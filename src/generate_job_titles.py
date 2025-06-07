@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from litellm import completion
 from pydantic import BaseModel, Field
 from typing import Optional, List
+from tqdm import tqdm
 
 # Load environment variables
 load_dotenv()
@@ -114,14 +115,9 @@ def generate_title(job_data, model="gpt-4o-mini"):
     
     # If title is already plain language, keep it
     if analysis.get('isPlainLanguage', False):
-        reasons = analysis.get('reasons', [])
-        print(f"  ✓ Plain language title: {reasons[0] if reasons else 'Good as-is'}")
         return job_data.get('PositionTitle', 'Unknown')
     
     # Otherwise, use the suggestion
-    reasons = analysis.get('reasons', [])
-    print(f"  → Needs improvement: {reasons[0] if reasons else 'Not plain language'}")
-    
     suggestion = analysis.get('suggestion')
     if suggestion:
         return suggestion
@@ -147,7 +143,9 @@ def process_jobs_file(input_file, output_file=None):
     
     results = []
     
-    for i, job in enumerate(jobs):
+    # Use tqdm for progress bar
+    print(f"\n🤖 Processing {len(jobs)} jobs with LLM...")
+    for job in tqdm(jobs, desc="Generating titles", unit="job"):
         # Get job details
         descriptor = job.get('MatchedObjectDescriptor', {})
         user_area = descriptor.get('UserArea', {})
@@ -157,8 +155,6 @@ def process_jobs_file(input_file, output_file=None):
         original_title = descriptor.get('PositionTitle', 'Unknown')
         position_id = descriptor.get('PositionID', 'N/A')
         
-        print(f"\nProcessing job {i+1}/{len(jobs)}: {original_title} (ID: {position_id})")
-        
         # Add position title to details for the prompt
         details['PositionTitle'] = original_title
         
@@ -166,8 +162,6 @@ def process_jobs_file(input_file, output_file=None):
         generated_title = generate_title(details)
         
         if generated_title:
-            print(f"Result: {generated_title}")
-            
             results.append({
                 'position_id': position_id,
                 'original_title': original_title,
@@ -175,8 +169,12 @@ def process_jobs_file(input_file, output_file=None):
                 'job_summary': details.get('JobSummary', '')[:200] + '...',  # First 200 chars
                 'organization': descriptor.get('OrganizationName', '')
             })
+            
+            # Show inline updates for interesting changes
+            if generated_title != original_title:
+                tqdm.write(f"  ✏️  {original_title} → {generated_title}")
         else:
-            print("Failed to generate title")
+            tqdm.write(f"  ❌ Failed: {original_title}")
     
     # Save results if output file specified
     if output_file:

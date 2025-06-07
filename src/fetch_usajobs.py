@@ -114,12 +114,9 @@ def main():
         "SortDirection": "desc"
     }
     
-    # Add date filter
+    # Add date filter if specified (jobs posted within N days)
     if args.days_posted:
-        # Use a reasonable date range (API doesn't accept future dates)
-        base_date = datetime(2024, 12, 1)  # Use December 2024 as base
-        date_from = (base_date - timedelta(days=args.days_posted)).strftime("%m/%d/%Y")
-        params["DatePosted"] = date_from
+        params["DatePosted"] = args.days_posted
     
     # Add keyword if provided
     if args.keyword:

@@ -10,7 +10,9 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-DATABASE_URL = "postgresql://neondb_owner:npg_W8eRMh3JyoYL@ep-quiet-sun-a4nwqkoa-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL not found in environment variables.")
 
 def get_latest_job_date():
     """Get the date of the most recently posted job in the database"""

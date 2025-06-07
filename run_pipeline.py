@@ -35,12 +35,9 @@ def run_fetch(args):
     if args.keyword:
         params["Keyword"] = args.keyword
     
+    # Add date filter if specified (jobs posted within N days)
     if args.days_posted:
-        from datetime import timedelta
-        # Use a reasonable date range (API doesn't accept future dates)
-        base_date = datetime(2024, 12, 1)  # Use December 2024 as base
-        date_from = (base_date - timedelta(days=args.days_posted)).strftime("%m/%d/%Y")
-        params["DatePosted"] = date_from
+        params["DatePosted"] = args.days_posted
     
     if args.remote:
         params["RemoteIndicator"] = "true"
@@ -239,6 +236,17 @@ def main():
         raw_file = run_fetch(args)
         if not raw_file:
             return
+    
+    # Show total jobs count
+    if not args.skip_fetch:
+        with open(raw_file, 'r') as f:
+            data = json.load(f)
+            total_jobs = len(data.get('SearchResult', {}).get('SearchResultItems', []))
+            print(f"\n📊 Total jobs fetched: {total_jobs}")
+            if args.sample_titles and args.sample_titles < total_jobs:
+                print(f"🎯 Will process: {args.sample_titles} jobs (sample)")
+            else:
+                print(f"🎯 Will process: ALL {total_jobs} jobs")
     
     # Step 2: Generate titles
     if not args.skip_titles:
