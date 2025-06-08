@@ -1,6 +1,6 @@
-# USAJobs Data Pipeline
+# USAJobs Historical Data Pipeline
 
-Fetches new job listings from USAJobs API and generates improved job titles using AI.
+Fetches historical job listings from the USAJobs Historical API and stores them in DuckDB for local analysis and PostgreSQL for cloud storage.
 
 ## Setup
 
@@ -18,37 +18,63 @@ Fetches new job listings from USAJobs API and generates improved job titles usin
 3. **Create .env file:**
    ```bash
    # .env
-   USAJOBS_API_TOKEN=your_usajobs_api_key_here
    DATABASE_URL=your_postgresql_connection_string_here
-   OPENAI_API_KEY=your_openai_api_key_here
    ```
 
 ## Run Pipeline
 
-**Test with small sample first:**
+**Quick pulls:**
 ```bash
-# Process just 10 jobs (good for testing)
-./run_full_pipeline.sh sample 10
+# Process jobs from last 24 hours
+./run_historical_pipeline.sh daily
 
-# Process 100 jobs
-./run_full_pipeline.sh sample 100
+# Process jobs from last 7 days
+./run_historical_pipeline.sh days 7
+
+# Process jobs from last 30 days
+./run_historical_pipeline.sh month
 ```
 
-**Process new jobs by date:**
+**Large pulls (use tmux for long-running jobs):**
 ```bash
-# Process jobs from last 1 day
-./run_full_pipeline.sh days 1
+# Process entire year (use tmux for unattended runs)
+tmux new-session -d -s usajobs-2024 './run_historical_pipeline.sh range 2024-01-01 2024-12-31'
 
-# Process jobs from last 3 days  
-./run_full_pipeline.sh days 3
+# Watch progress
+tmux attach -t usajobs-2024
 
-# Process jobs from last week
-./run_full_pipeline.sh days 7
+# Check logs
+tail -f logs/range_pull_*.log
+
+# Kill session
+tmux kill-session -t usajobs-2024
 ```
 
-**⚠️ Important:** This will push all processed results to your PostgreSQL database.
+**Custom date ranges:**
+```bash
+# Specific date range
+./run_historical_pipeline.sh range 2024-06-01 2024-06-30
+```
+
+## Data Storage
+
+- **DuckDB**: Local analytical database (`usajobs_YEAR.duckdb`) for fast querying
+- **PostgreSQL**: Cloud database for final storage (exported from DuckDB)
+- **Logs**: Stored in `logs/` directory
+
+## Query Data
+
+```bash
+# Interactive DuckDB queries
+python query_duckdb.py usajobs_2024.duckdb
+
+# Reset databases (careful!)
+python reset_databases.py
+```
 
 The pipeline will:
-1. Fetch jobs from USAJobs API
-2. Generate better job titles using AI
-3. Save results to `data/` folder AND your database
+1. Fetch historical jobs from USAJobs Historical API
+2. Store data incrementally in DuckDB with deduplication
+3. Export to PostgreSQL at the end of large pulls
+4. Handle 503 errors with retry logic
+5. Resume from existing data if interrupted
