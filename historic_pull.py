@@ -53,6 +53,11 @@ def get_job_data_page(params: Optional[Dict] = None, next_url: Optional[str] = N
                     print(f"  Failed after {retries} attempts")
             
             response.raise_for_status()
+            
+            # Handle "204 No Content" text response
+            if response.text.strip() == "204 No Content":
+                return {"results": []}
+                
             return response.json()
             
         except requests.RequestException as e:
