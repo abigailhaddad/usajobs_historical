@@ -410,99 +410,38 @@ def save_batch_to_postgres(cur, jobs: List[Dict]):
 
 
 def export_duckdb_to_postgres(duckdb_conn):
-    """Export all data from DuckDB to PostgreSQL."""
-    print("\n🔄 Exporting DuckDB data to PostgreSQL...")
+    """Export all data from DuckDB to PostgreSQL using fast parallel export."""
+    print("\n🚀 Using fast parallel PostgreSQL export...")
     
-    from dotenv import load_dotenv
-    import psycopg2
-    from psycopg2.extras import Json
+    # Get the DuckDB file path
+    try:
+        duckdb_file = duckdb_conn.execute("PRAGMA database_list").fetchone()[2]
+    except:
+        print("❌ Could not determine DuckDB file path")
+        return duckdb_conn
     
-    load_dotenv()
-    conn_str = os.getenv("DATABASE_URL")
-    if not conn_str:
-        print("⚠️  DATABASE_URL not found, skipping PostgreSQL export")
-        return
+    # Close the current connection temporarily
+    duckdb_conn.close()
+    
+    # Use the fast export script
+    import subprocess
+    import sys
     
     try:
-        # Get all jobs from DuckDB
-        jobs = duckdb_conn.execute("SELECT * FROM historical_jobs").fetchall()
-        columns = [desc[0] for desc in duckdb_conn.description]
+        result = subprocess.run([
+            sys.executable, "fast_postgres_export.py", duckdb_file, "8"
+        ], capture_output=True, text=True, cwd=os.path.dirname(os.path.abspath(__file__)))
         
-        print(f"Exporting {len(jobs)} jobs to PostgreSQL...")
-        
-        # Connect to PostgreSQL
-        pg_conn = psycopg2.connect(conn_str)
-        pg_cur = pg_conn.cursor()
-        
-        # Insert jobs in batches
-        batch_size = 1000
-        for i in range(0, len(jobs), batch_size):
-            batch = jobs[i:i + batch_size]
+        if result.returncode == 0:
+            print(result.stdout)
+        else:
+            print(f"❌ Fast export failed: {result.stderr}")
             
-            for job_row in batch:
-                # Convert DuckDB row to dict
-                job_dict = dict(zip(columns, job_row))
-                
-                try:
-                    pg_cur.execute("""
-                        INSERT INTO historical_jobs (
-                            control_number, announcement_number, hiring_agency_code, hiring_agency_name,
-                            hiring_department_code, hiring_department_name, hiring_subelement_name,
-                            agency_level, agency_level_sort, position_title, minimum_grade, maximum_grade,
-                            promotion_potential, appointment_type, work_schedule, service_type,
-                            pay_scale, salary_type, minimum_salary, maximum_salary, supervisory_status,
-                            travel_requirement, telework_eligible, security_clearance_required,
-                            security_clearance, drug_test_required, relocation_expenses_reimbursed,
-                            who_may_apply, hiring_paths, total_openings, disable_apply_online,
-                            position_open_date, position_close_date, position_expire_date,
-                            position_opening_status, announcement_closing_type_code,
-                            announcement_closing_type_description, vendor, job_series, locations, raw
-                        ) VALUES (
-                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-                        )
-                        ON CONFLICT (control_number) DO UPDATE SET
-                            updated_at = CURRENT_TIMESTAMP,
-                            position_title = EXCLUDED.position_title,
-                            position_opening_status = EXCLUDED.position_opening_status,
-                            raw = EXCLUDED.raw
-                    """, (
-                        job_dict.get("control_number"), job_dict.get("announcement_number"), 
-                        job_dict.get("hiring_agency_code"), job_dict.get("hiring_agency_name"),
-                        job_dict.get("hiring_department_code"), job_dict.get("hiring_department_name"),
-                        job_dict.get("hiring_subelement_name"), job_dict.get("agency_level"), 
-                        job_dict.get("agency_level_sort"), job_dict.get("position_title"),
-                        job_dict.get("minimum_grade"), job_dict.get("maximum_grade"),
-                        job_dict.get("promotion_potential"), job_dict.get("appointment_type"), 
-                        job_dict.get("work_schedule"), job_dict.get("service_type"),
-                        job_dict.get("pay_scale"), job_dict.get("salary_type"),
-                        job_dict.get("minimum_salary"), job_dict.get("maximum_salary"), 
-                        job_dict.get("supervisory_status"), job_dict.get("travel_requirement"), 
-                        job_dict.get("telework_eligible"), job_dict.get("security_clearance_required"),
-                        job_dict.get("security_clearance"), job_dict.get("drug_test_required"), 
-                        job_dict.get("relocation_expenses_reimbursed"), job_dict.get("who_may_apply"), 
-                        job_dict.get("hiring_paths"), job_dict.get("total_openings"),
-                        job_dict.get("disable_apply_online"), job_dict.get("position_open_date"), 
-                        job_dict.get("position_close_date"), job_dict.get("position_expire_date"),
-                        job_dict.get("position_opening_status"), job_dict.get("announcement_closing_type_code"),
-                        job_dict.get("announcement_closing_type_description"), job_dict.get("vendor"), 
-                        job_dict.get("job_series"), job_dict.get("locations"), 
-                        Json(job_dict.get("raw_data", {}))
-                    ))
-                except Exception as e:
-                    print(f"Error inserting job {job_dict.get('control_number')} to PostgreSQL: {e}")
-            
-            # Commit batch
-            pg_conn.commit()
-            print(f"  Exported batch {i//batch_size + 1}/{(len(jobs)-1)//batch_size + 1}")
-        
-        pg_cur.close()
-        pg_conn.close()
-        print("✅ PostgreSQL export complete!")
-        
     except Exception as e:
-        print(f"❌ PostgreSQL export failed: {e}")
+        print(f"❌ Failed to run fast export: {e}")
+    
+    # Reconnect to DuckDB for any remaining operations
+    return duckdb.connect(duckdb_file)
 
 
 def save_to_duckdb(jobs: List[Dict], db_path: str):
