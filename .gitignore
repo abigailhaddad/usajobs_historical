@@ -1,7 +1,15 @@
 .env
-data/
 venv/
 __pycache__/
-logs/
-*.duckdb
-*.log
+
+# Data files
+data/duckdb/*.duckdb
+data/duckdb/*.duckdb.wal
+data/exports/*.csv
+
+# Log files
+logs/*.log
+
+# Temporary files
+*.tmp
+*.temp

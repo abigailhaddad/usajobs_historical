@@ -9,5 +9,5 @@ if [ -z "$DATABASE_URL" ]; then
 fi
 
 echo "Uploading schema to database..."
-psql "$DATABASE_URL" -f sql/create_jobs.sql
+psql "$DATABASE_URL" -f sql/create_historical_jobs.sql
 echo "Schema upload complete!"

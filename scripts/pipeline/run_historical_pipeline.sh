@@ -145,14 +145,27 @@ case $MODE in
     
     # Run with caffeinate to prevent sleep, logging and error handling
     echo "☕ Using caffeinate to prevent system sleep"
-    # Use existing usajobs_YEAR.duckdb if it exists, otherwise create new one
-    YEAR=$(echo "$START_DATE" | cut -d'-' -f1)
-    if [ -f "usajobs_${YEAR}.duckdb" ]; then
-        DUCKDB_FILE="usajobs_${YEAR}.duckdb"
-        echo "📁 Using existing DuckDB file: $DUCKDB_FILE" | tee -a "$LOGFILE"
+    # Determine DuckDB filename
+    START_YEAR=$(echo "$START_DATE" | cut -d'-' -f1)
+    END_YEAR=$(echo "$END_DATE" | cut -d'-' -f1)
+    
+    # If it's a full year (Jan 1 to Dec 31), use year-based naming
+    if [[ "$START_DATE" == "$START_YEAR-01-01" ]] && [[ "$END_DATE" == "$END_YEAR-12-31" ]] && [[ "$START_YEAR" == "$END_YEAR" ]]; then
+        DUCKDB_FILE="usajobs_${START_YEAR}.duckdb"
+        if [ -f "$DUCKDB_FILE" ]; then
+            echo "📁 Using existing DuckDB file: $DUCKDB_FILE" | tee -a "$LOGFILE"
+        else
+            echo "📁 Creating new DuckDB file: $DUCKDB_FILE" | tee -a "$LOGFILE"
+        fi
     else
-        DUCKDB_FILE="${START_DATE}_to_${END_DATE}.duckdb"
-        echo "📁 Creating new DuckDB file: $DUCKDB_FILE" | tee -a "$LOGFILE"
+        # For partial year ranges, check if year file exists first
+        if [ -f "usajobs_${START_YEAR}.duckdb" ] && [[ "$START_YEAR" == "$END_YEAR" ]]; then
+            DUCKDB_FILE="usajobs_${START_YEAR}.duckdb"
+            echo "📁 Using existing DuckDB file: $DUCKDB_FILE" | tee -a "$LOGFILE"
+        else
+            DUCKDB_FILE="${START_DATE}_to_${END_DATE}.duckdb"
+            echo "📁 Creating new DuckDB file: $DUCKDB_FILE" | tee -a "$LOGFILE"
+        fi
     fi
     
     if caffeinate -s bash -c "source venv/bin/activate && python historic_pull.py \

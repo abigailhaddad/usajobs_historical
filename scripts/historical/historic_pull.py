@@ -6,7 +6,7 @@ Pulls all jobs from the USAJobs Historical API
 and saves the structured data to a JSON file.
 
 Usage:
-    python usajobs_historic_2210.py --start-date 2023-01-01 --end-date 2023-01-15 --output data.json
+    python ../../data/duckdb/usajobs_historic_2210.py --start-date 2023-01-01 --end-date 2023-01-15 --output data.json
 """
 
 import argparse

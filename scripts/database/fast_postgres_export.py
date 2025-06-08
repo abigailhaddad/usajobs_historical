@@ -173,7 +173,7 @@ def fast_export_duckdb_to_postgres(duckdb_file, max_workers=4):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python fast_postgres_export.py <duckdb_file> [max_workers]")
-        print("Example: python fast_postgres_export.py usajobs_2024.duckdb 8")
+        print("Example: python fast_postgres_export.py ../data/duckdb/usajobs_2024.duckdb 8")
         sys.exit(1)
     
     duckdb_file = sys.argv[1]
