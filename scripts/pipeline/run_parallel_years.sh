@@ -49,11 +49,7 @@ EST_HOURS=$(( NUM_YEARS * 365 * 20 / 3600 ))  # ~20 seconds per day
 echo "⏱️  Estimated time: ~${EST_HOURS} hours total (running in parallel)"
 echo ""
 
-# Check if virtual environment exists
-if [ ! -d "venv" ]; then
-    echo "❌ Virtual environment not found. Please run: python3 -m venv venv"
-    exit 1
-fi
+# Virtual environment check removed - assume user is already in venv
 
 # Create logs directory
 mkdir -p logs
@@ -92,9 +88,9 @@ for year in "${YEARS[@]}"; do
     echo "  Session: $session_name"
     echo "  Range: $start_date to $end_date"
     
-    # Start the tmux session
+    # Start the tmux session (run from repo root)
     tmux new-session -d -s "$session_name" \
-        "./run_historical_pipeline.sh range $start_date $end_date"
+        "cd /Users/abigailhaddad/Documents/repos/usajobs_historic && scripts/pipeline/run_historical_pipeline.sh range $start_date $end_date"
     
     if [ $? -eq 0 ]; then
         echo "  ✅ Started successfully"
@@ -290,11 +286,9 @@ done
 echo ""
 
 # Export each file
-source venv/bin/activate
-
 for db in "${DUCKDB_FILES[@]}"; do
     echo "📤 Exporting $db..."
-    python fast_postgres_export.py "$db" 8
+    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/database/fast_postgres_export.py "$db" 8
     echo ""
 done
 

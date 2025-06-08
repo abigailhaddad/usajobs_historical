@@ -1,15 +1,31 @@
 .env
 venv/
 __pycache__/
+*.pyc
 
-# Data files
+# Data files - DuckDB (large files, exclude from repo)
 data/duckdb/*.duckdb
 data/duckdb/*.duckdb.wal
-data/exports/*.csv
+*.duckdb
+*.duckdb.wal
+
+# CSV exports (include in repo for sharing)
+# data/exports/*.csv
 
 # Log files
 logs/*.log
+scripts/pipeline/logs/*.log
 
 # Temporary files
 *.tmp
 *.temp
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

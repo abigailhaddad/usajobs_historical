@@ -17,7 +17,23 @@ while true; do
     
     # Current progress for each year with visual bars
     echo "📅 Current Progress:"
-    for year in 2020 2021 2022 2023; do
+    
+    # Get active years from tmux sessions
+    active_years=()
+    while IFS= read -r session; do
+        if [[ "$session" =~ usajobs-([0-9]{4}) ]]; then
+            active_years+=(${BASH_REMATCH[1]})
+        fi
+    done < <(tmux ls 2>/dev/null | grep "usajobs-" | cut -d: -f1)
+    
+    # Sort the years
+    IFS=$'\n' active_years=($(sort -n <<<"${active_years[*]}"))
+    unset IFS
+    
+    if [ ${#active_years[@]} -eq 0 ]; then
+        echo "  No active sessions found"
+    else
+        for year in "${active_years[@]}"; do
         # Find the most recent log file for this year
         log_file=$(ls -t ../../logs/range_pull_${year}-01-01_to_${year}-12-31_*.log 2>/dev/null | head -1)
         
@@ -53,7 +69,8 @@ while true; do
         else
             printf "  %s: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] No log file found\n" "$year"
         fi
-    done
+        done
+    fi
     
     echo ""
     echo "Press Ctrl+C to exit monitoring"

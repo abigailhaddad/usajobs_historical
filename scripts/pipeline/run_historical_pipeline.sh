@@ -34,7 +34,7 @@ case $MODE in
     echo "🚀 Running USAJobs Historical Pipeline - DAILY MODE"
     echo "📊 Processing jobs from last 24 hours"
     
-    source venv/bin/activate && python historic_pull.py \
+    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/historical/historic_pull.py \
       --start-date $(date -v-1d +%Y-%m-%d) \
       --end-date $(date +%Y-%m-%d) \
       --duckdb "daily_$(date +%Y%m%d).duckdb" \
@@ -50,7 +50,7 @@ case $MODE in
     START_DATE=$(date -v-${DAYS}d +%Y-%m-%d)
     END_DATE=$(date +%Y-%m-%d)
     
-    source venv/bin/activate && python historic_pull.py \
+    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/historical/historic_pull.py \
       --start-date "$START_DATE" \
       --end-date "$END_DATE" \
       --duckdb "last_${DAYS}days_$(date +%Y%m%d).duckdb" \
@@ -65,7 +65,7 @@ case $MODE in
     START_DATE=$(date -v-30d +%Y-%m-%d)
     END_DATE=$(date +%Y-%m-%d)
     
-    source venv/bin/activate && python historic_pull.py \
+    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/historical/historic_pull.py \
       --start-date "$START_DATE" \
       --end-date "$END_DATE" \
       --duckdb "month_$(date +%Y%m%d).duckdb" \
@@ -94,7 +94,7 @@ case $MODE in
     
     # Run with caffeinate to prevent sleep, logging and error handling
     echo "☕ Using caffeinate to prevent system sleep"
-    if caffeinate -s bash -c "source venv/bin/activate && python historic_pull.py \
+    if caffeinate -s bash -c "python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/historical/historic_pull.py \
       --start-date '$START_DATE' \
       --end-date '$END_DATE' \
       --duckdb 'year_$(date +%Y%m%d).duckdb'" 2>&1 | tee -a "$LOGFILE"; then
@@ -168,7 +168,7 @@ case $MODE in
         fi
     fi
     
-    if caffeinate -s bash -c "source venv/bin/activate && python historic_pull.py \
+    if caffeinate -s bash -c "python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/historical/historic_pull.py \
       --start-date '$START_DATE' \
       --end-date '$END_DATE' \
       --duckdb '$DUCKDB_FILE'" 2>&1 | tee -a "$LOGFILE"; then

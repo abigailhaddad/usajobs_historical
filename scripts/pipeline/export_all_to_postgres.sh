@@ -5,9 +5,9 @@ echo "🚀 Exporting all DuckDB files to PostgreSQL..."
 echo ""
 
 # Check for DuckDB files
-DUCKDB_FILES=(usajobs_*.duckdb)
-if [ ${#DUCKDB_FILES[@]} -eq 0 ]; then
-    echo "❌ No DuckDB files found!"
+DUCKDB_FILES=(../../data/duckdb/usajobs_*.duckdb)
+if [ ! -f "${DUCKDB_FILES[0]}" ]; then
+    echo "❌ No DuckDB files found in data/duckdb/!"
     exit 1
 fi
 
@@ -18,11 +18,9 @@ done
 echo ""
 
 # Export each file
-source venv/bin/activate
-
 for db in "${DUCKDB_FILES[@]}"; do
-    echo "📤 Exporting $db..."
-    python fast_postgres_export.py "$db" 8
+    echo "📤 Exporting $(basename $db)..."
+    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/database/fast_postgres_export.py "$db" 8
     echo ""
 done
 
