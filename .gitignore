@@ -26,6 +26,10 @@ scripts/pipeline/logs/*.log
 *.swp
 *.swo
 
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
 # OS files
 .DS_Store
 Thumbs.db
