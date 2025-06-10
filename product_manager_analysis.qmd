@@ -1,0 +1,351 @@
+---
+title: "Analysis of 'Product Manager' Job Titles in USAJobs Historical API"
+author: "Abigail Haddad"
+email: "abigail.haddad@gmail.com"
+subtitle: "A title-based analysis of positions containing 'Product Manager' and related terms in the USAJobs Historical API"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+---
+
+```{python}
+import duckdb
+import pandas as pd
+import glob
+import os
+from great_tables import GT, md, html
+from datetime import datetime
+
+# Connect to DuckDB files
+duckdb_files = sorted(glob.glob("data/duckdb/usajobs_*.duckdb"))
+conn = duckdb.connect(':memory:')
+
+# Attach all databases
+for db_file in duckdb_files:
+    db_name = f"db_{os.path.basename(db_file).replace('.duckdb', '').replace('-', '_')}"
+    conn.execute(f"ATTACH '{db_file}' AS {db_name}")
+
+# Create unified view
+first_db = None
+for db_file in duckdb_files:
+    db_name = f"db_{os.path.basename(db_file).replace('.duckdb', '').replace('-', '_')}"
+    try:
+        count = conn.execute(f"SELECT COUNT(*) FROM {db_name}.historical_jobs").fetchone()[0]
+        if count > 0:
+            first_db = db_name
+            break
+    except:
+        continue
+
+if first_db:
+    conn.execute(f"CREATE OR REPLACE TABLE all_jobs AS SELECT * FROM {first_db}.historical_jobs")
+    for db_file in duckdb_files:
+        db_name = f"db_{os.path.basename(db_file).replace('.duckdb', '').replace('-', '_')}"
+        if db_name != first_db:
+            try:
+                conn.execute(f"INSERT INTO all_jobs SELECT * FROM {db_name}.historical_jobs")
+            except:
+                pass
+```
+
+## Overview
+
+This report analyzes positions with "Product Manager" or similar terms in their titles using data from the USAJobs Historical API as of June 8, 2025. 
+
+### Important Caveats:
+
+1. **Data Completeness**: The USAJobs Historical API has incomplete coverage before 2018. Years 2015-2016 have minimal data, and 2017 coverage is uncertain. This is NOT a complete 2015-2025 dataset.
+
+2. **Title-Based Identification Only**: We identified **537 positions** across **57 federal agencies** by searching for "product manager" and related terms in job titles. This likely includes positions that aren't actually Product Manager roles and excludes true PM roles with different titles.
+
+3. **Not All Federal PM Jobs**: Some Product Manager positions are not captured here:
+   - Some agencies, like USDS and DDS, used separate hiring sites. 
+   - Some groups, like DHS AI Corps, hired PMs without putting that in their job title.
+
+**Key Finding**: Of the ~2.9 million job listings in the Historical API (mostly 2018-present with some 2015-2017 data), 537 had "product manager" or similar terms in the title.
+
+## Data Collection Methodology
+
+### Data Source and Coverage
+
+```{python}
+# Get basic statistics
+total_jobs = conn.execute("SELECT COUNT(*) FROM all_jobs").fetchone()[0]
+date_range = conn.execute("""
+    SELECT 
+        MIN(position_open_date) as earliest,
+        MAX(position_open_date) as latest
+    FROM all_jobs
+""").fetchone()
+
+# Jobs by year
+jobs_by_year = conn.execute("""
+    SELECT 
+        EXTRACT(year FROM position_open_date) as year,
+        COUNT(*) as job_count
+    FROM all_jobs 
+    GROUP BY year 
+    ORDER BY year
+""").fetchdf()
+
+# Create coverage table
+coverage_data = []
+for _, row in jobs_by_year.iterrows():
+    year = int(row['year'])
+    count = row['job_count']
+    if year in [2015, 2016]:
+        status = "⚠️ Limited data"
+    elif year == 2017:
+        status = "❓ Coverage uncertain"
+    elif year == 2025:
+        status = "⚠️ Partial year (through June 8)"
+    else:
+        status = "✓ Complete"
+    coverage_data.append({
+        'Year': year,
+        'Total Jobs': f"{count:,}",
+        'Data Status': status
+    })
+
+coverage_df = pd.DataFrame(coverage_data)
+
+# Display coverage table
+(
+    GT(coverage_df)
+    .tab_header(
+        title="USAJobs Historical Data Coverage",
+        subtitle=f"Total: {total_jobs:,} jobs in Historical API from {date_range[0]} to {date_range[1]}"
+    )
+)
+```
+
+### Key Limitations
+
+- **Pre-2018 Data**: The Historical API has incomplete coverage before 2018
+- **2018-2024**: More complete coverage with 300,000-450,000 jobs per year
+- **2025 Data**: Partial year through June 8, 2025 (excludes currently-open positions)
+- **This represents only jobs available in the Historical API, not all federal hiring**
+
+### Title-Based Search Methodology
+
+We searched for positions containing "product manager" and related terms in job titles:
+
+```{python}
+# Product manager search query
+product_manager_query = """
+WHERE 
+    LOWER(position_title) LIKE '%product manager%'
+    OR LOWER(position_title) LIKE '%product management%'
+    OR LOWER(position_title) LIKE '%product owner%'
+    OR LOWER(position_title) LIKE '%product lead%'
+    OR LOWER(position_title) LIKE '%head of product%'
+    OR LOWER(position_title) LIKE '%director of product%'
+    OR LOWER(position_title) LIKE '%vp of product%'
+    OR LOWER(position_title) LIKE '%vice president of product%'
+    OR LOWER(position_title) LIKE '%chief product officer%'
+    OR (LOWER(position_title) LIKE '%product%' AND LOWER(position_title) LIKE '%strategist%')
+"""
+```
+
+## Product Manager Jobs Analysis
+
+```{python}
+# Get product manager jobs
+pm_jobs = conn.execute(f"""
+    SELECT *
+    FROM all_jobs 
+    {product_manager_query}
+""").fetchdf()
+
+# PM jobs by year for later analysis
+pm_jobs['year'] = pd.to_datetime(pm_jobs['position_open_date']).dt.year
+```
+
+### Top Agencies with PM-Titled Jobs
+
+```{python}
+# Top agencies hiring product managers
+pm_agencies = pm_jobs.groupby('hiring_agency_name').size().reset_index(name='count').sort_values('count', ascending=False).head(15)
+
+# Calculate percentage of total
+pm_agencies['percentage'] = (pm_agencies['count'] / len(pm_jobs) * 100).round(1)
+
+# Prepare data for table
+agency_data = []
+for idx, row in pm_agencies.iterrows():
+    agency_data.append({
+        'Rank': idx + 1,
+        'Agency': row['hiring_agency_name'],
+        'Total PM Jobs': row['count'],
+        '% of Total': f"{row['percentage']}%"
+    })
+
+agency_df = pd.DataFrame(agency_data)
+
+(
+    GT(agency_df)
+    .tab_header(
+        title="Top 15 Agencies with Product Manager Job Titles",
+        subtitle="U.S. Army Acquisition Support Center accounts for over 50% of PM-titled positions in this dataset"
+    )
+    .data_color(
+        columns="Total PM Jobs",
+        palette="Blues",
+        domain=[0, pm_agencies['count'].max()]
+    )
+)
+```
+
+### Job Series Distribution
+
+```{python}
+# Analyze job series for PM roles
+pm_series = pm_jobs['job_series'].value_counts().head(10)
+
+series_data = []
+for series, count in pm_series.items():
+    if series:
+        # Look up series name based on common codes
+        series_names = {
+            '0340': 'Program Management',
+            '0343': 'Management and Program Analysis',
+            '0301': 'Miscellaneous Administration',
+            '2210': 'Information Technology Management',
+            '0501': 'Financial Administration',
+            '1101': 'General Business and Industry',
+            '0346': 'Logistics Management'
+        }
+        series_name = series_names.get(series, 'Other')
+        percentage = round(count / len(pm_jobs) * 100, 1)
+        series_data.append({
+            'Job Series': series,
+            'Series Title': series_name,
+            'Count': count,
+            '% of PM Jobs': f"{percentage}%"
+        })
+
+series_df = pd.DataFrame(series_data)
+
+(
+    GT(series_df)
+    .tab_header(
+        title="Product Manager Positions by Job Series",
+        subtitle="Most PM roles fall under Program Management (0340) series"
+    )
+)
+```
+
+### Common Position Titles
+
+```{python}
+# Get top position titles
+pm_titles = pm_jobs['position_title'].value_counts().head(20)
+
+title_data = []
+for idx, (title, count) in enumerate(pm_titles.items()):
+    title_data.append({
+        'Rank': idx + 1,
+        'Position Title': title,
+        'Count': count
+    })
+
+title_df = pd.DataFrame(title_data)
+
+(
+    GT(title_df)
+    .tab_header(
+        title="Top 20 Product Manager Position Titles",
+        subtitle="Shows variety in PM role nomenclature across federal agencies"
+    )
+)
+```
+
+## Data Export Details
+
+### Export Format
+
+The complete dataset of Product Manager positions is available as a CSV file with the following fields:
+
+```{python}
+# Sample data preview
+export_columns = [
+    'position_title',
+    'hiring_agency_name', 
+    'job_series',
+    'minimum_grade',
+    'maximum_grade',
+    'position_open_date',
+    'position_close_date'
+]
+
+# Get sample of recent PM jobs
+sample_pm = pm_jobs[export_columns].sort_values('position_open_date', ascending=False).head(5)
+
+(
+    GT(sample_pm)
+    .tab_header(
+        title="Sample of Product Manager Jobs Dataset",
+        subtitle="Showing 5 most recent positions"
+    )
+    .fmt_date(
+        columns=['position_open_date', 'position_close_date'],
+        date_style='month_day_year'
+    )
+    .tab_options(
+        table_font_size='12px'
+    )
+)
+```
+
+### Key Fields in Export
+
+- **Control Number**: Unique identifier for each job posting
+- **Position Title**: Official job title
+- **Hiring Agency**: Federal agency posting the position
+- **Job Series**: Federal occupation classification code
+- **Grade Range**: Minimum and maximum GS/pay grades
+- **Dates**: Opening and closing dates for applications
+
+## Note on Data Usage
+
+This dataset is a starting point for understanding PM-titled roles in federal government, not an authoritative count. Manual review is recommended to filter out non-PM roles and identify missing positions.
+
+## Export Product Manager Data to CSV
+
+```{python}
+# Export the complete dataset to CSV
+pm_export = conn.execute(f"""
+    SELECT 
+        control_number,
+        announcement_number,
+        position_title,
+        hiring_agency_name,
+        hiring_department_name,
+        job_series,
+        minimum_grade,
+        maximum_grade,
+        position_open_date,
+        position_close_date,
+        minimum_salary,
+        maximum_salary,
+        work_schedule,
+        telework_eligible,
+        supervisory_status
+    FROM all_jobs 
+    {product_manager_query}
+    ORDER BY position_open_date DESC
+""").fetchdf()
+
+# Save to CSV
+pm_export.to_csv('product_manager_jobs_analysis.csv', index=False)
+print(f"Exported {len(pm_export):,} Product Manager jobs to 'product_manager_jobs_analysis.csv'")
+```
+
+---
+
+*Analysis by Abigail Haddad (abigail.haddad@gmail.com)*  

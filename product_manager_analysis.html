@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Abigail Haddad">
+
+<title>Analysis of ‘Product Manager’ Job Titles in USAJobs Historical API</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="product_manager_analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="product_manager_analysis_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="product_manager_analysis_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="product_manager_analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="product_manager_analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="product_manager_analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="product_manager_analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="product_manager_analysis_files/libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="product_manager_analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="product_manager_analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="product_manager_analysis_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#important-caveats" id="toc-important-caveats" class="nav-link" data-scroll-target="#important-caveats">Important Caveats:</a></li>
+  </ul></li>
+  <li><a href="#data-collection-methodology" id="toc-data-collection-methodology" class="nav-link" data-scroll-target="#data-collection-methodology">Data Collection Methodology</a>
+  <ul class="collapse">
+  <li><a href="#data-source-and-coverage" id="toc-data-source-and-coverage" class="nav-link" data-scroll-target="#data-source-and-coverage">Data Source and Coverage</a></li>
+  <li><a href="#key-limitations" id="toc-key-limitations" class="nav-link" data-scroll-target="#key-limitations">Key Limitations</a></li>
+  <li><a href="#title-based-search-methodology" id="toc-title-based-search-methodology" class="nav-link" data-scroll-target="#title-based-search-methodology">Title-Based Search Methodology</a></li>
+  </ul></li>
+  <li><a href="#product-manager-jobs-analysis" id="toc-product-manager-jobs-analysis" class="nav-link" data-scroll-target="#product-manager-jobs-analysis">Product Manager Jobs Analysis</a>
+  <ul class="collapse">
+  <li><a href="#top-agencies-with-pm-titled-jobs" id="toc-top-agencies-with-pm-titled-jobs" class="nav-link" data-scroll-target="#top-agencies-with-pm-titled-jobs">Top Agencies with PM-Titled Jobs</a></li>
+  <li><a href="#job-series-distribution" id="toc-job-series-distribution" class="nav-link" data-scroll-target="#job-series-distribution">Job Series Distribution</a></li>
+  <li><a href="#common-position-titles" id="toc-common-position-titles" class="nav-link" data-scroll-target="#common-position-titles">Common Position Titles</a></li>
+  </ul></li>
+  <li><a href="#data-export-details" id="toc-data-export-details" class="nav-link" data-scroll-target="#data-export-details">Data Export Details</a>
+  <ul class="collapse">
+  <li><a href="#export-format" id="toc-export-format" class="nav-link" data-scroll-target="#export-format">Export Format</a></li>
+  <li><a href="#key-fields-in-export" id="toc-key-fields-in-export" class="nav-link" data-scroll-target="#key-fields-in-export">Key Fields in Export</a></li>
+  </ul></li>
+  <li><a href="#note-on-data-usage" id="toc-note-on-data-usage" class="nav-link" data-scroll-target="#note-on-data-usage">Note on Data Usage</a></li>
+  <li><a href="#export-product-manager-data-to-csv" id="toc-export-product-manager-data-to-csv" class="nav-link" data-scroll-target="#export-product-manager-data-to-csv">Export Product Manager Data to CSV</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Analysis of ‘Product Manager’ Job Titles in USAJobs Historical API</h1>
+<p class="subtitle lead">A title-based analysis of positions containing ‘Product Manager’ and related terms in the USAJobs Historical API</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Abigail Haddad </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="79753647" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> glob</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> great_tables <span class="im">import</span> GT, md, html</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Connect to DuckDB files</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>duckdb_files <span class="op">=</span> <span class="bu">sorted</span>(glob.glob(<span class="st">"data/duckdb/usajobs_*.duckdb"</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>conn <span class="op">=</span> duckdb.<span class="ex">connect</span>(<span class="st">':memory:'</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Attach all databases</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> db_file <span class="kw">in</span> duckdb_files:</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    db_name <span class="op">=</span> <span class="ss">f"db_</span><span class="sc">{</span>os<span class="sc">.</span>path<span class="sc">.</span>basename(db_file)<span class="sc">.</span>replace(<span class="st">'.duckdb'</span>, <span class="st">''</span>)<span class="sc">.</span>replace(<span class="st">'-'</span>, <span class="st">'_'</span>)<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    conn.execute(<span class="ss">f"ATTACH '</span><span class="sc">{</span>db_file<span class="sc">}</span><span class="ss">' AS </span><span class="sc">{</span>db_name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Create unified view</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>first_db <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> db_file <span class="kw">in</span> duckdb_files:</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    db_name <span class="op">=</span> <span class="ss">f"db_</span><span class="sc">{</span>os<span class="sc">.</span>path<span class="sc">.</span>basename(db_file)<span class="sc">.</span>replace(<span class="st">'.duckdb'</span>, <span class="st">''</span>)<span class="sc">.</span>replace(<span class="st">'-'</span>, <span class="st">'_'</span>)<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        count <span class="op">=</span> conn.execute(<span class="ss">f"SELECT COUNT(*) FROM </span><span class="sc">{</span>db_name<span class="sc">}</span><span class="ss">.historical_jobs"</span>).fetchone()[<span class="dv">0</span>]</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> count <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>            first_db <span class="op">=</span> db_name</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span>:</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> first_db:</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    conn.execute(<span class="ss">f"CREATE OR REPLACE TABLE all_jobs AS SELECT * FROM </span><span class="sc">{</span>first_db<span class="sc">}</span><span class="ss">.historical_jobs"</span>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> db_file <span class="kw">in</span> duckdb_files:</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        db_name <span class="op">=</span> <span class="ss">f"db_</span><span class="sc">{</span>os<span class="sc">.</span>path<span class="sc">.</span>basename(db_file)<span class="sc">.</span>replace(<span class="st">'.duckdb'</span>, <span class="st">''</span>)<span class="sc">.</span>replace(<span class="st">'-'</span>, <span class="st">'_'</span>)<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> db_name <span class="op">!=</span> first_db:</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span>:</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>                conn.execute(<span class="ss">f"INSERT INTO all_jobs SELECT * FROM </span><span class="sc">{</span>db_name<span class="sc">}</span><span class="ss">.historical_jobs"</span>)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>            <span class="cf">except</span>:</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>                <span class="cf">pass</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>This report analyzes positions with “Product Manager” or similar terms in their titles using data from the USAJobs Historical API as of June 8, 2025.</p>
+<section id="important-caveats" class="level3">
+<h3 class="anchored" data-anchor-id="important-caveats">Important Caveats:</h3>
+<ol type="1">
+<li><p><strong>Data Completeness</strong>: The USAJobs Historical API has incomplete coverage before 2018. Years 2015-2016 have minimal data, and 2017 coverage is uncertain. This is NOT a complete 2015-2025 dataset.</p></li>
+<li><p><strong>Title-Based Identification Only</strong>: We identified <strong>537 positions</strong> across <strong>57 federal agencies</strong> by searching for “product manager” and related terms in job titles. This likely includes positions that aren’t actually Product Manager roles and excludes true PM roles with different titles.</p></li>
+<li><p><strong>Not All Federal PM Jobs</strong>: Some Product Manager positions are not captured here:</p>
+<ul>
+<li>Some agencies, like USDS and DDS, used separate hiring sites.</li>
+<li>Some groups, like DHS AI Corps, hired PMs without putting that in their job title.</li>
+</ul></li>
+</ol>
+<p><strong>Key Finding</strong>: Of the ~2.9 million job listings in the Historical API (mostly 2018-present with some 2015-2017 data), 537 had “product manager” or similar terms in the title.</p>
+</section>
+</section>
+<section id="data-collection-methodology" class="level2">
+<h2 class="anchored" data-anchor-id="data-collection-methodology">Data Collection Methodology</h2>
+<section id="data-source-and-coverage" class="level3">
+<h3 class="anchored" data-anchor-id="data-source-and-coverage">Data Source and Coverage</h3>
+<div id="f091e5f0" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get basic statistics</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>total_jobs <span class="op">=</span> conn.execute(<span class="st">"SELECT COUNT(*) FROM all_jobs"</span>).fetchone()[<span class="dv">0</span>]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>date_range <span class="op">=</span> conn.execute(<span class="st">"""</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT </span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="st">        MIN(position_open_date) as earliest,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="st">        MAX(position_open_date) as latest</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM all_jobs</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>).fetchone()</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Jobs by year</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>jobs_by_year <span class="op">=</span> conn.execute(<span class="st">"""</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT </span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="st">        EXTRACT(year FROM position_open_date) as year,</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="st">        COUNT(*) as job_count</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM all_jobs </span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="st">    GROUP BY year </span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="st">    ORDER BY year</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>).fetchdf()</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Create coverage table</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>coverage_data <span class="op">=</span> []</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, row <span class="kw">in</span> jobs_by_year.iterrows():</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    year <span class="op">=</span> <span class="bu">int</span>(row[<span class="st">'year'</span>])</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> row[<span class="st">'job_count'</span>]</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> year <span class="kw">in</span> [<span class="dv">2015</span>, <span class="dv">2016</span>]:</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        status <span class="op">=</span> <span class="st">"⚠️ Limited data"</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> year <span class="op">==</span> <span class="dv">2017</span>:</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        status <span class="op">=</span> <span class="st">"❓ Coverage uncertain"</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> year <span class="op">==</span> <span class="dv">2025</span>:</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        status <span class="op">=</span> <span class="st">"⚠️ Partial year (through June 8)"</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        status <span class="op">=</span> <span class="st">"✓ Complete"</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    coverage_data.append({</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Year'</span>: year,</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Total Jobs'</span>: <span class="ss">f"</span><span class="sc">{</span>count<span class="sc">:,}</span><span class="ss">"</span>,</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Data Status'</span>: status</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>coverage_df <span class="op">=</span> pd.DataFrame(coverage_data)</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Display coverage table</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    GT(coverage_df)</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    .tab_header(</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"USAJobs Historical Data Coverage"</span>,</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        subtitle<span class="op">=</span><span class="ss">f"Total: </span><span class="sc">{</span>total_jobs<span class="sc">:,}</span><span class="ss"> jobs in Historical API from </span><span class="sc">{</span>date_range[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> to </span><span class="sc">{</span>date_range[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div id="icuztaijcn" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>
+#icuztaijcn table {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+#icuztaijcn thead, tbody, tfoot, tr, td, th { border-style: none; }
+ tr { background-color: transparent; }
+#icuztaijcn p { margin: 0; padding: 0; }
+ #icuztaijcn .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #icuztaijcn .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #icuztaijcn .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #icuztaijcn .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #icuztaijcn .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #icuztaijcn .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #icuztaijcn .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #icuztaijcn .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #icuztaijcn .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #icuztaijcn .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #icuztaijcn .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #icuztaijcn .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #icuztaijcn .gt_spanner_row { border-bottom-style: hidden; }
+ #icuztaijcn .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #icuztaijcn .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
+ #icuztaijcn .gt_from_md> :first-child { margin-top: 0; }
+ #icuztaijcn .gt_from_md> :last-child { margin-bottom: 0; }
+ #icuztaijcn .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+ #icuztaijcn .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
+ #icuztaijcn .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #icuztaijcn .gt_row_group_first td { border-top-width: 2px; }
+ #icuztaijcn .gt_row_group_first th { border-top-width: 2px; }
+ #icuztaijcn .gt_striped { background-color: rgba(128,128,128,0.05); }
+ #icuztaijcn .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #icuztaijcn .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #icuztaijcn .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #icuztaijcn .gt_left { text-align: left; }
+ #icuztaijcn .gt_center { text-align: center; }
+ #icuztaijcn .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #icuztaijcn .gt_font_normal { font-weight: normal; }
+ #icuztaijcn .gt_font_bold { font-weight: bold; }
+ #icuztaijcn .gt_font_italic { font-style: italic; }
+ #icuztaijcn .gt_super { font-size: 65%; }
+ #icuztaijcn .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #icuztaijcn .gt_asterisk { font-size: 100%; vertical-align: 0; }
+ 
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<th colspan="3" class="gt_heading gt_title gt_font_normal">USAJobs Historical Data Coverage</th>
+</tr>
+<tr class="gt_heading even">
+<th colspan="3" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Total: 2,947,854 jobs in Historical API from 2015-01-01 to 2025-06-07</th>
+</tr>
+<tr class="gt_col_headings header">
+<th id="Year" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Year</th>
+<th id="Total-Jobs" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Total Jobs</th>
+<th id="Data-Status" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Data Status</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right">2015</td>
+<td class="gt_row gt_right">140</td>
+<td class="gt_row gt_left">⚠️ Limited data</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">2016</td>
+<td class="gt_row gt_right">3,879</td>
+<td class="gt_row gt_left">⚠️ Limited data</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">2017</td>
+<td class="gt_row gt_right">237,145</td>
+<td class="gt_row gt_left">❓ Coverage uncertain</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">2018</td>
+<td class="gt_row gt_right">327,905</td>
+<td class="gt_row gt_left">✓ Complete</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">2019</td>
+<td class="gt_row gt_right">349,256</td>
+<td class="gt_row gt_left">✓ Complete</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">2020</td>
+<td class="gt_row gt_right">326,376</td>
+<td class="gt_row gt_left">✓ Complete</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">2021</td>
+<td class="gt_row gt_right">366,943</td>
+<td class="gt_row gt_left">✓ Complete</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">2022</td>
+<td class="gt_row gt_right">441,487</td>
+<td class="gt_row gt_left">✓ Complete</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">2023</td>
+<td class="gt_row gt_right">454,036</td>
+<td class="gt_row gt_left">✓ Complete</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">2024</td>
+<td class="gt_row gt_right">367,193</td>
+<td class="gt_row gt_left">✓ Complete</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">2025</td>
+<td class="gt_row gt_right">73,494</td>
+<td class="gt_row gt_left">⚠️ Partial year (through June 8)</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</section>
+<section id="key-limitations" class="level3">
+<h3 class="anchored" data-anchor-id="key-limitations">Key Limitations</h3>
+<ul>
+<li><strong>Pre-2018 Data</strong>: The Historical API has incomplete coverage before 2018</li>
+<li><strong>2018-2024</strong>: More complete coverage with 300,000-450,000 jobs per year</li>
+<li><strong>2025 Data</strong>: Partial year through June 8, 2025 (excludes currently-open positions)</li>
+<li><strong>This represents only jobs available in the Historical API, not all federal hiring</strong></li>
+</ul>
+</section>
+<section id="title-based-search-methodology" class="level3">
+<h3 class="anchored" data-anchor-id="title-based-search-methodology">Title-Based Search Methodology</h3>
+<p>We searched for positions containing “product manager” and related terms in job titles:</p>
+<div id="4819e47f" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Product manager search query</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>product_manager_query <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">WHERE </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st">    LOWER(position_title) LIKE '%product manager%'</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="st">    OR LOWER(position_title) LIKE '%product management%'</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="st">    OR LOWER(position_title) LIKE '%product owner%'</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="st">    OR LOWER(position_title) LIKE '%product lead%'</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="st">    OR LOWER(position_title) LIKE '</span><span class="sc">%he</span><span class="st">ad of product%'</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="st">    OR LOWER(position_title) LIKE '</span><span class="sc">%d</span><span class="st">irector of product%'</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="st">    OR LOWER(position_title) LIKE '%vp of product%'</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="st">    OR LOWER(position_title) LIKE '%vice president of product%'</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="st">    OR LOWER(position_title) LIKE '</span><span class="sc">%c</span><span class="st">hief product officer%'</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="st">    OR (LOWER(position_title) LIKE '%product%' AND LOWER(position_title) LIKE '</span><span class="sc">%s</span><span class="st">trategist%')</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="product-manager-jobs-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="product-manager-jobs-analysis">Product Manager Jobs Analysis</h2>
+<div id="8ead7fb7" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get product manager jobs</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pm_jobs <span class="op">=</span> conn.execute(<span class="ss">f"""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ss">    SELECT *</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ss">    FROM all_jobs </span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ss">    </span><span class="sc">{</span>product_manager_query<span class="sc">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span>).fetchdf()</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># PM jobs by year for later analysis</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>pm_jobs[<span class="st">'year'</span>] <span class="op">=</span> pd.to_datetime(pm_jobs[<span class="st">'position_open_date'</span>]).dt.year</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="top-agencies-with-pm-titled-jobs" class="level3">
+<h3 class="anchored" data-anchor-id="top-agencies-with-pm-titled-jobs">Top Agencies with PM-Titled Jobs</h3>
+<div id="49585dc3" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Top agencies hiring product managers</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>pm_agencies <span class="op">=</span> pm_jobs.groupby(<span class="st">'hiring_agency_name'</span>).size().reset_index(name<span class="op">=</span><span class="st">'count'</span>).sort_values(<span class="st">'count'</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">15</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate percentage of total</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>pm_agencies[<span class="st">'percentage'</span>] <span class="op">=</span> (pm_agencies[<span class="st">'count'</span>] <span class="op">/</span> <span class="bu">len</span>(pm_jobs) <span class="op">*</span> <span class="dv">100</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare data for table</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>agency_data <span class="op">=</span> []</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, row <span class="kw">in</span> pm_agencies.iterrows():</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    agency_data.append({</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Rank'</span>: idx <span class="op">+</span> <span class="dv">1</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Agency'</span>: row[<span class="st">'hiring_agency_name'</span>],</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Total PM Jobs'</span>: row[<span class="st">'count'</span>],</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'</span><span class="sc">% o</span><span class="st">f Total'</span>: <span class="ss">f"</span><span class="sc">{</span>row[<span class="st">'percentage'</span>]<span class="sc">}</span><span class="ss">%"</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>agency_df <span class="op">=</span> pd.DataFrame(agency_data)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    GT(agency_df)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    .tab_header(</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"Top 15 Agencies with Product Manager Job Titles"</span>,</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        subtitle<span class="op">=</span><span class="st">"U.S. Army Acquisition Support Center accounts for over 50</span><span class="sc">% o</span><span class="st">f PM-titled positions in this dataset"</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    .data_color(</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        columns<span class="op">=</span><span class="st">"Total PM Jobs"</span>,</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        palette<span class="op">=</span><span class="st">"Blues"</span>,</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        domain<span class="op">=</span>[<span class="dv">0</span>, pm_agencies[<span class="st">'count'</span>].<span class="bu">max</span>()]</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div id="nqmmjsujac" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>
+#nqmmjsujac table {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+#nqmmjsujac thead, tbody, tfoot, tr, td, th { border-style: none; }
+ tr { background-color: transparent; }
+#nqmmjsujac p { margin: 0; padding: 0; }
+ #nqmmjsujac .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #nqmmjsujac .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #nqmmjsujac .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #nqmmjsujac .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #nqmmjsujac .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #nqmmjsujac .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #nqmmjsujac .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #nqmmjsujac .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #nqmmjsujac .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #nqmmjsujac .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #nqmmjsujac .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #nqmmjsujac .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #nqmmjsujac .gt_spanner_row { border-bottom-style: hidden; }
+ #nqmmjsujac .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #nqmmjsujac .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
+ #nqmmjsujac .gt_from_md> :first-child { margin-top: 0; }
+ #nqmmjsujac .gt_from_md> :last-child { margin-bottom: 0; }
+ #nqmmjsujac .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+ #nqmmjsujac .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
+ #nqmmjsujac .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #nqmmjsujac .gt_row_group_first td { border-top-width: 2px; }
+ #nqmmjsujac .gt_row_group_first th { border-top-width: 2px; }
+ #nqmmjsujac .gt_striped { background-color: rgba(128,128,128,0.05); }
+ #nqmmjsujac .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #nqmmjsujac .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #nqmmjsujac .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #nqmmjsujac .gt_left { text-align: left; }
+ #nqmmjsujac .gt_center { text-align: center; }
+ #nqmmjsujac .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #nqmmjsujac .gt_font_normal { font-weight: normal; }
+ #nqmmjsujac .gt_font_bold { font-weight: bold; }
+ #nqmmjsujac .gt_font_italic { font-style: italic; }
+ #nqmmjsujac .gt_super { font-size: 65%; }
+ #nqmmjsujac .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #nqmmjsujac .gt_asterisk { font-size: 100%; vertical-align: 0; }
+ 
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<th colspan="4" class="gt_heading gt_title gt_font_normal">Top 15 Agencies with Product Manager Job Titles</th>
+</tr>
+<tr class="gt_heading even">
+<th colspan="4" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">U.S. Army Acquisition Support Center accounts for over 50% of PM-titled positions in this dataset</th>
+</tr>
+<tr class="gt_col_headings header">
+<th id="Rank" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Rank</th>
+<th id="Agency" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Agency</th>
+<th id="Total-PM-Jobs" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Total PM Jobs</th>
+<th id="%-of-Total" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">% of Total</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right">47</td>
+<td class="gt_row gt_left">U.S. Army Acquisition Support Center</td>
+<td class="gt_row gt_right" style="color: #FFFFFF; background-color: #08306b">281</td>
+<td class="gt_row gt_right">52.3%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">9</td>
+<td class="gt_row gt_left">Consumer Financial Protection Bureau</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #eaf3fb">18</td>
+<td class="gt_row gt_right">3.4%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">46</td>
+<td class="gt_row gt_left">Treasury, Departmental Offices</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #ecf4fb">16</td>
+<td class="gt_row gt_right">3.0%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">16</td>
+<td class="gt_row gt_left">Federal Acquisition Service</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #edf5fc">14</td>
+<td class="gt_row gt_right">2.6%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">51</td>
+<td class="gt_row gt_left">U.S. Marine Corps</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #eef5fc">13</td>
+<td class="gt_row gt_right">2.4%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">45</td>
+<td class="gt_row gt_left">Social Security Administration</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #eef5fc">13</td>
+<td class="gt_row gt_right">2.4%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">33</td>
+<td class="gt_row gt_left">Office of Personnel Management</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #eef5fc">13</td>
+<td class="gt_row gt_right">2.4%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">6</td>
+<td class="gt_row gt_left">Centers for Medicare &amp; Medicaid Services</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #eef6fc">12</td>
+<td class="gt_row gt_right">2.2%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">54</td>
+<td class="gt_row gt_left">United States Army Futures Command</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #f1f7fd">8</td>
+<td class="gt_row gt_right">1.5%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">25</td>
+<td class="gt_row gt_left">Millennium Challenge Corporation</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #f1f7fd">8</td>
+<td class="gt_row gt_right">1.5%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">23</td>
+<td class="gt_row gt_left">Internal Revenue Service</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #f1f7fd">8</td>
+<td class="gt_row gt_right">1.5%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">38</td>
+<td class="gt_row gt_left">Patent and Trademark Office</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #f2f8fd">7</td>
+<td class="gt_row gt_right">1.3%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">4</td>
+<td class="gt_row gt_left">Bureau of Engraving and Printing</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #f2f8fd">7</td>
+<td class="gt_row gt_right">1.3%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">3</td>
+<td class="gt_row gt_left">Bonneville Power Administration</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #f2f8fd">7</td>
+<td class="gt_row gt_right">1.3%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">55</td>
+<td class="gt_row gt_left">Veterans Benefits Administration</td>
+<td class="gt_row gt_right" style="color: #000000; background-color: #f3f8fe">6</td>
+<td class="gt_row gt_right">1.1%</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</section>
+<section id="job-series-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="job-series-distribution">Job Series Distribution</h3>
+<div id="bddf3efb" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyze job series for PM roles</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>pm_series <span class="op">=</span> pm_jobs[<span class="st">'job_series'</span>].value_counts().head(<span class="dv">10</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>series_data <span class="op">=</span> []</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> series, count <span class="kw">in</span> pm_series.items():</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> series:</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Look up series name based on common codes</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        series_names <span class="op">=</span> {</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">'0340'</span>: <span class="st">'Program Management'</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">'0343'</span>: <span class="st">'Management and Program Analysis'</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            <span class="st">'0301'</span>: <span class="st">'Miscellaneous Administration'</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">'2210'</span>: <span class="st">'Information Technology Management'</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">'0501'</span>: <span class="st">'Financial Administration'</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">'1101'</span>: <span class="st">'General Business and Industry'</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">'0346'</span>: <span class="st">'Logistics Management'</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        series_name <span class="op">=</span> series_names.get(series, <span class="st">'Other'</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        percentage <span class="op">=</span> <span class="bu">round</span>(count <span class="op">/</span> <span class="bu">len</span>(pm_jobs) <span class="op">*</span> <span class="dv">100</span>, <span class="dv">1</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        series_data.append({</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>            <span class="st">'Job Series'</span>: series,</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>            <span class="st">'Series Title'</span>: series_name,</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>            <span class="st">'Count'</span>: count,</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>            <span class="st">'</span><span class="sc">% o</span><span class="st">f PM Jobs'</span>: <span class="ss">f"</span><span class="sc">{</span>percentage<span class="sc">}</span><span class="ss">%"</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>series_df <span class="op">=</span> pd.DataFrame(series_data)</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    GT(series_df)</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    .tab_header(</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"Product Manager Positions by Job Series"</span>,</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        subtitle<span class="op">=</span><span class="st">"Most PM roles fall under Program Management (0340) series"</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div id="fnfvwhaxww" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>
+#fnfvwhaxww table {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+#fnfvwhaxww thead, tbody, tfoot, tr, td, th { border-style: none; }
+ tr { background-color: transparent; }
+#fnfvwhaxww p { margin: 0; padding: 0; }
+ #fnfvwhaxww .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #fnfvwhaxww .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #fnfvwhaxww .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #fnfvwhaxww .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #fnfvwhaxww .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #fnfvwhaxww .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #fnfvwhaxww .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #fnfvwhaxww .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #fnfvwhaxww .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #fnfvwhaxww .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #fnfvwhaxww .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #fnfvwhaxww .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #fnfvwhaxww .gt_spanner_row { border-bottom-style: hidden; }
+ #fnfvwhaxww .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #fnfvwhaxww .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
+ #fnfvwhaxww .gt_from_md> :first-child { margin-top: 0; }
+ #fnfvwhaxww .gt_from_md> :last-child { margin-bottom: 0; }
+ #fnfvwhaxww .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+ #fnfvwhaxww .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
+ #fnfvwhaxww .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #fnfvwhaxww .gt_row_group_first td { border-top-width: 2px; }
+ #fnfvwhaxww .gt_row_group_first th { border-top-width: 2px; }
+ #fnfvwhaxww .gt_striped { background-color: rgba(128,128,128,0.05); }
+ #fnfvwhaxww .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #fnfvwhaxww .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #fnfvwhaxww .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #fnfvwhaxww .gt_left { text-align: left; }
+ #fnfvwhaxww .gt_center { text-align: center; }
+ #fnfvwhaxww .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #fnfvwhaxww .gt_font_normal { font-weight: normal; }
+ #fnfvwhaxww .gt_font_bold { font-weight: bold; }
+ #fnfvwhaxww .gt_font_italic { font-style: italic; }
+ #fnfvwhaxww .gt_super { font-size: 65%; }
+ #fnfvwhaxww .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #fnfvwhaxww .gt_asterisk { font-size: 100%; vertical-align: 0; }
+ 
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<th colspan="4" class="gt_heading gt_title gt_font_normal">Product Manager Positions by Job Series</th>
+</tr>
+<tr class="gt_heading even">
+<th colspan="4" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Most PM roles fall under Program Management (0340) series</th>
+</tr>
+<tr class="gt_col_headings header">
+<th id="Job-Series" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Job Series</th>
+<th id="Series-Title" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Series Title</th>
+<th id="Count" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Count</th>
+<th id="%-of-PM-Jobs" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">% of PM Jobs</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right">0340</td>
+<td class="gt_row gt_left">Program Management</td>
+<td class="gt_row gt_right">286</td>
+<td class="gt_row gt_right">53.3%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">0301</td>
+<td class="gt_row gt_left">Miscellaneous Administration</td>
+<td class="gt_row gt_right">131</td>
+<td class="gt_row gt_right">24.4%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">2210</td>
+<td class="gt_row gt_left">Information Technology Management</td>
+<td class="gt_row gt_right">62</td>
+<td class="gt_row gt_right">11.5%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">0343</td>
+<td class="gt_row gt_left">Management and Program Analysis</td>
+<td class="gt_row gt_right">18</td>
+<td class="gt_row gt_right">3.4%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">0601</td>
+<td class="gt_row gt_left">Other</td>
+<td class="gt_row gt_right">12</td>
+<td class="gt_row gt_right">2.2%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">1101</td>
+<td class="gt_row gt_left">General Business and Industry</td>
+<td class="gt_row gt_right">7</td>
+<td class="gt_row gt_right">1.3%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">0801</td>
+<td class="gt_row gt_left">Other</td>
+<td class="gt_row gt_right">6</td>
+<td class="gt_row gt_right">1.1%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">1130</td>
+<td class="gt_row gt_left">Other</td>
+<td class="gt_row gt_right">5</td>
+<td class="gt_row gt_right">0.9%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">0501</td>
+<td class="gt_row gt_left">Financial Administration</td>
+<td class="gt_row gt_right">3</td>
+<td class="gt_row gt_right">0.6%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">1560, 1515</td>
+<td class="gt_row gt_left">Other</td>
+<td class="gt_row gt_right">2</td>
+<td class="gt_row gt_right">0.4%</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</section>
+<section id="common-position-titles" class="level3">
+<h3 class="anchored" data-anchor-id="common-position-titles">Common Position Titles</h3>
+<div id="7ee77b8c" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get top position titles</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>pm_titles <span class="op">=</span> pm_jobs[<span class="st">'position_title'</span>].value_counts().head(<span class="dv">20</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>title_data <span class="op">=</span> []</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, (title, count) <span class="kw">in</span> <span class="bu">enumerate</span>(pm_titles.items()):</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    title_data.append({</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Rank'</span>: idx <span class="op">+</span> <span class="dv">1</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Position Title'</span>: title,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Count'</span>: count</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>title_df <span class="op">=</span> pd.DataFrame(title_data)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    GT(title_df)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    .tab_header(</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"Top 20 Product Manager Position Titles"</span>,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        subtitle<span class="op">=</span><span class="st">"Shows variety in PM role nomenclature across federal agencies"</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div id="bcazneclgi" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>
+#bcazneclgi table {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+#bcazneclgi thead, tbody, tfoot, tr, td, th { border-style: none; }
+ tr { background-color: transparent; }
+#bcazneclgi p { margin: 0; padding: 0; }
+ #bcazneclgi .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #bcazneclgi .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #bcazneclgi .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #bcazneclgi .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #bcazneclgi .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #bcazneclgi .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #bcazneclgi .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #bcazneclgi .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #bcazneclgi .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #bcazneclgi .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #bcazneclgi .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #bcazneclgi .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #bcazneclgi .gt_spanner_row { border-bottom-style: hidden; }
+ #bcazneclgi .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #bcazneclgi .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
+ #bcazneclgi .gt_from_md> :first-child { margin-top: 0; }
+ #bcazneclgi .gt_from_md> :last-child { margin-bottom: 0; }
+ #bcazneclgi .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+ #bcazneclgi .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
+ #bcazneclgi .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #bcazneclgi .gt_row_group_first td { border-top-width: 2px; }
+ #bcazneclgi .gt_row_group_first th { border-top-width: 2px; }
+ #bcazneclgi .gt_striped { background-color: rgba(128,128,128,0.05); }
+ #bcazneclgi .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #bcazneclgi .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #bcazneclgi .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #bcazneclgi .gt_left { text-align: left; }
+ #bcazneclgi .gt_center { text-align: center; }
+ #bcazneclgi .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #bcazneclgi .gt_font_normal { font-weight: normal; }
+ #bcazneclgi .gt_font_bold { font-weight: bold; }
+ #bcazneclgi .gt_font_italic { font-style: italic; }
+ #bcazneclgi .gt_super { font-size: 65%; }
+ #bcazneclgi .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #bcazneclgi .gt_asterisk { font-size: 100%; vertical-align: 0; }
+ 
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<th colspan="3" class="gt_heading gt_title gt_font_normal">Top 20 Product Manager Position Titles</th>
+</tr>
+<tr class="gt_heading even">
+<th colspan="3" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Shows variety in PM role nomenclature across federal agencies</th>
+</tr>
+<tr class="gt_col_headings header">
+<th id="Rank" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Rank</th>
+<th id="Position-Title" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Position Title</th>
+<th id="Count" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Count</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right">1</td>
+<td class="gt_row gt_left">PROGRAM MANAGER (DEPUTY PRODUCT MANAGER ACQUISITION)</td>
+<td class="gt_row gt_right">43</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">2</td>
+<td class="gt_row gt_left">Product Manager</td>
+<td class="gt_row gt_right">39</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">3</td>
+<td class="gt_row gt_left">Deputy Product Manager (Acquisition)</td>
+<td class="gt_row gt_right">34</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">4</td>
+<td class="gt_row gt_left">Program Manager (Deputy Product Manager Acquisition)</td>
+<td class="gt_row gt_right">31</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">5</td>
+<td class="gt_row gt_left">Program Manager (Product Lead Acquisition)</td>
+<td class="gt_row gt_right">26</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">6</td>
+<td class="gt_row gt_left">Program Manager (Deputy Product Lead Acquisition)</td>
+<td class="gt_row gt_right">21</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">7</td>
+<td class="gt_row gt_left">Assistant Product Manager</td>
+<td class="gt_row gt_right">18</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">8</td>
+<td class="gt_row gt_left">PROGRAM MANAGER (PRODUCT LEAD ACQUISITION)</td>
+<td class="gt_row gt_right">17</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">9</td>
+<td class="gt_row gt_left">Product Lead (Acquisition)</td>
+<td class="gt_row gt_right">16</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">10</td>
+<td class="gt_row gt_left">PROGRAM MANAGER (DEPUTY PRODUCT LEAD ACQUISITION)</td>
+<td class="gt_row gt_right">15</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">11</td>
+<td class="gt_row gt_left">Deputy Product Lead (Acquisition)</td>
+<td class="gt_row gt_right">12</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">12</td>
+<td class="gt_row gt_left">Business Product Manager</td>
+<td class="gt_row gt_right">12</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">13</td>
+<td class="gt_row gt_left">Product Owner</td>
+<td class="gt_row gt_right">10</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">14</td>
+<td class="gt_row gt_left">Health Science Product Manager</td>
+<td class="gt_row gt_right">9</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">15</td>
+<td class="gt_row gt_left">ASSISTANT PRODUCT MANAGER</td>
+<td class="gt_row gt_right">8</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">16</td>
+<td class="gt_row gt_left">PRODUCT MANAGER</td>
+<td class="gt_row gt_right">8</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">17</td>
+<td class="gt_row gt_left">DEPUTY PRODUCT LEAD (ACQUISITION)</td>
+<td class="gt_row gt_right">6</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">18</td>
+<td class="gt_row gt_left">Deputy Product Manager</td>
+<td class="gt_row gt_right">6</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right">19</td>
+<td class="gt_row gt_left">DEPUTY PRODUCT MANAGER (ACQUISITION)</td>
+<td class="gt_row gt_right">6</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right">20</td>
+<td class="gt_row gt_left">IT Product Manager</td>
+<td class="gt_row gt_right">5</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="data-export-details" class="level2">
+<h2 class="anchored" data-anchor-id="data-export-details">Data Export Details</h2>
+<section id="export-format" class="level3">
+<h3 class="anchored" data-anchor-id="export-format">Export Format</h3>
+<p>The complete dataset of Product Manager positions is available as a CSV file with the following fields:</p>
+<div id="cd3eacc1" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample data preview</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>export_columns <span class="op">=</span> [</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'position_title'</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'hiring_agency_name'</span>, </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'job_series'</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'minimum_grade'</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'maximum_grade'</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'position_open_date'</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'position_close_date'</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Get sample of recent PM jobs</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>sample_pm <span class="op">=</span> pm_jobs[export_columns].sort_values(<span class="st">'position_open_date'</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">5</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    GT(sample_pm)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    .tab_header(</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"Sample of Product Manager Jobs Dataset"</span>,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>        subtitle<span class="op">=</span><span class="st">"Showing 5 most recent positions"</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    .fmt_date(</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        columns<span class="op">=</span>[<span class="st">'position_open_date'</span>, <span class="st">'position_close_date'</span>],</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        date_style<span class="op">=</span><span class="st">'month_day_year'</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    .tab_options(</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        table_font_size<span class="op">=</span><span class="st">'12px'</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div id="tzjlocrpht" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>
+#tzjlocrpht table {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+#tzjlocrpht thead, tbody, tfoot, tr, td, th { border-style: none; }
+ tr { background-color: transparent; }
+#tzjlocrpht p { margin: 0; padding: 0; }
+ #tzjlocrpht .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 12px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #tzjlocrpht .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #tzjlocrpht .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #tzjlocrpht .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #tzjlocrpht .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #tzjlocrpht .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #tzjlocrpht .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #tzjlocrpht .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #tzjlocrpht .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #tzjlocrpht .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #tzjlocrpht .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #tzjlocrpht .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #tzjlocrpht .gt_spanner_row { border-bottom-style: hidden; }
+ #tzjlocrpht .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #tzjlocrpht .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
+ #tzjlocrpht .gt_from_md> :first-child { margin-top: 0; }
+ #tzjlocrpht .gt_from_md> :last-child { margin-bottom: 0; }
+ #tzjlocrpht .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+ #tzjlocrpht .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
+ #tzjlocrpht .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #tzjlocrpht .gt_row_group_first td { border-top-width: 2px; }
+ #tzjlocrpht .gt_row_group_first th { border-top-width: 2px; }
+ #tzjlocrpht .gt_striped { background-color: rgba(128,128,128,0.05); }
+ #tzjlocrpht .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #tzjlocrpht .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #tzjlocrpht .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #tzjlocrpht .gt_left { text-align: left; }
+ #tzjlocrpht .gt_center { text-align: center; }
+ #tzjlocrpht .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #tzjlocrpht .gt_font_normal { font-weight: normal; }
+ #tzjlocrpht .gt_font_bold { font-weight: bold; }
+ #tzjlocrpht .gt_font_italic { font-style: italic; }
+ #tzjlocrpht .gt_super { font-size: 65%; }
+ #tzjlocrpht .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #tzjlocrpht .gt_asterisk { font-size: 100%; vertical-align: 0; }
+ 
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<th colspan="7" class="gt_heading gt_title gt_font_normal">Sample of Product Manager Jobs Dataset</th>
+</tr>
+<tr class="gt_heading even">
+<th colspan="7" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Showing 5 most recent positions</th>
+</tr>
+<tr class="gt_col_headings header">
+<th id="position_title" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">position_title</th>
+<th id="hiring_agency_name" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">hiring_agency_name</th>
+<th id="job_series" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">job_series</th>
+<th id="minimum_grade" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">minimum_grade</th>
+<th id="maximum_grade" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">maximum_grade</th>
+<th id="position_open_date" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">position_open_date</th>
+<th id="position_close_date" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">position_close_date</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left">Program Analyst (Product Manager)</td>
+<td class="gt_row gt_left">Office of Personnel Management</td>
+<td class="gt_row gt_right">0343</td>
+<td class="gt_row gt_right">14</td>
+<td class="gt_row gt_right">14</td>
+<td class="gt_row gt_right">April 28, 2025</td>
+<td class="gt_row gt_right">May 2, 2025</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left">Product Manager</td>
+<td class="gt_row gt_left">Library of Congress</td>
+<td class="gt_row gt_right">0301</td>
+<td class="gt_row gt_right">14</td>
+<td class="gt_row gt_right">14</td>
+<td class="gt_row gt_right">March 14, 2025</td>
+<td class="gt_row gt_right">March 28, 2025</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left">PRODUCT OWNER (JUNIOR)</td>
+<td class="gt_row gt_left">Customs and Border Protection</td>
+<td class="gt_row gt_right">0301</td>
+<td class="gt_row gt_right">11</td>
+<td class="gt_row gt_right">12</td>
+<td class="gt_row gt_right">February 28, 2025</td>
+<td class="gt_row gt_right">March 6, 2025</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left">Acquisition Key Billet Product Manager or Acquisition Director</td>
+<td class="gt_row gt_left">U.S. Army Acquisition Support Center</td>
+<td class="gt_row gt_right">0340</td>
+<td class="gt_row gt_right">14</td>
+<td class="gt_row gt_right">14</td>
+<td class="gt_row gt_right">February 18, 2025</td>
+<td class="gt_row gt_right">April 18, 2025</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left">Information Technology Specialist (Product Manager)</td>
+<td class="gt_row gt_left">Administrative Office of the U.S. Courts</td>
+<td class="gt_row gt_right">2210</td>
+<td class="gt_row gt_right">00</td>
+<td class="gt_row gt_right">00</td>
+<td class="gt_row gt_right">February 18, 2025</td>
+<td class="gt_row gt_right">March 11, 2025</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</section>
+<section id="key-fields-in-export" class="level3">
+<h3 class="anchored" data-anchor-id="key-fields-in-export">Key Fields in Export</h3>
+<ul>
+<li><strong>Control Number</strong>: Unique identifier for each job posting</li>
+<li><strong>Position Title</strong>: Official job title</li>
+<li><strong>Hiring Agency</strong>: Federal agency posting the position</li>
+<li><strong>Job Series</strong>: Federal occupation classification code</li>
+<li><strong>Grade Range</strong>: Minimum and maximum GS/pay grades</li>
+<li><strong>Dates</strong>: Opening and closing dates for applications</li>
+</ul>
+</section>
+</section>
+<section id="note-on-data-usage" class="level2">
+<h2 class="anchored" data-anchor-id="note-on-data-usage">Note on Data Usage</h2>
+<p>This dataset is a starting point for understanding PM-titled roles in federal government, not an authoritative count. Manual review is recommended to filter out non-PM roles and identify missing positions.</p>
+</section>
+<section id="export-product-manager-data-to-csv" class="level2">
+<h2 class="anchored" data-anchor-id="export-product-manager-data-to-csv">Export Product Manager Data to CSV</h2>
+<div id="2a51517e" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Export the complete dataset to CSV</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>pm_export <span class="op">=</span> conn.execute(<span class="ss">f"""</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ss">    SELECT </span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="ss">        control_number,</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ss">        announcement_number,</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="ss">        position_title,</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="ss">        hiring_agency_name,</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="ss">        hiring_department_name,</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="ss">        job_series,</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="ss">        minimum_grade,</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="ss">        maximum_grade,</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="ss">        position_open_date,</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="ss">        position_close_date,</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="ss">        minimum_salary,</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="ss">        maximum_salary,</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="ss">        work_schedule,</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="ss">        telework_eligible,</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="ss">        supervisory_status</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="ss">    FROM all_jobs </span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="ss">    </span><span class="sc">{</span>product_manager_query<span class="sc">}</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="ss">    ORDER BY position_open_date DESC</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span>).fetchdf()</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Save to CSV</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>pm_export.to_csv(<span class="st">'product_manager_jobs_analysis.csv'</span>, index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Exported </span><span class="sc">{</span><span class="bu">len</span>(pm_export)<span class="sc">:,}</span><span class="ss"> Product Manager jobs to 'product_manager_jobs_analysis.csv'"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Exported 537 Product Manager jobs to 'product_manager_jobs_analysis.csv'</code></pre>
+</div>
+</div>
+<hr>
+<p><em>Analysis by Abigail Haddad (abigail.haddad@gmail.com)</em></p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
