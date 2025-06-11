@@ -1,0 +1,1497 @@
+[2025-06-11 06:58:48] Worker 6: Starting worker-based parallel scraper
+[2025-06-11 06:58:48] Worker 6: Year: 2019
+[2025-06-11 06:58:48] Worker 6: Worker: 6/16
+[2025-06-11 06:58:48] Worker 6: Main database: ../../data/duckdb/usajobs_2019.duckdb
+[2025-06-11 06:58:48] Worker 6: Worker database: ../../data/duckdb/usajobs_2019_worker_6.duckdb
+[2025-06-11 06:58:48] Worker 6: Delay range: 0.1-0.5 seconds
+[2025-06-11 06:58:48] Worker 6: ------------------------------------------------------------
+[2025-06-11 06:58:48] Worker 6: Created worker database: ../../data/duckdb/usajobs_2019_worker_6.duckdb
+[2025-06-11 07:00:15] Worker 6: Starting worker-based parallel scraper
+[2025-06-11 07:00:15] Worker 6: Year: 2019
+[2025-06-11 07:00:15] Worker 6: Worker: 6/16
+[2025-06-11 07:00:15] Worker 6: Main database: ../../data/duckdb/usajobs_2019.duckdb
+[2025-06-11 07:00:15] Worker 6: Worker database: ../../data/duckdb/usajobs_2019_worker_6.duckdb
+[2025-06-11 07:00:15] Worker 6: Delay range: 0.1-0.5 seconds
+[2025-06-11 07:00:15] Worker 6: ------------------------------------------------------------
+[2025-06-11 07:00:15] Worker 6: Created worker database: ../../data/duckdb/usajobs_2019_worker_6.duckdb
+[2025-06-11 07:00:15] Worker 6: Assigned 0 jobs to scrape
+[2025-06-11 07:00:15] Worker 6: No jobs to scrape for this worker
+[2025-06-11 07:43:59] Worker 6: Starting worker-based parallel scraper
+[2025-06-11 07:43:59] Worker 6: Year: 2019
+[2025-06-11 07:43:59] Worker 6: Worker: 6/16
+[2025-06-11 07:43:59] Worker 6: Main database: ../../data/duckdb/usajobs_2019.duckdb
+[2025-06-11 07:43:59] Worker 6: Worker database: ../../data/duckdb/usajobs_2019_worker_6.duckdb
+[2025-06-11 07:43:59] Worker 6: Delay range: 0.1-0.5 seconds
+[2025-06-11 07:43:59] Worker 6: ------------------------------------------------------------
+[2025-06-11 07:43:59] Worker 6: Created worker database: ../../data/duckdb/usajobs_2019_worker_6.duckdb
+[2025-06-11 07:43:59] Worker 6: Assigned 20868 jobs to scrape
+[2025-06-11 07:43:59] Worker 6: [1/20868] Scraping 521946000: Attorney-Advisor
+[2025-06-11 07:44:00] Worker 6: [2/20868] Scraping 521952400: Field Program Specialist
+[2025-06-11 07:44:00] Worker 6: [3/20868] Scraping 521958300: AIRCRAFT MECHANIC
+[2025-06-11 07:44:01] Worker 6: [4/20868] Scraping 521960700: EQUIPMENT SPECIALIST (ELECTRONIC) - AFETS
+[2025-06-11 07:44:02] Worker 6: [5/20868] Scraping 521962800: Deckhand NA-03
+[2025-06-11 07:44:02] Worker 6: [6/20868] Scraping 521964400: Health Systems Specialist
+[2025-06-11 07:44:02] Worker 6: [7/20868] Scraping 521966000: ELECTRONICS TECHNICIAN
+[2025-06-11 07:44:03] Worker 6: [8/20868] Scraping 521967600: Supervisory Industrial Property Clearance Speciali
+[2025-06-11 07:44:04] Worker 6: [9/20868] Scraping 521969200: Director, Office of Legislative Affairs and Policy
+[2025-06-11 07:44:04] Worker 6: [10/20868] Scraping 521970800: Emergency Management Specialist
+[2025-06-11 07:44:05] Worker 6: [11/20868] Scraping 521972400: Transportation Assistant
+[2025-06-11 07:44:05] Worker 6: [12/20868] Scraping 521974000: Architect
+[2025-06-11 07:44:06] Worker 6: [13/20868] Scraping 521975600: Instructional Systems Specialist
+[2025-06-11 07:44:06] Worker 6: [14/20868] Scraping 521977200: Security Specialist
+[2025-06-11 07:44:07] Worker 6: [15/20868] Scraping 521978800: AIRCRAFT ORDNANCE SYSTEMS MECHANIC
+[2025-06-11 07:44:07] Worker 6: [16/20868] Scraping 521980400: Claims Assistant
+[2025-06-11 07:44:08] Worker 6: [17/20868] Scraping 521982000: Medical Instrument Technician (Ultrasound)
+[2025-06-11 07:44:08] Worker 6: [18/20868] Scraping 521983600: Cashier NF-01
+[2025-06-11 07:44:09] Worker 6: [19/20868] Scraping 521985200: Interdisciplinary
+[2025-06-11 07:44:10] Worker 6: [20/20868] Scraping 521986800: Lead Recreation Assistant NF-02
+[2025-06-11 07:44:10] Worker 6: [21/20868] Scraping 521988400: Social Insurance Specialist (Claims Technical Expe
+[2025-06-11 07:44:10] Worker 6: [22/20868] Scraping 521990000: STORE ASSOCIATE
+[2025-06-11 07:44:11] Worker 6: [23/20868] Scraping 521991600: Interdisciplinary Computer Engineer/Computer Scien
+[2025-06-11 07:44:11] Worker 6: [24/20868] Scraping 521993200: Licensed Practical Nurse
+[2025-06-11 07:44:12] Worker 6: [25/20868] Scraping 521994800: DOCTRINE DEVELOPMENT ANALYST
+[2025-06-11 07:44:13] Worker 6: Progress: 25/20868 (Success: 25, Failed: 0) Rate: 1.85/sec, ETA: 187.4min
+[2025-06-11 07:44:13] Worker 6: [26/20868] Scraping 521996400: PRACTICAL NURSE
+[2025-06-11 07:44:13] Worker 6: [27/20868] Scraping 521998000: Custodial Worker Leader NL-02
+[2025-06-11 07:44:14] Worker 6: [28/20868] Scraping 521999600: ELECTRONICS MECHANIC SUPERVISOR
+[2025-06-11 07:44:14] Worker 6: [29/20868] Scraping 522001200: Partnership Specialist (Spanish),GG-0301-9/11/12-C
+[2025-06-11 07:44:15] Worker 6: [30/20868] Scraping 522002800: Partnership Specialist (Spanish),GG-0301-9/11/12-C
+[2025-06-11 07:44:15] Worker 6: [31/20868] Scraping 522004500: FACILITIES SPECIALIST
+[2025-06-11 07:44:15] Worker 6: [32/20868] Scraping 522006100: Psychologist
+[2025-06-11 07:44:16] Worker 6: [33/20868] Scraping 522007700: Senior Coordinator
+[2025-06-11 07:44:16] Worker 6: [34/20868] Scraping 522009300: Lock and Dam Equipment Mechanic
+[2025-06-11 07:44:16] Worker 6: [35/20868] Scraping 522010900: Physician Assistant
+[2025-06-11 07:44:17] Worker 6: [36/20868] Scraping 522012500: Procurement Technician
+[2025-06-11 07:44:17] Worker 6: [37/20868] Scraping 522014100: LIBRARIAN
+[2025-06-11 07:44:18] Worker 6: [38/20868] Scraping 522015700: Logistics Management Officer
+[2025-06-11 07:44:19] Worker 6: [39/20868] Scraping 522017300: Materials Handler
+[2025-06-11 07:44:19] Worker 6: [40/20868] Scraping 522018900: Food Service Worker
+[2025-06-11 07:44:20] Worker 6: [41/20868] Scraping 522020500: Supervisory General Engineer
+[2025-06-11 07:44:20] Worker 6: [42/20868] Scraping 522022100: Teacher (Special Education Teacher)
+[2025-06-11 07:44:21] Worker 6: [43/20868] Scraping 522023700: Supervisory Security Specialist
+[2025-06-11 07:44:21] Worker 6: [44/20868] Scraping 522025300: Staff Administrative Assistant
+[2025-06-11 07:44:22] Worker 6: [45/20868] Scraping 522026900: Staff Nurse - Cardiac Cath. Lab
+[2025-06-11 07:44:22] Worker 6: [46/20868] Scraping 522028500: Quality Assurance Specialist (Nuclear)
+[2025-06-11 07:44:23] Worker 6: [47/20868] Scraping 522030100: Clinical Pharmacy Specialist (PACT)
+[2025-06-11 07:44:23] Worker 6: [48/20868] Scraping 522031700: TRANSPORTATION ASSISTANT (PASSENGER)
+[2025-06-11 07:44:24] Worker 6: [49/20868] Scraping 522033300: Dental Chief
+[2025-06-11 07:44:24] Worker 6: [50/20868] Scraping 522034900: Medical Support Assistant
+[2025-06-11 07:44:25] Worker 6: Progress: 50/20868 (Success: 50, Failed: 0) Rate: 1.94/sec, ETA: 179.2min
+[2025-06-11 07:44:25] Worker 6: [51/20868] Scraping 522036600: HR SPECIALIST (RECRUITMENT/PLACEMENT)
+[2025-06-11 07:44:25] Worker 6: [52/20868] Scraping 522038200: Senior Capital Markets and Securities Specialist, 
+[2025-06-11 07:44:26] Worker 6: [53/20868] Scraping 522039800: Partnership Specialist,GG-0301-9/11/12-Census-INT-
+[2025-06-11 07:44:27] Worker 6: [54/20868] Scraping 522041400: Acquisition Utilization Specialist
+[2025-06-11 07:44:27] Worker 6: [55/20868] Scraping 522043000: Nurse Manager (PACT)
+[2025-06-11 07:44:28] Worker 6: [56/20868] Scraping 522044600: General Engineer (Project Management)
+[2025-06-11 07:44:28] Worker 6: [57/20868] Scraping 522046200: ADMINISTRATIVE SPECIALIST
+[2025-06-11 07:44:29] Worker 6: [58/20868] Scraping 522047800: AIRPLANE FLIGHT INSTRUCTOR
+[2025-06-11 07:44:29] Worker 6: [59/20868] Scraping 522049400: Distribution Process Worker
+[2025-06-11 07:44:30] Worker 6: [60/20868] Scraping 522051000: Nurse IV - Geriatrics & Extended Care Manager
+[2025-06-11 07:44:30] Worker 6: [61/20868] Scraping 522052600: Health System Specialist
+[2025-06-11 07:44:31] Worker 6: [62/20868] Scraping 522054200: Economic Assistant (Part-Time)
+[2025-06-11 07:44:31] Worker 6: [63/20868] Scraping 522055800: Recent Graduate - Industrial Hygienist
+[2025-06-11 07:44:32] Worker 6: [64/20868] Scraping 522057400: ADMINISTRATIVE/TECHNICAL SPECIALIST
+[2025-06-11 07:44:33] Worker 6: [65/20868] Scraping 522059000: LOGISTICS MANAGEMENT SPECIALIST
+[2025-06-11 07:44:33] Worker 6: [66/20868] Scraping 522060600: Supervisory Medical Record Administrator
+[2025-06-11 07:44:34] Worker 6: [67/20868] Scraping 522062200: Management and Program Analyst
+[2025-06-11 07:44:34] Worker 6: [68/20868] Scraping 522063800: Lead Telehealth Clinical Technician
+[2025-06-11 07:44:35] Worker 6: [69/20868] Scraping 522065400: Medical Support Assistant
+[2025-06-11 07:44:35] Worker 6: [70/20868] Scraping 522067100: Interdisciplinary General Engineer/Physical Scient
+[2025-06-11 07:44:36] Worker 6: [71/20868] Scraping 522068700: Civil Engineer, GS-0810-07/09/11 (MPP-BM)
+[2025-06-11 07:44:36] Worker 6: [72/20868] Scraping 522070300: Budget Officer
+[2025-06-11 07:44:37] Worker 6: [73/20868] Scraping 522071900: Student Trainee (Admin), CG-3/4/5 (Indefinite)
+[2025-06-11 07:44:37] Worker 6: [74/20868] Scraping 522073500: Registered Nurse (Stem Cell Transplant)
+[2025-06-11 07:44:38] Worker 6: [75/20868] Scraping 522075100: Lead Biomedical Equipment Support Specialist
+[2025-06-11 07:44:39] Worker 6: Progress: 75/20868 (Success: 75, Failed: 0) Rate: 1.90/sec, ETA: 182.2min
+[2025-06-11 07:44:39] Worker 6: [76/20868] Scraping 522076700: SUPV GENERAL ENGINEER
+[2025-06-11 07:44:39] Worker 6: [77/20868] Scraping 522078300: ADMINISTRATIVE SUPPORT SPECIALIST
+[2025-06-11 07:44:40] Worker 6: [78/20868] Scraping 522079900: IT SPECIALIST (NETWORK)
+[2025-06-11 07:44:40] Worker 6: [79/20868] Scraping 522081500: ORDNANCE EQUIPMENT MECHANIC
+[2025-06-11 07:44:40] Worker 6: [80/20868] Scraping 522083100: Staff Operations and Training Specialist
+[2025-06-11 07:44:41] Worker 6: [81/20868] Scraping 522084700: Medical Support Assistant
+[2025-06-11 07:44:42] Worker 6: [82/20868] Scraping 522086300: Social Insurance Specialist (Claims Specialist)
+[2025-06-11 07:44:42] Worker 6: [83/20868] Scraping 522087900: Legal Administrative Specialist - Homeless Veteran
+[2025-06-11 07:44:43] Worker 6: [84/20868] Scraping 522089500: Human Resources Assistant
+[2025-06-11 07:44:43] Worker 6: [85/20868] Scraping 522091100: Social Insurance Specialist (Claim Specialist) (Pa
+[2025-06-11 07:44:44] Worker 6: [86/20868] Scraping 522092700: Advanced Medical Support Assistant
+[2025-06-11 07:44:44] Worker 6: [87/20868] Scraping 522094300: DEPUTY ASSISTANT DIRECTOR ADMINISTRATION AND MANAG
+[2025-06-11 07:44:45] Worker 6: [88/20868] Scraping 522096100: Health Technician- GS-0640-05
+[2025-06-11 07:44:45] Worker 6: [89/20868] Scraping 522097700: ELECTRONIC INTEGRATED SYSTEMS MECHANIC SUPERVISOR
+[2025-06-11 07:44:46] Worker 6: [90/20868] Scraping 522099300: Medical Administrative Assistant
+[2025-06-11 07:44:46] Worker 6: [91/20868] Scraping 522100900: Legal Assistant (Senior Case Tech)
+[2025-06-11 07:44:47] Worker 6: [92/20868] Scraping 522102500: Recreation Assistant (Community Rec)
+[2025-06-11 07:44:47] Worker 6: [93/20868] Scraping 522104100: Budget Analyst
+[2025-06-11 07:44:48] Worker 6: [94/20868] Scraping 522105700: Food and Beverage Attendant (Snack Bar) NA-02
+[2025-06-11 07:44:48] Worker 6: [95/20868] Scraping 522107300: Mail Assistant
+[2025-06-11 07:44:49] Worker 6: [96/20868] Scraping 522108900: Supervisory Social Insurance Specialist (Operation
+[2025-06-11 07:44:49] Worker 6: [97/20868] Scraping 522110500: Social Worker-Suicide Prevention Program Coordinat
+[2025-06-11 07:44:50] Worker 6: [98/20868] Scraping 522112100: Nursing Assistant (Full-Time)
+[2025-06-11 07:44:50] Worker 6: [99/20868] Scraping 522113700: Realty Specialist
+[2025-06-11 07:44:51] Worker 6: [100/20868] Scraping 522115300: CHILD DEVELOPMENT OPERATIONS CLERK (OFFICE AUTOMAT
+[2025-06-11 07:44:51] Worker 6: Progress: 100/20868 (Success: 100, Failed: 0) Rate: 1.93/sec, ETA: 179.7min
+[2025-06-11 07:44:51] Worker 6: [101/20868] Scraping 522116900: RN - Bed Central (Admission and Transfer Coordinat
+[2025-06-11 07:44:52] Worker 6: [102/20868] Scraping 522118500: GENERAL ENGINEER
+[2025-06-11 07:44:52] Worker 6: [103/20868] Scraping 522120100: Lead Child and Youth Program Assistant (Level 5) C
+[2025-06-11 07:44:53] Worker 6: [104/20868] Scraping 522121700: Food Inspector (Processed Products)
+[2025-06-11 07:44:53] Worker 6: [105/20868] Scraping 522123300: Program Analyst (Informatics) (Associate Group Pra
+[2025-06-11 07:44:54] Worker 6: [106/20868] Scraping 522124900: Supervisory OI&T Specialist-Area Manager
+[2025-06-11 07:44:54] Worker 6: [107/20868] Scraping 522126500: Army Reserve Administrator
+[2025-06-11 07:44:55] Worker 6: [108/20868] Scraping 522128100: SUPVISORY MEDICAL SUPPORT ASSISTANT
+[2025-06-11 07:44:55] Worker 6: [109/20868] Scraping 522129700: Supervisory Attorney Adviser ( Group Supervisor)
+[2025-06-11 07:44:56] Worker 6: [110/20868] Scraping 522131300: Supervisory IT Specialist
+[2025-06-11 07:44:56] Worker 6: [111/20868] Scraping 522132900: SUPPORT SERVICES SPECIALIST
+[2025-06-11 07:44:56] Worker 6: [112/20868] Scraping 522134500: Management Analyst
+[2025-06-11 07:44:57] Worker 6: [113/20868] Scraping 522136100: Blind Rehabilitation Specialist - Orientation and 
+[2025-06-11 07:44:58] Worker 6: [114/20868] Scraping 522137700: INFORMATION TECHNOLOGY SPECIALIST (SYSTEM ADMIN)
+[2025-06-11 07:44:58] Worker 6: [115/20868] Scraping 522139300: LIBRARIAN (ACQUISITION)
+[2025-06-11 07:44:59] Worker 6: [116/20868] Scraping 522140900: TEST MANAGER
+[2025-06-11 07:44:59] Worker 6: [117/20868] Scraping 522142500: Lead Patient Service Assistant
+[2025-06-11 07:45:00] Worker 6: [118/20868] Scraping 522144100: Lead Emergency Management Specialist (Recovery)
+[2025-06-11 07:45:00] Worker 6: [119/20868] Scraping 522145700: Human Resources Specialist (Military)
+[2025-06-11 07:45:01] Worker 6: [120/20868] Scraping 522147300: Partnership Specialist,GG-0301-9/11/12-Census-INT-
+[2025-06-11 07:45:01] Worker 6: [121/20868] Scraping 522148900: PRODUCTION CONTROLLER
+[2025-06-11 07:45:02] Worker 6: [122/20868] Scraping 522150500: Library Technician NF-02
+[2025-06-11 07:45:03] Worker 6: [123/20868] Scraping 522152100: Supv Financial Management Analyst
+[2025-06-11 07:45:03] Worker 6: [124/20868] Scraping 522153700: RECORDS & INFORMATION MANAGEMENT SPECIALIST
+[2025-06-11 07:45:03] Worker 6: [125/20868] Scraping 522155300: Nurse (Consultant)
+[2025-06-11 07:45:04] Worker 6: Progress: 125/20868 (Success: 125, Failed: 0) Rate: 1.92/sec, ETA: 180.0min
+[2025-06-11 07:45:04] Worker 6: [126/20868] Scraping 522156900: RN-PACT Minot CBOC
+[2025-06-11 07:45:05] Worker 6: [127/20868] Scraping 522158500: Public Affairs Specialist
+[2025-06-11 07:45:06] Worker 6: [128/20868] Scraping 522160100: SUPERVISORY INSTRUCTIONAL SYSTEMS SPECIALIST
+[2025-06-11 07:45:06] Worker 6: [129/20868] Scraping 522161700: Registered Nurse (Nurse Manager - CLC/GEC)
+[2025-06-11 07:45:06] Worker 6: [130/20868] Scraping 522163300: AIRCRAFT WORKER
+[2025-06-11 07:45:07] Worker 6: [131/20868] Scraping 522164900: PROGRAM ANALYST
+[2025-06-11 07:45:07] Worker 6: [132/20868] Scraping 522166500: PUBLIC HEALTH SPECIALIST
+[2025-06-11 07:45:08] Worker 6: [133/20868] Scraping 522168100: ENGINEERING TECHNICIAN (CIVIL)
+[2025-06-11 07:45:09] Worker 6: [134/20868] Scraping 522169700: Administrative Support Assistant (CYS) NF-02
+[2025-06-11 07:45:09] Worker 6: [135/20868] Scraping 522171300: Clinical Pharmacist (Rotational Inpatient/Outpatie
+[2025-06-11 07:45:10] Worker 6: [136/20868] Scraping 522172900: ENGINEER/SCIENTIST
+[2025-06-11 07:45:10] Worker 6: [137/20868] Scraping 522174500: SUPERVISORY GOVERNMENT INFORMATION SPECIALIST
+[2025-06-11 07:45:11] Worker 6: [138/20868] Scraping 522176100: Regional Technician  GG-0301-9/11/12-Census-EXT-SC
+[2025-06-11 07:45:12] Worker 6: [139/20868] Scraping 522177700: Investigator
+[2025-06-11 07:45:12] Worker 6: [140/20868] Scraping 522179300: EMERGENCY SERVICES DISPATCHER (OA)
+[2025-06-11 07:45:12] Worker 6: [141/20868] Scraping 522180900: Interdisciplinary
+[2025-06-11 07:45:13] Worker 6: [142/20868] Scraping 522182500: Regulatory Counsel
+[2025-06-11 07:45:14] Worker 6: [143/20868] Scraping 522184100: NONDESTRUCTIVE TESTER
+[2025-06-11 07:45:14] Worker 6: [144/20868] Scraping 522185700: FORK LIFT OPERATOR
+[2025-06-11 07:45:15] Worker 6: [145/20868] Scraping 522187300: HR Specialist (Recruitment and Placement)
+[2025-06-11 07:45:15] Worker 6: [146/20868] Scraping 522188900: Media Specialist, GG-0301-09/11/12- Census- INT-DH
+[2025-06-11 07:45:16] Worker 6: [147/20868] Scraping 522190500: Media Specialist, GG-0301-09/11/12- Census- EXT- D
+[2025-06-11 07:45:16] Worker 6: [148/20868] Scraping 522192100: SHEET METAL MECHANIC (AIRCRAFT/PAINTER)
+[2025-06-11 07:45:17] Worker 6: [149/20868] Scraping 522193700: RN Nurse Manager Med/Surg
+[2025-06-11 07:45:17] Worker 6: [150/20868] Scraping 522195300: PLUMBER / NA10 (AMENDED)
+[2025-06-11 07:45:18] Worker 6: Progress: 150/20868 (Success: 150, Failed: 0) Rate: 1.91/sec, ETA: 181.2min
+[2025-06-11 07:45:18] Worker 6: [151/20868] Scraping 522196900: Advanced Medical Support Assistant
+[2025-06-11 07:45:18] Worker 6: [152/20868] Scraping 522198500: Program Manager, GS-0340-15 (MPP)(CS)
+[2025-06-11 07:45:19] Worker 6: [153/20868] Scraping 522200100: Supervisory Contract Specialist
+[2025-06-11 07:45:20] Worker 6: [154/20868] Scraping 522201700: Training Technician
+[2025-06-11 07:45:20] Worker 6: [155/20868] Scraping 522203300: Civil Engineer
+[2025-06-11 07:45:20] Worker 6: [156/20868] Scraping 522204900: SAFETY AND OCCUPATIONAL HEALTH SPECIALIST
+[2025-06-11 07:45:21] Worker 6: [157/20868] Scraping 522206500: Clinical Pharmacy Specialist (Mental Health)
+[2025-06-11 07:45:21] Worker 6: [158/20868] Scraping 522208100: Emergency Management Specialist (Recovery)
+[2025-06-11 07:45:22] Worker 6: [159/20868] Scraping 522209700: INFORMATION TECHNOLOGY SPECIALIST (INFORMATION SEC
+[2025-06-11 07:45:22] Worker 6: [160/20868] Scraping 522211300: Electronics Mechanic
+[2025-06-11 07:45:23] Worker 6: [161/20868] Scraping 522212900: Pipefitter
+[2025-06-11 07:45:23] Worker 6: [162/20868] Scraping 522214500: SECRETARY (OFFICE AUTOMATION)
+[2025-06-11 07:45:24] Worker 6: [163/20868] Scraping 522216100: Staff Assistant
+[2025-06-11 07:45:24] Worker 6: [164/20868] Scraping 522217700: Supervisory National Bank Examiner (Examiner-In-Ch
+[2025-06-11 07:45:25] Worker 6: [165/20868] Scraping 522219300: Mobilization and Deployment Specialist (Title 32) 
+[2025-06-11 07:45:25] Worker 6: [166/20868] Scraping 522220900: Physician(Hematologist-Oncologist)
+[2025-06-11 07:45:26] Worker 6: [167/20868] Scraping 522222500: Gardener Supervisor
+[2025-06-11 07:45:26] Worker 6: [168/20868] Scraping 522224100: ELECTRICAL ENGINEER
+[2025-06-11 07:45:27] Worker 6: [169/20868] Scraping 522225700: Supervisory Intelligence Specialist
+[2025-06-11 07:45:27] Worker 6: [170/20868] Scraping 522227300: Prosthetics Clerk (OA)
+[2025-06-11 07:45:28] Worker 6: [171/20868] Scraping 522228900: Senior Social Worker (HUD VASH)
+[2025-06-11 07:45:29] Worker 6: [172/20868] Scraping 522230500: 2ND ASST ENGINEER PLD CL 1
+[2025-06-11 07:45:29] Worker 6: [173/20868] Scraping 522232100: Media Specialist (Spanish), GG-0301-09/11/12, Cens
+[2025-06-11 07:45:29] Worker 6: [174/20868] Scraping 522233700: Social Work Program Coordinator (VASH Housing Proj
+[2025-06-11 07:45:30] Worker 6: [175/20868] Scraping 522235300: SALES ASSOC NF1*
+[2025-06-11 07:45:30] Worker 6: Progress: 175/20868 (Success: 175, Failed: 0) Rate: 1.92/sec, ETA: 179.6min
+[2025-06-11 07:45:30] Worker 6: [176/20868] Scraping 522236900: MECHANICAL ENGINEER
+[2025-06-11 07:45:31] Worker 6: [177/20868] Scraping 522238500: INTERDISCIPLINARY ENGINEER
+[2025-06-11 07:45:31] Worker 6: [178/20868] Scraping 522240100: Supervisory Program Manager
+[2025-06-11 07:45:32] Worker 6: [179/20868] Scraping 522241700: Human Resources Specialist (Quality Assurance)
+[2025-06-11 07:45:32] Worker 6: [180/20868] Scraping 522243300: Congressional Actions Coordinator
+[2025-06-11 07:45:33] Worker 6: [181/20868] Scraping 522244900: IT Specialist (APPSW)
+[2025-06-11 07:45:34] Worker 6: [182/20868] Scraping 522246500: MOTOR VEHICLE OPERATOR (TITLE 32)
+[2025-06-11 07:45:34] Worker 6: [183/20868] Scraping 522248100: Medical Supply Technician (SPS) - External
+[2025-06-11 07:45:35] Worker 6: [184/20868] Scraping 522249700: Logistics Management Specialist
+[2025-06-11 07:45:35] Worker 6: [185/20868] Scraping 522251300: Partnership Specialist (Tribal), GG-0301-09/11/12-
+[2025-06-11 07:45:36] Worker 6: [186/20868] Scraping 522252900: Partnership Specialist (Hmong),GG-0301-9/11/12-Cen
+[2025-06-11 07:45:36] Worker 6: [187/20868] Scraping 522254500: Supervisory Social Worker (Clinical)
+[2025-06-11 07:45:37] Worker 6: [188/20868] Scraping 522256100: Budget Analyst
+[2025-06-11 07:45:37] Worker 6: [189/20868] Scraping 522257700: TRAINING INSTRUCTOR (SPECIAL OPERATIONS)
+[2025-06-11 07:45:38] Worker 6: [190/20868] Scraping 522259300: IT SPECIALIST (CUSTSPT) (T32)
+[2025-06-11 07:45:38] Worker 6: [191/20868] Scraping 522260900: POWERED SUPPORT SYSTEMS MECHANIC
+[2025-06-11 07:45:39] Worker 6: [192/20868] Scraping 522262500: Food Services Assistant (Food Service Assistant)
+[2025-06-11 07:45:39] Worker 6: [193/20868] Scraping 522264100: Enumeration and Finance Supervisor
+[2025-06-11 07:45:40] Worker 6: [194/20868] Scraping 522265700: Biological Science Laboratory Technician
+[2025-06-11 07:45:41] Worker 6: [195/20868] Scraping 522267300: PHARMACY TECHNICIAN
+[2025-06-11 07:45:41] Worker 6: [196/20868] Scraping 522268900: Human Resources Specialist
+[2025-06-11 07:45:42] Worker 6: [197/20868] Scraping 522270500: MAINTENANCE TEST PILOT - TITLE 32
+[2025-06-11 07:45:42] Worker 6: [198/20868] Scraping 522272100: PROGRAM ANALYST
+[2025-06-11 07:45:43] Worker 6: [199/20868] Scraping 522273700: Supervisory Voucher Examiner NF-04
+[2025-06-11 07:45:43] Worker 6: [200/20868] Scraping 522275300: HUMAN RESOURCES ASSISTANT (MILITARY) (T32)
+[2025-06-11 07:45:44] Worker 6: Progress: 200/20868 (Success: 200, Failed: 0) Rate: 1.91/sec, ETA: 180.6min
+[2025-06-11 07:45:44] Worker 6: [201/20868] Scraping 522276900: Human Resources Specialist (Employee Benefits)
+[2025-06-11 07:45:44] Worker 6: [202/20868] Scraping 522278500: ADDICTION THERAPIST
+[2025-06-11 07:45:45] Worker 6: [203/20868] Scraping 522280100: Registered Nurse (RDU)
+[2025-06-11 07:45:45] Worker 6: [204/20868] Scraping 522281700: COMPOSITE/PLASTIC FABRICATOR SUPERVISOR I
+[2025-06-11 07:45:46] Worker 6: [205/20868] Scraping 522283300: Distribution Facilities Specialist
+[2025-06-11 07:45:46] Worker 6: [206/20868] Scraping 522285000: Human Resources Assistant (MIL/OA)
+[2025-06-11 07:45:47] Worker 6: [207/20868] Scraping 522286600: Medical Technologist
+[2025-06-11 07:45:47] Worker 6: [208/20868] Scraping 522288200: Human Resources Specialist (Information Systems)
+[2025-06-11 07:45:48] Worker 6: [209/20868] Scraping 522289800: EQUIPMENT SPECIALIST
+[2025-06-11 07:45:48] Worker 6: [210/20868] Scraping 522291400: Health Technician
+[2025-06-11 07:45:48] Worker 6: [211/20868] Scraping 522293000: TOOLS AND PARTS ATTENDANT
+[2025-06-11 07:45:49] Worker 6: [212/20868] Scraping 522294600: Deputy Nurse Executive RN
+[2025-06-11 07:45:50] Worker 6: [213/20868] Scraping 522296200: Social Worker
+[2025-06-11 07:45:50] Worker 6: [214/20868] Scraping 522297800: HUMAN RESOURCES ASSISTANT (MIL)
+[2025-06-11 07:45:51] Worker 6: [215/20868] Scraping 522299600: Pipefitter Supervisor (Pipefitter Foreman)
+[2025-06-11 07:45:51] Worker 6: [216/20868] Scraping 522301200: Licensed Practical Nurse (Outpatient Nursing/Belle
+[2025-06-11 07:45:52] Worker 6: [217/20868] Scraping 522302800: APRN-Outpatient Mental Health - AD-0610-00
+[2025-06-11 07:45:52] Worker 6: [218/20868] Scraping 522304400: Program Support Specialist
+[2025-06-11 07:45:53] Worker 6: [219/20868] Scraping 522306000: Chief Testing and Evaluation
+[2025-06-11 07:45:53] Worker 6: [220/20868] Scraping 522307600: IT SPECIALIST (NETWORK SERVICES) - AFETS
+[2025-06-11 07:45:54] Worker 6: [221/20868] Scraping 522309200: SURFACE MAINTENANCE MECHANIC SUPERVISOR
+[2025-06-11 07:45:54] Worker 6: [222/20868] Scraping 522310800: SECURITY SPECIALIST (OPERATIONS SECURITY)
+[2025-06-11 07:45:55] Worker 6: [223/20868] Scraping 522312400: FORESTRY TECHNICIAN (FIRE) (HOTSHOT) (DE)
+[2025-06-11 07:45:56] Worker 6: [224/20868] Scraping 522314000: Nurse
+[2025-06-11 07:45:56] Worker 6: [225/20868] Scraping 522315600: Financial Integration Officer
+[2025-06-11 07:45:57] Worker 6: Progress: 225/20868 (Success: 225, Failed: 0) Rate: 1.91/sec, ETA: 180.3min
+[2025-06-11 07:45:57] Worker 6: [226/20868] Scraping 522317200: Agricultural Commodity Technician
+[2025-06-11 07:45:57] Worker 6: [227/20868] Scraping 522318800: HUMAN RESOURCES SPECIALIST
+[2025-06-11 07:45:58] Worker 6: [228/20868] Scraping 522320400: INTERDISCIPLINARY ENGINEER/ARCHITECT
+[2025-06-11 07:45:58] Worker 6: [229/20868] Scraping 522322000: Advanced Medical Support Assistant
+[2025-06-11 07:45:59] Worker 6: [230/20868] Scraping 522323600: Industrial Specialist (General)
+[2025-06-11 07:46:00] Worker 6: [231/20868] Scraping 522325200: Human Resources Specialist (Employee & Labor Relat
+[2025-06-11 07:46:00] Worker 6: [232/20868] Scraping 522326800: Partnership Specialist (Spanish), GG-0301-09/11/12
+[2025-06-11 07:46:01] Worker 6: [233/20868] Scraping 522328400: Partnership Specialist (Spanish), GG-0301-09/11/12
+[2025-06-11 07:46:02] Worker 6: [234/20868] Scraping 522330000: Child and Youth Program Assistant Director
+[2025-06-11 07:46:03] Worker 6: [235/20868] Scraping 522331600: Mechanical Engineer (Hydropower)
+[2025-06-11 07:46:03] Worker 6: [236/20868] Scraping 522333200: Laborer (Career Seasonal)
+[2025-06-11 07:46:04] Worker 6: [237/20868] Scraping 522334800: Materials Examiner and Identifier (Fork Lift Opera
+[2025-06-11 07:46:04] Worker 6: [238/20868] Scraping 522336400: Assistant Director
+[2025-06-11 07:46:05] Worker 6: [239/20868] Scraping 522338000: Partnership Specialist (Spanish), GG-0301-09/11/12
+[2025-06-11 07:46:05] Worker 6: [240/20868] Scraping 522339600: Partnership Specialist (Spanish), GG-0301-09/11/12
+[2025-06-11 07:46:05] Worker 6: [241/20868] Scraping 522341200: Student Trainee (Logistics Management)
+[2025-06-11 07:46:06] Worker 6: [242/20868] Scraping 522342800: RESOURCE MANAGER (Title 5)
+[2025-06-11 07:46:07] Worker 6: [243/20868] Scraping 522344400: Supervisory General Engineer
+[2025-06-11 07:46:07] Worker 6: [244/20868] Scraping 522346000: INFORMATION TECHNOLOGY SPECIALIST (SYSTEMS ANALYSI
+[2025-06-11 07:46:08] Worker 6: [245/20868] Scraping 522347600: Therapeutic Radiologic Technologist
+[2025-06-11 07:46:08] Worker 6: [246/20868] Scraping 522349200: UNIT PROGRAM COORDINATOR
+[2025-06-11 07:46:09] Worker 6: [247/20868] Scraping 522350800: Registered Nurse - Telephone Triage
+[2025-06-11 07:46:09] Worker 6: [248/20868] Scraping 522352400: TRANSPORTATION COMMODITY SUPERVISOR
+[2025-06-11 07:46:10] Worker 6: [249/20868] Scraping 522354000: BILLETING FUND: FRONT DESK CLERK NF3*
+[2025-06-11 07:46:11] Worker 6: [250/20868] Scraping 522355600: ADMINISTRATIVE/TECHNICAL SPECIALIST
+[2025-06-11 07:46:11] Worker 6: Progress: 250/20868 (Success: 250, Failed: 0) Rate: 1.89/sec, ETA: 181.5min
+[2025-06-11 07:46:11] Worker 6: [251/20868] Scraping 522357200: Store Manager
+[2025-06-11 07:46:11] Worker 6: [252/20868] Scraping 522358900: General Engineer / Physical Scientist
+[2025-06-11 07:46:12] Worker 6: [253/20868] Scraping 522360500: Lead Customer Service Representative (TEMP)
+[2025-06-11 07:46:13] Worker 6: [254/20868] Scraping 522362100: PRODUCTION CONTROLLER (AIRCRAFT PROPULSION EQUIPME
+[2025-06-11 07:46:13] Worker 6: [255/20868] Scraping 522363700: Social Worker
+[2025-06-11 07:46:14] Worker 6: [256/20868] Scraping 522365300: PROGRAM ANALYST
+[2025-06-11 07:46:15] Worker 6: [257/20868] Scraping 522366900: Program Support Specialist
+[2025-06-11 07:46:15] Worker 6: [258/20868] Scraping 522368500: Economic Assistant
+[2025-06-11 07:46:15] Worker 6: [259/20868] Scraping 522370100: Social Insurance Specialist (Claims Technical Expe
+[2025-06-11 07:46:16] Worker 6: [260/20868] Scraping 522371700: SUPERVISORY FIREFIGHTER
+[2025-06-11 07:46:16] Worker 6: [261/20868] Scraping 522373300: EDUCATION SERVICES FACILITATOR
+[2025-06-11 07:46:17] Worker 6: [262/20868] Scraping 522374900: Security Specialist
+[2025-06-11 07:46:17] Worker 6: [263/20868] Scraping 522376500: Contract Price/Cost Analyst
+[2025-06-11 07:46:18] Worker 6: [264/20868] Scraping 522378100: Human Resources Specialist (Military)
+[2025-06-11 07:46:19] Worker 6: [265/20868] Scraping 522379700: Human Resources Specialist
+[2025-06-11 07:46:19] Worker 6: [266/20868] Scraping 522381300: Public Affairs Specialist
+[2025-06-11 07:46:20] Worker 6: [267/20868] Scraping 522382900: PHYSICAL SECURITY SPECIALIST
+[2025-06-11 07:46:20] Worker 6: [268/20868] Scraping 522384500: Program Support Assistant (OA)
+[2025-06-11 07:46:21] Worker 6: [269/20868] Scraping 522386100: Lead Accounting Technician
+[2025-06-11 07:46:21] Worker 6: [270/20868] Scraping 522387700: ADMINISTRATIVE/TECHNICAL SPECIALIST
+[2025-06-11 07:46:22] Worker 6: [271/20868] Scraping 522389300: Medical Support Assistant (Office Automation)
+[2025-06-11 07:46:23] Worker 6: [272/20868] Scraping 522390900: INFORMATION TECHNOLOGY SPECIALIST (APPSW)
+[2025-06-11 07:46:24] Worker 6: [273/20868] Scraping 522392500: QUALITY ASSURANCE SPECIALIST
+[2025-06-11 07:46:24] Worker 6: [274/20868] Scraping 522394100: Housekeeping Aid Supervisor
+[2025-06-11 07:46:25] Worker 6: [275/20868] Scraping 522395700: Lead Peer Specialist
+[2025-06-11 07:46:25] Worker 6: Progress: 275/20868 (Success: 275, Failed: 0) Rate: 1.88/sec, ETA: 182.4min
+[2025-06-11 07:46:25] Worker 6: [276/20868] Scraping 522397300: Production Controller (Aircraft) (Title 32)
+[2025-06-11 07:46:26] Worker 6: [277/20868] Scraping 522398900: Lead Medical Support Assistant (External)
+[2025-06-11 07:46:26] Worker 6: [278/20868] Scraping 522400500: Supervisory Diagnostic Radiologic Technologist
+[2025-06-11 07:46:27] Worker 6: [279/20868] Scraping 522402200: Civilian Pay Technician
+[2025-06-11 07:46:27] Worker 6: [280/20868] Scraping 522403800: Government Information Specialist
+[2025-06-11 07:46:28] Worker 6: [281/20868] Scraping 522405400: General Supply Specialist
+[2025-06-11 07:46:28] Worker 6: [282/20868] Scraping 522407000: INTELLIGENCE SPECIALIST
+[2025-06-11 07:46:29] Worker 6: [283/20868] Scraping 522408600: Materials Examiner and Identifier (FLO)
+[2025-06-11 07:46:29] Worker 6: [284/20868] Scraping 522410200: Emergency Management Specialist (Mitigation)
+[2025-06-11 07:46:30] Worker 6: [285/20868] Scraping 522411800: Electrician
+[2025-06-11 07:46:30] Worker 6: [286/20868] Scraping 522413400: Civil Engineer
+[2025-06-11 07:46:31] Worker 6: [287/20868] Scraping 522415000: Lead Medical Support Assistant
+[2025-06-11 07:46:31] Worker 6: [288/20868] Scraping 522416600: Cytotechnologist
+[2025-06-11 07:46:32] Worker 6: [289/20868] Scraping 522418200: Supervisory Training Systems Management Specialist
+[2025-06-11 07:46:33] Worker 6: [290/20868] Scraping 522419800: Park Ranger
+[2025-06-11 07:46:33] Worker 6: [291/20868] Scraping 522421400: Supervisory Voucher Examiner
+[2025-06-11 07:46:34] Worker 6: [292/20868] Scraping 522423000: Medical Reimbursement Technician 36018A/36017A
+[2025-06-11 07:46:34] Worker 6: [293/20868] Scraping 522424600: SOCIAL WORKER
+[2025-06-11 07:46:35] Worker 6: [294/20868] Scraping 522426200: Financial Administrative Specialist
+[2025-06-11 07:46:35] Worker 6: [295/20868] Scraping 522427800: ADMINISTRATIVE OFFICER
+[2025-06-11 07:46:36] Worker 6: [296/20868] Scraping 522429400: Advanced Medical Support Assistant
+[2025-06-11 07:46:36] Worker 6: [297/20868] Scraping 522431000: Program Analyst
+[2025-06-11 07:46:37] Worker 6: [298/20868] Scraping 522432700: Lead Supply Management Specialist
+[2025-06-11 07:46:37] Worker 6: [299/20868] Scraping 522434300: LOGISTICS MANAGEMENT SPECIALIST
+[2025-06-11 07:46:38] Worker 6: [300/20868] Scraping 522435900: OPERATING ROOM NURSING ASSISTANT (OBSTETRICAL)
+[2025-06-11 07:46:38] Worker 6: Progress: 300/20868 (Success: 300, Failed: 0) Rate: 1.88/sec, ETA: 182.1min
+[2025-06-11 07:46:38] Worker 6: [301/20868] Scraping 522437500: HR SPEC (MILITARY) (T5)
+[2025-06-11 07:46:39] Worker 6: [302/20868] Scraping 522439100: Nurse Practitioner
+[2025-06-11 07:46:40] Worker 6: [303/20868] Scraping 522440700: FINANCIAL SYSTEMS SPECIALIST
+[2025-06-11 07:46:40] Worker 6: [304/20868] Scraping 522442300: Supervisory, Program Analyst (Data Analytics)
+[2025-06-11 07:46:41] Worker 6: [305/20868] Scraping 522443900: Supervisory Chemist - Molecular Diagnostics Superv
+[2025-06-11 07:46:41] Worker 6: [306/20868] Scraping 522445500: Supervisory IT Specialist (Policy & Planning)
+[2025-06-11 07:46:42] Worker 6: [307/20868] Scraping 522447100: Advanced Medical Support Assistant
+[2025-06-11 07:46:42] Worker 6: [308/20868] Scraping 522448700: Supervisory Veterinary Medical Officer
+[2025-06-11 07:46:43] Worker 6: [309/20868] Scraping 522450300: PERSONNEL SECURITY SPECIALIST
+[2025-06-11 07:46:44] Worker 6: [310/20868] Scraping 522451900: HEALTH TECHNICIAN
+[2025-06-11 07:46:44] Worker 6: [311/20868] Scraping 522453500: Safety and Occupational Health Specialist
+[2025-06-11 07:46:45] Worker 6: [312/20868] Scraping 522455100: Supervisory Contract Specialist
+[2025-06-11 07:46:45] Worker 6: [313/20868] Scraping 522456700: ENGINEER
+[2025-06-11 07:46:46] Worker 6: [314/20868] Scraping 522458300: Contract Price/Cost Analyst
+[2025-06-11 07:46:46] Worker 6: [315/20868] Scraping 522459900: Intelligence Specialist (ICD)
+[2025-06-11 07:46:47] Worker 6: [316/20868] Scraping 522461500: Clinical Psychologist
+[2025-06-11 07:46:47] Worker 6: [317/20868] Scraping 522463100: LOCK AND DAM OPERATOR
+[2025-06-11 07:46:48] Worker 6: [318/20868] Scraping 522464700: Accountant
+[2025-06-11 07:46:48] Worker 6: [319/20868] Scraping 522466300: Supervisory Staff Administrator
+[2025-06-11 07:46:49] Worker 6: [320/20868] Scraping 522467900: Public Affairs Specialist
+[2025-06-11 07:46:49] Worker 6: [321/20868] Scraping 522469500: Ethics Program Specialist
+[2025-06-11 07:46:50] Worker 6: [322/20868] Scraping 522471100: AIRCRAFT ELECTRICIAN
+[2025-06-11 07:46:50] Worker 6: [323/20868] Scraping 522472700: Contact Representative (Customer Service Represent
+[2025-06-11 07:46:51] Worker 6: [324/20868] Scraping 522474300: AIRCRAFT MECHANIC
+[2025-06-11 07:46:52] Worker 6: [325/20868] Scraping 522475900: Teacher (Elementary)
+[2025-06-11 07:46:52] Worker 6: Progress: 325/20868 (Success: 325, Failed: 0) Rate: 1.88/sec, ETA: 182.2min
+[2025-06-11 07:46:52] Worker 6: [326/20868] Scraping 522477500: RN (Nurse Educator)
+[2025-06-11 07:46:52] Worker 6: [327/20868] Scraping 522479100: SUD Specialist Social Worker
+[2025-06-11 07:46:53] Worker 6: [328/20868] Scraping 522480700: Medical Planner
+[2025-06-11 07:46:54] Worker 6: [329/20868] Scraping 522482300: Fire Protection Inspector
+[2025-06-11 07:46:54] Worker 6: [330/20868] Scraping 522483900: Logistics Management Specialist
+[2025-06-11 07:46:55] Worker 6: [331/20868] Scraping 522485500: COMP SCIENTIST
+[2025-06-11 07:46:55] Worker 6: [332/20868] Scraping 522487100: SACC SUPERVISOR, NF-04/RFT, CAMP FOSTER, OKINAWA, 
+[2025-06-11 07:46:56] Worker 6: [333/20868] Scraping 522488700: Administrative Support Assistant
+[2025-06-11 07:46:56] Worker 6: [334/20868] Scraping 522490300: Management and Program Analyst, GS-343-9, (DE)
+[2025-06-11 07:46:57] Worker 6: [335/20868] Scraping 522491900: Lead IT Specialist (SysAna)
+[2025-06-11 07:46:57] Worker 6: [336/20868] Scraping 522493500: IT SPECIALIST (SYSADMIN)
+[2025-06-11 07:46:58] Worker 6: [337/20868] Scraping 522495100: Machinist (Armament)
+[2025-06-11 07:46:58] Worker 6: [338/20868] Scraping 522496700: Medical Records Technician (Release of Information
+[2025-06-11 07:46:59] Worker 6: [339/20868] Scraping 522498300: INTELLIGENCE SPECIALIST
+[2025-06-11 07:46:59] Worker 6: [340/20868] Scraping 522499900: INTELLIGENCE SPECIALIST
+[2025-06-11 07:47:00] Worker 6: [341/20868] Scraping 522501500: Administrative Specialist
+[2025-06-11 07:47:00] Worker 6: [342/20868] Scraping 522503100: QUALITY ASSUR SPEC
+[2025-06-11 07:47:01] Worker 6: [343/20868] Scraping 522504700: Supervisory Supply Technician
+[2025-06-11 07:47:02] Worker 6: [344/20868] Scraping 522506300: HR Specialist (Recruitment/Placement/Compensation)
+[2025-06-11 07:47:02] Worker 6: [345/20868] Scraping 522507900: AIRCRAFT ELECTRICIAN (AIRCRAFT PNEUDRALIC SYSTEMS 
+[2025-06-11 07:47:02] Worker 6: [346/20868] Scraping 522509500: Laundry Worker
+[2025-06-11 07:47:03] Worker 6: [347/20868] Scraping 522511100: FLIGHT ENGINEER (INSTRUCTOR)
+[2025-06-11 07:47:03] Worker 6: [348/20868] Scraping 522512700: Supervisory Radiologic Technologist for Cat Scan (
+[2025-06-11 07:47:04] Worker 6: [349/20868] Scraping 522514300: Purchasing Agent
+[2025-06-11 07:47:05] Worker 6: [350/20868] Scraping 522515900: MANAGEMENT ANALYST
+[2025-06-11 07:47:05] Worker 6: Progress: 350/20868 (Success: 350, Failed: 0) Rate: 1.88/sec, ETA: 182.1min
+[2025-06-11 07:47:05] Worker 6: [351/20868] Scraping 522517500: BUDGET ANALYST
+[2025-06-11 07:47:06] Worker 6: [352/20868] Scraping 522519100: Nursing Assistant
+[2025-06-11 07:47:07] Worker 6: [353/20868] Scraping 522520700: Social Worker (Access Crisis Team)
+[2025-06-11 07:47:07] Worker 6: [354/20868] Scraping 522522300: Boiler Plant Operator Leader
+[2025-06-11 07:47:08] Worker 6: [355/20868] Scraping 522523900: Fire Protection Engineer
+[2025-06-11 07:47:09] Worker 6: [356/20868] Scraping 522525500: Consumer Safety Inspector
+[2025-06-11 07:47:09] Worker 6: [357/20868] Scraping 522527100: General Engineer
+[2025-06-11 07:47:10] Worker 6: [358/20868] Scraping 522528700: HUMAN RESOURCES SPECIALIST (LABOR & EMPLOYEE RELAT
+[2025-06-11 07:47:10] Worker 6: [359/20868] Scraping 522530300: INFORMATION SECURITY SPECIALIST
+[2025-06-11 07:47:11] Worker 6: [360/20868] Scraping 522531900: Quality Assurance Specialist
+[2025-06-11 07:47:12] Worker 6: [361/20868] Scraping 522533500: Child and Youth Program Asst - Entry
+[2025-06-11 07:47:12] Worker 6: [362/20868] Scraping 522535100: Aircraft Ordnance Systems Mechanic
+[2025-06-11 07:47:12] Worker 6: [363/20868] Scraping 522536700: Physician (Primary Care)
+[2025-06-11 07:47:13] Worker 6: [364/20868] Scraping 522538300: Veterans Service Representative
+[2025-06-11 07:47:14] Worker 6: [365/20868] Scraping 522539900: Supervisory Nurse (Administrative/Ambulatory)
+[2025-06-11 07:47:14] Worker 6: [366/20868] Scraping 522541500: Supply Technician
+[2025-06-11 07:47:15] Worker 6: [367/20868] Scraping 522543100: Security Guard
+[2025-06-11 07:47:15] Worker 6: [368/20868] Scraping 522544700: EXECUTIVE OFFICER
+[2025-06-11 07:47:16] Worker 6: [369/20868] Scraping 522546300: EQUIPMENT SPECIALIST
+[2025-06-11 07:47:17] Worker 6: [370/20868] Scraping 522547900: INFORMATION TECHNOLOGY SPECIALIST (INFOSEC)
+[2025-06-11 07:47:17] Worker 6: [371/20868] Scraping 522549500: RN-Medical Surgical
+[2025-06-11 07:47:17] Worker 6: [372/20868] Scraping 522551100: Registered Respiratory Therapist (Night Supervisor
+[2025-06-11 07:47:18] Worker 6: [373/20868] Scraping 522552700: Logistics Management Specialist
+[2025-06-11 07:47:19] Worker 6: [374/20868] Scraping 522554300: Supervisory Logistics Management Specialist
+[2025-06-11 07:47:19] Worker 6: [375/20868] Scraping 522555900: Diagnostic Radiologic Technologist
+[2025-06-11 07:47:20] Worker 6: Progress: 375/20868 (Success: 375, Failed: 0) Rate: 1.87/sec, ETA: 182.9min
+[2025-06-11 07:47:20] Worker 6: [376/20868] Scraping 522557500: Health Technician (Call Center)
+[2025-06-11 07:47:21] Worker 6: [377/20868] Scraping 522559100: Civil Engineer - Highway - Direct Hire
+[2025-06-11 07:47:21] Worker 6: [378/20868] Scraping 522560700: Health System Specialist
+[2025-06-11 07:47:22] Worker 6: [379/20868] Scraping 522562300: Teacher
+[2025-06-11 07:47:22] Worker 6: [380/20868] Scraping 522563900: Construction Control Representative
+[2025-06-11 07:47:23] Worker 6: [381/20868] Scraping 522565500: SURFACE MAINTENANCE MECHANIC LEADER (TITLE 32)
+[2025-06-11 07:47:24] Worker 6: [382/20868] Scraping 522567100: SUPERVISORY SECURITY SPECIALIST
+[2025-06-11 07:47:24] Worker 6: [383/20868] Scraping 522568700: Nurse Specialist (Fluoroscopy)
+[2025-06-11 07:47:25] Worker 6: [384/20868] Scraping 522570300: Administrative Officer
+[2025-06-11 07:47:26] Worker 6: [385/20868] Scraping 522571900: EDUCATION SERVICES SPECIALIST
+[2025-06-11 07:47:26] Worker 6: [386/20868] Scraping 522573500: FACILITIES OPERATIONS SPECIALIST (PROGRAM MANAGEME
+[2025-06-11 07:47:26] Worker 6: [387/20868] Scraping 522575100: AIRCRAFT MECHANIC
+[2025-06-11 07:47:27] Worker 6: [388/20868] Scraping 522576700: Army Reserve Administrator
+[2025-06-11 07:47:27] Worker 6: [389/20868] Scraping 522578300: IT SPECIALIST (SYSADMIN)
+[2025-06-11 07:47:28] Worker 6: [390/20868] Scraping 522579900: Security Assistance Specialist
+[2025-06-11 07:47:28] Worker 6: [391/20868] Scraping 522581500: Hydrologist
+[2025-06-11 07:47:29] Worker 6: [392/20868] Scraping 522583100: Voucher Examiner PD 03365A/03247A
+[2025-06-11 07:47:30] Worker 6: [393/20868] Scraping 522584700: CONGRESSIONAL LIAISON SPECIALIST
+[2025-06-11 07:47:30] Worker 6: [394/20868] Scraping 522586300: Interdisciplinary
+[2025-06-11 07:47:31] Worker 6: [395/20868] Scraping 522587900: Medical Records Technician (Cancer Registrar)
+[2025-06-11 07:47:31] Worker 6: [396/20868] Scraping 522589500: IT Specialist (Cybersecurity)
+[2025-06-11 07:47:32] Worker 6: [397/20868] Scraping 522591100: Lead Recreation Assistant NF-02
+[2025-06-11 07:47:32] Worker 6: [398/20868] Scraping 522592700: Nursing Assistant
+[2025-06-11 07:47:33] Worker 6: [399/20868] Scraping 522594300: MEATCUTTING WORKER
+[2025-06-11 07:47:33] Worker 6: [400/20868] Scraping 522595900: Transportation Assistant
+[2025-06-11 07:47:34] Worker 6: Progress: 400/20868 (Success: 400, Failed: 0) Rate: 1.86/sec, ETA: 182.9min
+[2025-06-11 07:47:34] Worker 6: [401/20868] Scraping 522597500: Social Worker (MH RRTP Admissions Screener)
+[2025-06-11 07:47:34] Worker 6: [402/20868] Scraping 522599100: ELECTRONICS MECHANIC
+[2025-06-11 07:47:35] Worker 6: [403/20868] Scraping 522600700: Social Insurance Specialist (CTE TITLE XVI) (TEMP)
+[2025-06-11 07:47:35] Worker 6: [404/20868] Scraping 522602300: HR Specialist (CLSFN/RP)
+[2025-06-11 07:47:36] Worker 6: [405/20868] Scraping 522603900: IT Specialist (INFOSEC)
+[2025-06-11 07:47:36] Worker 6: [406/20868] Scraping 522605500: High Voltage Electrician
+[2025-06-11 07:47:37] Worker 6: [407/20868] Scraping 522607100: Safety Engineer (Systems)
+[2025-06-11 07:47:37] Worker 6: [408/20868] Scraping 522608700: SUPERVISORY MISSION SUPPORT SPECIALIST
+[2025-06-11 07:47:39] Worker 6: [409/20868] Scraping 522610300: Medical Support Assistant (Office Automation)
+[2025-06-11 07:47:39] Worker 6: [410/20868] Scraping 522611900: PROGRAM ANALYST
+[2025-06-11 07:47:40] Worker 6: [411/20868] Scraping 522613500: Dental Assistant
+[2025-06-11 07:47:40] Worker 6: [412/20868] Scraping 522615100: Distribution Facilities Specialist
+[2025-06-11 07:47:41] Worker 6: [413/20868] Scraping 522616700: Recovery Audit Coordinator
+[2025-06-11 07:47:41] Worker 6: [414/20868] Scraping 522618300: Facility Operations Specialist
+[2025-06-11 07:47:42] Worker 6: [415/20868] Scraping 522619900: Quality Assurance Specialist (Chemicals)
+[2025-06-11 07:47:43] Worker 6: [416/20868] Scraping 522621500: Physician Supervisor (Primary Care)
+[2025-06-11 07:47:43] Worker 6: [417/20868] Scraping 522623100: Supervisory Social Insurance Specialist (Operation
+[2025-06-11 07:47:44] Worker 6: [418/20868] Scraping 522624700: Supervisory Information Technology Specialist (INF
+[2025-06-11 07:47:44] Worker 6: [419/20868] Scraping 522626300: Writer-Editor (Oversight)
+[2025-06-11 07:47:45] Worker 6: [420/20868] Scraping 522627900: BARISTA/FOOD SERVICE WORKER
+[2025-06-11 07:47:46] Worker 6: [421/20868] Scraping 522629500: SUPERVISORY CIVIL ENGINEER (HYDRAULICS)
+[2025-06-11 07:47:46] Worker 6: [422/20868] Scraping 522631200: Nurse (Advanced Practice Registered Nurse Anesthet
+[2025-06-11 07:47:46] Worker 6: [423/20868] Scraping 522632800: PAINTER
+[2025-06-11 07:47:47] Worker 6: [424/20868] Scraping 522634500: PRODUCTION CONTROLLER (SHIPS)
+[2025-06-11 07:47:47] Worker 6: [425/20868] Scraping 522636100: Industrial Equipment Mechanic
+[2025-06-11 07:47:48] Worker 6: Progress: 425/20868 (Success: 425, Failed: 0) Rate: 1.86/sec, ETA: 183.6min
+[2025-06-11 07:47:48] Worker 6: [426/20868] Scraping 522637700: Social Worker (CNH/ADHC Coordinator)
+[2025-06-11 07:47:49] Worker 6: [427/20868] Scraping 522639300: Social Worker (HUD-VASH)
+[2025-06-11 07:47:49] Worker 6: [428/20868] Scraping 522640900: Civil Engineer
+[2025-06-11 07:47:50] Worker 6: [429/20868] Scraping 522642600: Instructional Systems Specialist (Mixed)
+[2025-06-11 07:47:51] Worker 6: [430/20868] Scraping 522644200: Claims Assistant
+[2025-06-11 07:47:51] Worker 6: [431/20868] Scraping 522645800: FLIGHT ENGINEER
+[2025-06-11 07:47:52] Worker 6: [432/20868] Scraping 522647400: Information Technology Specialist
+[2025-06-11 07:47:52] Worker 6: [433/20868] Scraping 522649000: Clinical Nurse (Perioperative)
+[2025-06-11 07:47:53] Worker 6: [434/20868] Scraping 522650600: Program Support Assistant
+[2025-06-11 07:47:53] Worker 6: [435/20868] Scraping 522652200: IT SPECIALIST (INFOSEC)
+[2025-06-11 07:47:54] Worker 6: [436/20868] Scraping 522653800: Management & Program Analyst
+[2025-06-11 07:47:54] Worker 6: [437/20868] Scraping 522655400: Criminal Investigator
+[2025-06-11 07:47:55] Worker 6: [438/20868] Scraping 522657000: Quality Assurance Specialist
+[2025-06-11 07:47:55] Worker 6: [439/20868] Scraping 522658600: ELECTRONICS TECHNICIAN
+[2025-06-11 07:47:56] Worker 6: [440/20868] Scraping 522660200: FAMILY PROGRAM SPECIALIST - TITLE 5
+[2025-06-11 07:47:56] Worker 6: [441/20868] Scraping 522661800: Senior Financial Management Systems Analyst
+[2025-06-11 07:47:57] Worker 6: [442/20868] Scraping 522663400: Senior Financial Management Systems Analyst
+[2025-06-11 07:47:57] Worker 6: [443/20868] Scraping 522665000: Health System Specialist, GS-0671-12, Office of th
+[2025-06-11 07:47:58] Worker 6: [444/20868] Scraping 522666700: Medical Instrument Technician (Gastroenterology)
+[2025-06-11 07:47:58] Worker 6: [445/20868] Scraping 522668300: Budget Analyst
+[2025-06-11 07:47:59] Worker 6: [446/20868] Scraping 522670000: Sheet Metal Repair Inspector
+[2025-06-11 07:47:59] Worker 6: [447/20868] Scraping 522671600: Procurement Technician
+[2025-06-11 07:48:00] Worker 6: [448/20868] Scraping 522673200: DIA SOUTH CAROLINA/CHARLESTON HIRING EVENT - MISSI
+[2025-06-11 07:48:01] Worker 6: [449/20868] Scraping 522674800: Safety and Occupational Health Specialist
+[2025-06-11 07:48:01] Worker 6: [450/20868] Scraping 522676600: Transportation Assistant
+[2025-06-11 07:48:02] Worker 6: Progress: 450/20868 (Success: 450, Failed: 0) Rate: 1.86/sec, ETA: 183.4min
+[2025-06-11 07:48:02] Worker 6: [451/20868] Scraping 522678200: SECRETARY (OA)
+[2025-06-11 07:48:02] Worker 6: [452/20868] Scraping 522679800: PHOTOGRAPHER
+[2025-06-11 07:48:03] Worker 6: [453/20868] Scraping 522681400: Dental Assistant
+[2025-06-11 07:48:03] Worker 6: [454/20868] Scraping 522683000: Interpreter (Sign Language)
+[2025-06-11 07:48:03] Worker 6: [455/20868] Scraping 522684600: Surgical Technician
+[2025-06-11 07:48:04] Worker 6: [456/20868] Scraping 522686200: Air Conditioning Equipment Mechanic
+[2025-06-11 07:48:04] Worker 6: [457/20868] Scraping 522687800: Supervisory General Engineer
+[2025-06-11 07:48:05] Worker 6: [458/20868] Scraping 522689400: Supervisory Human Resources Specialist
+[2025-06-11 07:48:05] Worker 6: [459/20868] Scraping 522691000: Pharmacist
+[2025-06-11 07:48:06] Worker 6: [460/20868] Scraping 522692600: Chief of Human Resources Division
+[2025-06-11 07:48:06] Worker 6: [461/20868] Scraping 522694200: INTELLIGENCE SPECIALIST
+[2025-06-11 07:48:07] Worker 6: [462/20868] Scraping 522695800: Nurse (Clinical/Medical-Surgical Expanded Function
+[2025-06-11 07:48:07] Worker 6: [463/20868] Scraping 522697400: Supply Technician
+[2025-06-11 07:48:07] Worker 6: [464/20868] Scraping 522699000: Supply Technician (Fork Lift Operator/Motor Vehicl
+[2025-06-11 07:48:08] Worker 6: [465/20868] Scraping 522700600: Nurse Manager 1A Hematology Oncology Geriatrics
+[2025-06-11 07:48:08] Worker 6: [466/20868] Scraping 522702300: Safety and Occupational Health Manager
+[2025-06-11 07:48:09] Worker 6: [467/20868] Scraping 522703900: Occupational Health Technician
+[2025-06-11 07:48:09] Worker 6: [468/20868] Scraping 522705500: SUPERVISORY FINANCIAL MANANGMENT ANALYST
+[2025-06-11 07:48:10] Worker 6: [469/20868] Scraping 522707100: Criminal Investigator
+[2025-06-11 07:48:10] Worker 6: [470/20868] Scraping 522708700: IMMIGRATION SERVICES ASSISTANT (OFFICE AUTOMATION)
+[2025-06-11 07:48:11] Worker 6: [471/20868] Scraping 522710300: FINANCIAL MANAGEMENT ANALYST
+[2025-06-11 07:48:12] Worker 6: [472/20868] Scraping 522711900: Food Service Worker NA-02
+[2025-06-11 07:48:12] Worker 6: [473/20868] Scraping 522713500: SUPERVISORY STORE ASSOCIATE
+[2025-06-11 07:48:13] Worker 6: [474/20868] Scraping 522715100: Physical Science Technician
+[2025-06-11 07:48:13] Worker 6: [475/20868] Scraping 522716700: TRAINING PROGRAM MANAGER
+[2025-06-11 07:48:13] Worker 6: Progress: 475/20868 (Success: 475, Failed: 0) Rate: 1.87/sec, ETA: 182.0min
+[2025-06-11 07:48:13] Worker 6: [476/20868] Scraping 522718300: Supervisory Detention & Deportation Officer
+[2025-06-11 07:48:14] Worker 6: [477/20868] Scraping 522720000: TRAINING ADMINISTRATOR (INSTRUCTOR)
+[2025-06-11 07:48:14] Worker 6: [478/20868] Scraping 522721600: Administrative Support Assistant
+[2025-06-11 07:48:15] Worker 6: [479/20868] Scraping 522723200: Aviation Safety Assistant
+[2025-06-11 07:48:15] Worker 6: [480/20868] Scraping 522724800: Information Technology Specialist (Information Sec
+[2025-06-11 07:48:16] Worker 6: [481/20868] Scraping 522726400: CONTRACT SPECIALIST
+[2025-06-11 07:48:16] Worker 6: [482/20868] Scraping 522728000: CONTRACT SPECIALIST
+[2025-06-11 07:48:17] Worker 6: [483/20868] Scraping 522729600: IT Specialist (Network Services)
+[2025-06-11 07:48:17] Worker 6: [484/20868] Scraping 522731200: Medical Technologist  - Recruitment Incentive/Educ
+[2025-06-11 07:48:18] Worker 6: [485/20868] Scraping 522732800: Supervisory Nurse (Clinical/Obstetrics-Gynecology)
+[2025-06-11 07:48:18] Worker 6: [486/20868] Scraping 522734400: Branch Support Assistant
+[2025-06-11 07:48:19] Worker 6: [487/20868] Scraping 522736000: RN/ Nurse Manager Operating Room
+[2025-06-11 07:48:19] Worker 6: [488/20868] Scraping 522737700: IT SPECIALIST (CUSTOMER SUPPORT)
+[2025-06-11 07:48:20] Worker 6: [489/20868] Scraping 522739300: Accounting Technician
+[2025-06-11 07:48:20] Worker 6: [490/20868] Scraping 522740900: Lead Interdisciplinary
+[2025-06-11 07:48:21] Worker 6: [491/20868] Scraping 522742500: Power Plant Superintendent
+[2025-06-11 07:48:21] Worker 6: [492/20868] Scraping 522744100: Human Resources Specialist
+[2025-06-11 07:48:22] Worker 6: [493/20868] Scraping 522745700: Advanced Registered Nurse Practitioner (CLC)
+[2025-06-11 07:48:22] Worker 6: [494/20868] Scraping 522747300: Wire Communications Cable Splicer
+[2025-06-11 07:48:23] Worker 6: [495/20868] Scraping 522748900: Supervisory Social Insurance Specialist (ADO Super
+[2025-06-11 07:48:23] Worker 6: [496/20868] Scraping 522750500: SUPERVISORY INTERDISCIPLINARY
+[2025-06-11 07:48:24] Worker 6: [497/20868] Scraping 522752100: MEATCUTTING WORKER
+[2025-06-11 07:48:25] Worker 6: [498/20868] Scraping 522753700: ELEX IND CTRL MECH
+[2025-06-11 07:48:25] Worker 6: [499/20868] Scraping 522755300: Program Analyst
+[2025-06-11 07:48:25] Worker 6: [500/20868] Scraping 522756900: Assistan Nurse Manager (Nursing Perioperative)
+[2025-06-11 07:48:26] Worker 6: Progress: 500/20868 (Success: 500, Failed: 0) Rate: 1.87/sec, ETA: 181.1min
+[2025-06-11 07:48:26] Worker 6: [501/20868] Scraping 522758500: Community Based Outpatient Clinic Licensed Practic
+[2025-06-11 07:48:26] Worker 6: [502/20868] Scraping 522760100: Medical Records Technician (Coder)
+[2025-06-11 07:48:27] Worker 6: [503/20868] Scraping 522761700: Instrumentation Specialist
+[2025-06-11 07:48:27] Worker 6: [504/20868] Scraping 522763300: Student Trainee (Engineering)
+[2025-06-11 07:48:28] Worker 6: [505/20868] Scraping 522764900: FINANCIAL MANAGEMENT ANALYST
+[2025-06-11 07:48:29] Worker 6: [506/20868] Scraping 522766500: TAX LAW SPECIALIST*CTAP/RPP ONLY*
+[2025-06-11 07:48:29] Worker 6: [507/20868] Scraping 522768100: MEDICAL TECHNOLOGIST (BLOOD BANK)
+[2025-06-11 07:48:30] Worker 6: [508/20868] Scraping 522769700: Supervisory General Engineer
+[2025-06-11 07:48:30] Worker 6: [509/20868] Scraping 522771300: Regulatory Affairs Specialist
+[2025-06-11 07:48:31] Worker 6: [510/20868] Scraping 522772900: Staff Assistant
+[2025-06-11 07:48:31] Worker 6: [511/20868] Scraping 522774500: Program Analyst
+[2025-06-11 07:48:32] Worker 6: [512/20868] Scraping 522776100: Administrative Officer
+[2025-06-11 07:48:33] Worker 6: [513/20868] Scraping 522777700: Chief Hematologist Oncologist
+[2025-06-11 07:48:33] Worker 6: [514/20868] Scraping 522779300: SURFACE MAINTENANCE MECHANIC INSPECTOR
+[2025-06-11 07:48:34] Worker 6: [515/20868] Scraping 522781000: Nurse (Administrative/Ambulatory)
+[2025-06-11 07:48:34] Worker 6: [516/20868] Scraping 522782600: Chief Engineer
+[2025-06-11 07:48:35] Worker 6: [517/20868] Scraping 522784200: Program Support Assistant
+[2025-06-11 07:48:36] Worker 6: [518/20868] Scraping 522785800: Sales Clerk NF 02
+[2025-06-11 07:48:36] Worker 6: [519/20868] Scraping 522787500: Economist
+[2025-06-11 07:48:37] Worker 6: [520/20868] Scraping 522789100: Supervisory IT Specialist
+[2025-06-11 07:48:37] Worker 6: [521/20868] Scraping 522790700: Patient Care Technician (Hemodialysis)
+[2025-06-11 07:48:38] Worker 6: [522/20868] Scraping 522792300: PROGRAM MANAGER
+[2025-06-11 07:48:39] Worker 6: [523/20868] Scraping 522793900: SUPERVISORY IMMIGRATION SERVICES OFFICER (Associat
+[2025-06-11 07:48:39] Worker 6: [524/20868] Scraping 522795500: AIRPLANE FLIGHT INSTRUCTOR
+[2025-06-11 07:48:39] Worker 6: [525/20868] Scraping 522797100: Facilities Operations Specialist
+[2025-06-11 07:48:40] Worker 6: Progress: 525/20868 (Success: 525, Failed: 0) Rate: 1.87/sec, ETA: 181.5min
+[2025-06-11 07:48:40] Worker 6: [526/20868] Scraping 522798700: SUPERVISORY EXPLOSIVES SAFETY SPECIALIST
+[2025-06-11 07:48:40] Worker 6: [527/20868] Scraping 522800300: NURSE (CARDIAC CATH. LAB)
+[2025-06-11 07:48:41] Worker 6: [528/20868] Scraping 522801900: Nursing Assistant - External - OCA
+[2025-06-11 07:48:42] Worker 6: [529/20868] Scraping 522803500: Food Service Worker (Eddies Snack Bars)
+[2025-06-11 07:48:42] Worker 6: [530/20868] Scraping 522805100: Supervisory Property Disposal Specialist
+[2025-06-11 07:48:43] Worker 6: [531/20868] Scraping 522806700: Nurse (Administration)
+[2025-06-11 07:48:43] Worker 6: [532/20868] Scraping 522808300: Program Specialist
+[2025-06-11 07:48:44] Worker 6: [533/20868] Scraping 522809900: Procurement Technician
+[2025-06-11 07:48:44] Worker 6: [534/20868] Scraping 522811500: SUPPLY TECHNICIAN
+[2025-06-11 07:48:45] Worker 6: [535/20868] Scraping 522813100: Military Personnel & Administrative Assistant
+[2025-06-11 07:48:46] Worker 6: [536/20868] Scraping 522814700: Maintenance Worker
+[2025-06-11 07:48:46] Worker 6: [537/20868] Scraping 522816300: Training Technician (Title 32)
+[2025-06-11 07:48:47] Worker 6: [538/20868] Scraping 522817900: PROSTHETICS REPRESENTATIVE
+[2025-06-11 07:48:47] Worker 6: [539/20868] Scraping 522819500: Interdisciplinary
+[2025-06-11 07:48:48] Worker 6: [540/20868] Scraping 522821100: Assistant Nurse Manager Community Living Center
+[2025-06-11 07:48:48] Worker 6: [541/20868] Scraping 522822700: Social Worker (SUD)
+[2025-06-11 07:48:49] Worker 6: [542/20868] Scraping 522824300: Social Worker (HUDVASH Housing Specialist)
+[2025-06-11 07:48:49] Worker 6: [543/20868] Scraping 522825900: SECURITY GUARD
+[2025-06-11 07:48:50] Worker 6: [544/20868] Scraping 522827500: Registered Nurse (MHICM Case Manager)
+[2025-06-11 07:48:50] Worker 6: [545/20868] Scraping 522829100: MEDICAL ADMINISTRATIVE OFFICER (TITLE 32)
+[2025-06-11 07:48:51] Worker 6: [546/20868] Scraping 522830700: Industrial Property Management Specialist
+[2025-06-11 07:48:51] Worker 6: [547/20868] Scraping 522832300: AUTOMOTIVE MECHANIC
+[2025-06-11 07:48:52] Worker 6: [548/20868] Scraping 522833900: TRAINING INSTRUCTOR (ELECTRONICS)
+[2025-06-11 07:48:52] Worker 6: [549/20868] Scraping 522835500: Assistant Inspector General for Investigations
+[2025-06-11 07:48:53] Worker 6: [550/20868] Scraping 522837100: IT SPECIALIST (SYSTEMS ADMINISTRATION) - AFETS
+[2025-06-11 07:48:53] Worker 6: Progress: 550/20868 (Success: 550, Failed: 0) Rate: 1.87/sec, ETA: 181.3min
+[2025-06-11 07:48:53] Worker 6: [551/20868] Scraping 522838700: Nurse (Clinical/Gastroenterology)
+[2025-06-11 07:48:54] Worker 6: [552/20868] Scraping 522840500: QM Medical Technologist (Core Lab)
+[2025-06-11 07:48:55] Worker 6: [553/20868] Scraping 522842200: Workers' Compensation Claims Examiner
+[2025-06-11 07:48:55] Worker 6: [554/20868] Scraping 522843800: Medical Records Technician (Coder) Outpatient Audi
+[2025-06-11 07:48:55] Worker 6: [555/20868] Scraping 522845400: IT SPECIALIST (INFOSEC)
+[2025-06-11 07:48:56] Worker 6: [556/20868] Scraping 522847000: Psychologist (Team Lead)
+[2025-06-11 07:48:56] Worker 6: [557/20868] Scraping 522848600: Custodial Worker (MVO)
+[2025-06-11 07:48:57] Worker 6: [558/20868] Scraping 522850200: Assistant United States Attorney (Civil AUSA - ACE
+[2025-06-11 07:48:57] Worker 6: [559/20868] Scraping 522851800: Supervisory Health Insurance Specialist
+[2025-06-11 07:48:58] Worker 6: [560/20868] Scraping 522853400: Health Tech (Dietetic)
+[2025-06-11 07:48:58] Worker 6: [561/20868] Scraping 522855000: SALES STORE CHECKER
+[2025-06-11 07:48:59] Worker 6: [562/20868] Scraping 522856600: Operations Specialist (Information Manager/Knowled
+[2025-06-11 07:48:59] Worker 6: [563/20868] Scraping 522858200: Supervisory Interdisciplinary
+[2025-06-11 07:49:00] Worker 6: [564/20868] Scraping 522860100: Accountant
+[2025-06-11 07:49:00] Worker 6: [565/20868] Scraping 522861700: PROGRAM ANALYST (INFORMATICS)
+[2025-06-11 07:49:01] Worker 6: [566/20868] Scraping 522863300: SUPERVISORY BORDER PATROL AGENT (RESIDENT AGENT)
+[2025-06-11 07:49:02] Worker 6: [567/20868] Scraping 522864900: Registered Nurse - Special Procedures Clinic (Cath
+[2025-06-11 07:49:02] Worker 6: [568/20868] Scraping 522866500: AIRCRAFT MAINTENANCE MANAGER
+[2025-06-11 07:49:02] Worker 6: [569/20868] Scraping 522868400: SUPERVISORY INVESTIGATIVE ANALYST
+[2025-06-11 07:49:03] Worker 6: [570/20868] Scraping 522870100: TRAFFIC MANAGEMENT SPECIALIST
+[2025-06-11 07:49:03] Worker 6: [571/20868] Scraping 522871700: Social Worker-HBPC
+[2025-06-11 07:49:04] Worker 6: [572/20868] Scraping 522873400: POWERED SUPPORT SYSTEMS MECHANIC
+[2025-06-11 07:49:05] Worker 6: [573/20868] Scraping 522875100: Registered Nurse, Nurse Manager
+[2025-06-11 07:49:05] Worker 6: [574/20868] Scraping 522876800: Supervisory Criminal Investigator
+[2025-06-11 07:49:05] Worker 6: [575/20868] Scraping 522878600: ADMINISTRATIVE SUPPORT TECHNICIAN (OA)
+[2025-06-11 07:49:06] Worker 6: Progress: 575/20868 (Success: 575, Failed: 0) Rate: 1.87/sec, ETA: 180.5min
+[2025-06-11 07:49:06] Worker 6: [576/20868] Scraping 522880300: Physician, Director, General Medicine Service
+[2025-06-11 07:49:07] Worker 6: [577/20868] Scraping 522882200: Border Patrol Agent (VRA)
+[2025-06-11 07:49:07] Worker 6: [578/20868] Scraping 522883800: Supervisory Information Technology Specialist
+[2025-06-11 07:49:07] Worker 6: [579/20868] Scraping 522885400: Deputy Regional Administrator
+[2025-06-11 07:49:08] Worker 6: [580/20868] Scraping 522887000: Supervisory Program Analyst
+[2025-06-11 07:49:08] Worker 6: [581/20868] Scraping 522888600: Supervisory Nurse (ER)-ESEP/MP
+[2025-06-11 07:49:09] Worker 6: [582/20868] Scraping 522890200: Human Resource Assistant (Military/Office Automati
+[2025-06-11 07:49:09] Worker 6: [583/20868] Scraping 522891800: Supervisory Pharmacist (Chief Pharmacist)
+[2025-06-11 07:49:10] Worker 6: [584/20868] Scraping 522893400: TECHNICAL EDITOR
+[2025-06-11 07:49:10] Worker 6: [585/20868] Scraping 522895000: Motor Vehicle Operator
+[2025-06-11 07:49:11] Worker 6: [586/20868] Scraping 522896600: Customs and Border Protection Officer (Direct Hire
+[2025-06-11 07:49:11] Worker 6: [587/20868] Scraping 522898200: SECURITY SPECIALIST
+[2025-06-11 07:49:12] Worker 6: [588/20868] Scraping 522899800: Medical Supply Technician
+[2025-06-11 07:49:12] Worker 6: [589/20868] Scraping 522901400: Military Personnel & Administrative Assistant
+[2025-06-11 07:49:13] Worker 6: [590/20868] Scraping 522903000: Correctional Program Specialist (Senior Intelligen
+[2025-06-11 07:49:14] Worker 6: [591/20868] Scraping 522904600: Certified Registered Nurse Practitioner (Pain Pact
+[2025-06-11 07:49:15] Worker 6: [592/20868] Scraping 522906300: INDUSTRIAL ENGINEERING TECHNICIAN
+[2025-06-11 07:49:15] Worker 6: [593/20868] Scraping 522907900: Food and Beverage Attendant NA-03
+[2025-06-11 07:49:16] Worker 6: [594/20868] Scraping 522909500: Clinical Pharmacy Specialist (Pharmaco-Economist)
+[2025-06-11 07:49:16] Worker 6: [595/20868] Scraping 522911100: Equipment Specialist
+[2025-06-11 07:49:17] Worker 6: [596/20868] Scraping 522912700: Medical Support Assistant
+[2025-06-11 07:49:17] Worker 6: [597/20868] Scraping 522914300: Mechanical Engineer
+[2025-06-11 07:49:18] Worker 6: [598/20868] Scraping 522915900: Air Conditioning Equipment Mechanic
+[2025-06-11 07:49:18] Worker 6: [599/20868] Scraping 522917500: Training Specialist (Intel)
+[2025-06-11 07:49:19] Worker 6: [600/20868] Scraping 522919100: Information Technology Specialist
+[2025-06-11 07:49:19] Worker 6: Progress: 600/20868 (Success: 600, Failed: 0) Rate: 1.88/sec, ETA: 180.1min
+[2025-06-11 07:49:19] Worker 6: [601/20868] Scraping 522920700: MATE (DREDGE CONTROL OFFICER)
+[2025-06-11 07:49:19] Worker 6: [602/20868] Scraping 522922300: RECORDS & INFORMATION MANAGEMENT SPECIALIST
+[2025-06-11 07:49:20] Worker 6: [603/20868] Scraping 522923900: Physician - Internal Jackson VAMC  FY 19
+[2025-06-11 07:49:20] Worker 6: [604/20868] Scraping 522925500: DISTRIBUTION PROCESS WORKER LEADER
+[2025-06-11 07:49:21] Worker 6: [605/20868] Scraping 522927100: FOREIGN AFFAIRS SPECIALIST
+[2025-06-11 07:49:22] Worker 6: [606/20868] Scraping 522928700: CYP Program Assistant - Entry
+[2025-06-11 07:49:22] Worker 6: [607/20868] Scraping 522930300: Criminal Investigator
+[2025-06-11 07:49:23] Worker 6: [608/20868] Scraping 522931900: Paralegal Specialist
+[2025-06-11 07:49:23] Worker 6: [609/20868] Scraping 522933500: Registered Nurse - Simulation / Clinical Educator
+[2025-06-11 07:49:24] Worker 6: [610/20868] Scraping 522935100: GEOGRAPHER (GIS)
+[2025-06-11 07:49:25] Worker 6: [611/20868] Scraping 522936700: SUPERVISORY EDUCATION SERVICES SPECIALIST
+[2025-06-11 07:49:25] Worker 6: [612/20868] Scraping 522938300: Environmental Health Specialist
+[2025-06-11 07:49:26] Worker 6: [613/20868] Scraping 522939900: CIVIL ENGINEER (HYDRAULIC)
+[2025-06-11 07:49:26] Worker 6: [614/20868] Scraping 522941500: Management Analyst
+[2025-06-11 07:49:27] Worker 6: [615/20868] Scraping 522943100: IT SPECIALIST (SYSADMIN/CUSTSPT)
+[2025-06-11 07:49:27] Worker 6: [616/20868] Scraping 522944700: Police Officer
+[2025-06-11 07:49:28] Worker 6: [617/20868] Scraping 522946300: PHYSICAL SCIENTIST/CHEMIST/CHEMICAL ENGINEER
+[2025-06-11 07:49:28] Worker 6: [618/20868] Scraping 522947900: Senior Principal Advisor Compensation Service
+[2025-06-11 07:49:29] Worker 6: [619/20868] Scraping 522949500: IT SPECIALIST (INFOSEC)
+[2025-06-11 07:49:29] Worker 6: [620/20868] Scraping 522951100: SUPERVISORY PHYSICAL SCIENCE TECHNICIAN
+[2025-06-11 07:49:30] Worker 6: [621/20868] Scraping 522952700: Biological Science Technician (Bears) Temporary NT
+[2025-06-11 07:49:30] Worker 6: [622/20868] Scraping 522954300: Commissary Support Clerk
+[2025-06-11 07:49:31] Worker 6: [623/20868] Scraping 522956000: Human Resources Specialist (Rec/Plac)
+[2025-06-11 07:49:31] Worker 6: [624/20868] Scraping 522957600: Information Technology Specialist (CUSTSPT)
+[2025-06-11 07:49:32] Worker 6: [625/20868] Scraping 522959200: Supervisory Partnership Specialist, GG-0301-13- Ce
+[2025-06-11 07:49:32] Worker 6: Progress: 625/20868 (Success: 625, Failed: 0) Rate: 1.88/sec, ETA: 179.9min
+[2025-06-11 07:49:32] Worker 6: [626/20868] Scraping 522960800: Registered Nurse (Day Hospital)
+[2025-06-11 07:49:33] Worker 6: [627/20868] Scraping 522962400: Chemist
+[2025-06-11 07:49:33] Worker 6: [628/20868] Scraping 522964000: Program Manager (Deputy)
+[2025-06-11 07:49:34] Worker 6: [629/20868] Scraping 522965600: Medical Technician
+[2025-06-11 07:49:34] Worker 6: [630/20868] Scraping 522967200: Management & Program Analyst
+[2025-06-11 07:49:35] Worker 6: [631/20868] Scraping 522968800: Supervisory Nurse (Clinical)
+[2025-06-11 07:49:35] Worker 6: [632/20868] Scraping 522970400: Human Resources Specialist (PERFORMANCE MANAGEMENT
+[2025-06-11 07:49:36] Worker 6: [633/20868] Scraping 522972000: COMMISSARY SUPPORT CLERK
+[2025-06-11 07:49:36] Worker 6: [634/20868] Scraping 522973600: Management and Program Analyst
+[2025-06-11 07:49:36] Worker 6: [635/20868] Scraping 522975200: Social Worker Program Coordinator (IPVAP-C)
+[2025-06-11 07:49:37] Worker 6: [636/20868] Scraping 522976800: SUPV QUALITY ASSURANCE SPEC
+[2025-06-11 07:49:37] Worker 6: [637/20868] Scraping 522978400: AIRFIELD MANAGEMENT SPECIALIST
+[2025-06-11 07:49:38] Worker 6: [638/20868] Scraping 522980000: Inpatient Staff RN - Multiple Positions - Medical 
+[2025-06-11 07:49:38] Worker 6: [639/20868] Scraping 522981600: Visual Information Specialist
+[2025-06-11 07:49:39] Worker 6: [640/20868] Scraping 522983200: Veterans Service Representative
+[2025-06-11 07:49:39] Worker 6: [641/20868] Scraping 522984800: IMMIGRATION OFFICER (FRAUD DETECTION AND NATIONAL 
+[2025-06-11 07:49:40] Worker 6: [642/20868] Scraping 522986400: Nursing Assistant - Surgical Unit
+[2025-06-11 07:49:40] Worker 6: [643/20868] Scraping 522988000: Dietitian (External)
+[2025-06-11 07:49:41] Worker 6: [644/20868] Scraping 522989600: Safety and Occupational Health Manager
+[2025-06-11 07:49:41] Worker 6: [645/20868] Scraping 522991200: Contract Specialist
+[2025-06-11 07:49:42] Worker 6: [646/20868] Scraping 522992800: Medical Records Technician (Coder)
+[2025-06-11 07:49:42] Worker 6: [647/20868] Scraping 522994400: Physician Assitant
+[2025-06-11 07:49:43] Worker 6: [648/20868] Scraping 522996000: Supervisory Work and Family Life
+[2025-06-11 07:49:43] Worker 6: [649/20868] Scraping 522997600: Nurse Practitioner - Gynecology
+[2025-06-11 07:49:44] Worker 6: [650/20868] Scraping 522999200: ITSPEC (CUSTSPT)
+[2025-06-11 07:49:44] Worker 6: Progress: 650/20868 (Success: 650, Failed: 0) Rate: 1.88/sec, ETA: 178.9min
+[2025-06-11 07:49:44] Worker 6: [651/20868] Scraping 523000800: UNIT PROGRAM COORDINATOR
+[2025-06-11 07:49:45] Worker 6: [652/20868] Scraping 523002400: SUPERVISORY FINANCIAL SPECIALIST
+[2025-06-11 07:49:45] Worker 6: [653/20868] Scraping 523004000: IT Specialist (Information Security)
+[2025-06-11 07:49:46] Worker 6: [654/20868] Scraping 523005600: Licensed Practical Nurse - Domiciliary
+[2025-06-11 07:49:46] Worker 6: [655/20868] Scraping 523007200: SUPERVISORY FINANCIAL MANAGEMENT SPECIALIST
+[2025-06-11 07:49:47] Worker 6: [656/20868] Scraping 523008800: Supervisory Social Insurance Specialist
+[2025-06-11 07:49:48] Worker 6: [657/20868] Scraping 523010400: Student Trainee (Biological Science Technician)
+[2025-06-11 07:49:48] Worker 6: [658/20868] Scraping 523012000: IT Specialist (INFOSEC)
+[2025-06-11 07:49:49] Worker 6: [659/20868] Scraping 523013600: TITLE 32 - AIRCRAFT MECHANIC, WG-8852-12
+[2025-06-11 07:49:49] Worker 6: [660/20868] Scraping 523015200: Advanced Practice Registered Nurse-PACT
+[2025-06-11 07:49:50] Worker 6: [661/20868] Scraping 523016800: Inventory Management Specialist (EX)
+[2025-06-11 07:49:50] Worker 6: [662/20868] Scraping 523018400: Supervisory Human Resources Specialist (ER/LR)
+[2025-06-11 07:49:51] Worker 6: [663/20868] Scraping 523020000: AIRCRAFT MAINTENANCE MANAGER
+[2025-06-11 07:49:51] Worker 6: [664/20868] Scraping 523021600: Speech-Language Pathologist
+[2025-06-11 07:49:52] Worker 6: [665/20868] Scraping 523023200: Human Resources Specialist (NAF/Strategic Response
+[2025-06-11 07:49:53] Worker 6: [666/20868] Scraping 523024800: LPN Whole Health Coach
+[2025-06-11 07:49:53] Worker 6: [667/20868] Scraping 523026400: Supervisory Nurse (ACNE)-ESEP/MP
+[2025-06-11 07:49:54] Worker 6: [668/20868] Scraping 523028000: SUPPLY TECHNICIAN (TITLE 32)
+[2025-06-11 07:49:54] Worker 6: [669/20868] Scraping 523029700: Registered Nurse (Resident Assessment Coordinator)
+[2025-06-11 07:49:55] Worker 6: [670/20868] Scraping 523031300: Paralegal Specialist
+[2025-06-11 07:49:55] Worker 6: [671/20868] Scraping 523032900: Supply Systems Analyst
+[2025-06-11 07:49:56] Worker 6: [672/20868] Scraping 523034500: SUPERVISORY CIVIL ENGINEER
+[2025-06-11 07:49:56] Worker 6: [673/20868] Scraping 523036100: Program Specialist
+[2025-06-11 07:49:57] Worker 6: [674/20868] Scraping 523037700: Lead Quality Assurance Specialist
+[2025-06-11 07:49:58] Worker 6: [675/20868] Scraping 523039300: SUPERVISORY PROGRAM ANALYST
+[2025-06-11 07:49:58] Worker 6: Progress: 675/20868 (Success: 675, Failed: 0) Rate: 1.88/sec, ETA: 179.0min
+[2025-06-11 07:49:58] Worker 6: [676/20868] Scraping 523040900: Registered Nurse- Acute Care 6W
+[2025-06-11 07:49:59] Worker 6: [677/20868] Scraping 523042500: Information Receptionist
+[2025-06-11 07:49:59] Worker 6: [678/20868] Scraping 523044100: Supervisory Diagnostic Radiologic Technologist(MRI
+[2025-06-11 07:50:00] Worker 6: [679/20868] Scraping 523045700: CIS ASSISTANT (OA)
+[2025-06-11 07:50:00] Worker 6: [680/20868] Scraping 523047300: Registered Nurse, Assistant Clinical Nurse Manager
+[2025-06-11 07:50:01] Worker 6: [681/20868] Scraping 523048900: MEATCUTTING WORKER
+[2025-06-11 07:50:01] Worker 6: [682/20868] Scraping 523050500: Social Science Research Analyst (Recent Graduate)
+[2025-06-11 07:50:02] Worker 6: [683/20868] Scraping 523052100: Clinical Laboratory Scientist
+[2025-06-11 07:50:03] Worker 6: [684/20868] Scraping 523053700: FACILITY OPERATIONS SPECIALIST
+[2025-06-11 07:50:03] Worker 6: [685/20868] Scraping 523055300: Social Worker Program Manager
+[2025-06-11 07:50:04] Worker 6: [686/20868] Scraping 523057000: RN Mental Health Inpatient
+[2025-06-11 07:50:04] Worker 6: [687/20868] Scraping 523058600: Project Manager
+[2025-06-11 07:50:05] Worker 6: [688/20868] Scraping 523060200: Contract Administrator (Keystone)
+[2025-06-11 07:50:06] Worker 6: [689/20868] Scraping 523061800: Registered Nurse (Medical Procedure Unit)
+[2025-06-11 07:50:06] Worker 6: [690/20868] Scraping 523063400: IT PROGRAM MANAGER (PLCYPLN)
+[2025-06-11 07:50:06] Worker 6: [691/20868] Scraping 523065000: PHARMACY TECHNICIAN
+[2025-06-11 07:50:07] Worker 6: [692/20868] Scraping 523066600: Administrative Specialist
+[2025-06-11 07:50:08] Worker 6: [693/20868] Scraping 523068200: International Broadcaster (Multimedia) (Korean)
+[2025-06-11 07:50:08] Worker 6: [694/20868] Scraping 523069800: SUPERVISORY AEROSPACE ENGINEER
+[2025-06-11 07:50:09] Worker 6: [695/20868] Scraping 523071400: Nurse Practitioner-  Long Term Care- Serenity Hous
+[2025-06-11 07:50:10] Worker 6: [696/20868] Scraping 523073000: Clinical Pharmacy Specialist
+[2025-06-11 07:50:10] Worker 6: [697/20868] Scraping 523074600: Social Science Research Analyst
+[2025-06-11 07:50:11] Worker 6: [698/20868] Scraping 523076200: MANAGEMENT ASST
+[2025-06-11 07:50:11] Worker 6: [699/20868] Scraping 523078000: Supervisory Supply Technician
+[2025-06-11 07:50:12] Worker 6: [700/20868] Scraping 523079600: Master Tender
+[2025-06-11 07:50:13] Worker 6: Progress: 700/20868 (Success: 700, Failed: 0) Rate: 1.87/sec, ETA: 179.4min
+[2025-06-11 07:50:13] Worker 6: [701/20868] Scraping 523081200: Student Trainee (Bio Science Tech)
+[2025-06-11 07:50:13] Worker 6: [702/20868] Scraping 523082800: Licensed Practical Nurse
+[2025-06-11 07:50:13] Worker 6: [703/20868] Scraping 523084400: Information Technology Manager, AD-0301-00-Census-
+[2025-06-11 07:50:14] Worker 6: [704/20868] Scraping 523086000: Administrative Officer
+[2025-06-11 07:50:15] Worker 6: [705/20868] Scraping 523087600: AIRCRAFT MECHANIC
+[2025-06-11 07:50:15] Worker 6: [706/20868] Scraping 523089200: Information Technology Specialist (CUSTSPT)
+[2025-06-11 07:50:16] Worker 6: [707/20868] Scraping 523090800: Staff Administrative Specialist
+[2025-06-11 07:50:16] Worker 6: [708/20868] Scraping 523092400: Intern-Student Trainee
+[2025-06-11 07:50:17] Worker 6: [709/20868] Scraping 523094000: Public Health Advisor
+[2025-06-11 07:50:18] Worker 6: [710/20868] Scraping 523095600: REGISTERED NURSE (HOME BASED CARDIAC REHAB)
+[2025-06-11 07:50:18] Worker 6: [711/20868] Scraping 523097200: Information Technology Manager, AD-0301-00-Census-
+[2025-06-11 07:50:19] Worker 6: [712/20868] Scraping 523098800: Administrative Assistant
+[2025-06-11 07:50:19] Worker 6: [713/20868] Scraping 523100400: MATERIALS HANDLER
+[2025-06-11 07:50:20] Worker 6: [714/20868] Scraping 523102000: Occupational Health Nurse, GS-0610-11
+[2025-06-11 07:50:21] Worker 6: [715/20868] Scraping 523103600: SECURITY GUARD
+[2025-06-11 07:50:21] Worker 6: [716/20868] Scraping 523105200: NP Structural Heart Coordinator
+[2025-06-11 07:50:22] Worker 6: [717/20868] Scraping 523106800: SUPERVISORY FACILITY OPERATIONS SPECIALIST
+[2025-06-11 07:50:22] Worker 6: [718/20868] Scraping 523108400: Supervisory Nurse (Emergency)
+[2025-06-11 07:50:23] Worker 6: [719/20868] Scraping 523110000: MEDICAL RECORDS TECHNICIAN
+[2025-06-11 07:50:23] Worker 6: [720/20868] Scraping 523111600: Recruiting Manager, AD-0301-00-Census-EXT-JKP
+[2025-06-11 07:50:24] Worker 6: [721/20868] Scraping 523113200: Accountant
+[2025-06-11 07:50:25] Worker 6: [722/20868] Scraping 523114800: Information Technology Specialist, GG-2210-5/7/9/1
+[2025-06-11 07:50:25] Worker 6: [723/20868] Scraping 523116400: Spinal Cord Injury Administrative Officer
+[2025-06-11 07:50:26] Worker 6: [724/20868] Scraping 523118000: Social Insurance Specialist (Area Administrative A
+[2025-06-11 07:50:27] Worker 6: [725/20868] Scraping 523119600: Supervisory Physical Security Specialist
+[2025-06-11 07:50:27] Worker 6: Progress: 725/20868 (Success: 725, Failed: 0) Rate: 1.87/sec, ETA: 179.7min
+[2025-06-11 07:50:27] Worker 6: [726/20868] Scraping 523121200: Lead Medical Support Assistant
+[2025-06-11 07:50:28] Worker 6: [727/20868] Scraping 523122800: Student Trainee (Admin Mgt)
+[2025-06-11 07:50:29] Worker 6: [728/20868] Scraping 523124400: Pathways Student - MPD
+[2025-06-11 07:50:29] Worker 6: [729/20868] Scraping 523126000: TELECOMMUNICATIONS MECHANIC
+[2025-06-11 07:50:30] Worker 6: [730/20868] Scraping 523127600: Deputy Chief Financial Officer
+[2025-06-11 07:50:30] Worker 6: [731/20868] Scraping 523129200: JOINT MULTINATIONAL EXERCISE PROGAM MANAGER
+[2025-06-11 07:50:31] Worker 6: [732/20868] Scraping 523130800: Realty Specialist
+[2025-06-11 07:50:31] Worker 6: [733/20868] Scraping 523132400: Audiologist
+[2025-06-11 07:50:32] Worker 6: [734/20868] Scraping 523134000: Administrative Assistant
+[2025-06-11 07:50:33] Worker 6: [735/20868] Scraping 523135600: Civil Engineer- Hydraulics
+[2025-06-11 07:50:33] Worker 6: [736/20868] Scraping 523137300: Human Resources Specialist (Classification)
+[2025-06-11 07:50:33] Worker 6: [737/20868] Scraping 523138900: Lifeguard (Seasonal)
+[2025-06-11 07:50:34] Worker 6: [738/20868] Scraping 523140500: Health System Administrator (Assistant Director)
+[2025-06-11 07:50:34] Worker 6: [739/20868] Scraping 523142100: Social Services Assistant
+[2025-06-11 07:50:35] Worker 6: [740/20868] Scraping 523143700: Supervisory Pharmacist
+[2025-06-11 07:50:35] Worker 6: [741/20868] Scraping 523145300: Lifeguard
+[2025-06-11 07:50:36] Worker 6: [742/20868] Scraping 523146900: IMMIGRATION SERVICES ASSISTANT (OFFICE AUTOMATION)
+[2025-06-11 07:50:36] Worker 6: [743/20868] Scraping 523148500: Executive Assistant
+[2025-06-11 07:50:37] Worker 6: [744/20868] Scraping 523150100: INSTRUMENT MECHANIC
+[2025-06-11 07:50:37] Worker 6: [745/20868] Scraping 523151700: PROGRAM ANALYST NF4
+[2025-06-11 07:50:38] Worker 6: [746/20868] Scraping 523153300: Counseling Psychologist (Substance Abuse)
+[2025-06-11 07:50:39] Worker 6: [747/20868] Scraping 523154900: Fish Biologist
+[2025-06-11 07:50:39] Worker 6: [748/20868] Scraping 523156500: Economist (Industrial), ZP-0110-IV, BEA-M-VFP
+[2025-06-11 07:50:40] Worker 6: [749/20868] Scraping 523158100: Advanced Medical Support Assistant ( Pulmonary)
+[2025-06-11 07:50:40] Worker 6: [750/20868] Scraping 523159700: Supervisory Quality Assurance Specialist
+[2025-06-11 07:50:41] Worker 6: Progress: 750/20868 (Success: 750, Failed: 0) Rate: 1.87/sec, ETA: 179.5min
+[2025-06-11 07:50:41] Worker 6: [751/20868] Scraping 523161300: Recreation Operations Assistant
+[2025-06-11 07:50:41] Worker 6: [752/20868] Scraping 523162900: Lease Management Specialist
+[2025-06-11 07:50:42] Worker 6: [753/20868] Scraping 523164500: Maintenance Worker
+[2025-06-11 07:50:42] Worker 6: [754/20868] Scraping 523166100: Medical Laboratory Technician
+[2025-06-11 07:50:43] Worker 6: [755/20868] Scraping 523167700: Partnership Specialist,GG-0301-9/11/12-Census-INT-
+[2025-06-11 07:50:43] Worker 6: [756/20868] Scraping 523169300: Safety and Occupational Health Specialist
+[2025-06-11 07:50:44] Worker 6: [757/20868] Scraping 523170900: Lead Transportation Security Officer
+[2025-06-11 07:50:44] Worker 6: [758/20868] Scraping 523172500: INFORMATION TECHNOLOGY SPECIALIST (INFOSEC)
+[2025-06-11 07:50:45] Worker 6: [759/20868] Scraping 523174100: AIRCRAFT OVERHAUL LEADER
+[2025-06-11 07:50:45] Worker 6: [760/20868] Scraping 523175700: Fitness/Aquatic Support
+[2025-06-11 07:50:45] Worker 6: [761/20868] Scraping 523177300: Contract Specialist, GS-1102 9/11 (de, bc)
+[2025-06-11 07:50:46] Worker 6: [762/20868] Scraping 523179000: Medical Record Technician (ROI)
+[2025-06-11 07:50:46] Worker 6: [763/20868] Scraping 523180700: Nuclear Medicine Technologist
+[2025-06-11 07:50:47] Worker 6: [764/20868] Scraping 523182300: Human Resources Assistant
+[2025-06-11 07:50:48] Worker 6: [765/20868] Scraping 523183900: Supervisory Operations Research Analyst
+[2025-06-11 07:50:48] Worker 6: [766/20868] Scraping 523185500: Student Trainee (Biological Science Laboratory Tec
+[2025-06-11 07:50:49] Worker 6: [767/20868] Scraping 523187100: SURFACE MAINTENANCE MECHANIC SUPERVISOR
+[2025-06-11 07:50:49] Worker 6: [768/20868] Scraping 523188700: ADMINISTRATIVE/TECHNICAL SPECIALIST
+[2025-06-11 07:50:50] Worker 6: [769/20868] Scraping 523190300: Student Trainee (Administrative Support)
+[2025-06-11 07:50:50] Worker 6: [770/20868] Scraping 523191900: Economist (Macro), ZP-0110-IV, BEA-MP-VFP
+[2025-06-11 07:50:51] Worker 6: [771/20868] Scraping 523193500: UNIT PROGRAM COORDINATOR
+[2025-06-11 07:50:52] Worker 6: [772/20868] Scraping 523195100: Supervisory Social Insurance Specialist (Operation
+[2025-06-11 07:50:52] Worker 6: [773/20868] Scraping 523196800: Heavy Mobile Equipment Repairer
+[2025-06-11 07:50:53] Worker 6: [774/20868] Scraping 523198400: Supervisory Staff Administrator
+[2025-06-11 07:50:53] Worker 6: [775/20868] Scraping 523200000: Student Trainee (Engineering Technician)
+[2025-06-11 07:50:54] Worker 6: Progress: 775/20868 (Success: 775, Failed: 0) Rate: 1.87/sec, ETA: 179.2min
+[2025-06-11 07:50:54] Worker 6: [776/20868] Scraping 523201600: Budget Analyst, GS-0560-05 (TERM-DEU-YS)
+[2025-06-11 07:50:54] Worker 6: [777/20868] Scraping 523203200: Procurement Analyst
+[2025-06-11 07:50:55] Worker 6: [778/20868] Scraping 523204800: HUMAN RESOURCES SPECIALIST (MILITARY)(NGT5900400)
+[2025-06-11 07:50:55] Worker 6: [779/20868] Scraping 523206400: CYBER TECHNICAL OPERATIONS ANALYST
+[2025-06-11 07:50:56] Worker 6: [780/20868] Scraping 523208000: Administrative Officer
+[2025-06-11 07:50:56] Worker 6: [781/20868] Scraping 523209600: Program Manager (Integrator)
+[2025-06-11 07:50:57] Worker 6: [782/20868] Scraping 523211200: Veterans Service Representative-Rating
+[2025-06-11 07:50:58] Worker 6: [783/20868] Scraping 523212900: Fishing Vessel Safety Examiner/Marine Inspector, G
+[2025-06-11 07:50:58] Worker 6: [784/20868] Scraping 523214600: Staff Physician (PACT)
+[2025-06-11 07:50:59] Worker 6: [785/20868] Scraping 523216200: AIRCRAFT ORDNANCE SYSTEMS MECHANIC SUPERVISOR - Ti
+[2025-06-11 07:51:00] Worker 6: [786/20868] Scraping 523217800: Human Resources Specialist
+[2025-06-11 07:51:00] Worker 6: [787/20868] Scraping 523219400: Housekeeping Aid
+[2025-06-11 07:51:01] Worker 6: [788/20868] Scraping 523221000: Fire Protection Engineer
+[2025-06-11 07:51:01] Worker 6: [789/20868] Scraping 523222600: Program Analyst
+[2025-06-11 07:51:02] Worker 6: [790/20868] Scraping 523224200: Mobile Equipment Servicer
+[2025-06-11 07:51:03] Worker 6: [791/20868] Scraping 523225800: Assistant Chief Mental Health Service Line, Licens
+[2025-06-11 07:51:03] Worker 6: [792/20868] Scraping 523227400: SURFACE MAINTENANCE REPAIRER
+[2025-06-11 07:51:04] Worker 6: [793/20868] Scraping 523229000: Regional Director - Southwest Region
+[2025-06-11 07:51:04] Worker 6: [794/20868] Scraping 523230600: Regional Technician, GG-0301-9/11/12-Census-EXT-MB
+[2025-06-11 07:51:05] Worker 6: [795/20868] Scraping 523232200: Human Capital Specialist
+[2025-06-11 07:51:06] Worker 6: [796/20868] Scraping 523233800: TRAINING AND EXERCISE PROGRAM SPECIALIST
+[2025-06-11 07:51:06] Worker 6: [797/20868] Scraping 523235400: Management and Program Analyst (TSC Director Manag
+[2025-06-11 07:51:06] Worker 6: [798/20868] Scraping 523237000: Supervisory Investigative Analyst
+[2025-06-11 07:51:07] Worker 6: [799/20868] Scraping 523238700: Park Guide - Bilingual
+[2025-06-11 07:51:07] Worker 6: [800/20868] Scraping 523240300: Certified Peer Specialist (Hinesville Outpatient C
+[2025-06-11 07:51:08] Worker 6: Progress: 800/20868 (Success: 800, Failed: 0) Rate: 1.86/sec, ETA: 179.4min
+[2025-06-11 07:51:08] Worker 6: [801/20868] Scraping 523241900: NUCLEAR ENGINEERING TECHNICIAN
+[2025-06-11 07:51:09] Worker 6: [802/20868] Scraping 523243500: Psychology Program Manager
+[2025-06-11 07:51:09] Worker 6: [803/20868] Scraping 523245100: Equipment Specialist
+[2025-06-11 07:51:10] Worker 6: [804/20868] Scraping 523246700: Chiropractor
+[2025-06-11 07:51:11] Worker 6: [805/20868] Scraping 523248300: Physical Therapy Assistant
+[2025-06-11 07:51:11] Worker 6: [806/20868] Scraping 523249900: RECREATION ASSISTANT NF2  MARINE DOME
+[2025-06-11 07:51:11] Worker 6: [807/20868] Scraping 523251500: POLICE OFFICER (LE OPERATIONS)
+[2025-06-11 07:51:12] Worker 6: [808/20868] Scraping 523253100: Project Specialist
+[2025-06-11 07:51:12] Worker 6: [809/20868] Scraping 523254700: Financial Management Technician NF-03
+[2025-06-11 07:51:13] Worker 6: [810/20868] Scraping 523256300: CONSTRUCTION MECHANIC
+[2025-06-11 07:51:14] Worker 6: [811/20868] Scraping 523257900: Health Technician
+[2025-06-11 07:51:14] Worker 6: [812/20868] Scraping 523259500: Lead Archeologist
+[2025-06-11 07:51:15] Worker 6: [813/20868] Scraping 523261100: Nurse - Geriatrics & Extended Care Manager
+[2025-06-11 07:51:15] Worker 6: [814/20868] Scraping 523262700: Transportation Assistant
+[2025-06-11 07:51:16] Worker 6: [815/20868] Scraping 523264300: Supervisory Policy Analyst
+[2025-06-11 07:51:16] Worker 6: [816/20868] Scraping 523265900: Paralegal Specialist
+[2025-06-11 07:51:17] Worker 6: [817/20868] Scraping 523267500: Food Service Worker
+[2025-06-11 07:51:18] Worker 6: [818/20868] Scraping 523269100: Laborer (Grounds)
+[2025-06-11 07:51:18] Worker 6: [819/20868] Scraping 523270700: IT SPECIALIST (DATAMGT/INET)
+[2025-06-11 07:51:19] Worker 6: [820/20868] Scraping 523272300: AIRCRAFT MECHANIC
+[2025-06-11 07:51:19] Worker 6: [821/20868] Scraping 523273900: MANAGEMENT ASSISTANT (OFFICE AUTOMATION)
+[2025-06-11 07:51:20] Worker 6: [822/20868] Scraping 523275500: REALTY SPECIALIST, GS-1170-09
+[2025-06-11 07:51:20] Worker 6: [823/20868] Scraping 523277100: Motor Vehicle Operator (CDL)
+[2025-06-11 07:51:21] Worker 6: [824/20868] Scraping 523278700: Supervisory IT Specialist
+[2025-06-11 07:51:21] Worker 6: [825/20868] Scraping 523280300: Dental Assistant
+[2025-06-11 07:51:22] Worker 6: Progress: 825/20868 (Success: 825, Failed: 0) Rate: 1.86/sec, ETA: 179.3min
+[2025-06-11 07:51:22] Worker 6: [826/20868] Scraping 523282000: Engineering Technician
+[2025-06-11 07:51:22] Worker 6: [827/20868] Scraping 523283600: Health Systems Specialist ( Assistant to Director)
+[2025-06-11 07:51:23] Worker 6: [828/20868] Scraping 523285200: Fire Protection Engineer
+[2025-06-11 07:51:23] Worker 6: [829/20868] Scraping 523286800: Passport and Visa Specialist (OA)
+[2025-06-11 07:51:24] Worker 6: [830/20868] Scraping 523288400: Quality Assurance Specialist (Aircraft) Deployable
+[2025-06-11 07:51:24] Worker 6: [831/20868] Scraping 523290000: Electronics Technician
+[2025-06-11 07:51:25] Worker 6: [832/20868] Scraping 523291600: AIRCRAFT MECHANIC
+[2025-06-11 07:51:26] Worker 6: [833/20868] Scraping 523293200: Military Personnel & Administrative Assistant
+[2025-06-11 07:51:26] Worker 6: [834/20868] Scraping 523294800: Social Worker (Multi-Function Clinical Social Work
+[2025-06-11 07:51:27] Worker 6: [835/20868] Scraping 523296400: Recreation Assistant (Lead Lifeguard) NF-02
+[2025-06-11 07:51:27] Worker 6: [836/20868] Scraping 523298000: LEAD POLICE OFFICER
+[2025-06-11 07:51:28] Worker 6: [837/20868] Scraping 523299600: Physician - Associate Chief of Staff, Research Ser
+[2025-06-11 07:51:28] Worker 6: [838/20868] Scraping 523301200: Surgical Technician
+[2025-06-11 07:51:29] Worker 6: [839/20868] Scraping 523302800: Criminal Investigator (Special Agent) -  ICTAP ELI
+[2025-06-11 07:51:29] Worker 6: [840/20868] Scraping 523304400: PROTOCOL SPECIALIST
+[2025-06-11 07:51:30] Worker 6: [841/20868] Scraping 523306000: TRAINING AND EXERCISE PROGRAM SPECIALIST
+[2025-06-11 07:51:31] Worker 6: [842/20868] Scraping 523307600: Outreach and Engagement Program Specialist
+[2025-06-11 07:51:31] Worker 6: [843/20868] Scraping 523309200: Clerk (Veterinary Services) NF 2
+[2025-06-11 07:51:32] Worker 6: [844/20868] Scraping 523310800: Librarian (Acquisitions Specialist)
+[2025-06-11 07:51:32] Worker 6: [845/20868] Scraping 523312400: SUPERVISORY REGIONAL ECONOMIST
+[2025-06-11 07:51:33] Worker 6: [846/20868] Scraping 523314000: SURFACE MAINTENANCE MECHANIC (Title 32)
+[2025-06-11 07:51:34] Worker 6: [847/20868] Scraping 523315600: IT Specialist NF3*
+[2025-06-11 07:51:34] Worker 6: [848/20868] Scraping 523317200: SECURITY GUARD
+[2025-06-11 07:51:35] Worker 6: [849/20868] Scraping 523318800: Maintenance Requirements Planning Specialist (Airc
+[2025-06-11 07:51:35] Worker 6: [850/20868] Scraping 523320400: Mechanical Engineer
+[2025-06-11 07:51:36] Worker 6: Progress: 850/20868 (Success: 850, Failed: 0) Rate: 1.86/sec, ETA: 179.5min
+[2025-06-11 07:51:36] Worker 6: [851/20868] Scraping 523322000: Administrative Support Assistant (Veterinary Servi
+[2025-06-11 07:51:37] Worker 6: [852/20868] Scraping 523323600: Natural Resources Specialist (Ranger)
+[2025-06-11 07:51:37] Worker 6: [853/20868] Scraping 523325200: Information Technology Project Manager
+[2025-06-11 07:51:38] Worker 6: [854/20868] Scraping 523326800: Secretary (Associate Warden's Secretary)
+[2025-06-11 07:51:38] Worker 6: [855/20868] Scraping 523328400: Lead Transportation Security Officer
+[2025-06-11 07:51:39] Worker 6: [856/20868] Scraping 523330000: Supervisory Medical Records Tecnician (ROI)
+[2025-06-11 07:51:39] Worker 6: [857/20868] Scraping 523331600: Supervisory Contract Specialist, GS-1102-12
+[2025-06-11 07:51:39] Worker 6: [858/20868] Scraping 523333200: HUMAN RESOURCES SPECIALIST (CLASSIFICATION)
+[2025-06-11 07:51:40] Worker 6: [859/20868] Scraping 523334800: Standardization Specialist
+[2025-06-11 07:51:41] Worker 6: [860/20868] Scraping 523336400: SAFETY & OCCUPATIONAL HEALTH SPECIALIST
+[2025-06-11 07:51:41] Worker 6: [861/20868] Scraping 523338100: MEDICAL ADMINISTRATIVE SPECIALIST
+[2025-06-11 07:51:42] Worker 6: [862/20868] Scraping 523339700: Community of Care Assistant Nurse Manager Register
+[2025-06-11 07:51:42] Worker 6: [863/20868] Scraping 523341300: IMMIGRATION OFFICER (FDNS)
+[2025-06-11 07:51:43] Worker 6: [864/20868] Scraping 523342900: Interdisciplinary Biologist/Microbiologist/Chemist
+[2025-06-11 07:51:44] Worker 6: [865/20868] Scraping 523344500: Secretary/OA
+[2025-06-11 07:51:44] Worker 6: [866/20868] Scraping 523346100: Nurse - Tele-Mental Health Deputy
+[2025-06-11 07:51:45] Worker 6: [867/20868] Scraping 523347700: METALIZING EQUIPMENT OPERATOR LEADER
+[2025-06-11 07:51:45] Worker 6: [868/20868] Scraping 523349300: SALES ASSOCIATE / CASHIER, NF-1
+[2025-06-11 07:51:46] Worker 6: [869/20868] Scraping 523350900: SHEET METAL WORKER (AIRCRAFT/PAINTER)
+[2025-06-11 07:51:46] Worker 6: [870/20868] Scraping 523352500: Supervisory Executive Medicine Specialist
+[2025-06-11 07:51:47] Worker 6: [871/20868] Scraping 523354100: Associate Director of the Customer and Staff Suppo
+[2025-06-11 07:51:48] Worker 6: [872/20868] Scraping 523355800: SALES ASSOCIATE / CASHIER, NF-1 (NORTHERN MCX LOCA
+[2025-06-11 07:51:48] Worker 6: [873/20868] Scraping 523357400: SURFACE MAINTENANCE MECHANIC (T32)
+[2025-06-11 07:51:49] Worker 6: [874/20868] Scraping 523359000: Cook
+[2025-06-11 07:51:49] Worker 6: [875/20868] Scraping 523360600: Program Analyst
+[2025-06-11 07:51:50] Worker 6: Progress: 875/20868 (Success: 875, Failed: 0) Rate: 1.86/sec, ETA: 179.3min
+[2025-06-11 07:51:50] Worker 6: [876/20868] Scraping 523362200: Registered Nurse (Discharge Planner)
+[2025-06-11 07:51:50] Worker 6: [877/20868] Scraping 523363800: Policy Analyst, GS-0301-14 (DE/CR)
+[2025-06-11 07:51:51] Worker 6: [878/20868] Scraping 523365400: ADMINISTRATIVE SPECIALIST
+[2025-06-11 07:51:51] Worker 6: [879/20868] Scraping 523367000: Budget Analyst
+[2025-06-11 07:51:52] Worker 6: [880/20868] Scraping 523368600: Pharmacist
+[2025-06-11 07:51:52] Worker 6: [881/20868] Scraping 523370200: Advanced Medical Support Assistant
+[2025-06-11 07:51:53] Worker 6: [882/20868] Scraping 523371800: Chaplain (Protestant)
+[2025-06-11 07:51:53] Worker 6: [883/20868] Scraping 523373400: Lead Social Insurance Specialist (Program Leader)
+[2025-06-11 07:51:54] Worker 6: [884/20868] Scraping 523375000: RN - Clinical Nurse Expert
+[2025-06-11 07:51:54] Worker 6: [885/20868] Scraping 523376600: FACILITIES SERVICES ASSISTANT
+[2025-06-11 07:51:55] Worker 6: [886/20868] Scraping 523378200: Police Officer
+[2025-06-11 07:51:55] Worker 6: [887/20868] Scraping 523379800: Intelligence Research Specialist
+[2025-06-11 07:51:56] Worker 6: [888/20868] Scraping 523381400: Park Guide
+[2025-06-11 07:51:56] Worker 6: [889/20868] Scraping 523383000: SUPERVISORY GENERAL ENGINEER
+[2025-06-11 07:51:57] Worker 6: [890/20868] Scraping 523384600: ADMINISTRATIVE SUPPORT ASSISTANT (OA)
+[2025-06-11 07:51:58] Worker 6: [891/20868] Scraping 523386200: Social Worker
+[2025-06-11 07:51:58] Worker 6: [892/20868] Scraping 523387800: Recruiting Manager, AD-0301-00-Census-EXT-JKP
+[2025-06-11 07:51:59] Worker 6: [893/20868] Scraping 523389400: Maintenance and Operations Supervisor
+[2025-06-11 07:52:00] Worker 6: [894/20868] Scraping 523391000: Time and Leave Clerk
+[2025-06-11 07:52:00] Worker 6: [895/20868] Scraping 523392600: CYP Program Assistant
+[2025-06-11 07:52:00] Worker 6: [896/20868] Scraping 523394200: Student Trainee (Technical Information)
+[2025-06-11 07:52:01] Worker 6: [897/20868] Scraping 523395800: Program Analyst (Informatics)
+[2025-06-11 07:52:01] Worker 6: [898/20868] Scraping 523397400: LOGISTICS MANAGEMENT SPECIALIST
+[2025-06-11 07:52:02] Worker 6: [899/20868] Scraping 523399000: Practical Nurse
+[2025-06-11 07:52:02] Worker 6: [900/20868] Scraping 523400600: Maintenance Worker (MVO)
+[2025-06-11 07:52:03] Worker 6: Progress: 900/20868 (Success: 900, Failed: 0) Rate: 1.86/sec, ETA: 178.8min
+[2025-06-11 07:52:03] Worker 6: [901/20868] Scraping 523402200: Human Resources Specialist (Employee Relations)
+[2025-06-11 07:52:03] Worker 6: [902/20868] Scraping 523403800: Cook
+[2025-06-11 07:52:04] Worker 6: [903/20868] Scraping 523405400: QUALITY ASSURANCE SPECIALIST (MET)
+[2025-06-11 07:52:05] Worker 6: [904/20868] Scraping 523407000: ASSISTANT SINGLE MARINE PROGRAM RECREATION CENTER 
+[2025-06-11 07:52:06] Worker 6: [905/20868] Scraping 523408600: Fish Biologist
+[2025-06-11 07:52:07] Worker 6: [906/20868] Scraping 523410200: Local Hire (Public Assistance Program Delivery Man
+[2025-06-11 07:52:07] Worker 6: [907/20868] Scraping 523411800: Deputy Director- Safety Standards B, 
+Deputy Dire
+[2025-06-11 07:52:08] Worker 6: [908/20868] Scraping 523413400: Tax Assistance Coordinator
+[2025-06-11 07:52:08] Worker 6: [909/20868] Scraping 523415000: Supervisory Store Associate
+[2025-06-11 07:52:09] Worker 6: [910/20868] Scraping 523416600: Police Officer
+[2025-06-11 07:52:10] Worker 6: [911/20868] Scraping 523418200: TRAINING INSTRUCTOR (OFFICER COURSES)
+[2025-06-11 07:52:10] Worker 6: [912/20868] Scraping 523419800: Paralegal Specialist
+[2025-06-11 07:52:10] Worker 6: [913/20868] Scraping 523421400: MEATCUTTING WORKER
+[2025-06-11 07:52:11] Worker 6: [914/20868] Scraping 523423000: Foreign Service Construction Engineer
+[2025-06-11 07:52:12] Worker 6: [915/20868] Scraping 523424600: Lead Photographer
+[2025-06-11 07:52:12] Worker 6: [916/20868] Scraping 523426200: Statistician (Health)
+[2025-06-11 07:52:13] Worker 6: [917/20868] Scraping 523427800: Statistician (Health)
+[2025-06-11 07:52:13] Worker 6: [918/20868] Scraping 523429400: Administrative Support Assistant (OA)
+[2025-06-11 07:52:14] Worker 6: [919/20868] Scraping 523431000: Program Operations Specialist NF-04
+[2025-06-11 07:52:15] Worker 6: [920/20868] Scraping 523432600: Nuclear Medicine Technologist
+[2025-06-11 07:52:15] Worker 6: [921/20868] Scraping 523434200: AIRCRAFT MECHANIC
+[2025-06-11 07:52:16] Worker 6: [922/20868] Scraping 523435800: Student Trainee (Administrative & Office Support)
+[2025-06-11 07:52:16] Worker 6: [923/20868] Scraping 523437400: Auditor
+[2025-06-11 07:52:17] Worker 6: [924/20868] Scraping 523439000: Facility Operations Specialist
+[2025-06-11 07:52:17] Worker 6: [925/20868] Scraping 523440600: Safety & Occupational Health Manager
+[2025-06-11 07:52:18] Worker 6: Progress: 925/20868 (Success: 925, Failed: 0) Rate: 1.86/sec, ETA: 179.1min
+[2025-06-11 07:52:18] Worker 6: [926/20868] Scraping 523442200: STORE WORKER
+[2025-06-11 07:52:18] Worker 6: [927/20868] Scraping 523443800: SUPERVISORY LOGISTICS AND MAINTENANCE SUPPORT SPEC
+[2025-06-11 07:52:19] Worker 6: [928/20868] Scraping 523445400: Human Resources Specialist (Human Resource Special
+[2025-06-11 07:52:19] Worker 6: [929/20868] Scraping 523447000: FINANCIAL TECHNICIAN
+[2025-06-11 07:52:20] Worker 6: [930/20868] Scraping 523448600: SUPVY CBP AG SPECLST
+[2025-06-11 07:52:20] Worker 6: [931/20868] Scraping 523450200: Supervisory Health System Specialist
+[2025-06-11 07:52:21] Worker 6: [932/20868] Scraping 523451800: SUPPLY CLERK
+[2025-06-11 07:52:21] Worker 6: [933/20868] Scraping 523453400: PLANS OFFICER
+[2025-06-11 07:52:22] Worker 6: [934/20868] Scraping 523455000: Bartender NA-03
+[2025-06-11 07:52:22] Worker 6: [935/20868] Scraping 523456600: Accountant
+[2025-06-11 07:52:23] Worker 6: [936/20868] Scraping 523458200: Practical Nurse
+[2025-06-11 07:52:23] Worker 6: [937/20868] Scraping 523459800: Administrative Assistant
+[2025-06-11 07:52:24] Worker 6: [938/20868] Scraping 523461400: Physician (Internal Medicine)
+[2025-06-11 07:52:24] Worker 6: [939/20868] Scraping 523463000: Public Affairs Specialist
+[2025-06-11 07:52:25] Worker 6: [940/20868] Scraping 523464700: Clinical Psychologist (Drug Abuse Program Coordina
+[2025-06-11 07:52:26] Worker 6: [941/20868] Scraping 523466300: LEAD SUPPLY TECHNICIAN
+[2025-06-11 07:52:26] Worker 6: [942/20868] Scraping 523467900: Microbiologist
+[2025-06-11 07:52:26] Worker 6: [943/20868] Scraping 523469500: Account Executive (Mortgage Backed Securities)
+[2025-06-11 07:52:27] Worker 6: [944/20868] Scraping 523471100: Administrative Manager, AD-0301-00-Census-EXT-JKP
+[2025-06-11 07:52:27] Worker 6: [945/20868] Scraping 523472700: Recruiting Manager, AD-0301-00-Census-EXT-JKP
+[2025-06-11 07:52:28] Worker 6: [946/20868] Scraping 523474300: Supervisory Human Resources Specialist
+[2025-06-11 07:52:28] Worker 6: [947/20868] Scraping 523475900: Information Technology Manager, AD-0301-00-Census-
+[2025-06-11 07:52:29] Worker 6: [948/20868] Scraping 523477500: Procurement Technician (Purchase Card Program Coor
+[2025-06-11 07:52:29] Worker 6: [949/20868] Scraping 523479100: Support Services Specialist
+[2025-06-11 07:52:30] Worker 6: [950/20868] Scraping 523480700: Registered Nurse (Cardiology)
+[2025-06-11 07:52:31] Worker 6: Progress: 950/20868 (Success: 950, Failed: 0) Rate: 1.86/sec, ETA: 178.7min
+[2025-06-11 07:52:31] Worker 6: [951/20868] Scraping 523482300: Health Technician (Operating Room)
+[2025-06-11 07:52:31] Worker 6: [952/20868] Scraping 523483900: Investigative Analyst
+[2025-06-11 07:52:32] Worker 6: [953/20868] Scraping 523485500: CENTRAL REGISTRATION TECHNICIAN
+[2025-06-11 07:52:32] Worker 6: [954/20868] Scraping 523487100: Security Assistant (Dispatcher)
+[2025-06-11 07:52:33] Worker 6: [955/20868] Scraping 523488700: Sexual Assault Prevention & Response  (Victim Advo
+[2025-06-11 07:52:33] Worker 6: [956/20868] Scraping 523490300: Nurse (Critical Care)
+[2025-06-11 07:52:34] Worker 6: [957/20868] Scraping 523491900: Laborer
+[2025-06-11 07:52:34] Worker 6: [958/20868] Scraping 523493500: SEXUAL ASSAULT RESPONSE COORDINATOR
+[2025-06-11 07:52:35] Worker 6: [959/20868] Scraping 523495100: Contract Specialist, GS-1102-12/13 (Direct Hire)
+[2025-06-11 07:52:35] Worker 6: [960/20868] Scraping 523496700: Secretary (OA)
+[2025-06-11 07:52:36] Worker 6: [961/20868] Scraping 523498300: Registered Nurse Clinical Reviewer
+[2025-06-11 07:52:36] Worker 6: [962/20868] Scraping 523499900: HUMAN RESOURCES SPECIALIST
+[2025-06-11 07:52:37] Worker 6: [963/20868] Scraping 523501500: SUPERVISORY FINANCIAL SPECIALIST
+[2025-06-11 07:52:37] Worker 6: [964/20868] Scraping 523503100: AUDIOVISUAL PRODUCTION SPECIALIST
+[2025-06-11 07:52:38] Worker 6: [965/20868] Scraping 523504700: SUPERVISORY RECORDS and INFORMATION MANAGEMENT SPE
+[2025-06-11 07:52:38] Worker 6: [966/20868] Scraping 523506400: Logistics Management Specialist
+[2025-06-11 07:52:39] Worker 6: [967/20868] Scraping 523508000: QUALITY ASSURANCE SPECIALIST (CHEMICALS)
+[2025-06-11 07:52:39] Worker 6: [968/20868] Scraping 523509600: Accountant
+[2025-06-11 07:52:40] Worker 6: [969/20868] Scraping 523511200: DIAGNOSTIC RADIOLOGIC TECHNOLOGIST
+[2025-06-11 07:52:40] Worker 6: [970/20868] Scraping 523512800: Blind Rehabilatation Specialist (VIST Coordinator)
+[2025-06-11 07:52:41] Worker 6: [971/20868] Scraping 523514400: Supervisory Forestry Tech (Fire)
+[2025-06-11 07:52:41] Worker 6: [972/20868] Scraping 523516000: Staff Assistant (Bilingual English/Spanish)
+[2025-06-11 07:52:42] Worker 6: [973/20868] Scraping 523517600: Supervisory Public Health Advisor GS 0685-15
+[2025-06-11 07:52:42] Worker 6: [974/20868] Scraping 523519200: Maintenance Worker
+[2025-06-11 07:52:43] Worker 6: [975/20868] Scraping 523520800: SUPPLY TECHNICIAN
+[2025-06-11 07:52:44] Worker 6: Progress: 975/20868 (Success: 975, Failed: 0) Rate: 1.86/sec, ETA: 178.3min
+[2025-06-11 07:52:44] Worker 6: [976/20868] Scraping 523522400: HUMAN RESOURCES SPECIALIST (MILITARY)
+[2025-06-11 07:52:44] Worker 6: [977/20868] Scraping 523524000: Cytotechnologist
+[2025-06-11 07:52:45] Worker 6: [978/20868] Scraping 523525600: Physical Security Specialist
+[2025-06-11 07:52:45] Worker 6: [979/20868] Scraping 523527200: Area Census Office Manager, AD-0301-00-Census-EXT-
+[2025-06-11 07:52:46] Worker 6: [980/20868] Scraping 523528800: VISUAL INFORMATION SPECIALIST
+[2025-06-11 07:52:46] Worker 6: [981/20868] Scraping 523530400: Income Tax Preparation Assistant
+[2025-06-11 07:52:47] Worker 6: [982/20868] Scraping 523532000: Secretary/ OA
+[2025-06-11 07:52:48] Worker 6: [983/20868] Scraping 523533600: Pharmacy Technician
+[2025-06-11 07:52:48] Worker 6: [984/20868] Scraping 523535200: Quality Assurance Specialist
+[2025-06-11 07:52:48] Worker 6: [985/20868] Scraping 523536800: ADMINISTRATIVE OFFICER (Title 32)
+[2025-06-11 07:52:49] Worker 6: [986/20868] Scraping 523538400: Transportation Security Officer (TSO)
+[2025-06-11 07:52:49] Worker 6: [987/20868] Scraping 523540000: Secretary
+[2025-06-11 07:52:50] Worker 6: [988/20868] Scraping 523541600: Housekeeping Aid
+[2025-06-11 07:52:50] Worker 6: [989/20868] Scraping 523543200: Health Systems Specialist
+[2025-06-11 07:52:51] Worker 6: [990/20868] Scraping 523544800: PARAMEDIC
+[2025-06-11 07:52:52] Worker 6: [991/20868] Scraping 523546400: Production Controller (Ammunition)
+[2025-06-11 07:52:52] Worker 6: [992/20868] Scraping 523548000: Recreation Specialist (Fitness)
+[2025-06-11 07:52:53] Worker 6: [993/20868] Scraping 523549600: PROGRAM ANALYST
+[2025-06-11 07:52:53] Worker 6: [994/20868] Scraping 523551200: Lead Export Control Analyst
+[2025-06-11 07:52:54] Worker 6: [995/20868] Scraping 523552800: Social Worker- Warrior Care Network Liaison
+[2025-06-11 07:52:54] Worker 6: [996/20868] Scraping 523554400: Supervisory Mobility Transportation Specialist
+[2025-06-11 07:52:55] Worker 6: [997/20868] Scraping 523556000: Maintenance Mechanic
+[2025-06-11 07:52:55] Worker 6: [998/20868] Scraping 523557600: ELECTRONIC INTEGRATED SYSTEMS REPAIR INSPECTOR
+[2025-06-11 07:52:56] Worker 6: [999/20868] Scraping 523559200: Maintenance Worker Helper
+[2025-06-11 07:52:57] Worker 6: [1000/20868] Scraping 523560800: Medical Technologist
+[2025-06-11 07:52:57] Worker 6: Progress: 1000/20868 (Success: 1000, Failed: 0) Rate: 1.86/sec, ETA: 178.1min
+[2025-06-11 07:52:57] Worker 6: [1001/20868] Scraping 523562400: SAFETY AND OCCUPATIONAL HEALTH MANAGER
+[2025-06-11 07:52:57] Worker 6: [1002/20868] Scraping 523564000: CONTRACT SPECIALIST
+[2025-06-11 07:52:58] Worker 6: [1003/20868] Scraping 523565600: Supervisory Logistics Management Specialist
+[2025-06-11 07:52:58] Worker 6: [1004/20868] Scraping 523567200: Test Administrator
+[2025-06-11 07:52:59] Worker 6: [1005/20868] Scraping 523568800: Student Trainee (Management Analyst)
+[2025-06-11 07:52:59] Worker 6: [1006/20868] Scraping 523570400: Transportation Security Manager
+[2025-06-11 07:53:00] Worker 6: [1007/20868] Scraping 523572000: Supervisory Management & Program Analyst (Director
+[2025-06-11 07:53:01] Worker 6: [1008/20868] Scraping 523573600: Master Transportation Security Officer - Security 
+[2025-06-11 07:53:01] Worker 6: [1009/20868] Scraping 523575200: PHYSICAL SCIENTIST
+[2025-06-11 07:53:02] Worker 6: [1010/20868] Scraping 523576800: Medical Instrument Technician (Pulmonary Function)
+[2025-06-11 07:53:03] Worker 6: [1011/20868] Scraping 523578400: Physical Scientist, GS-1301-13 (DE/CR)
+[2025-06-11 07:53:03] Worker 6: [1012/20868] Scraping 523580000: CBP OFFICER (PRECLEARANCE-REASSIGNMENT OPPORTUNITY
+[2025-06-11 07:53:03] Worker 6: [1013/20868] Scraping 523581600: Logictics Management Specialist
+[2025-06-11 07:53:04] Worker 6: [1014/20868] Scraping 523583200: TRAVEL ASSISTANT
+[2025-06-11 07:53:05] Worker 6: [1015/20868] Scraping 523584800: Realty Specialist
+[2025-06-11 07:53:05] Worker 6: [1016/20868] Scraping 523586400: Administrative Officer
+[2025-06-11 07:53:06] Worker 6: [1017/20868] Scraping 523588000: Pharmacist (Staff Pharmacist)
+[2025-06-11 07:53:06] Worker 6: [1018/20868] Scraping 523589600: Aircraft Engine Mechanic
+[2025-06-11 07:53:07] Worker 6: [1019/20868] Scraping 523591200: Mining Engineer
+[2025-06-11 07:53:07] Worker 6: [1020/20868] Scraping 523592800: SURFACE MAINTENANCE REPAIRER
+[2025-06-11 07:53:08] Worker 6: [1021/20868] Scraping 523594400: Legislative Affairs Specialist
+[2025-06-11 07:53:08] Worker 6: [1022/20868] Scraping 523596000: Rehabilitation Service Care Line Manager
+[2025-06-11 07:53:08] Worker 6: [1023/20868] Scraping 523597600: CUE (Regional Information Systems Officer)
+[2025-06-11 07:53:09] Worker 6: [1024/20868] Scraping 523599200: Human Resources Specialist (ER/LR)
+[2025-06-11 07:53:09] Worker 6: [1025/20868] Scraping 523600800: SUPERVISORY ASYLUM OFFICER
+[2025-06-11 07:53:10] Worker 6: Progress: 1025/20868 (Success: 1025, Failed: 0) Rate: 1.86/sec, ETA: 177.7min
+[2025-06-11 07:53:10] Worker 6: [1026/20868] Scraping 523602400: TRAINING TECHNICIAN
+[2025-06-11 07:53:10] Worker 6: [1027/20868] Scraping 523604000: Lead IT Specialist
+[2025-06-11 07:53:11] Worker 6: [1028/20868] Scraping 523605600: IT SPECIALIST (APPSW)
+[2025-06-11 07:53:11] Worker 6: [1029/20868] Scraping 523607200: Human Resources Retirement Specialist
+[2025-06-11 07:53:12] Worker 6: [1030/20868] Scraping 523608800: Education & Training Technician NF3
+[2025-06-11 07:53:13] Worker 6: [1031/20868] Scraping 523610400: Human Resources Assistant (Recruitment/Placement)
+[2025-06-11 07:53:14] Worker 6: [1032/20868] Scraping 523612000: Biological Science Technician (Plants)
+[2025-06-11 07:53:14] Worker 6: [1033/20868] Scraping 523613600: Social Worker (HUD-VASH Case Manager)
+[2025-06-11 07:53:15] Worker 6: [1034/20868] Scraping 523615200: Automotive Mechanic Helper NA-05
+[2025-06-11 07:53:15] Worker 6: [1035/20868] Scraping 523616800: Contract Price/Cost Analyst
+[2025-06-11 07:53:15] Worker 6: [1036/20868] Scraping 523618400: Project Scheduler
+[2025-06-11 07:53:16] Worker 6: [1037/20868] Scraping 523620000: Pharmacy Technician
+[2025-06-11 07:53:16] Worker 6: [1038/20868] Scraping 523621600: PLANS AND PROGRAMS ENGINEER
+[2025-06-11 07:53:17] Worker 6: [1039/20868] Scraping 523623200: Quality Assurance Specialist
+[2025-06-11 07:53:18] Worker 6: [1040/20868] Scraping 523624800: Procurement Technician
+[2025-06-11 07:53:18] Worker 6: [1041/20868] Scraping 523626400: Social Worker(HCHV)
+[2025-06-11 07:53:19] Worker 6: [1042/20868] Scraping 523628000: Nurse/RN Staff-Critical Care (CCU/ICCU)
+[2025-06-11 07:53:19] Worker 6: [1043/20868] Scraping 523629600: Advanced Practice Nurse (Nurse Practitioner)
+[2025-06-11 07:53:20] Worker 6: [1044/20868] Scraping 523631200: Maintenance Worker
+[2025-06-11 07:53:21] Worker 6: [1045/20868] Scraping 523632800: Attorney-Advisor (General)
+[2025-06-11 07:53:21] Worker 6: [1046/20868] Scraping 523634400: CHEMIST
+[2025-06-11 07:53:22] Worker 6: [1047/20868] Scraping 523636000: Physician
+[2025-06-11 07:53:22] Worker 6: [1048/20868] Scraping 523637600: Field Examiner
+[2025-06-11 07:53:23] Worker 6: [1049/20868] Scraping 523639200: Information Technology Specialist (Customer Suppor
+[2025-06-11 07:53:23] Worker 6: [1050/20868] Scraping 523640800: Lead Quality Assurance Specialist
+[2025-06-11 07:53:24] Worker 6: Progress: 1050/20868 (Success: 1050, Failed: 0) Rate: 1.86/sec, ETA: 177.6min
+[2025-06-11 07:53:24] Worker 6: [1051/20868] Scraping 523642400: Supply Management Specialist (Title 32)
+[2025-06-11 07:53:24] Worker 6: [1052/20868] Scraping 523644000: Crane Operator
+[2025-06-11 07:53:25] Worker 6: [1053/20868] Scraping 523645600: Veteran Service Representative WARTAC Challenge JB
+[2025-06-11 07:53:25] Worker 6: [1054/20868] Scraping 523647200: DIA MIDWEST/OMAHA HIRING EVENT - OFFICE MANAGEMENT
+[2025-06-11 07:53:26] Worker 6: [1055/20868] Scraping 523648800: HR Specialist (ER/LR)
+[2025-06-11 07:53:26] Worker 6: [1056/20868] Scraping 523650400: Produce Department Manager
+[2025-06-11 07:53:27] Worker 6: [1057/20868] Scraping 523652000: Social Worker
+[2025-06-11 07:53:27] Worker 6: [1058/20868] Scraping 523653600: Information Technology Specialist (Information Sec
+[2025-06-11 07:53:28] Worker 6: [1059/20868] Scraping 523655200: Secretary (OA)
+[2025-06-11 07:53:28] Worker 6: [1060/20868] Scraping 523656800: Diagnostic Radiologic Technologist CT
+[2025-06-11 07:53:29] Worker 6: [1061/20868] Scraping 523658400: Budget Analyst
+[2025-06-11 07:53:29] Worker 6: [1062/20868] Scraping 523660000: SECRETARY (OFFICE AUTOMATION)
+[2025-06-11 07:53:30] Worker 6: [1063/20868] Scraping 523661600: Public Health Analyst
+[2025-06-11 07:53:30] Worker 6: [1064/20868] Scraping 523663200: BIOLOGICAL SCIENCE TECHNICIAN (FISHERIES)
+[2025-06-11 07:53:31] Worker 6: [1065/20868] Scraping 523664800: Health Technician
+[2025-06-11 07:53:31] Worker 6: [1066/20868] Scraping 523666400: Occupational Therapy Assistant
+[2025-06-11 07:53:32] Worker 6: [1067/20868] Scraping 523668000: Medical Supply Technician (OA)
+[2025-06-11 07:53:32] Worker 6: [1068/20868] Scraping 523669600: Physician (Radiology)
+[2025-06-11 07:53:33] Worker 6: [1069/20868] Scraping 523671200: AIRCRAFT ENGINE MECHANIC LEADER
+[2025-06-11 07:53:34] Worker 6: [1070/20868] Scraping 523672800: Human Resources Assistant Military/Office Automati
+[2025-06-11 07:53:34] Worker 6: [1071/20868] Scraping 523674400: FINANCIAL MANAGEMENT ANALYST
+[2025-06-11 07:53:35] Worker 6: [1072/20868] Scraping 523676000: AIRCRAFT WORKER
+[2025-06-11 07:53:35] Worker 6: [1073/20868] Scraping 523677600: Inventory Management Specialist
+[2025-06-11 07:53:36] Worker 6: [1074/20868] Scraping 523679200: Financial Management Specialist
+[2025-06-11 07:53:36] Worker 6: [1075/20868] Scraping 523680800: Housekeeping Aid
+[2025-06-11 07:53:37] Worker 6: Progress: 1075/20868 (Success: 1075, Failed: 0) Rate: 1.86/sec, ETA: 177.2min
+[2025-06-11 07:53:37] Worker 6: [1076/20868] Scraping 523682400: Laborer NA-04
+[2025-06-11 07:53:37] Worker 6: [1077/20868] Scraping 523684000: Alcohol and Drug Control Specialist
+[2025-06-11 07:53:38] Worker 6: [1078/20868] Scraping 523685600: Nurse (Clinical/Obstetrics-Gynecology)
+[2025-06-11 07:53:38] Worker 6: [1079/20868] Scraping 523687200: SURFACE MAINTENANCE MECHANIC LEADER (T32)
+[2025-06-11 07:53:39] Worker 6: [1080/20868] Scraping 523688800: Human Resources Specialist
+[2025-06-11 07:53:39] Worker 6: [1081/20868] Scraping 523690400: FACILITY RESOURCE COORDINATOR
+[2025-06-11 07:53:40] Worker 6: [1082/20868] Scraping 523692000: Social Insurance Specialist(Claims Technical Exper
+[2025-06-11 07:53:40] Worker 6: [1083/20868] Scraping 523693600: Social Insurance Specialist(Claims Technical Exper
+[2025-06-11 07:53:41] Worker 6: [1084/20868] Scraping 523695200: SUPV IT SPECIALIST (INFOSEC)
+[2025-06-11 07:53:41] Worker 6: [1085/20868] Scraping 523696800: Clinical Dietitian
+[2025-06-11 07:53:42] Worker 6: [1086/20868] Scraping 523698400: Government Information Specialist (Privacy Officer
+[2025-06-11 07:53:42] Worker 6: [1087/20868] Scraping 523700000: Health System Specialist
+[2025-06-11 07:53:43] Worker 6: [1088/20868] Scraping 523701600: Social Worker - MHICM
+[2025-06-11 07:53:44] Worker 6: [1089/20868] Scraping 523703200: Management Analyst, ZA-0343-3 (DE/CR)
+[2025-06-11 07:53:44] Worker 6: [1090/20868] Scraping 523704800: Recreation Assistant (Outdoor) NF-02
+[2025-06-11 07:53:45] Worker 6: [1091/20868] Scraping 523706400: Lead Public Utilities Specialist
+[2025-06-11 07:53:45] Worker 6: [1092/20868] Scraping 523708000: Administrative Support Assistant
+[2025-06-11 07:53:46] Worker 6: [1093/20868] Scraping 523709600: Nurse (Advanced Practice Registered Nurse Practiti
+[2025-06-11 07:53:46] Worker 6: [1094/20868] Scraping 523711200: Supervisory Air Traffic Control Specialist, (MSS-4
+[2025-06-11 07:53:47] Worker 6: [1095/20868] Scraping 523712800: Operations Specialist
+[2025-06-11 07:53:48] Worker 6: [1096/20868] Scraping 523714400: Licensed Vocational Nurse/Licensed Practical Nurse
+[2025-06-11 07:53:48] Worker 6: [1097/20868] Scraping 523716000: AUDITOR Title 5 Permanent
+[2025-06-11 07:53:49] Worker 6: [1098/20868] Scraping 523717600: SUPERVISORY FACILITY SUSTAINMENT COMMODITY SPECIAL
+[2025-06-11 07:53:50] Worker 6: [1099/20868] Scraping 523719200: Supervisory Transportation Security Specialist - E
+[2025-06-11 07:53:51] Worker 6: [1100/20868] Scraping 523720800: LPN/TCT
+[2025-06-11 07:53:52] Worker 6: Progress: 1100/20868 (Success: 1100, Failed: 0) Rate: 1.86/sec, ETA: 177.5min
+[2025-06-11 07:53:52] Worker 6: [1101/20868] Scraping 523722400: Advanced Medical Support Assistant (Outpatient Cli
+[2025-06-11 07:53:52] Worker 6: [1102/20868] Scraping 523724000: INVESTIGATIVE ANALYST **RPP ONLY**
+[2025-06-11 07:53:53] Worker 6: [1103/20868] Scraping 523725600: Mathematical Statistician
+[2025-06-11 07:53:54] Worker 6: [1104/20868] Scraping 523727200: AIRCRAFT MECHANIC
+[2025-06-11 07:53:54] Worker 6: [1105/20868] Scraping 523728900: Supervisory Accountant
+[2025-06-11 07:53:55] Worker 6: [1106/20868] Scraping 523730500: Dentist
+[2025-06-11 07:53:55] Worker 6: [1107/20868] Scraping 523732100: Medical Support Assistant
+[2025-06-11 07:53:56] Worker 6: [1108/20868] Scraping 523733800: FORCE SUPPORT OFFICER
+[2025-06-11 07:53:56] Worker 6: [1109/20868] Scraping 523735400: Human Resources Assistant (NAF/Developmental) NF 0
+[2025-06-11 07:53:57] Worker 6: [1110/20868] Scraping 523737000: Supply Technician
+[2025-06-11 07:53:57] Worker 6: [1111/20868] Scraping 523738600: Nursing Assistant - MICU
+[2025-06-11 07:53:58] Worker 6: [1112/20868] Scraping 523740200: AIRCRAFT MECHANIC SUPERVISOR
+[2025-06-11 07:53:58] Worker 6: [1113/20868] Scraping 523741800: Transportation Security Specialist
+[2025-06-11 07:53:59] Worker 6: [1114/20868] Scraping 523743400: SUPERVISORY FINANCIAL SPECIALIST
+[2025-06-11 07:53:59] Worker 6: [1115/20868] Scraping 523745000: Advanced Medical Support Assistant
+[2025-06-11 07:54:00] Worker 6: [1116/20868] Scraping 523746600: Lead Postal Operations Assistant
+[2025-06-11 07:54:00] Worker 6: [1117/20868] Scraping 523748200: Program Support Assistant (OA)
+[2025-06-11 07:54:01] Worker 6: [1118/20868] Scraping 523749800: MANAGEMENT ASSISTANT
+[2025-06-11 07:54:02] Worker 6: [1119/20868] Scraping 523751400: AIRCRAFT MECHANIC HELPER
+[2025-06-11 07:54:02] Worker 6: [1120/20868] Scraping 523753000: Psychologist (Post-Traumatic Stress Disorder)
+[2025-06-11 07:54:02] Worker 6: [1121/20868] Scraping 523754600: RN (EP/CATH LAB) NTE 18 MONTHS
+[2025-06-11 07:54:03] Worker 6: [1122/20868] Scraping 523756200: Advanced Medical Support Assistant
+[2025-06-11 07:54:04] Worker 6: [1123/20868] Scraping 523757800: ENGINEERING TECH
+[2025-06-11 07:54:04] Worker 6: [1124/20868] Scraping 523759400: Project Manager
+[2025-06-11 07:54:05] Worker 6: [1125/20868] Scraping 523761000: Administrative Support Assistant (OA), ZS-0303-III
+[2025-06-11 07:54:05] Worker 6: Progress: 1125/20868 (Success: 1125, Failed: 0) Rate: 1.86/sec, ETA: 177.3min
+[2025-06-11 07:54:05] Worker 6: [1126/20868] Scraping 523762600: AIRCRAFT PNEUDRAULIC SYSTEMS MECHANIC
+[2025-06-11 07:54:06] Worker 6: [1127/20868] Scraping 523764200: Physical Security Specialist
+[2025-06-11 07:54:07] Worker 6: [1128/20868] Scraping 523765800: Human Resources Specialist (ER/LR)
+[2025-06-11 07:54:07] Worker 6: [1129/20868] Scraping 523767400: Management Analyst (Regional Disability Integratio
+[2025-06-11 07:54:08] Worker 6: [1130/20868] Scraping 523769000: IT Specialist
+[2025-06-11 07:54:08] Worker 6: [1131/20868] Scraping 523770600: CHILD & YOUTH  PROGRAM  ASSISTANT (GSE-02,GSE-3,GS
+[2025-06-11 07:54:09] Worker 6: [1132/20868] Scraping 523772200: Information Technology Specialist, GS-2210-12 (INF
+[2025-06-11 07:54:09] Worker 6: [1133/20868] Scraping 523773800: HUMAN RESOURCES ASSISTANT (MILITARY)
+[2025-06-11 07:54:09] Worker 6: [1134/20868] Scraping 523775400: Medical Technologist
+[2025-06-11 07:54:10] Worker 6: [1135/20868] Scraping 523777000: Health Insurance Specialist (Program Contractor Ma
+[2025-06-11 07:54:10] Worker 6: [1136/20868] Scraping 523778600: Insulator
+[2025-06-11 07:54:11] Worker 6: [1137/20868] Scraping 523780200: Electronics Engineer (Recent Graduate)
+[2025-06-11 07:54:11] Worker 6: [1138/20868] Scraping 523781800: Senior Social Worker (IPV) - TEMPORARY
+[2025-06-11 07:54:12] Worker 6: [1139/20868] Scraping 523783400: Accountant
+[2025-06-11 07:54:13] Worker 6: [1140/20868] Scraping 523785000: Human Resources Officer
+[2025-06-11 07:54:13] Worker 6: [1141/20868] Scraping 523786600: Student Trainee (Engineering) (Pathways Internship
+[2025-06-11 07:54:14] Worker 6: [1142/20868] Scraping 523788200: Diagnostic Radiologic Technologist MRI CT
+[2025-06-11 07:54:14] Worker 6: [1143/20868] Scraping 523789800: PERSONNEL RECOVERY MANAGER
+[2025-06-11 07:54:15] Worker 6: [1144/20868] Scraping 523791400: Facilities Coordinator
+[2025-06-11 07:54:15] Worker 6: [1145/20868] Scraping 523793000: CIVIL ENGINEER (STRUCTURAL)
+[2025-06-11 07:54:16] Worker 6: [1146/20868] Scraping 523794600: IT Specialist (SYSANA/APPSW)
+[2025-06-11 07:54:16] Worker 6: [1147/20868] Scraping 523796200: Health System Specialist
+[2025-06-11 07:54:17] Worker 6: [1148/20868] Scraping 523797800: INTELLIGENCE OPERATIONS SPECIALIST
+[2025-06-11 07:54:17] Worker 6: [1149/20868] Scraping 523799400: SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST (TITLE
+[2025-06-11 07:54:18] Worker 6: [1150/20868] Scraping 523801000: Concessions Management Specialist
+[2025-06-11 07:54:19] Worker 6: Progress: 1150/20868 (Success: 1150, Failed: 0) Rate: 1.86/sec, ETA: 177.1min
+[2025-06-11 07:54:19] Worker 6: [1151/20868] Scraping 523802600: Medical Instrument Technician (Electroencephalogra
+[2025-06-11 07:54:19] Worker 6: [1152/20868] Scraping 523804200: Supervisory IT Specialist (PLCYPLN)
+[2025-06-11 07:54:20] Worker 6: [1153/20868] Scraping 523805800: Cook Supervisor (Cook Foreman)
+[2025-06-11 07:54:20] Worker 6: [1154/20868] Scraping 523807400: Telecommunication Specialist
+[2025-06-11 07:54:21] Worker 6: [1155/20868] Scraping 523809000: Registered Nurse - Medical Specialty Clinics - Der
+[2025-06-11 07:54:21] Worker 6: [1156/20868] Scraping 523810600: LPN
+[2025-06-11 07:54:22] Worker 6: [1157/20868] Scraping 523812200: BIOLOGICAL SCIENTIST (ENVIRONMENTAL)
+[2025-06-11 07:54:22] Worker 6: [1158/20868] Scraping 523813800: Supervisory Border Patrol Agent (Deputy Patrol Age
+[2025-06-11 07:54:23] Worker 6: [1159/20868] Scraping 523815400: Police Officer
+[2025-06-11 07:54:23] Worker 6: [1160/20868] Scraping 523817000: Librarian
+[2025-06-11 07:54:24] Worker 6: [1161/20868] Scraping 523818600: Budget Analyst
+[2025-06-11 07:54:24] Worker 6: [1162/20868] Scraping 523820200: Regional Technician, GG-0301-9/11/12-Census-EXT-BA
+[2025-06-11 07:54:25] Worker 6: [1163/20868] Scraping 523821800: HR Specialist - Recruitment and Placement (Virtual
+[2025-06-11 07:54:26] Worker 6: [1164/20868] Scraping 523823400: AIR TRANSPORTATION OPERATIONS SPECIALIST
+[2025-06-11 07:54:26] Worker 6: [1165/20868] Scraping 523825000: Human Resources Specialist (Classification/ Recrui
+[2025-06-11 07:54:27] Worker 6: [1166/20868] Scraping 523826600: Health System Specialist (Chief Planning Officer)
+[2025-06-11 07:54:27] Worker 6: [1167/20868] Scraping 523828200: Interior Designer
+[2025-06-11 07:54:28] Worker 6: [1168/20868] Scraping 523829800: RN - Outpatient Mental Health Clinic Case Manager
+[2025-06-11 07:54:29] Worker 6: [1169/20868] Scraping 523831400: IT Specialist (PLCYPLN/ENTARCH)
+[2025-06-11 07:54:29] Worker 6: [1170/20868] Scraping 523833000: TRAFFIC MANAGEMENT SPECIALIST
+[2025-06-11 07:54:30] Worker 6: [1171/20868] Scraping 523834600: Biological Science Technician (Wildlife)
+[2025-06-11 07:54:31] Worker 6: [1172/20868] Scraping 523836200: Chiropractor
+[2025-06-11 07:54:31] Worker 6: [1173/20868] Scraping 523837800: RN Quality Improvement Specialist
+[2025-06-11 07:54:31] Worker 6: [1174/20868] Scraping 523839400: Safety & Occupational Health Specialist
+[2025-06-11 07:54:32] Worker 6: [1175/20868] Scraping 523841000: IT Specialist (INFOSEC)
+[2025-06-11 07:54:33] Worker 6: Progress: 1175/20868 (Success: 1175, Failed: 0) Rate: 1.85/sec, ETA: 176.9min
+[2025-06-11 07:54:33] Worker 6: [1176/20868] Scraping 523842600: AIRCRAFT ELECTRICIAN
+[2025-06-11 07:54:33] Worker 6: [1177/20868] Scraping 523844200: General Equipment Mechanic Leader
+[2025-06-11 07:54:34] Worker 6: [1178/20868] Scraping 523845800: ADMINISTRATIVE/TECHNICAL SPECIALIST
+[2025-06-11 07:54:34] Worker 6: [1179/20868] Scraping 523847400: Human Resources Assistant
+[2025-06-11 07:54:35] Worker 6: [1180/20868] Scraping 523849000: Licensed Practical Nurse
+[2025-06-11 07:54:35] Worker 6: [1181/20868] Scraping 523850600: Assistant Regional Census Manager,GG-0301-13/14-Ce
+[2025-06-11 07:54:36] Worker 6: [1182/20868] Scraping 523852200: Physician - Pulmonologist
+[2025-06-11 07:54:36] Worker 6: [1183/20868] Scraping 523853800: Human Resources Assistant (MIL)
+[2025-06-11 07:54:37] Worker 6: [1184/20868] Scraping 523855400: Nurse
+[2025-06-11 07:54:38] Worker 6: [1185/20868] Scraping 523857000: PARALEGAL SPECIALIST
+[2025-06-11 07:54:38] Worker 6: [1186/20868] Scraping 523858600: Supervisory Financial Accounts Technician
+[2025-06-11 07:54:39] Worker 6: [1187/20868] Scraping 523860200: PARALEGAL SPECIALIST
+[2025-06-11 07:54:39] Worker 6: [1188/20868] Scraping 523861800: SATCS,(Air Traffic Manager),(MSS-4,Level 6), AT-21
+[2025-06-11 07:54:40] Worker 6: [1189/20868] Scraping 523863400: CLINICIAN - COMMUNITY COUNSELING PROGRAM, NF-04/RF
+[2025-06-11 07:54:40] Worker 6: [1190/20868] Scraping 523865000: Nurse Practitioner - Primary Care Clinics
+[2025-06-11 07:54:41] Worker 6: [1191/20868] Scraping 523866700: HR Specialist (MILITARY)
+[2025-06-11 07:54:42] Worker 6: [1192/20868] Scraping 523868300: AIR CONDITIONING EQUIPMENT MECHANIC
+[2025-06-11 07:54:43] Worker 6: [1193/20868] Scraping 523869900: Student Trainee (Visitor Use Assitant-Fee Collecti
+[2025-06-11 07:54:43] Worker 6: [1194/20868] Scraping 523871500: Supply Technician
+[2025-06-11 07:54:44] Worker 6: [1195/20868] Scraping 523873100: Assistant Commissary Officer
+[2025-06-11 07:54:45] Worker 6: [1196/20868] Scraping 523874700: Transportation Security Officer (TSO)
+[2025-06-11 07:54:45] Worker 6: [1197/20868] Scraping 523876300: Human Resources Specialist (Military)
+[2025-06-11 07:54:46] Worker 6: [1198/20868] Scraping 523877900: FIRE PROTECTION INSPECTOR
+[2025-06-11 07:54:46] Worker 6: [1199/20868] Scraping 523879500: AIRCRAFT MECHANIC(TITLE 32)
+[2025-06-11 07:54:47] Worker 6: [1200/20868] Scraping 523881100: Human Resources Specialist
+[2025-06-11 07:54:47] Worker 6: Progress: 1200/20868 (Success: 1200, Failed: 0) Rate: 1.85/sec, ETA: 177.1min
+[2025-06-11 07:54:47] Worker 6: [1201/20868] Scraping 523882700: Information Technology Specialist
+[2025-06-11 07:54:48] Worker 6: [1202/20868] Scraping 523884300: Supervisory Contract Specialist
+[2025-06-11 07:54:48] Worker 6: [1203/20868] Scraping 523885900: Lead Transportation Security Officer
+[2025-06-11 07:54:49] Worker 6: [1204/20868] Scraping 523887500: PROGRAM ANALYST
+[2025-06-11 07:54:50] Worker 6: [1205/20868] Scraping 523889100: Engineering Technician
+[2025-06-11 07:54:50] Worker 6: [1206/20868] Scraping 523890700: Laborer NA-04
+[2025-06-11 07:54:51] Worker 6: [1207/20868] Scraping 523892300: Senior Social Worker (HUDVASH)
+[2025-06-11 07:54:51] Worker 6: [1208/20868] Scraping 523893900: STUDENT TRAINEE (ENGINEERING)
+[2025-06-11 07:54:52] Worker 6: [1209/20868] Scraping 523895500: Human Resources Specialist (Recruitment & Placemen
+[2025-06-11 07:54:52] Worker 6: [1210/20868] Scraping 523897100: Program Manager
+[2025-06-11 07:54:53] Worker 6: [1211/20868] Scraping 523898700: Laborer
+[2025-06-11 07:54:53] Worker 6: [1212/20868] Scraping 523900300: ELECTRONIC INDUSTRIAL CONTROLS MECHANIC
+[2025-06-11 07:54:54] Worker 6: [1213/20868] Scraping 523901900: SUPERVISORY SECURITY SPECIALIST
+[2025-06-11 07:54:54] Worker 6: [1214/20868] Scraping 523903600: SECURITY SPECIALIST
+[2025-06-11 07:54:55] Worker 6: [1215/20868] Scraping 523905200: SUPV IT SPECIALIST (PLCYPLN)
+[2025-06-11 07:54:56] Worker 6: [1216/20868] Scraping 523906800: Student Trainee (Laborer)(Pathways Internship)
+[2025-06-11 07:54:56] Worker 6: [1217/20868] Scraping 523908400: Food and Beverage Attendant NA-01
+[2025-06-11 07:54:57] Worker 6: [1218/20868] Scraping 523910000: Health Systems Specialist (AO)
+[2025-06-11 07:54:57] Worker 6: [1219/20868] Scraping 523911600: NGIS FRONT DESK ASSOC
+[2025-06-11 07:54:58] Worker 6: [1220/20868] Scraping 523913200: DU-0318-02 Secretary (Office Automation) (GS-06 Eq
+[2025-06-11 07:54:58] Worker 6: [1221/20868] Scraping 523914800: Assistant Nurse Manager (ANM) Hemodialysis
+[2025-06-11 07:54:59] Worker 6: [1222/20868] Scraping 523916400: Psychologist
+[2025-06-11 07:55:00] Worker 6: [1223/20868] Scraping 523918000: Social Insurance Specialist (Systems Coordinator) 
+[2025-06-11 07:55:00] Worker 6: [1224/20868] Scraping 523919600: PROGRAM ANALYST
+[2025-06-11 07:55:01] Worker 6: [1225/20868] Scraping 523921200: SUPERVISORY MANAGEMENT ANALYST
+[2025-06-11 07:55:01] Worker 6: Progress: 1225/20868 (Success: 1225, Failed: 0) Rate: 1.85/sec, ETA: 176.9min
+[2025-06-11 07:55:01] Worker 6: [1226/20868] Scraping 523922800: Supervisory Management and Program Analyst (Direct
+[2025-06-11 07:55:01] Worker 6: [1227/20868] Scraping 523924400: Supply Technician (Motor Vehicle Operator)
+[2025-06-11 07:55:02] Worker 6: [1228/20868] Scraping 523926000: Ordnance Equipment Mechanic
+[2025-06-11 07:55:02] Worker 6: [1229/20868] Scraping 523927600: Front Desk Associate
+[2025-06-11 07:55:03] Worker 6: [1230/20868] Scraping 523929200: ENGINEER or SCIENTIST
+[2025-06-11 07:55:04] Worker 6: [1231/20868] Scraping 523930800: Forestry Technician (Fire)
+[2025-06-11 07:55:04] Worker 6: [1232/20868] Scraping 523932400: PLANS AND OPERATIONS SPECIALIST
+[2025-06-11 07:55:04] Worker 6: [1233/20868] Scraping 523934000: Administrative Program Manager
+[2025-06-11 07:55:05] Worker 6: [1234/20868] Scraping 523935600: FACILITIES MANAGEMENT SPECIALIST
+[2025-06-11 07:55:06] Worker 6: [1235/20868] Scraping 523937200: CONSTRUCTION CONTROL REPRESENTATIVE
+[2025-06-11 07:55:06] Worker 6: [1236/20868] Scraping 523938800: MOTOR VEHICLE OPERATOR
+[2025-06-11 07:55:07] Worker 6: [1237/20868] Scraping 523940400: Social Insurance Specialist (Claims Specialist)
+[2025-06-11 07:55:07] Worker 6: [1238/20868] Scraping 523942000: ELECTRONIC INTEGRATED SYSTEMS MECHANIC
+[2025-06-11 07:55:08] Worker 6: [1239/20868] Scraping 523943600: Information Technology Specialist
+[2025-06-11 07:55:09] Worker 6: [1240/20868] Scraping 523945200: Management Analyst
+[2025-06-11 07:55:09] Worker 6: [1241/20868] Scraping 523946800: Supervisory Human Resources Specialist (Human Reso
+[2025-06-11 07:55:10] Worker 6: [1242/20868] Scraping 523948400: RANGE PROJECT DEVELOPMENT SPECIALIST
+[2025-06-11 07:55:10] Worker 6: [1243/20868] Scraping 523950100: PHYSICIAN - INTERNAL MEDICINE
+[2025-06-11 07:55:11] Worker 6: [1244/20868] Scraping 523951700: Archivist
+[2025-06-11 07:55:11] Worker 6: [1245/20868] Scraping 523953300: Program Specialist (Cryo-Initiative)
+[2025-06-11 07:55:12] Worker 6: [1246/20868] Scraping 523954900: STORE WORKER
+[2025-06-11 07:55:12] Worker 6: [1247/20868] Scraping 523956500: OPERATIONS SUPPORT SPECIALIST
+[2025-06-11 07:55:13] Worker 6: [1248/20868] Scraping 523958100: Heavy Mobile Equipment Mechanic
+[2025-06-11 07:55:13] Worker 6: [1249/20868] Scraping 523959700: Social Worker (Family Advocacy)
+[2025-06-11 07:55:14] Worker 6: [1250/20868] Scraping 523961300: Supervisory Contract Specialist (Branch Chief)
+[2025-06-11 07:55:14] Worker 6: Progress: 1250/20868 (Success: 1250, Failed: 0) Rate: 1.85/sec, ETA: 176.6min
+[2025-06-11 07:55:14] Worker 6: [1251/20868] Scraping 523962900: MECHANICAL ENGINEER/ELECTRICAL ENGINEER/ELECTRONIC
+[2025-06-11 07:55:15] Worker 6: [1252/20868] Scraping 523964500: Procurement Analyst
+[2025-06-11 07:55:15] Worker 6: [1253/20868] Scraping 523966100: Program Specialist (Law Enforcement)
+[2025-06-11 07:55:16] Worker 6: [1254/20868] Scraping 523967800: Food Service Worker NA-01
+[2025-06-11 07:55:16] Worker 6: [1255/20868] Scraping 523969400: Interdisciplinary
+[2025-06-11 07:55:17] Worker 6: [1256/20868] Scraping 523971000: Lead Management Analyst
+[2025-06-11 07:55:17] Worker 6: [1257/20868] Scraping 523972600: AIRCRAFT MECHANIC SUPERVISOR
+[2025-06-11 07:55:18] Worker 6: [1258/20868] Scraping 523974200: Human Resources Assistant (Military)
+[2025-06-11 07:55:18] Worker 6: [1259/20868] Scraping 523975800: Heavy Mobile Equipment Repairer
+[2025-06-11 07:55:19] Worker 6: [1260/20868] Scraping 523977400: Supervisory Natural Resources Specialist DIRECT HI
+[2025-06-11 07:55:19] Worker 6: [1261/20868] Scraping 523979000: SECRETARY
+[2025-06-11 07:55:20] Worker 6: [1262/20868] Scraping 523980600: LOGISTICS MANAGEMENT SPECIALIST
+[2025-06-11 07:55:20] Worker 6: [1263/20868] Scraping 523982200: Teacher
+[2025-06-11 07:55:21] Worker 6: [1264/20868] Scraping 523983800: INTELLIGENCE SPECIALIST
+[2025-06-11 07:55:21] Worker 6: [1265/20868] Scraping 523985400: Biologist, GS-0401-11 (DHA-TERM-CNS)
+[2025-06-11 07:55:22] Worker 6: [1266/20868] Scraping 523987000: Management Analyst
+[2025-06-11 07:55:22] Worker 6: [1267/20868] Scraping 523988600: ENGINEERING TECHNICIAN
+[2025-06-11 07:55:23] Worker 6: [1268/20868] Scraping 523990200: HAZMAT SPECIALIST (TITLE 32)
+[2025-06-11 07:55:23] Worker 6: [1269/20868] Scraping 523991900: STORE WORKER LEADER
+[2025-06-11 07:55:24] Worker 6: [1270/20868] Scraping 523993500: Quality Assurance Specialist (Electronics)
+[2025-06-11 07:55:25] Worker 6: [1271/20868] Scraping 523995100: Administative Officer HCBC
+[2025-06-11 07:55:25] Worker 6: [1272/20868] Scraping 523996700: Supervisory Tax Examining Technician (Appeals Proc
+[2025-06-11 07:55:26] Worker 6: [1273/20868] Scraping 523998300: Maintenance Worker
+[2025-06-11 07:55:26] Worker 6: [1274/20868] Scraping 523999900: Archeologist
+[2025-06-11 07:55:27] Worker 6: [1275/20868] Scraping 524001500: Medical Support Assistant
+[2025-06-11 07:55:28] Worker 6: Progress: 1275/20868 (Success: 1275, Failed: 0) Rate: 1.85/sec, ETA: 176.4min
+[2025-06-11 07:55:28] Worker 6: [1276/20868] Scraping 524003100: Detective
+[2025-06-11 07:55:28] Worker 6: [1277/20868] Scraping 524004700: Security Specialist
+[2025-06-11 07:55:29] Worker 6: [1278/20868] Scraping 524006300: FINANCIAL MANAGEMENT ANALYST
+[2025-06-11 07:55:29] Worker 6: [1279/20868] Scraping 524007900: Supervisory Medical Support Assistant
+[2025-06-11 07:55:30] Worker 6: [1280/20868] Scraping 524009500: Supervisory Air Traffic Control Specialist,
+[2025-06-11 07:55:30] Worker 6: [1281/20868] Scraping 524011100: Production Testing
+[2025-06-11 07:55:31] Worker 6: [1282/20868] Scraping 524012700: AIRCRAFT ORDNANCE SYSTEMS MECHANIC
+[2025-06-11 07:55:31] Worker 6: [1283/20868] Scraping 524014300: Recent Graduate - Safety and Occupational Health S
+[2025-06-11 07:55:32] Worker 6: [1284/20868] Scraping 524015900: NURSE CONSULTANT
+[2025-06-11 07:55:32] Worker 6: [1285/20868] Scraping 524017500: DON PATHWAYS INTERNSHIP PROGRAM (STUDENT TRAINEE-E
+[2025-06-11 07:55:33] Worker 6: [1286/20868] Scraping 524019100: Job Fair Cashier NF 01
+[2025-06-11 07:55:34] Worker 6: [1287/20868] Scraping 524020700: MEATCUTTING WORKER
+[2025-06-11 07:55:34] Worker 6: [1288/20868] Scraping 524022300: WAREHOUSE WORKER NA-04 RFT (JAPAN MAINLAND-WIDE ON
+[2025-06-11 07:55:35] Worker 6: [1289/20868] Scraping 524023900: Transportation Security Inspector
+[2025-06-11 07:55:36] Worker 6: [1290/20868] Scraping 524025500: Supervisory Criminal Investigator
+[2025-06-11 07:55:36] Worker 6: [1291/20868] Scraping 524027100: SUPERVISORY COMPUTER SCIENTIST
+[2025-06-11 07:55:37] Worker 6: [1292/20868] Scraping 524028700: ADMINISTRATIVE SUPPORT ASSISTANT
+[2025-06-11 07:55:37] Worker 6: [1293/20868] Scraping 524030300: Social Insurance Specialist (Claims Specialist BLN
+[2025-06-11 07:55:38] Worker 6: [1294/20868] Scraping 524031900: Military Personnel & Administrative Assistant
+[2025-06-11 07:55:38] Worker 6: [1295/20868] Scraping 524033500: ENVIRONMENTAL PROTECTION SPECIALIST
+[2025-06-11 07:55:39] Worker 6: [1296/20868] Scraping 524035100: CBP OFFICER (CONTAINER SECURITY)
+[2025-06-11 07:55:39] Worker 6: [1297/20868] Scraping 524036700: Transportation Security Specialist
+[2025-06-11 07:55:40] Worker 6: [1298/20868] Scraping 524038300: Contract Specialist
+[2025-06-11 07:55:40] Worker 6: [1299/20868] Scraping 524039900: Administrative Officer
+[2025-06-11 07:55:41] Worker 6: [1300/20868] Scraping 524041500: Legal Assistant (Senior Case Technician)
+[2025-06-11 07:55:41] Worker 6: Progress: 1300/20868 (Success: 1300, Failed: 0) Rate: 1.85/sec, ETA: 176.2min
+[2025-06-11 07:55:41] Worker 6: [1301/20868] Scraping 524043100: EQUIPMENT SPECIALIST
+[2025-06-11 07:55:42] Worker 6: [1302/20868] Scraping 524044700: Management & Program Analyst
+[2025-06-11 07:55:42] Worker 6: [1303/20868] Scraping 524046300: Respiratory Therapist
+[2025-06-11 07:55:43] Worker 6: [1304/20868] Scraping 524047900: INTERPRETER
+[2025-06-11 07:55:44] Worker 6: [1305/20868] Scraping 524049500: Laundry Worker
+[2025-06-11 07:55:44] Worker 6: [1306/20868] Scraping 524051100: Medical Technician (Phlebotomy)
+[2025-06-11 07:55:45] Worker 6: [1307/20868] Scraping 524052700: Program Support Assistant
+[2025-06-11 07:55:46] Worker 6: [1308/20868] Scraping 524054300: Budget Analyst
+[2025-06-11 07:55:46] Worker 6: [1309/20868] Scraping 524055900: MANAGEMENT ANALYST
+[2025-06-11 07:55:47] Worker 6: [1310/20868] Scraping 524057500: Inventory Management Specialist
+[2025-06-11 07:55:47] Worker 6: [1311/20868] Scraping 524059100: Social Scientist (Program Director)
+[2025-06-11 07:55:48] Worker 6: [1312/20868] Scraping 524060700: Dietitian - Home Based Primary Care
+[2025-06-11 07:55:49] Worker 6: [1313/20868] Scraping 524062300: Supervisory Forestry Technician (Fire),
+[2025-06-11 07:55:49] Worker 6: [1314/20868] Scraping 524063900: Accounting Technician
+[2025-06-11 07:55:50] Worker 6: [1315/20868] Scraping 524065500: Advanced Medical Support Assistant (Guntersville C
+[2025-06-11 07:55:50] Worker 6: [1316/20868] Scraping 524067100: ENGINEERING EQUIPMENT OPERATOR
+[2025-06-11 07:55:51] Worker 6: [1317/20868] Scraping 524068700: ENGINEERING TECHNICIAN
+[2025-06-11 07:55:51] Worker 6: [1318/20868] Scraping 524070300: Supervisory Financial Analyst
+[2025-06-11 07:55:52] Worker 6: [1319/20868] Scraping 524071900: Regional Capital Market Specialist
+[2025-06-11 07:55:52] Worker 6: [1320/20868] Scraping 524073500: Psychologist (Military Trauma Treatment Program)
+[2025-06-11 07:55:53] Worker 6: [1321/20868] Scraping 524075100: Registered Nurse - Community Living Center
+[2025-06-11 07:55:53] Worker 6: [1322/20868] Scraping 524076700: Economic Assistant (Part-Time)
+[2025-06-11 07:55:54] Worker 6: [1323/20868] Scraping 524078400: IT Specialist
+[2025-06-11 07:55:54] Worker 6: [1324/20868] Scraping 524080000: Advanced Medical Support Assistant
+[2025-06-11 07:55:55] Worker 6: [1325/20868] Scraping 524081600: Interdisciplinary
+[2025-06-11 07:55:55] Worker 6: Progress: 1325/20868 (Success: 1325, Failed: 0) Rate: 1.85/sec, ETA: 176.1min
+[2025-06-11 07:55:55] Worker 6: [1326/20868] Scraping 524083200: Travel Audit Specialist, CG-0301-09
+[2025-06-11 07:55:56] Worker 6: [1327/20868] Scraping 524084800: Public Affairs Specialist
+[2025-06-11 07:55:56] Worker 6: [1328/20868] Scraping 524086400: STANDARDS ANALYST (CONTINGENCY PLANNING)
+[2025-06-11 07:55:57] Worker 6: [1329/20868] Scraping 524088000: Criminal Investigator
+[2025-06-11 07:55:57] Worker 6: [1330/20868] Scraping 524089600: FIRE PROTECTION ENGINEER
+[2025-06-11 07:55:58] Worker 6: [1331/20868] Scraping 524091200: Supply Management Specialist
+[2025-06-11 07:55:59] Worker 6: [1332/20868] Scraping 524092800: ELECTRICAL SYSTEMS INSPECTOR (SHIPS)
+[2025-06-11 07:55:59] Worker 6: [1333/20868] Scraping 524094400: Quality Assurance Specialist (Nuclear)
+[2025-06-11 07:56:00] Worker 6: [1334/20868] Scraping 524096000: IT Specialist
+[2025-06-11 07:56:01] Worker 6: [1335/20868] Scraping 524097600: FOREIGN MILITARY ASSISTANCE SPECIALIST
+[2025-06-11 07:56:01] Worker 6: [1336/20868] Scraping 524099200: CUSTODIAL WORKER A02*
+[2025-06-11 07:56:02] Worker 6: [1337/20868] Scraping 524100800: PLUMBER LEADER
+[2025-06-11 07:56:02] Worker 6: [1338/20868] Scraping 524102400: SUPERVISORY CONTRACT SPECIALIST
+[2025-06-11 07:56:03] Worker 6: [1339/20868] Scraping 524104000: AST, Engineering Technology Program Management
+[2025-06-11 07:56:03] Worker 6: [1340/20868] Scraping 524105600: AIRCRAFT MECHANIC
+[2025-06-11 07:56:04] Worker 6: [1341/20868] Scraping 524107200: Equipment Specialist (Electrical)
+[2025-06-11 07:56:04] Worker 6: [1342/20868] Scraping 524108800: PUBLIC AFFAIRS SPECIALIST
+[2025-06-11 07:56:05] Worker 6: [1343/20868] Scraping 524110400: Staff Psychologist (Inpatient)
+[2025-06-11 07:56:05] Worker 6: [1344/20868] Scraping 524112000: NURSE (Cardiac Cath. Lab)
+[2025-06-11 07:56:06] Worker 6: [1345/20868] Scraping 524113600: Guidance Counselor
+[2025-06-11 07:56:07] Worker 6: [1346/20868] Scraping 524115200: INTERDISCIPLINARY
+[2025-06-11 07:56:07] Worker 6: [1347/20868] Scraping 524116800: SUPERVISORY AIRPLANE FLIGHT INSTRUCTOR
+[2025-06-11 07:56:07] Worker 6: [1348/20868] Scraping 524118400: Lead Payroll Technician
+[2025-06-11 07:56:08] Worker 6: [1349/20868] Scraping 524120000: PROGRAM SCHEDULER
+[2025-06-11 07:56:09] Worker 6: [1350/20868] Scraping 524121600: SUPPLY TECHNICIAN
+[2025-06-11 07:56:09] Worker 6: Progress: 1350/20868 (Success: 1350, Failed: 0) Rate: 1.85/sec, ETA: 175.9min
+[2025-06-11 07:56:09] Worker 6: [1351/20868] Scraping 524123200: Supervisory Contract Specialist
+[2025-06-11 07:56:11] Worker 6: [1352/20868] Scraping 524124800: Information Technology Specialist (CUSTSPT)
+[2025-06-11 07:56:11] Worker 6: [1353/20868] Scraping 524126400: Regulatory Specialist
+[2025-06-11 07:56:12] Worker 6: [1354/20868] Scraping 524128000: Acupuncturist
+[2025-06-11 07:56:12] Worker 6: [1355/20868] Scraping 524129600: Motor Vehicle Operator
+[2025-06-11 07:56:13] Worker 6: [1356/20868] Scraping 524131200: Health Technician (Optometry)
+[2025-06-11 07:56:13] Worker 6: [1357/20868] Scraping 524132800: Accounting Technician
+[2025-06-11 07:56:13] Worker 6: [1358/20868] Scraping 524134400: EXECUTIVE OFFICER
+[2025-06-11 07:56:14] Worker 6: [1359/20868] Scraping 524136000: SUPERVISORY SUPPLY TECHNICIAN
+[2025-06-11 07:56:15] Worker 6: [1360/20868] Scraping 524137600: Supervisory Program Specialist (CYS Services) NF-0
+[2025-06-11 07:56:15] Worker 6: [1361/20868] Scraping 524139200: Regulatory Affairs Specialist
+[2025-06-11 07:56:16] Worker 6: [1362/20868] Scraping 524140800: CONTRACT SPECIALIST
+[2025-06-11 07:56:17] Worker 6: [1363/20868] Scraping 524142400: Health Technician (PACU)
+[2025-06-11 07:56:17] Worker 6: [1364/20868] Scraping 524144000: Student Training (Administrative and Office Suppor
+[2025-06-11 07:56:17] Worker 6: [1365/20868] Scraping 524145600: LOGISTICS MANAGEMENT SPECIALIST
+[2025-06-11 07:56:18] Worker 6: [1366/20868] Scraping 524147200: BIOLOGICAL SCIENCE TECHNICIAN (FISHERIES)
+[2025-06-11 07:56:18] Worker 6: [1367/20868] Scraping 524148800: Physical Therapist
+[2025-06-11 07:56:19] Worker 6: [1368/20868] Scraping 524150400: Safety Health and Environmental Manager
+[2025-06-11 07:56:19] Worker 6: [1369/20868] Scraping 524152000: Program Analyst
+[2025-06-11 07:56:20] Worker 6: [1370/20868] Scraping 524153600: MATERIALS EXAMINER & IDENTIFIER
+[2025-06-11 07:56:20] Worker 6: [1371/20868] Scraping 524155200: Engineering Equipment Operator Supervisor
+[2025-06-11 07:56:21] Worker 6: [1372/20868] Scraping 524156800: Custodial Worker (Room Attendant) NA-02
+[2025-06-11 07:56:21] Worker 6: [1373/20868] Scraping 524158400: Aviation Safety Inspector, Assistant Principal Ope
+[2025-06-11 07:56:22] Worker 6: [1374/20868] Scraping 524160000: Supervisory Air Traffic Control Specialist
+[2025-06-11 07:56:22] Worker 6: [1375/20868] Scraping 524161600: SUPV HR SPEC
+[2025-06-11 07:56:23] Worker 6: Progress: 1375/20868 (Success: 1375, Failed: 0) Rate: 1.85/sec, ETA: 175.7min
+[2025-06-11 07:56:23] Worker 6: [1376/20868] Scraping 524163200: Front Office Manager
+[2025-06-11 07:56:23] Worker 6: [1377/20868] Scraping 524164800: Registered Nurse - Part-Time - Off Tour Supervisor
+[2025-06-11 07:56:23] Worker 6: [1378/20868] Scraping 524166400: Supervisory CBP Officer (Port Director), (Second L
+[2025-06-11 07:56:24] Worker 6: [1379/20868] Scraping 524168000: Nurse (Clinical/Ambulatory)
+[2025-06-11 07:56:24] Worker 6: [1380/20868] Scraping 524169600: INTERDISCIPLINARY
+[2025-06-11 07:56:25] Worker 6: [1381/20868] Scraping 524171200: Housekeeping Aid
+[2025-06-11 07:56:25] Worker 6: [1382/20868] Scraping 524172800: Admnistrative Officer
+[2025-06-11 07:56:26] Worker 6: [1383/20868] Scraping 524174400: Ecologist
+[2025-06-11 07:56:27] Worker 6: [1384/20868] Scraping 524176000: Auditor
+[2025-06-11 07:56:27] Worker 6: [1385/20868] Scraping 524177600: Advanced Medical Support Assistant - Primary Care
+[2025-06-11 07:56:27] Worker 6: [1386/20868] Scraping 524179200: INTERDISCIPLINARY ENGINEER
+[2025-06-11 07:56:28] Worker 6: [1387/20868] Scraping 524180800: Fire Management Specialist (Wildland Fire Lessons 
+[2025-06-11 07:56:28] Worker 6: [1388/20868] Scraping 524182400: IT PROJECT MANAGER (POLICY & PLANNING)
+[2025-06-11 07:56:29] Worker 6: [1389/20868] Scraping 524184000: SEXUAL ASSAULT PREVENTION AND RESPONSE SPECIALIST
+[2025-06-11 07:56:29] Worker 6: [1390/20868] Scraping 524185600: Clinical Dietetic Technician
+[2025-06-11 07:56:30] Worker 6: [1391/20868] Scraping 524187200: Office Assistant (Office Automation)
+[2025-06-11 07:56:31] Worker 6: [1392/20868] Scraping 524188800: Administrative Support Clerk (OA)
+[2025-06-11 07:56:31] Worker 6: [1393/20868] Scraping 524190400: Information Technology Specialist (Enterprise Arch
+[2025-06-11 07:56:32] Worker 6: [1394/20868] Scraping 524192000: Air Conditioning Equipment Mechanic
+[2025-06-11 07:56:32] Worker 6: [1395/20868] Scraping 524193600: SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST
+[2025-06-11 07:56:33] Worker 6: [1396/20868] Scraping 524195200: Supervisory Licensed Professional Mental Health Co
+[2025-06-11 07:56:33] Worker 6: [1397/20868] Scraping 524196800: SUPERVISORY RESOURCE MANAGEMENT ANALYST
+[2025-06-11 07:56:34] Worker 6: [1398/20868] Scraping 524198400: INTELLIGENCE RESEARCH SPECIALIST (FRAUD DETECTION 
+[2025-06-11 07:56:34] Worker 6: [1399/20868] Scraping 524200000: Criminal investigator
+[2025-06-11 07:56:35] Worker 6: [1400/20868] Scraping 524201600: Management Analyst (Leader)
+[2025-06-11 07:56:36] Worker 6: Progress: 1400/20868 (Success: 1400, Failed: 0) Rate: 1.85/sec, ETA: 175.3min
+[2025-06-11 07:56:36] Worker 6: [1401/20868] Scraping 524203200: Budget Analyst
+[2025-06-11 07:56:36] Worker 6: [1402/20868] Scraping 524204800: SYSTEMS ENGINEER
+[2025-06-11 07:56:37] Worker 6: [1403/20868] Scraping 524206400: Practical/Vocational Nurse
+[2025-06-11 07:56:37] Worker 6: [1404/20868] Scraping 524208000: OFFICE AUTOMATION CLERK
+[2025-06-11 07:56:38] Worker 6: [1405/20868] Scraping 524209600: REAL PROPERTY ACCOUNTABLE OFFICER
+[2025-06-11 07:56:38] Worker 6: [1406/20868] Scraping 524211200: Medical Support Assistant
+[2025-06-11 07:56:39] Worker 6: [1407/20868] Scraping 524212800: TECHNICAL ORDER MANAGEMENT SPECIALIST
+[2025-06-11 07:56:39] Worker 6: [1408/20868] Scraping 524214400: IT SPECIALIST (OS/PLCYPLN)
+[2025-06-11 07:56:40] Worker 6: [1409/20868] Scraping 524216000: Physical Scientist
+[2025-06-11 07:56:40] Worker 6: [1410/20868] Scraping 524217600: LOGISTICS MANAGEMENT SPECIALIST
+[2025-06-11 07:56:41] Worker 6: [1411/20868] Scraping 524219200: Secretary
+[2025-06-11 07:56:41] Worker 6: [1412/20868] Scraping 524220800: Agricultural Commodity Grader (Meat)
+[2025-06-11 07:56:42] Worker 6: [1413/20868] Scraping 524222400: Supervisory Emergency Management Specialist (Recov
