@@ -1,0 +1,30 @@
+# Data files
+data/
+*.duckdb
+*.json
+*.csv
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.DS_Store
+
+# HTML outputs
+*.html
+*_files/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+env/
+.env
