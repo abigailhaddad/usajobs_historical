@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Connect to the unified dataset
-conn = duckdb.connect("data/unified_pipeline_20250612_132347.duckdb")
+conn = duckdb.connect("data/unified_test_with_scraping.duckdb")
 ```
 
 ## Dataset Overview
@@ -42,545 +42,258 @@ for source, count in data_sources:
     print(f"   {json.loads(source)[0] if source else 'Unknown'}: {count:,} records")
 ```
 
-## Source Data Comparison
+## Data Source Comparison
+
+### Sample Overlapping Jobs
 
 ```{python}
-# Find overlapping jobs (same control numbers in both datasets)
+# Find a couple overlapping jobs for side-by-side comparison
 overlap_jobs = conn.execute("""
     WITH historical_controls AS (
-        SELECT DISTINCT control_number 
-        FROM unified_jobs 
-        WHERE data_sources LIKE '%historical%'
+        SELECT DISTINCT control_number FROM unified_jobs WHERE data_sources LIKE '%historical%'
     ),
     current_controls AS (
-        SELECT DISTINCT control_number 
-        FROM unified_jobs 
-        WHERE data_sources LIKE '%current%'
+        SELECT DISTINCT control_number FROM unified_jobs WHERE data_sources LIKE '%current%'
     )
     SELECT h.control_number
     FROM historical_controls h
     INNER JOIN current_controls c ON h.control_number = c.control_number
     ORDER BY RANDOM()
-    LIMIT 5
+    LIMIT 2
 """).fetchall()
 
-print("🔍 SIDE-BY-SIDE COMPARISON: SAME JOBS IN BOTH DATASETS")
-print("=" * 80)
-
 if overlap_jobs:
-    print(f"Found {len(overlap_jobs)} overlapping jobs to compare\n")
-    
     for i, (control_num,) in enumerate(overlap_jobs, 1):
-        print(f"JOB {i}: Control Number {control_num}")
-        print("=" * 60)
+        print(f"EXAMPLE {i}: Job {control_num}")
+        print("-" * 50)
         
-        # Get historical version  
+        # Get key fields from both sources
         hist_job = conn.execute("""
-            SELECT control_number, position_title, agency_name, job_series, 
-                   min_salary, max_salary, work_schedule, locations,
-                   major_duties, qualification_summary, requirements,
-                   job_summary, total_openings, promotion_potential,
-                   security_clearance_required, telework_eligible, remote_indicator,
-                   relocation_assistance, education, how_to_apply
+            SELECT position_title, agency_name, job_series, min_salary, max_salary, 
+                   work_schedule, major_duties, qualification_summary
             FROM unified_jobs 
             WHERE control_number = ? AND data_sources LIKE '%historical%'
         """, [control_num]).fetchone()
         
-        # Get current version
         curr_job = conn.execute("""
-            SELECT control_number, position_title, agency_name, job_series,
-                   min_salary, max_salary, work_schedule, locations,
-                   major_duties, qualification_summary, requirements,
-                   job_summary, total_openings, promotion_potential,
-                   security_clearance_required, telework_eligible, remote_indicator,
-                   relocation_assistance, education, how_to_apply
+            SELECT position_title, agency_name, job_series, min_salary, max_salary,
+                   work_schedule, major_duties, qualification_summary
             FROM unified_jobs
             WHERE control_number = ? AND data_sources LIKE '%current%'
         """, [control_num]).fetchone()
         
-        # Field names for display - Core fields first, then additional fields
-        field_names = ['Control Number', 'Position Title', 'Agency', 'Job Series', 
-                      'Min Salary', 'Max Salary', 'Work Schedule', 'Locations',
-                      'Major Duties', 'Qualification Summary', 'Requirements',
-                      'Job Summary', 'Total Openings', 'Promotion Potential', 
-                      'Security Clearance', 'Telework Eligible', 'Remote Indicator',
-                      'Relocation Assistance', 'Education', 'How To Apply']
+        fields = ['Position Title', 'Agency', 'Job Series', 'Min Salary', 'Max Salary', 
+                 'Work Schedule', 'Major Duties', 'Qualifications']
         
-        print(f"{'Field':<20} {'Historical API':<60} {'Current API':<60}")
-        print("-" * 140)
+        print(f"{'Field':<15} {'Historical':<30} {'Current':<30}")
+        print("-" * 75)
         
-        for j, field_name in enumerate(field_names):
-            hist_val = hist_job[j] if hist_job else "❌ Missing"
-            curr_val = curr_job[j] if curr_job else "❌ Missing"
+        for j, field in enumerate(fields):
+            hist_val = hist_job[j] if hist_job and hist_job[j] else "❌"
+            curr_val = curr_job[j] if curr_job and curr_job[j] else "❌"
             
-            # Format values for display
-            def format_val(val):
-                if val is None:
-                    return "❌ None"
-                elif str(val).strip() == "":
-                    return "⚠️ Empty"
-                elif isinstance(val, (int, float)) and field_name in ['Min Salary', 'Max Salary']:
-                    return f"${val:,.0f}" if val else "❌ None"
-                else:
-                    val_str = str(val)
-                    # For long text fields, show more content but still truncate
-                    if field_name in ['Major Duties', 'Qualification Summary', 'Requirements']:
-                        return val_str[:57] + "..." if len(val_str) > 60 else val_str
-                    else:
-                        return val_str[:57] + "..." if len(val_str) > 60 else val_str
-            
-            print(f"{field_name:<20} {format_val(hist_val):<60} {format_val(curr_val):<60}")
-        
-        print("\n")
-else:
-    print("❌ No overlapping jobs found between historical and current datasets")
-```
-
-```{python}
-# Field coverage comparison between sources
-field_coverage = conn.execute("""
-    WITH source_stats AS (
-        SELECT 
-            CASE WHEN data_sources LIKE '%historical_api%' THEN 'Historical'
-                 WHEN data_sources LIKE '%current_api%' THEN 'Current' 
-                 ELSE 'Other' END as source_type,
-            COUNT(*) as total_records,
-            
-            -- Core identification fields
-            COUNT(CASE WHEN position_title IS NOT NULL AND position_title != '' THEN 1 END) as has_title,
-            COUNT(CASE WHEN agency_name IS NOT NULL AND agency_name != '' THEN 1 END) as has_agency,
-            COUNT(CASE WHEN job_series IS NOT NULL AND job_series != '' AND job_series != '0000' THEN 1 END) as has_series,
-            
-            -- Salary information
-            COUNT(CASE WHEN min_salary IS NOT NULL AND max_salary IS NOT NULL THEN 1 END) as has_salary,
-            
-            -- Location data
-            COUNT(CASE WHEN locations IS NOT NULL AND locations != '' THEN 1 END) as has_location,
-            
-            -- Rich content fields
-            COUNT(CASE WHEN major_duties IS NOT NULL AND major_duties != '' THEN 1 END) as has_duties,
-            COUNT(CASE WHEN qualification_summary IS NOT NULL AND qualification_summary != '' THEN 1 END) as has_qualifications,
-            COUNT(CASE WHEN requirements IS NOT NULL AND requirements != '' THEN 1 END) as has_requirements,
-            
-            -- Workflow fields
-            COUNT(CASE WHEN work_schedule IS NOT NULL AND work_schedule != '' THEN 1 END) as has_schedule
-            
-        FROM unified_jobs 
-        WHERE data_sources NOT LIKE '%other%'
-        GROUP BY source_type
-    )
-    SELECT * FROM source_stats WHERE source_type IN ('Historical', 'Current')
-""").fetchall()
-
-print("\n📊 FIELD COVERAGE BY SOURCE TYPE")
-print("=" * 80)
-
-if field_coverage:
-    historical_stats = next((row for row in field_coverage if row[0] == 'Historical'), None)
-    current_stats = next((row for row in field_coverage if row[0] == 'Current'), None)
-    
-    field_names = [
-        ('Total Records', 1),
-        ('Position Title', 2), ('Agency Name', 3), ('Job Series', 4),
-        ('Salary Range', 5), ('Location', 6), 
-        ('Major Duties', 7), ('Qualifications', 8), ('Requirements', 9),
-        ('Work Schedule', 10)
-    ]
-    
-    print(f"{'Field':<20} {'Historical':<15} {'Current':<15} {'Comparison'}")
-    print("-" * 70)
-    
-    for field_name, idx in field_names:
-        hist_val = historical_stats[idx] if historical_stats else 0
-        curr_val = current_stats[idx] if current_stats else 0
-        
-        if idx == 1:  # Total records
-            print(f"{field_name:<20} {hist_val:<15,} {curr_val:<15,} {'📊 Counts'}")
-        else:
-            hist_pct = (hist_val / historical_stats[1] * 100) if historical_stats and historical_stats[1] > 0 else 0
-            curr_pct = (curr_val / current_stats[1] * 100) if current_stats and current_stats[1] > 0 else 0
-            
-            if hist_pct > curr_pct + 10:
-                comparison = "🟢 Hist Better"
-            elif curr_pct > hist_pct + 10:
-                comparison = "🔵 Curr Better"  
-            elif abs(hist_pct - curr_pct) <= 10:
-                comparison = "🟡 Similar"
-            else:
-                comparison = "⚪ Mixed"
+            # Format for display
+            if isinstance(hist_val, (int, float)) and 'Salary' in field:
+                hist_val = f"${hist_val:,.0f}" if hist_val != "❌" else "❌"
+            elif hist_val != "❌" and len(str(hist_val)) > 27:
+                hist_val = str(hist_val)[:27] + "..."
                 
-            print(f"{field_name:<20} {hist_pct:<15.1f}% {curr_pct:<15.1f}% {comparison}")
-
-print(f"\n🔍 KEY INSIGHTS:")
-print(f"• Historical API: Structured data with consistent core fields")
-print(f"• Current API: Rich content fields like duties and qualifications") 
-print(f"• Rationalization: Combines best of both sources")
+            if isinstance(curr_val, (int, float)) and 'Salary' in field:
+                curr_val = f"${curr_val:,.0f}" if curr_val != "❌" else "❌"
+            elif curr_val != "❌" and len(str(curr_val)) > 27:
+                curr_val = str(curr_val)[:27] + "..."
+            
+            print(f"{field:<15} {str(hist_val):<30} {str(curr_val):<30}")
+        print()
 ```
 
-## Field Rationalization Quality Analysis
-
-### 1. Position Titles
+## Field Coverage Analysis
 
 ```{python}
-# Analyze position title rationalization
-title_analysis = conn.execute("""
-    SELECT 
-        position_title,
-        COUNT(*) as count,
-        COUNT(DISTINCT agency_name) as unique_agencies,
-        COUNT(DISTINCT job_series) as unique_series,
-        AVG(confidence_score) as avg_confidence
-    FROM unified_jobs 
-    WHERE position_title IS NOT NULL 
-    GROUP BY position_title 
-    ORDER BY count DESC 
-    LIMIT 15
-""").fetchall()
+# Field coverage analysis - long format instead of wide
+field_coverage_data = []
 
-title_df = pd.DataFrame(title_analysis, columns=['Position Title', 'Count', 'Unique Agencies', 'Unique Series', 'Avg Confidence'])
-print("🏷️ Most Common Position Titles:")
-print(title_df.to_string(index=False))
+# Historical data coverage
+hist_total = conn.execute("SELECT COUNT(*) FROM unified_jobs WHERE data_sources LIKE '%historical%'").fetchone()[0]
+if hist_total > 0:
+    hist_fields = conn.execute("""
+        SELECT 
+            'position_title' as field_name,
+            COUNT(CASE WHEN position_title IS NOT NULL AND position_title != '' THEN 1 END) as complete_count,
+            ROUND(COUNT(CASE WHEN position_title IS NOT NULL AND position_title != '' THEN 1 END) * 100.0 / COUNT(*), 1) as percentage
+        FROM unified_jobs WHERE data_sources LIKE '%historical%'
+        
+        UNION ALL SELECT 'agency_name', COUNT(CASE WHEN agency_name IS NOT NULL AND agency_name != '' THEN 1 END), 
+                  ROUND(COUNT(CASE WHEN agency_name IS NOT NULL AND agency_name != '' THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%historical%'
+        
+        UNION ALL SELECT 'job_series', COUNT(CASE WHEN job_series IS NOT NULL AND job_series != '' AND job_series != '0000' THEN 1 END),
+                  ROUND(COUNT(CASE WHEN job_series IS NOT NULL AND job_series != '' AND job_series != '0000' THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%historical%'
+        
+        UNION ALL SELECT 'salary_range', COUNT(CASE WHEN min_salary IS NOT NULL AND max_salary IS NOT NULL THEN 1 END),
+                  ROUND(COUNT(CASE WHEN min_salary IS NOT NULL AND max_salary IS NOT NULL THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%historical%'
+        
+        UNION ALL SELECT 'locations', COUNT(CASE WHEN locations IS NOT NULL AND locations != '' THEN 1 END),
+                  ROUND(COUNT(CASE WHEN locations IS NOT NULL AND locations != '' THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%historical%'
+        
+        UNION ALL SELECT 'major_duties', COUNT(CASE WHEN major_duties IS NOT NULL AND major_duties != '' THEN 1 END),
+                  ROUND(COUNT(CASE WHEN major_duties IS NOT NULL AND major_duties != '' THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%historical%'
+        
+        UNION ALL SELECT 'qualification_summary', COUNT(CASE WHEN qualification_summary IS NOT NULL AND qualification_summary != '' THEN 1 END),
+                  ROUND(COUNT(CASE WHEN qualification_summary IS NOT NULL AND qualification_summary != '' THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%historical%'
+        
+        UNION ALL SELECT 'work_schedule', COUNT(CASE WHEN work_schedule IS NOT NULL AND work_schedule != '' THEN 1 END),
+                  ROUND(COUNT(CASE WHEN work_schedule IS NOT NULL AND work_schedule != '' THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%historical%'
+    """).fetchall()
+    
+    for field, count, pct in hist_fields:
+        field_coverage_data.append({'Source': 'Historical', 'Field': field, 'Complete': count, 'Total': hist_total, 'Percentage': pct})
 
-# Title completeness
-title_completeness = conn.execute("""
-    SELECT 
-        CASE WHEN position_title IS NULL OR position_title = '' THEN 'Missing' ELSE 'Present' END as status,
-        COUNT(*) as count
-    FROM unified_jobs 
-    GROUP BY status
-""").fetchall()
+# Current data coverage
+curr_total = conn.execute("SELECT COUNT(*) FROM unified_jobs WHERE data_sources LIKE '%current%'").fetchone()[0]
+if curr_total > 0:
+    curr_fields = conn.execute("""
+        SELECT 
+            'position_title' as field_name,
+            COUNT(CASE WHEN position_title IS NOT NULL AND position_title != '' THEN 1 END) as complete_count,
+            ROUND(COUNT(CASE WHEN position_title IS NOT NULL AND position_title != '' THEN 1 END) * 100.0 / COUNT(*), 1) as percentage
+        FROM unified_jobs WHERE data_sources LIKE '%current%'
+        
+        UNION ALL SELECT 'agency_name', COUNT(CASE WHEN agency_name IS NOT NULL AND agency_name != '' THEN 1 END), 
+                  ROUND(COUNT(CASE WHEN agency_name IS NOT NULL AND agency_name != '' THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%current%'
+        
+        UNION ALL SELECT 'job_series', COUNT(CASE WHEN job_series IS NOT NULL AND job_series != '' AND job_series != '0000' THEN 1 END),
+                  ROUND(COUNT(CASE WHEN job_series IS NOT NULL AND job_series != '' AND job_series != '0000' THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%current%'
+        
+        UNION ALL SELECT 'salary_range', COUNT(CASE WHEN min_salary IS NOT NULL AND max_salary IS NOT NULL THEN 1 END),
+                  ROUND(COUNT(CASE WHEN min_salary IS NOT NULL AND max_salary IS NOT NULL THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%current%'
+        
+        UNION ALL SELECT 'locations', COUNT(CASE WHEN locations IS NOT NULL AND locations != '' THEN 1 END),
+                  ROUND(COUNT(CASE WHEN locations IS NOT NULL AND locations != '' THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%current%'
+        
+        UNION ALL SELECT 'major_duties', COUNT(CASE WHEN major_duties IS NOT NULL AND major_duties != '' THEN 1 END),
+                  ROUND(COUNT(CASE WHEN major_duties IS NOT NULL AND major_duties != '' THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%current%'
+        
+        UNION ALL SELECT 'qualification_summary', COUNT(CASE WHEN qualification_summary IS NOT NULL AND qualification_summary != '' THEN 1 END),
+                  ROUND(COUNT(CASE WHEN qualification_summary IS NOT NULL AND qualification_summary != '' THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%current%'
+        
+        UNION ALL SELECT 'work_schedule', COUNT(CASE WHEN work_schedule IS NOT NULL AND work_schedule != '' THEN 1 END),
+                  ROUND(COUNT(CASE WHEN work_schedule IS NOT NULL AND work_schedule != '' THEN 1 END) * 100.0 / COUNT(*), 1)
+        FROM unified_jobs WHERE data_sources LIKE '%current%'
+    """).fetchall()
+    
+    for field, count, pct in curr_fields:
+        field_coverage_data.append({'Source': 'Current', 'Field': field, 'Complete': count, 'Total': curr_total, 'Percentage': pct})
 
-print(f"\n📋 Title Completeness:")
-for status, count in title_completeness:
-    pct = (count / total_records) * 100
-    print(f"   {status}: {count:,} ({pct:.1f}%)")
+# Display the long format table
+coverage_df = pd.DataFrame(field_coverage_data)
+if not coverage_df.empty:
+    print("📊 Field Coverage by Source (Long Format):")
+    print(coverage_df.to_string(index=False))
 ```
 
-### 2. Agency Name Rationalization
+## Missing Duties and Qualifications Analysis
 
 ```{python}
-# Analyze agency rationalization
-agency_analysis = conn.execute("""
-    SELECT 
-        agency_name,
-        department_name,
-        COUNT(*) as job_count,
-        COUNT(DISTINCT job_series) as unique_series,
-        MIN(open_date) as earliest_job,
-        MAX(open_date) as latest_job
-    FROM unified_jobs 
-    WHERE agency_name IS NOT NULL 
-    GROUP BY agency_name, department_name
-    ORDER BY job_count DESC 
-    LIMIT 10
-""").fetchall()
-
-agency_df = pd.DataFrame(agency_analysis, columns=['Agency', 'Department', 'Job Count', 'Unique Series', 'Earliest', 'Latest'])
-print("🏢 Top Hiring Agencies:")
-print(agency_df.to_string(index=False))
-
-# Agency-Department consistency
-consistency_check = conn.execute("""
-    SELECT 
-        agency_name,
-        COUNT(DISTINCT department_name) as dept_variations
-    FROM unified_jobs 
-    WHERE agency_name IS NOT NULL AND department_name IS NOT NULL
-    GROUP BY agency_name 
-    HAVING COUNT(DISTINCT department_name) > 1
-    ORDER BY dept_variations DESC
-    LIMIT 5
-""").fetchall()
-
-if consistency_check:
-    print(f"\n⚠️ Agencies with Multiple Departments (potential inconsistencies):")
-    for agency, var_count in consistency_check:
-        print(f"   {agency}: {var_count} departments")
-```
-
-### 3. Job Series (Occupational Codes) Analysis
-
-```{python}
-# Job series rationalization analysis
-series_analysis = conn.execute("""
-    SELECT 
-        job_series,
-        COUNT(*) as count,
-        COUNT(DISTINCT agency_name) as unique_agencies
-    FROM unified_jobs 
-    WHERE job_series IS NOT NULL AND job_series != '' AND job_series != '0000'
-    GROUP BY job_series 
-    ORDER BY count DESC 
-    LIMIT 15
-""").fetchall()
-
-print("🔢 Most Common Job Series:")
-for series, count, agencies in series_analysis:
-    print(f"   {series}: {count:,} jobs, {agencies} agencies")
-
-# Job series completeness
-series_completeness = conn.execute("""
-    SELECT 
-        CASE 
-            WHEN job_series IS NULL OR job_series = '' OR job_series = '0000' THEN 'Missing/Invalid' 
-            ELSE 'Valid' 
-        END as status,
-        COUNT(*) as count
-    FROM unified_jobs 
-    GROUP BY status
-""").fetchall()
-
-print(f"📊 Job Series Completeness:")
-for status, count in series_completeness:
-    pct = (count / total_records) * 100
-    print(f"   {status}: {count:,} ({pct:.1f}%)")
-```
-
-### 4. Major Duties Field Analysis
-
-```{python}
-# Analyze major duties field (key for understanding job content)
-duties_analysis = conn.execute("""
-    SELECT 
-        CASE 
-            WHEN major_duties IS NULL OR major_duties = '' THEN 'Missing'
-            WHEN LENGTH(major_duties) < 100 THEN 'Brief (< 100 chars)'
-            WHEN LENGTH(major_duties) < 500 THEN 'Moderate (100-500 chars)'
-            WHEN LENGTH(major_duties) < 1000 THEN 'Detailed (500-1000 chars)'
-            ELSE 'Very Detailed (1000+ chars)'
-        END as duties_category,
-        COUNT(*) as count,
-        AVG(confidence_score) as avg_confidence
-    FROM unified_jobs 
-    GROUP BY duties_category
-    ORDER BY count DESC
-""").fetchall()
-
-print("📝 Major Duties Field Analysis:")
-for category, count, confidence in duties_analysis:
-    pct = (count / total_records) * 100
-    conf_str = f"(confidence: {confidence:.2f})" if confidence else "(confidence: N/A)"
-    print(f"   {category}: {count:,} ({pct:.1f}%) {conf_str}")
-
-# Sample duties by length category
-sample_duties = conn.execute("""
-    SELECT 
-        position_title,
-        agency_name,
-        LENGTH(major_duties) as duties_length,
-        LEFT(major_duties, 200) as duties_sample
-    FROM unified_jobs 
-    WHERE major_duties IS NOT NULL AND major_duties != ''
-    ORDER BY RANDOM()
-    LIMIT 3
-""").fetchall()
-
-print(f"\n📋 Sample Major Duties Content:")
-for title, agency, length, sample in sample_duties:
-    print(f"   {title} ({agency})")
-    print(f"   Length: {length} characters")
-    print(f"   Sample: {sample}...")
-    print()
-```
-
-## Data Quality Metrics
-
-```{python}
-# Comprehensive data quality analysis
-quality_metrics = conn.execute("""
-    SELECT 
-        'Position Title' as field,
-        COUNT(*) as total,
-        COUNT(position_title) as non_null,
-        ROUND(COUNT(position_title) * 100.0 / COUNT(*), 1) as completeness_pct
-    FROM unified_jobs
-    
-    UNION ALL
-    
-    SELECT 
-        'Agency Name' as field,
-        COUNT(*) as total,
-        COUNT(agency_name) as non_null,
-        ROUND(COUNT(agency_name) * 100.0 / COUNT(*), 1) as completeness_pct
-    FROM unified_jobs
-    
-    UNION ALL
-    
-    SELECT 
-        'Job Series' as field,
-        COUNT(*) as total,
-        COUNT(CASE WHEN job_series IS NOT NULL AND job_series != '' AND job_series != '0000' THEN 1 END) as non_null,
-        ROUND(COUNT(CASE WHEN job_series IS NOT NULL AND job_series != '' AND job_series != '0000' THEN 1 END) * 100.0 / COUNT(*), 1) as completeness_pct
-    FROM unified_jobs
-    
-    UNION ALL
-    
-    SELECT 
-        'Major Duties' as field,
-        COUNT(*) as total,
-        COUNT(major_duties) as non_null,
-        ROUND(COUNT(major_duties) * 100.0 / COUNT(*), 1) as completeness_pct
-    FROM unified_jobs
-    
-    UNION ALL
-    
-    SELECT 
-        'Salary Range' as field,
-        COUNT(*) as total,
-        COUNT(CASE WHEN min_salary IS NOT NULL AND max_salary IS NOT NULL THEN 1 END) as non_null,
-        ROUND(COUNT(CASE WHEN min_salary IS NOT NULL AND max_salary IS NOT NULL THEN 1 END) * 100.0 / COUNT(*), 1) as completeness_pct
-    FROM unified_jobs
-    
-    UNION ALL
-    
-    SELECT 
-        'Locations' as field,
-        COUNT(*) as total,
-        COUNT(locations) as non_null,
-        ROUND(COUNT(locations) * 100.0 / COUNT(*), 1) as completeness_pct
-    FROM unified_jobs
-""").fetchall()
-
-quality_df = pd.DataFrame(quality_metrics, columns=['Field', 'Total Records', 'Complete Records', 'Completeness %'])
-print("📊 Field Completeness Analysis:")
-print(quality_df.to_string(index=False))
-```
-
-## Rationalization Effectiveness
-
-```{python}
-# Analyze how well the rationalization process worked
-confidence_distribution = conn.execute("""
-    SELECT 
-        CASE 
-            WHEN confidence_score >= 0.95 THEN 'Excellent (0.95+)'
-            WHEN confidence_score >= 0.90 THEN 'Good (0.90-0.94)'
-            WHEN confidence_score >= 0.85 THEN 'Fair (0.85-0.89)'
-            ELSE 'Poor (<0.85)'
-        END as confidence_level,
-        COUNT(*) as count
-    FROM unified_jobs 
-    GROUP BY confidence_level
-    ORDER BY MIN(confidence_score) DESC
-""").fetchall()
-
-print("🎯 Rationalization Confidence Distribution:")
-for level, count in confidence_distribution:
-    pct = (count / total_records) * 100
-    print(f"   {level}: {count:,} ({pct:.1f}%)")
-
-# Source combination analysis
-source_combinations = conn.execute("""
-    SELECT 
-        data_sources,
-        COUNT(*) as count,
-        AVG(confidence_score) as avg_confidence
-    FROM unified_jobs 
-    GROUP BY data_sources
-    ORDER BY count DESC
-""").fetchall()
-
-print(f"\n📡 Data Source Combinations:")
-for sources, count, confidence in source_combinations:
-    source_list = json.loads(sources) if sources else ['Unknown']
-    pct = (count / total_records) * 100
-    print(f"   {', '.join(source_list)}: {count:,} ({pct:.1f}%) - confidence: {confidence:.3f}")
-```
-
-## Sample High-Quality Records
-
-```{python}
-# Show examples of well-rationalized records
-high_quality_samples = conn.execute("""
+# Find jobs missing major_duties
+missing_duties = conn.execute("""
     SELECT 
         control_number,
         position_title,
         agency_name,
-        job_series,
-        CASE WHEN major_duties IS NOT NULL THEN 'Yes' ELSE 'No' END as has_duties,
-        CASE WHEN min_salary IS NOT NULL AND max_salary IS NOT NULL THEN 'Yes' ELSE 'No' END as has_salary,
-        confidence_score
+        data_sources,
+        CASE WHEN major_duties IS NULL THEN 'NULL' 
+             WHEN major_duties = '' THEN 'EMPTY' 
+             ELSE 'PRESENT' END as duties_status
     FROM unified_jobs 
-    WHERE confidence_score >= 0.90 
-        AND position_title IS NOT NULL 
-        AND agency_name IS NOT NULL 
-        AND job_series IS NOT NULL 
-        AND job_series != '' 
-        AND job_series != '0000'
-    ORDER BY confidence_score DESC, RANDOM()
-    LIMIT 10
+    WHERE major_duties IS NULL OR major_duties = ''
+    ORDER BY control_number
+    LIMIT 20
 """).fetchall()
 
-print("⭐ Sample High-Quality Rationalized Records:")
-print()
-for control, title, agency, series, duties, salary, confidence in high_quality_samples:
-    print(f"Control: {control}")
-    print(f"Title: {title}")
-    print(f"Agency: {agency}")
-    print(f"Series: {series}")
-    print(f"Has Duties: {duties} | Has Salary: {salary}")
-    print(f"Confidence: {confidence:.3f}")
-    print("-" * 50)
-```
+print("❌ Jobs Missing Major Duties (first 20):")
+print("Control Number | Position Title | Agency | Source | Status")
+print("-" * 80)
+for control, title, agency, sources, status in missing_duties:
+    title_short = (title[:30] + "...") if title and len(title) > 30 else (title or "N/A")
+    agency_short = (agency[:20] + "...") if agency and len(agency) > 20 else (agency or "N/A")
+    source_list = json.loads(sources) if sources else ['Unknown']
+    source_short = source_list[0] if source_list else 'Unknown'
+    print(f"{control} | {title_short:<30} | {agency_short:<20} | {source_short:<10} | {status}")
 
-## Geographic Distribution
-
-```{python}
-# Analyze location data
-location_analysis = conn.execute("""
+# Count by source
+duties_by_source = conn.execute("""
     SELECT 
-        CASE 
-            WHEN locations LIKE '%Washington%' THEN 'Washington DC Area'
-            WHEN locations LIKE '%California%' THEN 'California'
-            WHEN locations LIKE '%Texas%' THEN 'Texas'
-            WHEN locations LIKE '%New York%' THEN 'New York'
-            WHEN locations LIKE '%Virginia%' THEN 'Virginia'
-            WHEN locations LIKE '%Maryland%' THEN 'Maryland'
-            WHEN locations LIKE '%Remote%' OR locations LIKE '%remote%' THEN 'Remote'
-            WHEN locations LIKE '%Multiple%' OR locations LIKE '%multiple%' THEN 'Multiple Locations'
-            ELSE 'Other States'
-        END as location_category,
-        COUNT(*) as count
-    FROM unified_jobs 
-    WHERE locations IS NOT NULL
-    GROUP BY location_category
-    ORDER BY count DESC
-    LIMIT 10
+        CASE WHEN data_sources LIKE '%historical%' AND data_sources LIKE '%current%' THEN 'Both'
+             WHEN data_sources LIKE '%historical%' THEN 'Historical Only'
+             WHEN data_sources LIKE '%current%' THEN 'Current Only'
+             ELSE 'Other' END as source_type,
+        COUNT(CASE WHEN major_duties IS NULL OR major_duties = '' THEN 1 END) as missing_duties,
+        COUNT(*) as total,
+        ROUND(COUNT(CASE WHEN major_duties IS NULL OR major_duties = '' THEN 1 END) * 100.0 / COUNT(*), 1) as missing_pct
+    FROM unified_jobs
+    GROUP BY source_type
 """).fetchall()
 
-print("🗺️ Geographic Distribution of Jobs:")
-for location, count in location_analysis:
-    pct = (count / total_records) * 100
-    print(f"   {location}: {count:,} ({pct:.1f}%)")
-```
+print(f"\n📈 Missing Duties by Source:")
+for source, missing, total, pct in duties_by_source:
+    print(f"   {source}: {missing}/{total} ({pct}%)")
 
-## Summary Assessment
+print("\n" + "="*50)
 
-```{python}
-# Overall assessment of rationalization quality
-total_high_quality = conn.execute("SELECT COUNT(*) FROM unified_jobs WHERE confidence_score >= 0.90").fetchone()[0]
-total_complete_core = conn.execute("""
-    SELECT COUNT(*) FROM unified_jobs 
-    WHERE position_title IS NOT NULL 
-        AND agency_name IS NOT NULL 
-        AND job_series IS NOT NULL 
-        AND job_series != '' 
-        AND job_series != '0000'
-""").fetchone()[0]
+# Find jobs missing qualification_summary
+missing_quals = conn.execute("""
+    SELECT 
+        control_number,
+        position_title,
+        agency_name,
+        data_sources,
+        CASE WHEN qualification_summary IS NULL THEN 'NULL' 
+             WHEN qualification_summary = '' THEN 'EMPTY' 
+             ELSE 'PRESENT' END as quals_status
+    FROM unified_jobs 
+    WHERE qualification_summary IS NULL OR qualification_summary = ''
+    ORDER BY control_number
+    LIMIT 20
+""").fetchall()
 
-print("🎯 RATIONALIZATION QUALITY SUMMARY")
-print("=" * 50)
-print(f"✅ High Confidence Records (≥0.90): {total_high_quality:,} ({(total_high_quality/total_records)*100:.1f}%)")
-print(f"✅ Complete Core Fields: {total_complete_core:,} ({(total_complete_core/total_records)*100:.1f}%)")
-print(f"✅ Average Confidence Score: {conn.execute('SELECT AVG(confidence_score) FROM unified_jobs').fetchone()[0]:.3f}")
+print("❌ Jobs Missing Qualification Summary (first 20):")
+print("Control Number | Position Title | Agency | Source | Status")
+print("-" * 80)
+for control, title, agency, sources, status in missing_quals:
+    title_short = (title[:30] + "...") if title and len(title) > 30 else (title or "N/A")
+    agency_short = (agency[:20] + "...") if agency and len(agency) > 20 else (agency or "N/A")
+    source_list = json.loads(sources) if sources else ['Unknown']
+    source_short = source_list[0] if source_list else 'Unknown'
+    print(f"{control} | {title_short:<30} | {agency_short:<20} | {source_short:<10} | {status}")
 
-# Close connection
-conn.close()
+# Count by source
+quals_by_source = conn.execute("""
+    SELECT 
+        CASE WHEN data_sources LIKE '%historical%' AND data_sources LIKE '%current%' THEN 'Both'
+             WHEN data_sources LIKE '%historical%' THEN 'Historical Only'
+             WHEN data_sources LIKE '%current%' THEN 'Current Only'
+             ELSE 'Other' END as source_type,
+        COUNT(CASE WHEN qualification_summary IS NULL OR qualification_summary = '' THEN 1 END) as missing_quals,
+        COUNT(*) as total,
+        ROUND(COUNT(CASE WHEN qualification_summary IS NULL OR qualification_summary = '' THEN 1 END) * 100.0 / COUNT(*), 1) as missing_pct
+    FROM unified_jobs
+    GROUP BY source_type
+""").fetchall()
 
-print(f"\n🔍 Key Findings:")
-print(f"• Position titles are well-preserved with high completeness")
-print(f"• Agency names show good consistency across departments") 
-print(f"• Job series codes are properly rationalized for most records")
-print(f"• Major duties field needs enhancement from scraping for completeness")
-print(f"• Overall data quality is good with strong confidence scores")
+print(f"\n📈 Missing Qualifications by Source:")
+for source, missing, total, pct in quals_by_source:
+    print(f"   {source}: {missing}/{total} ({pct}%)")
 ```
