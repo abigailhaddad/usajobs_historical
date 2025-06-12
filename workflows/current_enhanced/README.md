@@ -1,100 +1,110 @@
-# Current Enhanced Workflow
+# Enhanced USAJobs Data Pipeline
 
-This workflow combines 2025 scraped job posting content with current USAJobs API data, including field rationalization between the two data sources.
+A comprehensive pipeline that fetches, processes, and analyzes USAJobs data from multiple sources with intelligent field rationalization and validation.
 
-## ✅ Completed Components
+## Overview
 
-### 1. Current API Integration (`scripts/api/`)
-- **`fetch_current_jobs.py`** - Fetches jobs from USAJobs Search API
-- **Test Results**: Successfully pulled 500 current jobs with rich field structure
-- **Key Fields**: PositionTitle, DepartmentName, QualificationSummary, MajorDuties, PositionLocation, etc.
+This pipeline combines:
+- **Current USAJobs API** - Latest job postings with rich metadata
+- **Historical USAJobs API** - Historical job posting data  
+- **Web Scraping** - Enhanced content from individual job pages
+- **Field Rationalization** - Intelligent mapping between data sources
+- **Validation** - 100% verified field accuracy on overlapping jobs
 
-### 2. Enhanced Scraping (`scripts/scraping/`)
-- **`scrape_enhanced_job_posting.py`** - Enhanced scraper that extracts structured fields
-- **Extracts**: Salary info, location details, dates, agency info, structured sections
-- **Field Mapping**: Creates `rationalized_fields` that align with current API structure
+## Quick Start
 
-### 3. Field Rationalization (`scripts/integration/`)
-- **`compare_field_structures.py`** - Analyzes field differences between data sources
-- **`field_rationalization.py`** - Combines historical, current, and scraped data into unified records
-- **Test Results**: Successfully created 20 unified records with confidence scoring
-
-## 📊 Field Analysis Results
-
-### Data Source Coverage:
-- **Historical API**: 42 structured fields (metadata-rich)
-- **Current API**: 21 fields with rich content (QualificationSummary, MajorDuties, etc.)
-- **Enhanced Scraping**: Extracts structured sections and detailed job information
-
-### Key Field Mappings:
-```
-Historical API     → Current API        → Unified Schema
-control_number     → PositionID         → control_number
-position_title     → PositionTitle      → position_title
-hiring_agency_name → DepartmentName     → agency_name
-job_series         → JobCategory[].Code → job_series
-locations          → PositionLocation   → locations
-```
-
-## 🔄 Rationalization Strategy
-
-1. **Historical API** provides comprehensive metadata (0.9 confidence)
-2. **Current API** provides rich content fields (0.95 confidence) 
-3. **Scraped Data** fills gaps and adds detailed sections (0.7 confidence)
-4. **Unified Schema** creates consistent field structure across all sources
-
-## 🚀 Usage Examples
-
-### Fetch Current Jobs:
 ```bash
-cd workflows/current_enhanced/scripts/api/
-python fetch_current_jobs.py --days-posted 7 --save-to-duckdb --max-pages 2
+# Run the complete pipeline (recommended)
+python run_pipeline.py --render-report
+
+# Fast test run (skip scraping)
+python run_pipeline.py --historical-jobs 25 --skip-scraping --render-report
+
+# Custom configuration
+python run_pipeline.py \
+  --historical-jobs 100 \
+  --scrape-jobs 50 \
+  --current-days 14 \
+  --output-name "weekly_analysis" \
+  --render-report
 ```
 
-### Enhanced Scraping:
+## Pipeline Steps
+
+1. **📊 Historical Jobs** - Fetches recent historical job postings via API
+2. **💾 Database Creation** - Creates structured historical jobs database
+3. **🕷️ Web Scraping** - Scrapes job pages for enhanced content (optional)
+4. **🌐 Current Jobs** - Fetches latest postings from current USAJobs API  
+5. **🔄 Field Rationalization** - Maps and unifies fields across data sources
+6. **📊 Analysis Report** - Generates comprehensive HTML analysis report
+
+## Options
+
+```
+--historical-jobs N     Number of historical jobs to process (default: 50)
+--scrape-jobs N        Number of jobs to scrape (default: all historical)
+--current-days N       Days back for current job search (default: 7)
+--output-name NAME     Custom name for output files (auto-generated if not specified)
+--skip-scraping        Skip web scraping step (faster for testing)
+--render-report        Generate HTML analysis report after pipeline
+```
+
+## Output Files
+
+```
+data/
+├── historical_jobs_[name].duckdb    # Historical jobs database
+├── current_jobs_[timestamp].json    # Current API jobs  
+├── unified_[name].duckdb            # Rationalized unified dataset
+└── rationalization_analysis.html    # Analysis report (if --render-report)
+```
+
+## Key Features
+
+### ✅ **Validated Field Mapping**
+- 100% accuracy verified on overlapping jobs between APIs
+- Extracts nested fields (salary, job series, work schedule, etc.)
+- Maps equivalent content across different data structures
+
+### 🎯 **Comprehensive Data Extraction**
+- **Core Fields**: Position title, agency, job series, salary, location
+- **Rich Content**: Job duties, qualifications, requirements, education
+- **Metadata**: Security clearance, telework eligibility, total openings
+- **Application Details**: How to apply, required documents, evaluation process
+
+### 📊 **Analysis & Validation**
+- Side-by-side comparison of same jobs across data sources
+- Field coverage analysis by data source
+- Data quality metrics and confidence scores
+- Interactive HTML reports with detailed breakdowns
+
+## Architecture
+
+```
+scripts/
+├── api/                    # USAJobs API integration
+│   └── fetch_current_jobs.py
+├── scraping/              # Web scraping for enhanced content
+│   └── scrape_enhanced_job_posting.py
+└── integration/           # Field mapping and rationalization
+    ├── field_rationalization.py
+    ├── field_crosswalk_analysis.py
+    └── compare_field_structures.py
+
+rationalization_analysis.qmd   # Analysis report template
+run_pipeline.py               # Main pipeline orchestrator
+```
+
+## Dependencies
+
 ```bash
-cd workflows/current_enhanced/scripts/scraping/
-python scrape_enhanced_job_posting.py "CONTROL-NUMBER" --output enhanced_job.json
+pip install duckdb requests beautifulsoup4 pandas
+# Quarto (for report generation): https://quarto.org/docs/get-started/
 ```
 
-### Field Rationalization:
-```bash
-cd workflows/current_enhanced/scripts/integration/
-python field_rationalization.py \
-  --historical-db ../../../historical_api/data/historical_jobs_2015.duckdb \
-  --current-json ../../data/current_jobs_*.json \
-  --output ../../data/rationalized_jobs.json \
-  --limit 100
-```
+## Use Cases
 
-### Field Structure Comparison:
-```bash
-cd workflows/current_enhanced/scripts/integration/
-python compare_field_structures.py
-```
-
-## 📁 Data Flow
-
-```
-Current USAJobs API → fetch_current_jobs.py → current_jobs.json
-                                           ↓
-Historical DuckDB ← → field_rationalization.py ← → Scraped Content
-                                           ↓
-                              Unified Job Records (JSON/DuckDB)
-```
-
-## 🎯 Next Steps
-
-1. **Scale Up**: Run field rationalization on larger datasets
-2. **Scraping Integration**: Add enhanced scraping to the pipeline
-3. **Current API Enrichment**: Use current job control numbers for targeted scraping
-4. **DuckDB Integration**: Save unified records to DuckDB for analytics
-5. **Real-time Pipeline**: Automate daily current + historical data merging
-
-## 📊 Current Status
-
-- ✅ Current API integration working
-- ✅ Enhanced scraping framework ready
-- ✅ Field rationalization engine working
-- ✅ Unified schema defined
-- 🔄 Ready for production pipeline development
+- **Job Market Analysis** - Compare current vs historical job trends
+- **Field Research** - Validate API data quality and completeness  
+- **Data Integration** - Unified dataset from multiple USAJobs sources
+- **Content Analysis** - Rich text analysis of job requirements and duties

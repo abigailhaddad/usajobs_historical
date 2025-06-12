@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Connect to the unified dataset
-conn = duckdb.connect("data/unified_minimal_test_20250612_131510.duckdb")
+conn = duckdb.connect("data/unified_pipeline_20250612_132347.duckdb")
 ```
 
 ## Dataset Overview
