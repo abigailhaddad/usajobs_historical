@@ -34,7 +34,7 @@ HEADERS = {
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch current USAJobs data")
     parser.add_argument("--keyword", help="Search keyword", default=None)
-    parser.add_argument("--days-posted", type=int, help="Jobs posted within N days", default=7)
+    parser.add_argument("--days-posted", type=int, help="Jobs posted within N days", default=None)
     parser.add_argument("--max-pages", type=int, help="Maximum pages to fetch", default=None)
     parser.add_argument("--who-may-apply", help="Who may apply filter", default="public")
     parser.add_argument("--remote", action="store_true", help="Remote jobs only")
@@ -368,11 +368,11 @@ def main():
     
     # Save results
     if args.save_to_duckdb:
-        db_path = "../../data/current_jobs.duckdb"
+        db_path = "../data/current_jobs.duckdb"
         save_jobs_to_duckdb(flattened_jobs, db_path)
     
     # Always save JSON for inspection
-    filename = f"../../data/current_jobs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    filename = f"../data/current_jobs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     save_jobs_data(raw_jobs, filename)
     
     print(f"\n✅ Completed! Fetched {len(flattened_jobs)} current job postings")
