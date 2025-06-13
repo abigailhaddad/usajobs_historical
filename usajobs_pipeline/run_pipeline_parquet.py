@@ -15,6 +15,8 @@ import sys
 import time
 import pandas as pd
 from tqdm import tqdm
+import logging
+import traceback
 
 sys.path.append('scripts')
 from parquet_storage import ParquetJobStorage
@@ -22,12 +24,55 @@ from fetch_historical_jobs import fetch_jobs_by_date_range
 from fetch_current_jobs import fetch_all_jobs
 from scrape_enhanced_job_posting import scrape_enhanced_job_posting
 from field_rationalization import FieldRationalizer
+from simple_validation import calculate_field_overlap
+
+# Set up logging
+def setup_logging():
+    """Set up logging to both file and console"""
+    log_dir = Path('logs')
+    log_dir.mkdir(exist_ok=True)
+    
+    log_filename = f'pipeline_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
+    log_path = log_dir / log_filename
+    
+    # Create formatter
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    
+    # Set up file handler
+    file_handler = logging.FileHandler(log_path)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    
+    # Set up console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(formatter)
+    
+    # Configure root logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+    
+    # Also create a specific logger for errors
+    error_logger = logging.getLogger('errors')
+    error_handler = logging.FileHandler(log_dir / 'errors.log')
+    error_handler.setLevel(logging.ERROR)
+    error_handler.setFormatter(formatter)
+    error_logger.addHandler(error_handler)
+    
+    logging.info(f"Logging initialized. Log file: {log_path}")
+    return logger
 
 def scrape_single_job(args):
     """
     Worker function for parallel scraping of individual jobs
     """
     control_number, = args
+    logger = logging.getLogger()
     
     try:
         scraped_data = scrape_enhanced_job_posting(control_number)
@@ -35,18 +80,20 @@ def scrape_single_job(args):
         if scraped_data.get('status') == 'success':
             content_sections = scraped_data.get('content_sections', {})
             if content_sections and len(content_sections) > 0:
-                print(f"✅ {control_number} - {len(content_sections)} sections")
+                logger.info(f"✅ {control_number} - {len(content_sections)} sections")
                 return control_number, scraped_data
             else:
-                print(f"⚠️ {control_number} - success but no content sections")
+                logger.warning(f"⚠️ {control_number} - success but no content sections")
                 return control_number, None
         else:
             error_msg = scraped_data.get('error', 'Unknown error')
-            print(f"❌ {control_number} - {error_msg}")
+            logger.error(f"❌ {control_number} - {error_msg}")
+            logging.getLogger('errors').error(f"Scraping failed for {control_number}: {error_msg}")
             return control_number, None
             
     except Exception as e:
-        print(f"❌ {control_number} - Exception: {e}")
+        logger.error(f"❌ {control_number} - Exception: {e}")
+        logging.getLogger('errors').error(f"Exception scraping {control_number}: {str(e)}\n{traceback.format_exc()}")
         return control_number, None
 
 def parallel_scrape_jobs(historical_jobs, storage, scrape_workers):
@@ -260,6 +307,8 @@ def run_rationalization(storage: ParquetJobStorage):
     """
     Run field rationalization on the collected data
     """
+    logger = logging.getLogger()
+    logger.info(f"\n🔄 STARTING FIELD RATIONALIZATION")
     print(f"\n🔄 STARTING FIELD RATIONALIZATION")
     print("=" * 40)
     
@@ -279,17 +328,36 @@ def run_rationalization(storage: ParquetJobStorage):
     current_jobs = current_df.to_dict('records') if not current_df.empty else []
     
     # Parse JSON fields back to objects
+    jobs_with_scraped = 0
+    jobs_with_content = 0
     for job in historical_jobs:
+        control_num = job.get('usajobsControlNumber', 'unknown')
+        
+        # Always create scraped_content structure, even if empty
+        job['scraped_content'] = {'content_sections': {}}
+        
         if 'scraped_sections' in job and job['scraped_sections']:
             try:
-                job['scraped_content'] = {
-                    'content_sections': json.loads(job['scraped_sections'])
-                }
+                scraped_sections = job['scraped_sections']
+                if scraped_sections and scraped_sections != '{}':
+                    sections = json.loads(scraped_sections)
+                    job['scraped_content']['content_sections'] = sections
+                    jobs_with_scraped += 1
+                    
+                    # Log what content we found
+                    if sections:
+                        jobs_with_content += 1
+                        logger.debug(f"Job {control_num} has scraped sections: {list(sections.keys())}")
+                    
                 if 'scraped_metadata' in job and job['scraped_metadata']:
                     metadata = json.loads(job['scraped_metadata'])
                     job['scraped_content'].update(metadata)
-            except json.JSONDecodeError:
-                pass
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse scraped content for job {control_num}: {e}")
+                logging.getLogger('errors').error(f"JSON decode error for {control_num}: {e}\nContent: {scraped_sections[:200]}...")
+    
+    logger.info(f"Historical jobs with scraped sections: {jobs_with_scraped}/{len(historical_jobs)}")
+    logger.info(f"Historical jobs with actual content: {jobs_with_content}/{len(historical_jobs)}")
     
     # Flatten current jobs - extract MatchedObjectDescriptor content
     flattened_current_jobs = []
@@ -326,10 +394,18 @@ def run_rationalization(storage: ParquetJobStorage):
     duplicate_count = 0
     
     # Process historical records first
+    scraped_jobs_count = 0
+    scraped_applied_count = 0
     for hist_record in historical_jobs:
         control_num = str(hist_record.get('usajobsControlNumber', ''))
         if control_num and control_num not in processed_control_numbers:
             current_record = current_lookup.get(control_num)
+            
+            # Check if this job has scraped content
+            scraped_data = hist_record.get('scraped_content')
+            if scraped_data and scraped_data.get('content_sections'):
+                scraped_jobs_count += 1
+                logger.debug(f"Job {control_num} has scraped_content with sections: {list(scraped_data.get('content_sections', {}).keys())}")
             
             if current_record:
                 duplicate_count += 1
@@ -338,9 +414,9 @@ def run_rationalization(storage: ParquetJobStorage):
                 hist_mapped = rationalizer._map_fields(hist_record, 'historical_to_unified')
                 
                 # Add scraped content if available
-                if hist_record.get('scraped_content'):
-                    scraped_mapped = rationalizer._map_fields(hist_record['scraped_content'], 'scraped_to_unified')
-                    scraped_content = rationalizer._extract_scraped_content(hist_record['scraped_content'])
+                if scraped_data and scraped_data.get('content_sections'):
+                    scraped_mapped = rationalizer._map_fields(scraped_data, 'scraped_to_unified')
+                    scraped_content = rationalizer._extract_scraped_content(scraped_data)
                     scraped_mapped.update(scraped_content)
                     
                     # Add scraped data where historical doesn't have it
@@ -363,7 +439,7 @@ def run_rationalization(storage: ParquetJobStorage):
             unified_record = rationalizer.rationalize_job_record(
                 historical_data=hist_record,
                 current_data=current_record,
-                scraped_data=hist_record.get('scraped_content')
+                scraped_data=scraped_data
             )
             
             rationalized_records.append(unified_record)
@@ -381,6 +457,7 @@ def run_rationalization(storage: ParquetJobStorage):
     
     print(f"   📊 Total unified records: {len(rationalized_records)}")
     print(f"   🔄 Overlapping jobs: {duplicate_count}")
+    print(f"   🕷️ Jobs with scraped content: {scraped_jobs_count}")
     
     # Save results
     if rationalized_records:
@@ -395,6 +472,9 @@ def run_rationalization(storage: ParquetJobStorage):
     return storage
 
 def main():
+    # Set up logging first
+    logger = setup_logging()
+    
     parser = argparse.ArgumentParser(description='Run parallel USAJobs pipeline with Parquet storage')
     parser.add_argument('--start-date', default='2025-01-01',
                        help='Start date for historical jobs (YYYY-MM-DD)')
@@ -444,6 +524,27 @@ def main():
     # Run rationalization if requested
     if not args.no_rationalization:
         storage = run_rationalization(storage)
+        
+        # Run field overlap analysis
+        print("\n🔍 Running field overlap analysis...")
+        try:
+            overlap_df = storage.load_overlap_samples()
+            if not overlap_df.empty:
+                overlap_results = calculate_field_overlap(overlap_df)
+                if overlap_results['status'] == 'success':
+                    print(f"✅ Content matching analysis complete:")
+                    print(f"   Overlap jobs tested: {overlap_results['total_overlap_jobs']}")
+                    for field, stats in overlap_results['field_stats'].items():
+                        if stats['both_have_content'] > 0:
+                            print(f"   {field}: {stats['both_have_content']} comparisons, {stats['perfect_match_pct']:.1f}% perfect matches, {stats['avg_similarity']:.3f} avg similarity")
+                        else:
+                            print(f"   {field}: No overlapping content to compare")
+                else:
+                    print(f"⚠️ Overlap analysis failed: {overlap_results.get('message', 'Unknown error')}")
+            else:
+                print("⚠️ No overlap samples available for analysis")
+        except Exception as e:
+            print(f"⚠️ Overlap analysis error: {e}")
     
     # Generate QMD analysis report
     print("\n📊 Generating analysis report...")

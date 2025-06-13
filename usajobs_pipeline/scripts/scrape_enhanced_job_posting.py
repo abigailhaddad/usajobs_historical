@@ -30,11 +30,11 @@ from datetime import datetime
 
 # Content sections using Current API field names
 TARGET_SECTIONS = {
-    'Summary': ['Summary'],
+    'Summary': ['Summary', 'Overview'],
     'MajorDuties': ['Duties', 'Major Duties', 'Key Duties', 'Responsibilities', 'What You Will Do'],
     'QualificationSummary': ['Qualifications', 'Required Qualifications', 'Minimum Qualifications', 'Qualification Summary'],
-    'Requirements': ['Requirements', 'Conditions of Employment', 'Specialized Experience', 'Experience Requirements'],
-    'Education': ['Education', 'Educational Requirements', 'Education Requirements'],
+    'Requirements': ['Conditions of Employment', 'Specialized Experience', 'Experience Requirements'],
+    'Education': ['Education', 'Educational Requirements', 'Education Requirements', 'If you are relying on your education to meet qualification requirements:'],
     'HowToApply': ['How to Apply', 'Application Process', 'Application Instructions'],
     'Evaluations': ['Evaluation', 'How You Will Be Evaluated', 'Rating and Ranking'],
     'Benefits': ['Benefits', 'What We Offer', 'Compensation'],
@@ -68,9 +68,20 @@ def extract_section_by_headers(soup, header_variations):
                                string=lambda text: text and header_text.lower() in text.lower() if text else False)
         
         if headers:
-            content = extract_content_after_header(headers[0])
-            if content and len(content) > 50:  # Minimum content threshold
-                return content
+            # Try each header until we find one with reasonable content
+            for header in headers:
+                content = extract_content_after_header(header)
+                if content and content.strip():
+                    # Prefer content that's a reasonable length (not too long, not too short)
+                    content_len = len(content)
+                    if 500 < content_len < 5000:  # Reasonable content length
+                        return content
+            
+            # If no reasonable content found, use the first non-empty result
+            for header in headers:
+                content = extract_content_after_header(header)
+                if content and content.strip():
+                    return content
         
         # Approach 2: Class-based search
         class_name = header_text.lower().replace(' ', '-')
@@ -79,7 +90,7 @@ def extract_section_by_headers(soup, header_variations):
         
         for elem in class_elements:
             content = extract_element_content(elem)
-            if content and len(content) > 50:
+            if content and content.strip():
                 return content
         
         # Approach 3: ID-based search
@@ -88,7 +99,7 @@ def extract_section_by_headers(soup, header_variations):
         
         for elem in id_elements:
             content = extract_element_content(elem)
-            if content and len(content) > 50:
+            if content and content.strip():
                 return content
     
     return None
@@ -102,32 +113,65 @@ def extract_content_after_header(header_elem):
     current = header_elem.find_next_sibling()
     
     while current:
-        # Stop at next header
+        # Stop at next header (direct sibling)
         if current.name in ['h1', 'h2', 'h3', 'h4', 'h5'] or (
             current.name in ['dt', 'strong'] and len(current.get_text(strip=True)) < 100
         ):
             break
         
+        # Also stop if current element contains a header as its first child
+        if current.name and hasattr(current, 'children'):
+            first_child = next((child for child in current.children if hasattr(child, 'name') and child.name), None)
+            if first_child and first_child.name in ['h1', 'h2', 'h3', 'h4', 'h5']:
+                break
+        
         # Extract text content
         if current.name:
             text = current.get_text(separator=' ', strip=True)
-            if text and len(text) > 10:
+            if text and text.strip():
                 content_parts.append(text)
         
         current = current.find_next_sibling()
     
-    # Also try parent container approach
+    # Also try parent container approach - but be more selective
     if not content_parts:
         parent = header_elem.find_parent(['div', 'section', 'dd'])
         if parent:
-            # Get all text except the header itself
+            # Instead of taking all parent text, look for the first immediate content
+            # after this header but before any other headers
             header_text = header_elem.get_text(strip=True)
-            full_text = parent.get_text(separator=' ', strip=True)
-            content = full_text.replace(header_text, '', 1).strip()
-            if content:
-                content_parts.append(content)
+            
+            # Find the position of this header in the parent
+            header_found = False
+            for child in parent.descendants:
+                if child == header_elem:
+                    header_found = True
+                    continue
+                    
+                if header_found and hasattr(child, 'name'):
+                    # Stop if we hit another header
+                    if child.name in ['h1', 'h2', 'h3', 'h4', 'h5']:
+                        break
+                    # Collect text from this element if it's substantial
+                    if child.name and child.get_text(strip=True):
+                        text = child.get_text(separator=' ', strip=True)
+                        if len(text) > 50:  # Only substantial content
+                            content_parts.append(text)
+                            break  # Take only the first substantial content block
     
-    return '\n\n'.join(content_parts)
+    # Special handling for education content
+    result = '\n\n'.join(content_parts)
+    if not result.strip() and header_elem.get_text(strip=True).lower() in ['education', 'educational requirements']:
+        # Look harder for education content
+        parent = header_elem.find_parent(['div', 'section'])
+        if parent:
+            # Find any paragraphs or divs after the header
+            for elem in parent.find_all(['p', 'div', 'ul']):
+                text = elem.get_text(strip=True)
+                if text and text not in result:
+                    result += ' ' + text
+    
+    return result
 
 
 def extract_element_content(elem):

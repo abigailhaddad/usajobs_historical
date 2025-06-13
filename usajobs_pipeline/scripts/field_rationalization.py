@@ -50,7 +50,11 @@ class FieldRationalizer:
                 'workSchedule': 'work_schedule',
                 'teleworkEligible': 'telework_eligible',
                 'securityClearanceRequired': 'security_clearance_required',
-                'whoMayApply': 'hiring_path'
+                'whoMayApply': 'hiring_path',
+                # Add the fields from the database columns that are missing
+                'pay_scale': 'pay_scale',
+                'promotion_potential': 'promotion_potential', 
+                'total_openings': 'total_openings'
             },
             'current_to_unified': {
                 # Raw current API field names (MatchedObjectDescriptor)
@@ -179,6 +183,20 @@ class FieldRationalizer:
         - Scraped data supplements both sources
         """
         
+        import logging
+        logger = logging.getLogger()
+        
+        # Log what data sources we have
+        control_num = (historical_data or {}).get('usajobsControlNumber') or \
+                     (current_data or {}).get('MatchedObjectId') or \
+                     (current_data or {}).get('controlNumber') or 'unknown'
+        
+        logger.debug(f"Rationalizing job {control_num} - Historical: {bool(historical_data)}, Current: {bool(current_data)}, Scraped: {bool(scraped_data)}")
+        if scraped_data:
+            logger.debug(f"  Scraped data keys: {list(scraped_data.keys())}")
+            if 'content_sections' in scraped_data:
+                logger.debug(f"  Content sections: {list(scraped_data['content_sections'].keys()) if isinstance(scraped_data['content_sections'], dict) else 'not a dict'}")
+        
         unified_record = {}
         data_sources = []
         dedup_strategy = "none"
@@ -242,16 +260,29 @@ class FieldRationalizer:
         
         # Process scraped data (fills gaps and adds rich content)
         if scraped_data:
+            import logging
+            logger = logging.getLogger()
+            
             scraped_mapped = self._map_fields(scraped_data, 'scraped_to_unified')
             
             # Extract content from structured sections
             scraped_content = self._extract_scraped_content(scraped_data)
             scraped_mapped.update(scraped_content)
             
+            # Log what we found in scraped content
+            control_num = unified_record.get('control_number', 'unknown')
+            logger.debug(f"Job {control_num} - Scraped content fields: {list(scraped_content.keys())}")
+            
             # Add scraped data where no API data exists
             for field, value in scraped_mapped.items():
                 if field not in unified_record or not unified_record[field]:
                     unified_record[field] = value
+                    logger.debug(f"Job {control_num} - Added scraped {field}: {len(str(value))} chars")
+                else:
+                    # Log when we're NOT using scraped content
+                    existing_len = len(str(unified_record[field]))
+                    scraped_len = len(str(value))
+                    logger.debug(f"Job {control_num} - Kept existing {field} ({existing_len} chars) over scraped ({scraped_len} chars)")
             
             data_sources.append('scraping')
         
@@ -269,6 +300,9 @@ class FieldRationalizer:
     
     def _extract_scraped_content(self, scraped_data: Dict[str, Any]) -> Dict[str, str]:
         """Extract specific content fields from scraped content sections"""
+        import logging
+        logger = logging.getLogger()
+        
         content_fields = {}
         
         # Get content sections from new scraper format
@@ -303,6 +337,9 @@ class FieldRationalizer:
                         content_fields[unified_field] += f"\n\nEducation Requirements:\n{content}"
                     else:
                         content_fields[unified_field] = content
+                    logger.debug(f"Extracted {unified_field} from scraped {scraped_key}: {len(content)} chars")
+                else:
+                    logger.debug(f"Skipped {unified_field} from scraped {scraped_key}: only {len(content)} chars")
         
         # Also try to extract from full text if sections are missing
         full_text = scraped_data.get('full_text', '')
@@ -360,6 +397,63 @@ class FieldRationalizer:
                     
             except (json.JSONDecodeError, TypeError):
                 pass  # Skip if raw_data parsing fails
+        
+        # Special handling for nested historical API fields
+        if mapping_key == 'historical_to_unified':
+            # Extract job series from JobCategories array
+            if 'JobCategories' in source_data and source_data['JobCategories'] is not None:
+                job_categories = source_data['JobCategories']
+                
+                # Handle numpy arrays
+                if hasattr(job_categories, 'tolist'):
+                    job_categories = job_categories.tolist()
+                
+                if isinstance(job_categories, list) and job_categories:
+                    job_series = job_categories[0].get('series', '')
+                    if job_series:
+                        mapped_data['job_series'] = job_series
+            
+            # Extract locations from PositionLocations array
+            if 'PositionLocations' in source_data and source_data['PositionLocations'] is not None:
+                position_locations = source_data['PositionLocations']
+                
+                # Handle numpy arrays
+                if hasattr(position_locations, 'tolist'):
+                    position_locations = position_locations.tolist()
+                
+                if isinstance(position_locations, list) and position_locations:
+                    location_names = []
+                    for loc in position_locations:
+                        if isinstance(loc, dict):
+                            city = loc.get('positionLocationCity', '')
+                            state = loc.get('positionLocationState', '')
+                            if city and state and state != city:
+                                location_names.append(f"{city}, {state}")
+                            elif city:
+                                location_names.append(city)
+                    
+                    if location_names:
+                        # Limit to first 5 locations
+                        mapped_data['locations'] = ', '.join(location_names[:5])
+                        if len(location_names) > 5:
+                            mapped_data['locations'] += f' (and {len(location_names) - 5} more)'
+            
+            # Extract hiring paths from HiringPaths array
+            if 'HiringPaths' in source_data and source_data['HiringPaths'] is not None:
+                hiring_paths = source_data['HiringPaths']
+                
+                # Handle numpy arrays
+                if hasattr(hiring_paths, 'tolist'):
+                    hiring_paths = hiring_paths.tolist()
+                
+                if isinstance(hiring_paths, list) and hiring_paths:
+                    path_names = []
+                    for path in hiring_paths:
+                        if isinstance(path, dict) and 'hiringPath' in path:
+                            path_names.append(path['hiringPath'])
+                    
+                    if path_names:
+                        mapped_data['hiring_path'] = ', '.join(path_names)
         
         # Special handling for nested current API fields
         if mapping_key == 'current_to_unified':
@@ -513,6 +607,8 @@ class FieldRationalizer:
                 'WhatToExpectNext': 'what_to_expect_next',
                 'RequiredDocuments': 'required_documents',
                 'Education': 'education',
+                'Requirements': 'requirements',
+                'MajorDuties': 'major_duties',
                 'LowGrade': 'min_grade',
                 'HighGrade': 'max_grade'
             }
@@ -530,7 +626,9 @@ class FieldRationalizer:
                         # MajorDuties is often a list, join with newlines
                         mapped_data[unified_field] = '\n\n'.join(str(item) for item in value)
                     else:
-                        mapped_data[unified_field] = str(value).strip()
+                        cleaned_value = str(value).strip()
+                        if cleaned_value:  # Only store non-empty values
+                            mapped_data[unified_field] = cleaned_value
             
             # Extract HiringPath from UserArea.Details (better source than WhoMayApply)
             if 'HiringPath' in details and details['HiringPath'] is not None:

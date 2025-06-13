@@ -9,11 +9,16 @@ data/duckdb/*.duckdb.wal
 *.duckdb
 *.duckdb.wal
 
+# Parquet data files (large files, exclude from repo)
+data_parquet/
+*.parquet
+
 # CSV exports (include in repo for sharing)
 # data/exports/*.csv
 
 # Log files
-logs/*.log
+logs/
+*.log
 scripts/pipeline/logs/*.log
 
 # Temporary files

@@ -23,6 +23,7 @@ import seaborn as sns
 import sys
 sys.path.append('scripts')
 from parquet_storage import ParquetJobStorage
+from simple_validation import calculate_field_overlap, generate_simple_validation_html, generate_simple_validation_summary
 
 # Load data from Parquet files
 storage = ParquetJobStorage('data_parquet')
@@ -145,6 +146,34 @@ except Exception as e:
     print(f"Overlap analysis not available: {e}")
 ```
 
+## Field Overlap Analysis
+
+```{python}
+# Simple field overlap analysis
+try:
+    overlap_df = storage.load_overlap_samples()
+    
+    if not overlap_df.empty:
+        # Calculate field overlap
+        overlap_results = calculate_field_overlap(overlap_df)
+        
+        if overlap_results['status'] == 'success':
+            # Display summary
+            print(generate_simple_validation_summary(overlap_results))
+            
+            # Generate and display HTML table
+            from IPython.display import HTML, display
+            overlap_html = generate_simple_validation_html(overlap_results)
+            display(HTML(overlap_html))
+        else:
+            print(f"Overlap analysis failed: {overlap_results.get('message', 'Unknown error')}")
+    else:
+        print("No overlap samples available for analysis")
+        
+except Exception as e:
+    print(f"Overlap analysis not available: {e}")
+```
+
 ## Field Coverage Analysis
 
 ```{python}
@@ -159,59 +188,58 @@ if not unified_df.empty:
     
     field_coverage_data = []
     
-    # Historical data coverage
+    # Define the three categories
     hist_mask = unified_df['data_sources'].str.contains('historical', na=False)
-    hist_df = unified_df[hist_mask]
-    hist_total = len(hist_df)
-    
-    if hist_total > 0:
-        for field_name in analysis_fields:
-            if field_name in ['min_salary', 'max_salary', 'total_openings']:
-                # Numeric fields - check for non-null values
-                complete_count = hist_df[field_name].notna().sum()
-            elif field_name in ['open_date', 'close_date']:
-                # Date fields - check for non-null values
-                complete_count = hist_df[field_name].notna().sum()
-            else:
-                # String fields - check for non-null and non-empty values
-                complete_count = ((hist_df[field_name].notna()) & (hist_df[field_name] != '')).sum()
-            
-            percentage = round(complete_count * 100.0 / hist_total, 1) if hist_total > 0 else 0
-            
-            field_coverage_data.append({
-                'Source': 'Historical',
-                'Field': field_name,
-                'Complete': complete_count,
-                'Total': hist_total,
-                'Percentage': percentage
-            })
-    
-    # Current data coverage
     curr_mask = unified_df['data_sources'].str.contains('current', na=False)
-    curr_df = unified_df[curr_mask]
-    curr_total = len(curr_df)
     
-    if curr_total > 0:
-        for field_name in analysis_fields:
-            if field_name in ['min_salary', 'max_salary', 'total_openings']:
-                # Numeric fields - check for non-null values
-                complete_count = curr_df[field_name].notna().sum()
-            elif field_name in ['open_date', 'close_date']:
-                # Date fields - check for non-null values
-                complete_count = curr_df[field_name].notna().sum()
-            else:
-                # String fields - check for non-null and non-empty values
-                complete_count = ((curr_df[field_name].notna()) & (curr_df[field_name] != '')).sum()
-            
-            percentage = round(complete_count * 100.0 / curr_total, 1) if curr_total > 0 else 0
-            
-            field_coverage_data.append({
-                'Source': 'Current',
-                'Field': field_name,
-                'Complete': complete_count,
-                'Total': curr_total,
-                'Percentage': percentage
-            })
+    # Historical-only (no current API data)
+    hist_only_mask = hist_mask & ~curr_mask
+    hist_only_df = unified_df[hist_only_mask]
+    hist_only_total = len(hist_only_df)
+    
+    # Current-only (no historical API data)
+    curr_only_mask = curr_mask & ~hist_mask
+    curr_only_df = unified_df[curr_only_mask]
+    curr_only_total = len(curr_only_df)
+    
+    # Overlap (both historical AND current)
+    overlap_mask = hist_mask & curr_mask
+    overlap_df = unified_df[overlap_mask]
+    overlap_total = len(overlap_df)
+    
+    print(f"📊 Data source breakdown:")
+    print(f"   Historical-only: {hist_only_total:,} records")
+    print(f"   Current-only: {curr_only_total:,} records")
+    print(f"   Overlap: {overlap_total:,} records")
+    print()
+    
+    # Calculate coverage for each category
+    for source_name, source_df, source_total in [
+        ('Historical-only', hist_only_df, hist_only_total),
+        ('Current-only', curr_only_df, curr_only_total),
+        ('Overlap', overlap_df, overlap_total)
+    ]:
+        if source_total > 0:
+            for field_name in analysis_fields:
+                if field_name in ['min_salary', 'max_salary', 'total_openings']:
+                    # Numeric fields - check for non-null values
+                    complete_count = source_df[field_name].notna().sum()
+                elif field_name in ['open_date', 'close_date']:
+                    # Date fields - check for non-null values
+                    complete_count = source_df[field_name].notna().sum()
+                else:
+                    # String fields - check for non-null and non-empty values
+                    complete_count = ((source_df[field_name].notna()) & (source_df[field_name] != '')).sum()
+                
+                percentage = round(complete_count * 100.0 / source_total, 1) if source_total > 0 else 0
+                
+                field_coverage_data.append({
+                    'Source': source_name,
+                    'Field': field_name,
+                    'Complete': complete_count,
+                    'Total': source_total,
+                    'Percentage': percentage
+                })
     
     # Create DataFrame and pivot for better visualization
     if field_coverage_data:
@@ -230,18 +258,22 @@ if not unified_df.empty:
         other_fields = sorted([f for f in pivot_df.index if f not in field_order])
         pivot_df = pivot_df.reindex(existing_fields + other_fields)
         
-        print("📊 Field Coverage Comparison (% of records with data):")
+        print("📊 Field Coverage by Data Source Category (% of records with data):")
         print(pivot_df.to_string())
         
-        # Highlight fields with significant differences
-        print("\n🔍 Fields with Major Coverage Differences:")
-        if 'Historical' in pivot_df.columns and 'Current' in pivot_df.columns:
-            for field in pivot_df.index:
-                hist_val = pivot_df.loc[field, 'Historical']
-                curr_val = pivot_df.loc[field, 'Current']
-                diff = abs(hist_val - curr_val)
-                if diff > 20:
-                    print(f"   {field}: Historical={hist_val}%, Current={curr_val}% (diff={diff:.1f}%)")
+        # Show specific insights for key content fields
+        print("\n🔍 Key Content Fields Analysis:")
+        content_fields = ['requirements', 'education', 'benefits', 'major_duties', 'qualification_summary']
+        
+        for field in content_fields:
+            if field in pivot_df.index:
+                print(f"\n{field.replace('_', ' ').title()}:")
+                if 'Historical-only' in pivot_df.columns:
+                    print(f"   Historical-only: {pivot_df.loc[field, 'Historical-only']:.1f}% (from scraping)")
+                if 'Current-only' in pivot_df.columns:
+                    print(f"   Current-only: {pivot_df.loc[field, 'Current-only']:.1f}% (from API)")
+                if 'Overlap' in pivot_df.columns:
+                    print(f"   Overlap: {pivot_df.loc[field, 'Overlap']:.1f}% (from any source)")
 else:
     print("No unified data available for coverage analysis.")
 ```
