@@ -33,23 +33,24 @@ class FieldRationalizer:
         """Define field mappings between data sources"""
         return {
             'historical_to_unified': {
-                'control_number': 'control_number',
-                'position_title': 'position_title',
-                'hiring_agency_name': 'agency_name',
-                'hiring_department_name': 'department_name',
-                'hiring_subelement_name': 'sub_agency',
-                'job_series': 'job_series',
-                'minimum_grade': 'min_grade',
-                'maximum_grade': 'max_grade',
-                'minimum_salary': 'min_salary',
-                'maximum_salary': 'max_salary',
-                'position_open_date': 'open_date',
-                'position_close_date': 'close_date',
+                # Historical API uses camelCase field names
+                'usajobsControlNumber': 'control_number',
+                'positionTitle': 'position_title',
+                'hiringAgencyName': 'agency_name',
+                'hiringDepartmentName': 'department_name',
+                'hiringSubelementName': 'sub_agency',
+                'jobSeries': 'job_series',
+                'minimumGrade': 'min_grade',
+                'maximumGrade': 'max_grade',
+                'minimumSalary': 'min_salary',
+                'maximumSalary': 'max_salary',
+                'positionOpenDate': 'open_date',
+                'positionCloseDate': 'close_date',
                 'locations': 'locations',
-                'work_schedule': 'work_schedule',
-                'telework_eligible': 'telework_eligible',
-                'security_clearance_required': 'security_clearance_required',
-                'hiring_path': 'hiring_path'
+                'workSchedule': 'work_schedule',
+                'teleworkEligible': 'telework_eligible',
+                'securityClearanceRequired': 'security_clearance_required',
+                'whoMayApply': 'hiring_path'
             },
             'current_to_unified': {
                 # Raw current API field names (MatchedObjectDescriptor)
@@ -183,7 +184,7 @@ class FieldRationalizer:
         dedup_strategy = "none"
         
         # Determine deduplication strategy  
-        hist_control = str(historical_data.get('control_number', '')) if historical_data else ''
+        hist_control = str(historical_data.get('usajobsControlNumber', '')) if historical_data else ''
         curr_control = str(current_data.get('MatchedObjectId', current_data.get('controlNumber', ''))) if current_data else ''
         
         if hist_control and curr_control and hist_control == curr_control:
@@ -363,46 +364,96 @@ class FieldRationalizer:
         # Special handling for nested current API fields
         if mapping_key == 'current_to_unified':
             # Extract job series from JobCategory array
-            if 'JobCategory' in source_data and isinstance(source_data['JobCategory'], list):
-                if source_data['JobCategory']:
-                    job_series = source_data['JobCategory'][0].get('Code', '')
+            if 'JobCategory' in source_data and source_data['JobCategory'] is not None:
+                job_category_data = source_data['JobCategory']
+                
+                # Handle numpy arrays
+                if hasattr(job_category_data, 'tolist'):
+                    job_category_data = job_category_data.tolist()
+                
+                if isinstance(job_category_data, list) and job_category_data:
+                    job_series = job_category_data[0].get('Code', '')
                     if job_series:
                         mapped_data['job_series'] = job_series
             
+            # Extract locations from PositionLocation array
+            if 'PositionLocation' in source_data and source_data['PositionLocation'] is not None:
+                location_data = source_data['PositionLocation']
+                
+                # Handle numpy arrays
+                if hasattr(location_data, 'tolist'):
+                    location_data = location_data.tolist()
+                
+                if isinstance(location_data, list) and location_data:
+                    # Extract city/state names from location array
+                    location_names = []
+                    for loc in location_data:
+                        if isinstance(loc, dict):
+                            if 'LocationName' in loc:
+                                location_names.append(loc['LocationName'])
+                            elif 'CityName' in loc:
+                                city = loc['CityName']
+                                state = loc.get('CountrySubDivisionCode', '')
+                                if state and state != city:
+                                    location_names.append(f"{city}, {state}")
+                                else:
+                                    location_names.append(city)
+                    
+                    if location_names:
+                        # Limit to first 5 locations to avoid overly long strings
+                        mapped_data['locations'] = ', '.join(location_names[:5])
+                        if len(location_names) > 5:
+                            mapped_data['locations'] += f' (and {len(location_names) - 5} more)'
+            
             # Extract work schedule from PositionSchedule array
-            if 'PositionSchedule' in source_data and isinstance(source_data['PositionSchedule'], list):
-                if source_data['PositionSchedule']:
-                    schedule_code = source_data['PositionSchedule'][0].get('Code', '')
-                    schedule_name = source_data['PositionSchedule'][0].get('Name', '')
-                    # Map codes to meaningful values
-                    schedule_map = {
-                        '1': 'Full-Time',
-                        '2': 'Part-Time', 
-                        '3': 'Shift Work',
-                        '4': 'Intermittent',
-                        '5': 'Job Sharing',
-                        '6': 'Multiple Schedules'
-                    }
-                    mapped_data['work_schedule'] = schedule_map.get(schedule_code, schedule_name or schedule_code)
+            if 'PositionSchedule' in source_data and source_data['PositionSchedule'] is not None:
+                schedule_data = source_data['PositionSchedule']
+                
+                # Handle numpy arrays
+                if hasattr(schedule_data, 'tolist'):
+                    schedule_data = schedule_data.tolist()
+                
+                if isinstance(schedule_data, list) and schedule_data:
+                    schedule_info = schedule_data[0]
+                    if isinstance(schedule_info, dict):
+                        schedule_code = schedule_info.get('Code', '')
+                        schedule_name = schedule_info.get('Name', '')
+                        # Map codes to meaningful values
+                        schedule_map = {
+                            '1': 'Full-Time',
+                            '2': 'Part-Time', 
+                            '3': 'Shift Work',
+                            '4': 'Intermittent',
+                            '5': 'Job Sharing',
+                            '6': 'Multiple Schedules'
+                        }
+                        mapped_data['work_schedule'] = schedule_map.get(schedule_code, schedule_name or schedule_code)
             
             
             # Extract salary range from PositionRemuneration array
-            if 'PositionRemuneration' in source_data and isinstance(source_data['PositionRemuneration'], list):
-                if source_data['PositionRemuneration']:
-                    remun = source_data['PositionRemuneration'][0]
-                    if 'MinimumRange' in remun:
-                        try:
-                            mapped_data['min_salary'] = float(remun['MinimumRange'])
-                        except (ValueError, TypeError):
-                            pass
-                    if 'MaximumRange' in remun:
-                        try:
-                            mapped_data['max_salary'] = float(remun['MaximumRange'])
-                        except (ValueError, TypeError):
-                            pass
-                    # Also capture the salary text description
-                    if 'Description' in remun:
-                        mapped_data['salary_text'] = f"{remun.get('MinimumRange', '')} - {remun.get('MaximumRange', '')} {remun.get('Description', '')}"
+            if 'PositionRemuneration' in source_data and source_data['PositionRemuneration'] is not None:
+                remun_data = source_data['PositionRemuneration']
+                
+                # Handle numpy arrays
+                if hasattr(remun_data, 'tolist'):
+                    remun_data = remun_data.tolist()
+                
+                if isinstance(remun_data, list) and remun_data:
+                    remun = remun_data[0]
+                    if isinstance(remun, dict):
+                        if 'MinimumRange' in remun:
+                            try:
+                                mapped_data['min_salary'] = float(remun['MinimumRange'])
+                            except (ValueError, TypeError):
+                                pass
+                        if 'MaximumRange' in remun:
+                            try:
+                                mapped_data['max_salary'] = float(remun['MaximumRange'])
+                            except (ValueError, TypeError):
+                                pass
+                        # Also capture the salary text description
+                        if 'Description' in remun:
+                            mapped_data['salary_text'] = f"{remun.get('MinimumRange', '')} - {remun.get('MaximumRange', '')} {remun.get('Description', '')}"
             
             # Fallback to other salary fields
             elif 'OfferRemunerationMinimumAmount' in source_data:
@@ -416,11 +467,18 @@ class FieldRationalizer:
                 mapped_data['max_salary'] = source_data['RemunMax']
             
             # Extract grades from JobGrade array
-            if 'JobGrade' in source_data and isinstance(source_data['JobGrade'], list):
-                if source_data['JobGrade']:
-                    grade_info = source_data['JobGrade'][0]
-                    if 'Code' in grade_info:
-                        mapped_data['pay_scale'] = grade_info['Code']
+            if 'JobGrade' in source_data and source_data['JobGrade'] is not None:
+                job_grade_data = source_data['JobGrade']
+                
+                # Handle numpy arrays
+                if hasattr(job_grade_data, 'tolist'):
+                    job_grade_data = job_grade_data.tolist()
+                
+                if isinstance(job_grade_data, list) and job_grade_data:
+                    grade_info = job_grade_data[0]
+                    if isinstance(grade_info, dict):
+                        if 'Code' in grade_info:
+                            mapped_data['pay_scale'] = grade_info['Code']
             
             # Try to get grade info from other fields
             if 'LowGrade' in source_data:
@@ -460,8 +518,11 @@ class FieldRationalizer:
             }
             
             for api_field, unified_field in job_posting_fields.items():
-                if api_field in details and details[api_field]:
+                if api_field in details and details[api_field] is not None:
                     value = details[api_field]
+                    # Handle numpy arrays
+                    if hasattr(value, 'tolist'):
+                        value = value.tolist()
                     # Handle different data types
                     if isinstance(value, bool):
                         mapped_data[unified_field] = 'Yes' if value else 'No'
@@ -472,10 +533,13 @@ class FieldRationalizer:
                         mapped_data[unified_field] = str(value).strip()
             
             # Extract HiringPath from UserArea.Details (better source than WhoMayApply)
-            if 'HiringPath' in details and details['HiringPath']:
+            if 'HiringPath' in details and details['HiringPath'] is not None:
                 hiring_paths = details['HiringPath']
+                # Handle numpy arrays and lists
+                if hasattr(hiring_paths, 'tolist'):
+                    hiring_paths = hiring_paths.tolist()
                 if isinstance(hiring_paths, list):
-                    mapped_data['hiring_path'] = ', '.join(hiring_paths)
+                    mapped_data['hiring_path'] = ', '.join(str(p) for p in hiring_paths)
                 else:
                     mapped_data['hiring_path'] = str(hiring_paths)
             
@@ -493,8 +557,11 @@ class FieldRationalizer:
             }
             
             for detail_field, unified_field in userarea_mappings.items():
-                if detail_field in details and details[detail_field]:
+                if detail_field in details and details[detail_field] is not None:
                     value = details[detail_field]
+                    # Handle numpy arrays
+                    if hasattr(value, 'tolist'):
+                        value = value.tolist()
                     if isinstance(value, list):
                         value = ' '.join(str(v) for v in value)
                     mapped_data[unified_field] = str(value)
@@ -907,7 +974,7 @@ def main():
         print(f"   Loaded {len(current_data)} current records")
     
     # Create lookup dictionaries
-    historical_lookup = {str(record.get('control_number', '')): record for record in historical_data}
+    historical_lookup = {str(record.get('usajobsControlNumber', '')): record for record in historical_data}
     # Current data uses MatchedObjectId (raw API) or controlNumber (flattened)
     current_lookup = {str(record.get('MatchedObjectId', record.get('controlNumber', ''))): record for record in current_data}
     
@@ -920,7 +987,7 @@ def main():
     
     # Create all possible control numbers for comparison
     all_control_numbers = set()
-    hist_controls = {str(record.get('control_number', '')) for record in historical_data if record.get('control_number')}
+    hist_controls = {str(record.get('usajobsControlNumber', '')) for record in historical_data if record.get('usajobsControlNumber')}
     curr_controls = {str(record.get('MatchedObjectId', record.get('controlNumber', ''))) for record in current_data if record.get('MatchedObjectId') or record.get('controlNumber')}
     
     overlapping_controls = hist_controls.intersection(curr_controls)
@@ -935,48 +1002,44 @@ def main():
     if overlapping_controls:
         print(f"   📝 Sample overlapping controls: {list(overlapping_controls)[:5]}")
     
-    # Save overlap samples for analysis (first 3 overlaps)
+    # Save ALL overlap samples for analysis
     overlap_samples = []
-    overlap_count = 0
     
     # Process historical records first (will handle duplicates)
     for hist_record in historical_data:
-        control_num = str(hist_record.get('control_number', ''))
+        control_num = str(hist_record.get('usajobsControlNumber', ''))
         if control_num and control_num not in processed_control_numbers:
             current_record = current_lookup.get(control_num)
             
             if current_record:
                 duplicate_count += 1
                 
-                # Save first 3 overlaps for comparison analysis
-                if overlap_count < 3:
-                    # Save historical version with scraped content
-                    hist_mapped = rationalizer._map_fields(hist_record, 'historical_to_unified')
+                # Save ALL overlaps for comparison analysis
+                # Save historical version with scraped content
+                hist_mapped = rationalizer._map_fields(hist_record, 'historical_to_unified')
+                
+                # Add scraped content to historical sample if available
+                if hist_record.get('scraped_content'):
+                    scraped_mapped = rationalizer._map_fields(hist_record['scraped_content'], 'scraped_to_unified')
+                    scraped_content = rationalizer._extract_scraped_content(hist_record['scraped_content'])
+                    scraped_mapped.update(scraped_content)
                     
-                    # Add scraped content to historical sample if available
-                    if hist_record.get('scraped_content'):
-                        scraped_mapped = rationalizer._map_fields(hist_record['scraped_content'], 'scraped_to_unified')
-                        scraped_content = rationalizer._extract_scraped_content(hist_record['scraped_content'])
-                        scraped_mapped.update(scraped_content)
-                        
-                        # Add scraped data where historical doesn't have it
-                        for field, value in scraped_mapped.items():
-                            if field not in hist_mapped or not hist_mapped[field]:
-                                hist_mapped[field] = value
-                    
-                    hist_sample = {k: v for k, v in hist_mapped.items() if k in rationalizer.unified_schema}
-                    hist_sample['control_number'] = control_num
-                    hist_sample['source_type'] = 'historical'
-                    overlap_samples.append(hist_sample)
-                    
-                    # Save current version  
-                    curr_mapped = rationalizer._map_fields(current_record, 'current_to_unified')
-                    curr_sample = {k: v for k, v in curr_mapped.items() if k in rationalizer.unified_schema}
-                    curr_sample['control_number'] = control_num
-                    curr_sample['source_type'] = 'current'
-                    overlap_samples.append(curr_sample)
-                    
-                    overlap_count += 1
+                    # Add scraped data where historical doesn't have it
+                    for field, value in scraped_mapped.items():
+                        if field not in hist_mapped or not hist_mapped[field]:
+                            hist_mapped[field] = value
+                
+                hist_sample = {k: v for k, v in hist_mapped.items() if k in rationalizer.unified_schema}
+                hist_sample['control_number'] = control_num
+                hist_sample['source_type'] = 'historical'
+                overlap_samples.append(hist_sample)
+                
+                # Save current version  
+                curr_mapped = rationalizer._map_fields(current_record, 'current_to_unified')
+                curr_sample = {k: v for k, v in curr_mapped.items() if k in rationalizer.unified_schema}
+                curr_sample['control_number'] = control_num
+                curr_sample['source_type'] = 'current'
+                overlap_samples.append(curr_sample)
             
             unified_record = rationalizer.rationalize_job_record(
                 historical_data=hist_record,
