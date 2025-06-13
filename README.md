@@ -1,160 +1,180 @@
-# USAJobs Historical Data Pipeline
+# USAJobs Historic Data Collection
 
-Fetches historical job listings from the USAJobs Historical API and stores them in DuckDB for local analysis and PostgreSQL for cloud storage.
+This repository contains two complementary workflows for collecting and processing USAJobs data from different sources and time periods.
 
-## Data Coverage
+## Workflows Overview
 
-**Total**: 2,947,854 jobs across 11 years (2015-2025)
+### 1. Enhanced USAJobs Pipeline (`usajobs_pipeline/`)
 
-| Year | Job Count | Notes |
-|------|-----------|-------|
-| 2015 | 140 | ⚠️ Limited data - API coverage started mid-year |
-| 2016 | 3,879 | ⚠️ Limited data - partial API coverage |
-| 2017 | 237,145 | Full coverage |
-| 2018 | 327,905 | Full coverage |
-| 2019 | 349,256 | Full coverage |
-| 2020 | 326,376 | Full coverage |
-| 2021 | 366,943 | Full coverage |
-| 2022 | 441,487 | Full coverage |
-| 2023 | 454,036 | Full coverage |
-| 2024 | 367,193 | Full coverage |
-| 2025 | 73,494 | Current through June 7, 2025 |
+A comprehensive, modern pipeline that combines multiple data sources for enriched job posting analysis.
 
-**Coverage**: 90.6% of expected days (3,452/3,811 days) from 2015-01-01 to 2025-06-07
+**Key Features:**
+- **Multi-source integration**: Current API + Historical API + Web scraping
+- **Field rationalization**: Intelligent mapping between different data structures  
+- **Parallel processing**: Fast collection with multiple workers
+- **Parquet storage**: Lock-free parallel processing and efficient storage
+- **Validation**: 100% verified field accuracy on overlapping jobs
+- **Analysis reports**: Automated HTML report generation
 
-## Setup
+**Data Sources:**
+- Current USAJobs API (latest postings with rich metadata)
+- Historical USAJobs API (historical job posting data)
+- Web scraping (enhanced content from individual job pages)
 
-1. **Create virtual environment:**
+**Quick Start:**
+```bash
+cd usajobs_pipeline/
+
+# Run complete pipeline
+python run_pipeline_parquet.py --start-date 2025-01-01
+
+# Fast test run (no scraping)
+python run_pipeline_parquet.py --start-date 2025-01-01 --no-scraping
+
+# Custom configuration
+python run_pipeline_parquet.py \
+  --start-date 2025-01-01 \
+  --scrape-workers 8 \
+  --output-dir custom_data
+```
+
+**Output:**
+- `data_parquet/historical_jobs/` - Historical API data
+- `data_parquet/current_jobs/` - Current API data  
+- `data_parquet/unified_jobs/` - Rationalized unified dataset
+- `rationalization_analysis.html` - Analysis report
+
+### 2. Historical API Workflow (`workflows/historical_api/`)
+
+A focused, efficient workflow for collecting pure historical USAJobs API data (2015-2024).
+
+**Key Features:**
+- **API-only approach**: Fast, reliable historical data collection
+- **DuckDB storage**: Efficient structured data storage by year
+- **Parallel processing**: Multi-worker data collection
+- **PostgreSQL integration**: Optional export to PostgreSQL
+- **Date range filtering**: Collect specific time periods
+
+**Data Coverage:**
+- **Total**: 2,947,854+ jobs across 11 years (2015-2025)
+- **Coverage**: 90.6% of expected days from 2015-01-01 to present
+- **Peak years**: 2022-2024 with 400,000+ jobs per year
+
+**Quick Start:**
+```bash
+cd workflows/historical_api/
+
+# Collect full year of data
+python scripts/api/historic_pull_parallel.py \
+  --start-date 2023-01-01 \
+  --end-date 2023-12-31
+
+# Collect with PostgreSQL export
+python scripts/api/historic_pull_parallel.py \
+  --start-date 2023-01-01 \
+  --end-date 2023-12-31 \
+  --load-to-postgres \
+  --workers 8
+
+# Query collected data
+python scripts/database/query_duckdb.py data/historical_jobs_2023.duckdb
+```
+
+**Output:**
+- `data/historical_jobs_[YEAR].duckdb` - Annual historical data files
+- PostgreSQL tables (optional)
+
+## Workflow Comparison
+
+| Feature | Enhanced Pipeline | Historical API |
+|---------|------------------|----------------|
+| **Data Sources** | Current API + Historical API + Web scraping | Historical API only |
+| **Storage Format** | Parquet files | DuckDB |
+| **Time Range** | Current + Recent historical | 2015-2024 historical |
+| **Field Enrichment** | Yes (rationalization + scraping) | No (raw API data) |
+| **Analysis Reports** | Automated HTML reports | Manual querying |
+| **Use Case** | Rich analysis, data validation | Fast historical collection |
+| **Performance** | Moderate (due to scraping) | Fast (API-only) |
+
+## When to Use Which Workflow
+
+### Use Enhanced Pipeline When:
+- You need enriched job content (duties, qualifications, requirements)
+- You want unified data from multiple sources
+- You need current + historical data integration
+- You want automated analysis and validation reports
+- You're doing comprehensive job market analysis
+
+### Use Historical API Workflow When:
+- You need large-scale historical data collection (2015-2024)
+- You want fast, efficient API-only data collection
+- You're building time-series datasets
+- You need PostgreSQL integration
+- You want raw, unprocessed historical job data
+
+## Repository Structure
+
+```
+usajobs_historic/
+├── usajobs_pipeline/          # Enhanced multi-source pipeline
+│   ├── run_pipeline_parquet.py    # Main pipeline script
+│   ├── scripts/                   # Pipeline components
+│   ├── data_parquet/              # Parquet data storage
+│   └── README.md                  # Detailed pipeline docs
+├── workflows/historical_api/   # Historical API workflow
+│   ├── scripts/api/               # API collection scripts
+│   ├── scripts/database/          # Database operations
+│   ├── data/                      # DuckDB storage
+│   └── sql/                       # Database schemas
+├── shared/                     # Shared utilities
+│   └── api/                       # Common API functions
+├── analysis/                   # Analysis notebooks and reports
+└── archive/                    # Legacy code and documentation
+```
+
+## Dependencies
+
+Both workflows require:
+```bash
+pip install -r requirements.txt
+```
+
+Key packages:
+- `requests` - API calls
+- `pandas` - Data processing  
+- `duckdb` - Database operations
+- `tqdm` - Progress bars
+- `beautifulsoup4` - Web scraping (Enhanced Pipeline only)
+
+For Enhanced Pipeline reports:
+- `quarto` - Report generation ([installation guide](https://quarto.org/docs/get-started/))
+
+## Getting Started
+
+1. **Clone the repository**
    ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-2. **Install dependencies:**
-   ```bash
+   git clone <repository-url>
+   cd usajobs_historic
    pip install -r requirements.txt
    ```
 
-3. **Create .env file:**
-   ```bash
-   # .env
-   DATABASE_URL=your_postgresql_connection_string_here
-   ```
+2. **Choose your workflow:**
+   - For comprehensive analysis: Use Enhanced Pipeline
+   - For historical data collection: Use Historical API Workflow
 
-## File Structure
+3. **Check the individual README files** for detailed usage instructions:
+   - `usajobs_pipeline/README.md` - Enhanced Pipeline details
 
-```
-├── scripts/
-│   ├── historical/           # Data collection scripts
-│   │   ├── historic_pull.py     # Main data fetching script
-│   │   ├── load_historical_jobs.py
-│   │   └── retry_failed_dates.py
-│   ├── database/            # Database management
-│   │   ├── query_duckdb.py      # Interactive DuckDB queries
-│   │   ├── fast_postgres_export.py  # Parallel PostgreSQL export
-│   │   ├── reset_databases.py
-│   │   └── export_product_manager_jobs.py
-│   ├── monitoring/          # Progress tracking
-│   │   ├── check_counts.py      # Verify data integrity
-│   │   └── monitor_parallel.sh  # Real-time progress monitoring
-│   └── pipeline/            # Orchestration scripts
-│       ├── run_historical_pipeline.sh  # Main pipeline runner
-│       ├── run_parallel_years.sh
-│       ├── check_parallel_complete.sh
-│       └── export_all_to_postgres.sh
-├── data/
-│   ├── duckdb/             # Local analytical databases
-│   │   └── usajobs_YEAR.duckdb
-│   └── exports/            # CSV exports
-├── logs/                   # Pipeline execution logs
-└── sql/                    # Database schemas
-```
+## Data Sources
 
-## Run Pipeline
+### USAJobs APIs
+- **Current API**: `https://data.usajobs.gov/api/search` - Latest job postings
+- **Historical API**: `https://data.usajobs.gov/api/historicjoa` - Historical data (2015-2024)
 
-**Quick pulls:**
-```bash
-# Process jobs from last 24 hours
-scripts/pipeline/run_historical_pipeline.sh daily
+### Web Scraping
+- Individual job posting pages for enhanced content extraction
+- Used only in Enhanced Pipeline workflow
 
-# Process jobs from last 7 days
-scripts/pipeline/run_historical_pipeline.sh days 7
+## License
 
-# Process jobs from last 30 days
-scripts/pipeline/run_historical_pipeline.sh month
-```
-
-**Large pulls (use tmux for long-running jobs):**
-```bash
-# Process entire year (use tmux for unattended runs)
-tmux new-session -d -s usajobs-2024 'scripts/pipeline/run_historical_pipeline.sh range 2024-01-01 2024-12-31'
-
-# Watch progress
-./monitor.sh  # or tmux attach -t usajobs-2024
-
-# Check completion status
-scripts/pipeline/check_parallel_complete.sh
-
-# Check logs
-tail -f logs/range_pull_*.log
-
-# Kill session
-tmux kill-session -t usajobs-2024
-```
-
-**Parallel processing multiple years:**
-```bash
-# Process multiple years in parallel
-scripts/pipeline/run_parallel_years.sh 2020 2021 2022 2023
-
-# Monitor all parallel jobs
-./monitor.sh
-```
-
-**Custom date ranges:**
-```bash
-# Specific date range
-scripts/pipeline/run_historical_pipeline.sh range 2024-06-01 2024-06-30
-```
-
-## Data Storage
-
-- **DuckDB**: Local analytical database (`usajobs_YEAR.duckdb`) for fast querying
-- **PostgreSQL**: Cloud database for final storage (exported from DuckDB)
-- **Logs**: Stored in `logs/` directory
-
-## Query Data
-
-```bash
-# Interactive DuckDB queries
-python scripts/database/query_duckdb.py data/duckdb/usajobs_2024.duckdb
-
-# Export product manager jobs to CSV
-python scripts/database/export_product_manager_jobs.py
-
-# Fast parallel export to PostgreSQL
-python scripts/database/fast_postgres_export.py data/duckdb/usajobs_2024.duckdb 8
-
-# Export all databases to PostgreSQL
-scripts/pipeline/export_all_to_postgres.sh
-
-# Check data integrity
-python scripts/monitoring/check_counts.py
-
-# Reset databases (careful!)
-python scripts/database/reset_databases.py --postgresql  # Only reset PostgreSQL
-python scripts/database/reset_databases.py --all         # Reset both
-```
-
-## Performance
-
-- **Data collection**: ~12 seconds per day (handles 503 errors with retry)
-- **PostgreSQL export**: 13,322+ jobs/second with parallel processing
-- **Local queries**: Instant with DuckDB indexing
-
-The pipeline will:
-1. Fetch historical jobs from USAJobs Historical API
-2. Store data incrementally in DuckDB with deduplication  
-3. Export to PostgreSQL using fast parallel bulk inserts
-4. Handle 503 errors with exponential backoff retry logic
-5. Resume from existing data if interrupted
+See LICENSE file for details.

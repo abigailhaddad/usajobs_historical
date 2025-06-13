@@ -96,9 +96,9 @@ def scrape_single_job(args):
         logging.getLogger('errors').error(f"Exception scraping {control_number}: {str(e)}\n{traceback.format_exc()}")
         return control_number, None
 
-def parallel_scrape_jobs(historical_jobs, storage, scrape_workers):
+def parallel_scrape_jobs(jobs, storage, scrape_workers, job_type='historical'):
     """
-    Parallelize scraping across individual jobs
+    Parallelize scraping across individual jobs (works for both historical and current)
     """
     # Check which jobs already have scraping data
     already_scraped = storage.get_control_numbers_with_scraping()
@@ -106,16 +106,21 @@ def parallel_scrape_jobs(historical_jobs, storage, scrape_workers):
     
     # Find jobs that need scraping
     jobs_to_scrape = []
-    for job in historical_jobs:
-        control_number = str(job.get('usajobsControlNumber', '') or job.get('control_number', ''))
-        if control_number not in already_scraped:
+    for job in jobs:
+        # Different control number fields for historical vs current
+        if job_type == 'historical':
+            control_number = str(job.get('usajobsControlNumber', '') or job.get('control_number', ''))
+        else:  # current
+            control_number = str(job.get('MatchedObjectId', ''))
+            
+        if control_number and control_number not in already_scraped:
             jobs_to_scrape.append((job, control_number))
     
     if not jobs_to_scrape:
         print("⏭️ All jobs already scraped")
-        return historical_jobs
+        return jobs
     
-    print(f"🕷️ Scraping {len(jobs_to_scrape)} jobs with {scrape_workers} workers...")
+    print(f"🕷️ Scraping {len(jobs_to_scrape)} {job_type} jobs with {scrape_workers} workers...")
     
     # Prepare arguments for parallel scraping
     scrape_args = [(control_number,) for job, control_number in jobs_to_scrape]
@@ -131,14 +136,19 @@ def parallel_scrape_jobs(historical_jobs, storage, scrape_workers):
     
     # Add scraped content to jobs
     scraped_count = 0
-    for job in historical_jobs:
-        control_number = str(job.get('usajobsControlNumber', '') or job.get('control_number', ''))
+    for job in jobs:
+        # Use appropriate control number field
+        if job_type == 'historical':
+            control_number = str(job.get('usajobsControlNumber', '') or job.get('control_number', ''))
+        else:  # current
+            control_number = str(job.get('MatchedObjectId', ''))
+            
         if control_number in scraped_results:
             job['scraped_content'] = scraped_results[control_number]
             scraped_count += 1
     
-    print(f"✅ Successfully scraped {scraped_count}/{len(jobs_to_scrape)} jobs")
-    return historical_jobs
+    print(f"✅ Successfully scraped {scraped_count}/{len(jobs_to_scrape)} {job_type} jobs")
+    return jobs
 
 def fetch_and_scrape_batch(args):
     """
@@ -272,6 +282,11 @@ def run_pipeline(start_date: str, base_path: str, scrape_jobs: bool = True, scra
     }
     current_jobs = fetch_all_jobs(current_params)
     if current_jobs:
+        # Add scraping to current jobs if requested
+        if scrape_jobs:
+            print(f"\n🕷️ Scraping current jobs...")
+            current_jobs = parallel_scrape_jobs(current_jobs, storage, scrape_workers, job_type='current')
+        
         storage.save_current_jobs(current_jobs)
         print(f"✅ Saved {len(current_jobs)} current jobs")
     else:
@@ -295,7 +310,7 @@ def run_pipeline(start_date: str, base_path: str, scrape_jobs: bool = True, scra
     
     # Parallel scraping if requested
     if scrape_jobs:
-        historical_jobs = parallel_scrape_jobs(historical_jobs, storage, scrape_workers)
+        historical_jobs = parallel_scrape_jobs(historical_jobs, storage, scrape_workers, job_type='historical')
     
     # Save all historical jobs
     batch_id = f"0_{start_date}_{end_date}"
@@ -367,6 +382,11 @@ def run_rationalization(storage: ParquetJobStorage):
         if descriptor:
             # Add the MatchedObjectId to the descriptor for lookup
             descriptor['MatchedObjectId'] = job.get('MatchedObjectId')
+            
+            # Add scraped content if available (from current job scraping)
+            if 'scraped_content' in job:
+                descriptor['scraped_content'] = job['scraped_content']
+                
             flattened_current_jobs.append(descriptor)
     
     # Parse any JSON string fields in the flattened data
@@ -449,8 +469,27 @@ def run_rationalization(storage: ParquetJobStorage):
     for current_record in flattened_current_jobs:
         control_num = str(current_record.get('MatchedObjectId', ''))
         if control_num and control_num not in processed_control_numbers:
+            # Check if this current job has scraped content
+            scraped_data = current_record.get('scraped_content')
+            if scraped_data:
+                # Parse scraped content for current jobs (same as historical)
+                parsed_scraped = {'content_sections': {}}
+                if 'content_sections' in scraped_data:
+                    try:
+                        if isinstance(scraped_data['content_sections'], str):
+                            parsed_scraped['content_sections'] = json.loads(scraped_data['content_sections'])
+                        else:
+                            parsed_scraped['content_sections'] = scraped_data['content_sections']
+                        
+                        if 'extraction_stats' in scraped_data:
+                            parsed_scraped.update(scraped_data)
+                    except json.JSONDecodeError:
+                        logger.error(f"Failed to parse scraped content for current job {control_num}")
+                scraped_data = parsed_scraped if parsed_scraped['content_sections'] else None
+            
             unified_record = rationalizer.rationalize_job_record(
-                current_data=current_record
+                current_data=current_record,
+                scraped_data=scraped_data
             )
             rationalized_records.append(unified_record)
             processed_control_numbers.add(control_num)
