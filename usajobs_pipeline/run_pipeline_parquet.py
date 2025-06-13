@@ -445,12 +445,39 @@ def main():
     if not args.no_rationalization:
         storage = run_rationalization(storage)
     
-    # Cleanup old files
+    # Generate QMD analysis report
+    print("\n📊 Generating analysis report...")
+    try:
+        import subprocess
+        result = subprocess.run(['quarto', 'render', 'rationalization_analysis.qmd'], 
+                              capture_output=True, text=True, cwd='.')
+        if result.returncode == 0:
+            print("✅ Analysis report generated: rationalization_analysis.html")
+        else:
+            print(f"⚠️ QMD generation failed: {result.stderr}")
+    except FileNotFoundError:
+        print("⚠️ Quarto not found - skipping report generation")
+    except Exception as e:
+        print(f"⚠️ Error generating report: {e}")
+    
+    # Cleanup old files and worker data
     storage.cleanup_old_files(keep_latest_n=2)
+    
+    # Clean up worker files if they exist
+    print("\n🧹 Cleaning up worker files...")
+    worker_files = list(Path(args.output_dir).glob("worker_*.parquet"))
+    temp_files = list(Path(args.output_dir).glob("temp_*.parquet"))
+    
+    for file in worker_files + temp_files:
+        try:
+            file.unlink()
+            print(f"   Removed: {file.name}")
+        except Exception as e:
+            print(f"   Warning: Could not remove {file.name}: {e}")
     
     print(f"\n✅ PIPELINE COMPLETE!")
     print(f"📁 Data saved to: {args.output_dir}")
-    print(f"📊 Run analysis with: python analyze_parquet_results.py --data-dir {args.output_dir}")
+    print(f"📊 View report: rationalization_analysis.html")
 
 if __name__ == "__main__":
     main()
