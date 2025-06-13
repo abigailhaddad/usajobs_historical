@@ -30,6 +30,7 @@ from datetime import datetime
 
 # Content sections using Current API field names
 TARGET_SECTIONS = {
+    'Summary': ['Summary'],
     'MajorDuties': ['Duties', 'Major Duties', 'Key Duties', 'Responsibilities', 'What You Will Do'],
     'QualificationSummary': ['Qualifications', 'Required Qualifications', 'Minimum Qualifications', 'Qualification Summary'],
     'Requirements': ['Requirements', 'Conditions of Employment', 'Specialized Experience', 'Experience Requirements'],

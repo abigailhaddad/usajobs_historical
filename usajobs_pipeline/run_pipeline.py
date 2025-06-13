@@ -29,6 +29,8 @@ import requests
 import time
 from pathlib import Path
 from datetime import datetime, timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from tqdm import tqdm
 
 
 def setup_directories():
@@ -41,10 +43,86 @@ def setup_directories():
         dir_path.mkdir(exist_ok=True)
     
     return base_dir
-def fetch_recent_historical_jobs(num_jobs=None, start_date_str='2025-01-01'):
-    """Fetch recent historical jobs using correct pagination"""
+def fetch_jobs_for_date_range(date_str, output_name, base_dir):
+    """Fetch jobs for a specific date and save to individual database"""
+    try:
+        print(f"🔎 Fetching jobs for {date_str}")
+        day_jobs = fetch_all_jobs_for_date(date_str)
+        
+        if day_jobs:
+            # Create individual database for this date
+            db_path = base_dir / "data" / f"temp_jobs_{date_str}_{output_name}.duckdb"
+            create_historical_database_for_jobs(day_jobs, db_path)
+            print(f"  ✅ {len(day_jobs)} jobs saved to {db_path.name}")
+            return db_path, len(day_jobs)
+        else:
+            print(f"  📭 No jobs found for {date_str}")
+            return None, 0
+            
+    except Exception as e:
+        print(f"  ⚠️ Error for {date_str}: {e}")
+        return None, 0
+
+def fetch_recent_historical_jobs_parallel(num_jobs=None, start_date_str='2025-01-01', output_name="", max_workers=4):
+    """Fetch recent historical jobs using parallel processing by date"""
     start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-    print(f"📊 Fetching {'ALL' if not num_jobs else num_jobs} historical jobs since {start_date_str}...")
+    print(f"📊 Fetching {'ALL' if not num_jobs else num_jobs} historical jobs since {start_date_str} (parallel)...")
+
+    end_date = datetime.now()
+    days_to_fetch = (end_date - start_date).days
+    base_dir = Path(__file__).parent
+
+    # Generate list of dates to fetch
+    dates_to_fetch = []
+    for days_back in range(days_to_fetch):
+        date = end_date - timedelta(days=days_back)
+        dates_to_fetch.append(date.strftime('%Y-%m-%d'))
+
+    print(f"🗓️ Processing {len(dates_to_fetch)} dates with {max_workers} workers")
+
+    temp_dbs = []
+    total_jobs = 0
+    
+    # Process dates in parallel
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # Submit all tasks
+        future_to_date = {
+            executor.submit(fetch_jobs_for_date_range, date_str, output_name, base_dir): date_str 
+            for date_str in dates_to_fetch
+        }
+        
+        # Collect results as they complete with progress bar
+        with tqdm(total=len(dates_to_fetch), desc="📅 Fetching by date", unit="date") as pbar:
+            for future in as_completed(future_to_date):
+                date_str = future_to_date[future]
+                try:
+                    db_path, job_count = future.result()
+                    if db_path:
+                        temp_dbs.append(db_path)
+                        total_jobs += job_count
+                        pbar.set_postfix({"jobs": total_jobs, "files": len(temp_dbs)})
+                        
+                        # Stop early if we have enough jobs
+                        if num_jobs is not None and total_jobs >= num_jobs:
+                            print(f"🎯 Reached target of {num_jobs} jobs, stopping early")
+                            # Cancel remaining futures
+                            for f in future_to_date:
+                                if not f.done():
+                                    f.cancel()
+                            break
+                            
+                except Exception as e:
+                    print(f"  ❌ Failed to process {date_str}: {e}")
+                finally:
+                    pbar.update(1)
+
+    print(f"📦 Collected {total_jobs} total jobs across {len(temp_dbs)} date files")
+    return temp_dbs, total_jobs
+
+def fetch_recent_historical_jobs_sequential(num_jobs=None, start_date_str='2025-01-01'):
+    """Fetch recent historical jobs using sequential processing (no temp files)"""
+    start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+    print(f"📊 Fetching {'ALL' if not num_jobs else num_jobs} historical jobs since {start_date_str} (sequential)...")
 
     end_date = datetime.now()
     days_to_fetch = (end_date - start_date).days
@@ -52,32 +130,35 @@ def fetch_recent_historical_jobs(num_jobs=None, start_date_str='2025-01-01'):
     all_jobs = []
     seen_control_numbers = set()
 
+    # Generate dates to fetch
+    dates_to_fetch = []
     for days_back in range(days_to_fetch):
-        if num_jobs is not None and len(all_jobs) >= num_jobs:
-            break
-
         date = end_date - timedelta(days=days_back)
-        date_str = date.strftime('%Y-%m-%d')
-        print(f"🔎 Fetching jobs for {date_str}")
+        dates_to_fetch.append(date.strftime('%Y-%m-%d'))
 
-        try:
-            day_jobs = fetch_all_jobs_for_date(date_str)
+    # Process dates sequentially with progress bar
+    with tqdm(dates_to_fetch, desc="📅 Fetching by date", unit="date") as pbar:
+        for date_str in pbar:
+            try:
+                day_jobs = fetch_all_jobs_for_date(date_str)
 
-            # Deduplicate by control number
-            new_jobs = [j for j in day_jobs if j.get("usajobsControlNumber") not in seen_control_numbers]
-            all_jobs.extend(new_jobs)
-            seen_control_numbers.update(j.get("usajobsControlNumber") for j in new_jobs)
+                # Deduplicate by control number
+                new_jobs = [j for j in day_jobs if j.get("usajobsControlNumber") not in seen_control_numbers]
+                all_jobs.extend(new_jobs)
+                seen_control_numbers.update(j.get("usajobsControlNumber") for j in new_jobs)
 
-            print(f"  ✅ {len(new_jobs)} new jobs added (running total: {len(all_jobs)})")
+                pbar.set_postfix({"jobs": len(all_jobs)})
 
-            if num_jobs is not None and len(all_jobs) >= num_jobs:
-                break
+                # Stop early if we have enough jobs
+                if num_jobs is not None and len(all_jobs) >= num_jobs:
+                    print(f"🎯 Reached target of {num_jobs} jobs, stopping early")
+                    break
 
-        except Exception as e:
-            print(f"  ⚠️ Error for {date_str}: {e}")
-            continue
+            except Exception as e:
+                print(f"  ⚠️ Error for {date_str}: {e}")
+                continue
 
-        time.sleep(0.1)
+            time.sleep(0.1)
 
     print(f"📦 Collected {len(all_jobs)} total jobs")
     return all_jobs
@@ -118,22 +199,13 @@ def fetch_all_jobs_for_date(date_str):
     return all_jobs
 
 
-def create_historical_database(jobs, output_name):
-    """Create historical jobs database"""
-    print("💾 Creating historical jobs database...")
-    
-    base_dir = Path(__file__).parent
-    db_path = base_dir / "data" / f"historical_jobs_{output_name}.duckdb"
-    
+def create_historical_database_for_jobs(jobs, db_path):
+    """Create historical jobs database for a specific set of jobs"""
     conn = duckdb.connect(str(db_path))
-    
-    # Drop existing tables
-    conn.execute("DROP TABLE IF EXISTS historical_jobs")
-    conn.execute("DROP TABLE IF EXISTS scraped_jobs")
     
     # Create historical jobs table
     conn.execute("""
-        CREATE TABLE historical_jobs (
+        CREATE TABLE IF NOT EXISTS historical_jobs (
             control_number BIGINT PRIMARY KEY,
             announcement_number VARCHAR,
             hiring_agency_name VARCHAR,
@@ -157,7 +229,7 @@ def create_historical_database(jobs, output_name):
     
     # Create scraped jobs table
     conn.execute("""
-        CREATE TABLE scraped_jobs (
+        CREATE TABLE IF NOT EXISTS scraped_jobs (
             control_number VARCHAR PRIMARY KEY,
             scraped_date TIMESTAMP,
             scraped_content JSON,
@@ -167,7 +239,6 @@ def create_historical_database(jobs, output_name):
     """)
     
     # Insert historical jobs
-    successful_inserts = 0
     for job in jobs:
         try:
             control_number = job.get("usajobsControlNumber")
@@ -202,13 +273,104 @@ def create_historical_database(jobs, output_name):
                 ", ".join([c.get("series", "") for c in job.get("JobCategories", [])]),
                 json.dumps(job)
             ])
-            successful_inserts += 1
         except Exception as e:
             print(f"  ⚠️ Error inserting job {control_number}: {e}")
             continue
     
     conn.close()
-    print(f"  ✅ Created database with {successful_inserts} jobs")
+
+def merge_historical_databases(temp_dbs, output_name):
+    """Merge multiple temporary databases into final historical database"""
+    print(f"🔗 Merging {len(temp_dbs)} temporary databases...")
+    
+    base_dir = Path(__file__).parent
+    final_db_path = base_dir / "data" / f"historical_jobs_{output_name}.duckdb"
+    
+    # Create final database
+    conn = duckdb.connect(str(final_db_path))
+    
+    # Drop existing tables
+    conn.execute("DROP TABLE IF EXISTS historical_jobs")
+    conn.execute("DROP TABLE IF EXISTS scraped_jobs")
+    
+    # Create tables with same structure
+    conn.execute("""
+        CREATE TABLE historical_jobs (
+            control_number BIGINT PRIMARY KEY,
+            announcement_number VARCHAR,
+            hiring_agency_name VARCHAR,
+            hiring_department_name VARCHAR,
+            hiring_subelement_name VARCHAR,
+            position_title VARCHAR,
+            minimum_grade VARCHAR,
+            maximum_grade VARCHAR,
+            minimum_salary DECIMAL,
+            maximum_salary DECIMAL,
+            position_open_date DATE,
+            position_close_date DATE,
+            locations VARCHAR,
+            work_schedule VARCHAR,
+            travel_requirement VARCHAR,
+            job_series VARCHAR,
+            raw_data JSON,
+            inserted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
+    conn.execute("""
+        CREATE TABLE scraped_jobs (
+            control_number VARCHAR PRIMARY KEY,
+            scraped_date TIMESTAMP,
+            scraped_content JSON,
+            scraping_success BOOLEAN,
+            error_message VARCHAR
+        )
+    """)
+    
+    total_jobs = 0
+    
+    # Merge each temporary database with progress bar
+    with tqdm(temp_dbs, desc="🔗 Merging databases", unit="file") as pbar:
+        for temp_db in pbar:
+            try:
+                # Attach temporary database (escape single quotes in path)
+                safe_path = str(temp_db).replace("'", "''")
+                conn.execute(f"ATTACH '{safe_path}' AS temp_db")
+                
+                # Insert data with deduplication using ON CONFLICT
+                result = conn.execute("""
+                    INSERT INTO historical_jobs 
+                    SELECT * FROM temp_db.historical_jobs
+                    ON CONFLICT (control_number) DO NOTHING
+                """)
+                
+                # Get count of inserted rows
+                count = conn.execute("SELECT changes()").fetchone()[0]
+                total_jobs += count
+                pbar.set_postfix({"total_jobs": total_jobs})
+                
+                # Detach temporary database
+                conn.execute("DETACH temp_db")
+                
+                # Clean up temporary file
+                temp_db.unlink()
+                
+            except Exception as e:
+                print(f"  ⚠️ Error merging {temp_db}: {e}")
+    
+    conn.close()
+    print(f"  ✅ Created final database with {total_jobs} unique jobs")
+    return final_db_path
+
+def create_historical_database(jobs, output_name):
+    """Create historical jobs database (legacy function for backwards compatibility)"""
+    print("💾 Creating historical jobs database...")
+    
+    base_dir = Path(__file__).parent
+    db_path = base_dir / "data" / f"historical_jobs_{output_name}.duckdb"
+    
+    create_historical_database_for_jobs(jobs, db_path)
+    print(f"  ✅ Created database with {len(jobs)} jobs")
     return db_path
 
 
@@ -225,9 +387,48 @@ def fetch_current_jobs():
     return result.returncode == 0
 
 
-def scrape_jobs(db_path, num_to_scrape=None):
-    """Scrape job postings for enhanced content"""
-    print(f"🕷️ Scraping job postings...")
+def scrape_single_job(control_number, db_path):
+    """Scrape a single job posting"""
+    try:
+        # Import scraping function
+        sys.path.append(str(Path(__file__).parent / "scripts"))
+        from scrape_enhanced_job_posting import scrape_enhanced_job_posting
+        
+        conn = duckdb.connect(str(db_path))
+        
+        # Check if already scraped
+        existing = conn.execute("SELECT control_number FROM scraped_jobs WHERE control_number = ?", [str(control_number)]).fetchone()
+        if existing:
+            conn.close()
+            return True, f"Already scraped: {control_number}"
+        
+        result = scrape_enhanced_job_posting(str(control_number))
+        
+        conn.execute("""
+            INSERT OR REPLACE INTO scraped_jobs 
+            (control_number, scraped_date, scraped_content, scraping_success, error_message)
+            VALUES (?, ?, ?, ?, ?)
+        """, [
+            str(control_number),
+            datetime.now().isoformat(),
+            json.dumps(result) if result else None,
+            result.get('status') == 'success' if result else False,
+            result.get('error') if result and result.get('status') == 'error' else None
+        ])
+        
+        conn.close()
+        
+        if result and result.get('status') == 'success':
+            return True, f"Successfully scraped: {control_number}"
+        else:
+            return False, f"Failed to scrape: {control_number}"
+            
+    except Exception as e:
+        return False, f"Error scraping {control_number}: {e}"
+
+def scrape_jobs_parallel(db_path, num_to_scrape=None, max_workers=8):
+    """Scrape job postings for enhanced content using parallel processing"""
+    print(f"🕷️ Scraping job postings (parallel with {max_workers} workers)...")
     
     conn = duckdb.connect(str(db_path))
     
@@ -237,45 +438,39 @@ def scrape_jobs(db_path, num_to_scrape=None):
     else:
         control_numbers = conn.execute("SELECT control_number FROM historical_jobs").fetchall()
     
+    conn.close()
+    
     print(f"  📄 Scraping {len(control_numbers)} jobs...")
     
-    # Import scraping function
-    sys.path.append(str(Path(__file__).parent / "scripts"))
-    from scrape_enhanced_job_posting import scrape_enhanced_job_posting
-    
     success_count = 0
-    for i, (control_number,) in enumerate(control_numbers, 1):
-        try:
-            print(f"  📄 {i}/{len(control_numbers)}: {control_number}")
-            
-            # Check if already scraped
-            existing = conn.execute("SELECT control_number FROM scraped_jobs WHERE control_number = ?", [str(control_number)]).fetchone()
-            if existing:
-                success_count += 1
-                continue
-            
-            result = scrape_enhanced_job_posting(str(control_number))
-            
-            conn.execute("""
-                INSERT OR REPLACE INTO scraped_jobs 
-                (control_number, scraped_date, scraped_content, scraping_success, error_message)
-                VALUES (?, ?, ?, ?, ?)
-            """, [
-                str(control_number),
-                datetime.now().isoformat(),
-                json.dumps(result) if result else None,
-                result.get('status') == 'success' if result else False,
-                result.get('error') if result and result.get('status') == 'error' else None
-            ])
-            
-            if result and result.get('status') == 'success':
-                success_count += 1
-                
-        except Exception as e:
-            print(f"    ❌ Error scraping {control_number}: {e}")
     
-    conn.close()
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # Submit all scraping tasks
+        future_to_control_number = {
+            executor.submit(scrape_single_job, control_number[0], db_path): control_number[0] 
+            for control_number in control_numbers
+        }
+        
+        # Process completed tasks with progress bar
+        with tqdm(total=len(control_numbers), desc="🕷️ Scraping jobs", unit="job") as pbar:
+            for future in as_completed(future_to_control_number):
+                control_number = future_to_control_number[future]
+                try:
+                    success, message = future.result()
+                    if success:
+                        success_count += 1
+                    pbar.set_postfix({"success": success_count, "rate": f"{success_count/pbar.n*100:.1f}%" if pbar.n > 0 else "0%"})
+                        
+                except Exception as e:
+                    print(f"    ❌ Error processing {control_number}: {e}")
+                finally:
+                    pbar.update(1)
+    
     print(f"  ✅ Successfully scraped {success_count}/{len(control_numbers)} jobs")
+
+def scrape_jobs(db_path, num_to_scrape=None):
+    """Scrape job postings for enhanced content (legacy function)"""
+    scrape_jobs_parallel(db_path, num_to_scrape)
 
 
 def run_field_rationalization(historical_db, output_name):
@@ -365,6 +560,14 @@ def main():
                        help='Custom name for output files (default: auto-generated)')
     parser.add_argument('--no-report', action='store_true',
                        help='Skip HTML report generation (reports are generated by default)')
+    parser.add_argument('--skip-fetch', action='store_true',
+                       help='Skip historical job fetching (use existing database)')
+    parser.add_argument('--skip-current', action='store_true',
+                       help='Skip current job fetching (use existing file)')
+    parser.add_argument('--skip-scraping', action='store_true',
+                       help='Skip job scraping step')
+    parser.add_argument('--scraping-only', action='store_true',
+                       help='Only run scraping step (requires existing historical database)')
     
     args = parser.parse_args()
     
@@ -385,22 +588,50 @@ def main():
     print("=" * 50)
     
     try:
-        # Step 1: Fetch historical jobs
-        historical_jobs = fetch_recent_historical_jobs(args.historical_jobs, args.start_date)
-        if not historical_jobs:
-            print("❌ No historical jobs found")
-            return 1
+        # Handle scraping-only mode
+        if args.scraping_only:
+            print("🕷️ SCRAPING-ONLY MODE")
+            historical_db = base_dir / "data" / f"historical_jobs_{args.output_name}.duckdb"
+            if not historical_db.exists():
+                print(f"❌ Historical database not found: {historical_db}")
+                return 1
+            
+            print(f"📊 Using existing database: {historical_db.name}")
+            scrape_jobs_parallel(historical_db, None)
+            print("✅ Scraping complete!")
+            return 0
         
-        # Step 2: Create historical database
-        historical_db = create_historical_database(historical_jobs, args.output_name)
+        # Step 1: Fetch historical jobs (using simple sequential approach for now)
+        if not args.skip_fetch:
+            print("📊 Using sequential fetching to avoid merge issues...")
+            # Use the original non-parallel function
+            historical_jobs = fetch_recent_historical_jobs_sequential(args.historical_jobs, args.start_date)
+            if not historical_jobs:
+                print("❌ No historical jobs found")
+                return 1
+            
+            # Step 2: Create historical database directly
+            historical_db = create_historical_database(historical_jobs, args.output_name)
+        else:
+            print("⏭️ Skipping historical job fetching")
+            historical_db = base_dir / "data" / f"historical_jobs_{args.output_name}.duckdb"
+            if not historical_db.exists():
+                print(f"❌ Historical database not found: {historical_db}")
+                return 1
         
-        # Step 3: Scrape jobs (always)
-        scrape_jobs(historical_db, None)
+        # Step 3: Scrape jobs in parallel (unless skipped)
+        if not args.skip_scraping:
+            scrape_jobs_parallel(historical_db, None)
+        else:
+            print("⏭️ Skipping job scraping")
         
-        # Step 4: Fetch current jobs
-        if not fetch_current_jobs():
-            print("❌ Current jobs fetch failed")
-            return 1
+        # Step 4: Fetch current jobs (unless skipped)
+        if not args.skip_current:
+            if not fetch_current_jobs():
+                print("❌ Current jobs fetch failed")
+                return 1
+        else:
+            print("⏭️ Skipping current job fetching")
         
         # Step 5: Run field rationalization
         unified_db = run_field_rationalization(historical_db, args.output_name)

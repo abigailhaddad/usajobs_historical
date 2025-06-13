@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Connect to the unified dataset
-conn = duckdb.connect("data/unified_pipeline_20250612_150437.duckdb")
+conn = duckdb.connect("data/unified_pipeline_20250613_042206.duckdb")
 ```
 
 ## Dataset Overview
@@ -36,10 +36,28 @@ data_sources = conn.execute("SELECT data_sources, COUNT(*) FROM unified_jobs GRO
 
 print(f"📊 Total Records: {total_records:,}")
 print(f"📅 Date Range: {date_range[0]} to {date_range[1]}")
-print(f"📈 Average Confidence: {conn.execute('SELECT AVG(confidence_score) FROM unified_jobs').fetchone()[0]:.3f}")
 print("\n🔄 Data Sources:")
-for source, count in data_sources:
-    print(f"   {json.loads(source)[0] if source else 'Unknown'}: {count:,} records")
+
+# Count overlaps and unique sources
+current_only = 0
+historical_only = 0
+overlap = 0
+
+for sources_json, count in data_sources:
+    if sources_json:
+        sources_list = json.loads(sources_json)
+        if 'current_api' in sources_list and any('historical' in s for s in sources_list):
+            overlap += count
+        elif 'current_api' in sources_list:
+            current_only += count
+        else:
+            historical_only += count
+
+print(f"   📘 Current API only: {current_only:,} jobs")
+print(f"   📗 Historical API only: {historical_only:,} jobs") 
+print(f"   🔄 Overlap (in both): {overlap:,} jobs")
+print(f"\n   ⚠️ Note: The {overlap:,} overlapping jobs appear in both current and historical data.")
+print(f"   These are being kept with current API data taking priority.")
 ```
 
 ## Data Source Comparison
@@ -47,161 +65,190 @@ for source, count in data_sources:
 ### Sample Overlapping Jobs
 
 ```{python}
-# Find a couple overlapping jobs for side-by-side comparison
-overlap_jobs = conn.execute("""
-    WITH historical_controls AS (
-        SELECT DISTINCT control_number FROM unified_jobs WHERE data_sources LIKE '%historical%'
-    ),
-    current_controls AS (
-        SELECT DISTINCT control_number FROM unified_jobs WHERE data_sources LIKE '%current%'
-    )
-    SELECT h.control_number
-    FROM historical_controls h
-    INNER JOIN current_controls c ON h.control_number = c.control_number
-    ORDER BY RANDOM()
-    LIMIT 2
-""").fetchall()
-
-if overlap_jobs:
-    for i, (control_num,) in enumerate(overlap_jobs, 1):
-        print(f"EXAMPLE {i}: Job {control_num}")
-        print("-" * 50)
+# Check if overlap samples table exists and has data
+try:
+    overlap_samples = conn.execute("SELECT * FROM overlap_samples ORDER BY control_number, source_type").fetchall()
+    
+    if overlap_samples:
+        # Get field names
+        field_info = conn.execute("PRAGMA table_info(overlap_samples)").fetchall()
+        field_names = [row[1] for row in field_info if row[1] not in ['control_number', 'source_type']]
         
-        # Get key fields from both sources
-        hist_job = conn.execute("""
-            SELECT position_title, agency_name, job_series, min_salary, max_salary, 
-                   work_schedule, major_duties, qualification_summary
-            FROM unified_jobs 
-            WHERE control_number = ? AND data_sources LIKE '%historical%'
-        """, [control_num]).fetchone()
+        # Group by control number
+        control_groups = {}
+        for row in overlap_samples:
+            control_num = row[0]
+            source_type = row[1] 
+            if control_num not in control_groups:
+                control_groups[control_num] = {}
+            control_groups[control_num][source_type] = row[2:]  # Skip control_number and source_type
         
-        curr_job = conn.execute("""
-            SELECT position_title, agency_name, job_series, min_salary, max_salary,
-                   work_schedule, major_duties, qualification_summary
-            FROM unified_jobs
-            WHERE control_number = ? AND data_sources LIKE '%current%'
-        """, [control_num]).fetchone()
-        
-        fields = ['Position Title', 'Agency', 'Job Series', 'Min Salary', 'Max Salary', 
-                 'Work Schedule', 'Major Duties', 'Qualifications']
-        
-        print(f"{'Field':<15} {'Historical':<30} {'Current':<30}")
-        print("-" * 75)
-        
-        for j, field in enumerate(fields):
-            hist_val = hist_job[j] if hist_job and hist_job[j] else "❌"
-            curr_val = curr_job[j] if curr_job and curr_job[j] else "❌"
-            
-            # Format for display
-            if isinstance(hist_val, (int, float)) and 'Salary' in field:
-                hist_val = f"${hist_val:,.0f}" if hist_val != "❌" else "❌"
-            elif hist_val != "❌" and len(str(hist_val)) > 27:
-                hist_val = str(hist_val)[:27] + "..."
+        # Display comparisons
+        for i, (control_num, sources) in enumerate(control_groups.items(), 1):
+            if 'historical' in sources and 'current' in sources:
+                print(f"EXAMPLE {i}: Job {control_num}")
+                print("-" * 80)
                 
-            if isinstance(curr_val, (int, float)) and 'Salary' in field:
-                curr_val = f"${curr_val:,.0f}" if curr_val != "❌" else "❌"
-            elif curr_val != "❌" and len(str(curr_val)) > 27:
-                curr_val = str(curr_val)[:27] + "..."
-            
-            print(f"{field:<15} {str(hist_val):<30} {str(curr_val):<30}")
-        print()
+                hist_data = sources['historical']
+                curr_data = sources['current'] 
+                
+                print(f"{'Field':<20} {'Historical':<30} {'Current':<30}")
+                print("-" * 80)
+                
+                # Compare all important fields
+                key_fields = ['position_title', 'agency_name', 'department_name', 'sub_agency', 'job_series', 
+                             'min_grade', 'max_grade', 'pay_scale', 'min_salary', 'max_salary', 'salary_text',
+                             'open_date', 'close_date', 'locations', 'work_schedule',
+                             'telework_eligible', 'security_clearance_required', 'hiring_path',
+                             'qualification_summary', 'major_duties', 'requirements', 'how_to_apply',
+                             'benefits', 'education', 'job_summary', 'total_openings', 'promotion_potential']
+                
+                for field_idx, field_name in enumerate(field_names):
+                    if field_name in key_fields:
+                        hist_val = hist_data[field_idx] if hist_data[field_idx] else "❌"
+                        curr_val = curr_data[field_idx] if curr_data[field_idx] else "❌"
+                        
+                        # Format for display
+                        if isinstance(hist_val, (int, float)) and 'salary' in field_name:
+                            hist_val = f"${hist_val:,.0f}" if hist_val != "❌" else "❌"
+                        elif hist_val != "❌":
+                            # Handle text fields differently - show more for important content fields
+                            if field_name in ['qualification_summary', 'major_duties', 'requirements', 'job_summary']:
+                                hist_val = (str(hist_val)[:50] + "...") if len(str(hist_val)) > 50 else str(hist_val)
+                            elif len(str(hist_val)) > 27:
+                                hist_val = str(hist_val)[:27] + "..."
+                            else:
+                                hist_val = str(hist_val)
+                            
+                        if isinstance(curr_val, (int, float)) and 'salary' in field_name:
+                            curr_val = f"${curr_val:,.0f}" if curr_val != "❌" else "❌"
+                        elif curr_val != "❌":
+                            # Handle text fields differently - show more for important content fields  
+                            if field_name in ['qualification_summary', 'major_duties', 'requirements', 'job_summary']:
+                                curr_val = (str(curr_val)[:50] + "...") if len(str(curr_val)) > 50 else str(curr_val)
+                            elif len(str(curr_val)) > 27:
+                                curr_val = str(curr_val)[:27] + "..."
+                            else:
+                                curr_val = str(curr_val)
+                        
+                        # Mark differences
+                        match_indicator = "✅" if str(hist_val) == str(curr_val) else "❓"
+                        
+                        print(f"{field_name:<20} {str(hist_val):<30} {str(curr_val):<30} {match_indicator}")
+                print()
+                
+    else:
+        print("No overlap samples found for comparison.")
+        
+except Exception as e:
+    print(f"Overlap analysis not available: {e}")
 ```
 
 ## Field Coverage Analysis
 
 ```{python}
-# Field coverage analysis - long format instead of wide
+# Get all fields from the schema (excluding metadata and empty fields)
+all_fields_raw = conn.execute("PRAGMA table_info(unified_jobs)").fetchall()
+all_fields = [
+    (row[1],) for row in all_fields_raw 
+    if row[1] not in ('data_sources', 'rationalization_date', 'confidence_score', 
+                      'extraction_metadata', 'scraped_sections', 'full_content',
+                      'announcement_number', 'posted_date', 'primary_location')
+]
+
+# Build dynamic coverage query for all fields
 field_coverage_data = []
 
 # Historical data coverage
 hist_total = conn.execute("SELECT COUNT(*) FROM unified_jobs WHERE data_sources LIKE '%historical%'").fetchone()[0]
 if hist_total > 0:
-    hist_fields = conn.execute("""
-        SELECT 
-            'position_title' as field_name,
-            COUNT(CASE WHEN position_title IS NOT NULL AND position_title != '' THEN 1 END) as complete_count,
-            ROUND(COUNT(CASE WHEN position_title IS NOT NULL AND position_title != '' THEN 1 END) * 100.0 / COUNT(*), 1) as percentage
-        FROM unified_jobs WHERE data_sources LIKE '%historical%'
+    for (field_name,) in all_fields:
+        # Special handling for different field types
+        if field_name in ['min_salary', 'max_salary', 'total_openings']:
+            # Numeric fields - just check NOT NULL
+            count_query = f"COUNT(CASE WHEN {field_name} IS NOT NULL THEN 1 END)"
+        elif field_name in ['open_date', 'close_date', 'posted_date', 'rationalization_date']:
+            # Date fields - just check NOT NULL
+            count_query = f"COUNT(CASE WHEN {field_name} IS NOT NULL THEN 1 END)"
+        else:
+            # String fields - check NOT NULL and not empty
+            count_query = f"COUNT(CASE WHEN {field_name} IS NOT NULL AND {field_name} != '' THEN 1 END)"
         
-        UNION ALL SELECT 'agency_name', COUNT(CASE WHEN agency_name IS NOT NULL AND agency_name != '' THEN 1 END), 
-                  ROUND(COUNT(CASE WHEN agency_name IS NOT NULL AND agency_name != '' THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%historical%'
+        result = conn.execute(f"""
+            SELECT 
+                {count_query} as complete_count,
+                ROUND({count_query} * 100.0 / COUNT(*), 1) as percentage
+            FROM unified_jobs WHERE data_sources LIKE '%historical%'
+        """).fetchone()
         
-        UNION ALL SELECT 'job_series', COUNT(CASE WHEN job_series IS NOT NULL AND job_series != '' AND job_series != '0000' THEN 1 END),
-                  ROUND(COUNT(CASE WHEN job_series IS NOT NULL AND job_series != '' AND job_series != '0000' THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%historical%'
-        
-        UNION ALL SELECT 'salary_range', COUNT(CASE WHEN min_salary IS NOT NULL AND max_salary IS NOT NULL THEN 1 END),
-                  ROUND(COUNT(CASE WHEN min_salary IS NOT NULL AND max_salary IS NOT NULL THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%historical%'
-        
-        UNION ALL SELECT 'locations', COUNT(CASE WHEN locations IS NOT NULL AND locations != '' THEN 1 END),
-                  ROUND(COUNT(CASE WHEN locations IS NOT NULL AND locations != '' THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%historical%'
-        
-        UNION ALL SELECT 'major_duties', COUNT(CASE WHEN major_duties IS NOT NULL AND major_duties != '' THEN 1 END),
-                  ROUND(COUNT(CASE WHEN major_duties IS NOT NULL AND major_duties != '' THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%historical%'
-        
-        UNION ALL SELECT 'qualification_summary', COUNT(CASE WHEN qualification_summary IS NOT NULL AND qualification_summary != '' THEN 1 END),
-                  ROUND(COUNT(CASE WHEN qualification_summary IS NOT NULL AND qualification_summary != '' THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%historical%'
-        
-        UNION ALL SELECT 'work_schedule', COUNT(CASE WHEN work_schedule IS NOT NULL AND work_schedule != '' THEN 1 END),
-                  ROUND(COUNT(CASE WHEN work_schedule IS NOT NULL AND work_schedule != '' THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%historical%'
-    """).fetchall()
-    
-    for field, count, pct in hist_fields:
-        field_coverage_data.append({'Source': 'Historical', 'Field': field, 'Complete': count, 'Total': hist_total, 'Percentage': pct})
+        field_coverage_data.append({
+            'Source': 'Historical', 
+            'Field': field_name, 
+            'Complete': result[0], 
+            'Total': hist_total, 
+            'Percentage': result[1]
+        })
 
-# Current data coverage
+# Current data coverage  
 curr_total = conn.execute("SELECT COUNT(*) FROM unified_jobs WHERE data_sources LIKE '%current%'").fetchone()[0]
 if curr_total > 0:
-    curr_fields = conn.execute("""
-        SELECT 
-            'position_title' as field_name,
-            COUNT(CASE WHEN position_title IS NOT NULL AND position_title != '' THEN 1 END) as complete_count,
-            ROUND(COUNT(CASE WHEN position_title IS NOT NULL AND position_title != '' THEN 1 END) * 100.0 / COUNT(*), 1) as percentage
-        FROM unified_jobs WHERE data_sources LIKE '%current%'
+    for (field_name,) in all_fields:
+        # Special handling for different field types
+        if field_name in ['min_salary', 'max_salary', 'total_openings']:
+            # Numeric fields - just check NOT NULL
+            count_query = f"COUNT(CASE WHEN {field_name} IS NOT NULL THEN 1 END)"
+        elif field_name in ['open_date', 'close_date', 'posted_date', 'rationalization_date']:
+            # Date fields - just check NOT NULL
+            count_query = f"COUNT(CASE WHEN {field_name} IS NOT NULL THEN 1 END)"
+        else:
+            # String fields - check NOT NULL and not empty
+            count_query = f"COUNT(CASE WHEN {field_name} IS NOT NULL AND {field_name} != '' THEN 1 END)"
         
-        UNION ALL SELECT 'agency_name', COUNT(CASE WHEN agency_name IS NOT NULL AND agency_name != '' THEN 1 END), 
-                  ROUND(COUNT(CASE WHEN agency_name IS NOT NULL AND agency_name != '' THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%current%'
+        result = conn.execute(f"""
+            SELECT 
+                {count_query} as complete_count,
+                ROUND({count_query} * 100.0 / COUNT(*), 1) as percentage
+            FROM unified_jobs WHERE data_sources LIKE '%current%'
+        """).fetchone()
         
-        UNION ALL SELECT 'job_series', COUNT(CASE WHEN job_series IS NOT NULL AND job_series != '' AND job_series != '0000' THEN 1 END),
-                  ROUND(COUNT(CASE WHEN job_series IS NOT NULL AND job_series != '' AND job_series != '0000' THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%current%'
-        
-        UNION ALL SELECT 'salary_range', COUNT(CASE WHEN min_salary IS NOT NULL AND max_salary IS NOT NULL THEN 1 END),
-                  ROUND(COUNT(CASE WHEN min_salary IS NOT NULL AND max_salary IS NOT NULL THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%current%'
-        
-        UNION ALL SELECT 'locations', COUNT(CASE WHEN locations IS NOT NULL AND locations != '' THEN 1 END),
-                  ROUND(COUNT(CASE WHEN locations IS NOT NULL AND locations != '' THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%current%'
-        
-        UNION ALL SELECT 'major_duties', COUNT(CASE WHEN major_duties IS NOT NULL AND major_duties != '' THEN 1 END),
-                  ROUND(COUNT(CASE WHEN major_duties IS NOT NULL AND major_duties != '' THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%current%'
-        
-        UNION ALL SELECT 'qualification_summary', COUNT(CASE WHEN qualification_summary IS NOT NULL AND qualification_summary != '' THEN 1 END),
-                  ROUND(COUNT(CASE WHEN qualification_summary IS NOT NULL AND qualification_summary != '' THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%current%'
-        
-        UNION ALL SELECT 'work_schedule', COUNT(CASE WHEN work_schedule IS NOT NULL AND work_schedule != '' THEN 1 END),
-                  ROUND(COUNT(CASE WHEN work_schedule IS NOT NULL AND work_schedule != '' THEN 1 END) * 100.0 / COUNT(*), 1)
-        FROM unified_jobs WHERE data_sources LIKE '%current%'
-    """).fetchall()
-    
-    for field, count, pct in curr_fields:
-        field_coverage_data.append({'Source': 'Current', 'Field': field, 'Complete': count, 'Total': curr_total, 'Percentage': pct})
+        field_coverage_data.append({
+            'Source': 'Current', 
+            'Field': field_name, 
+            'Complete': result[0], 
+            'Total': curr_total, 
+            'Percentage': result[1]
+        })
 
-# Display the long format table
+# Create DataFrame and pivot for better visualization
 coverage_df = pd.DataFrame(field_coverage_data)
 if not coverage_df.empty:
-    print("📊 Field Coverage by Source (Long Format):")
-    print(coverage_df.to_string(index=False))
+    # Create pivot table for side-by-side comparison
+    pivot_df = coverage_df.pivot(index='Field', columns='Source', values='Percentage').fillna(0)
+    pivot_df = pivot_df.round(1)
+    
+    # Sort by field importance
+    field_order = ['control_number', 'position_title', 'agency_name', 'department_name', 
+                   'min_salary', 'max_salary', 'job_series', 'locations', 'work_schedule',
+                   'major_duties', 'qualification_summary', 'requirements', 'education',
+                   'benefits', 'how_to_apply', 'hiring_path']
+    
+    # Reorder fields that exist
+    existing_fields = [f for f in field_order if f in pivot_df.index]
+    other_fields = sorted([f for f in pivot_df.index if f not in field_order])
+    pivot_df = pivot_df.reindex(existing_fields + other_fields)
+    
+    print("📊 Field Coverage Comparison (% of records with data):")
+    print(pivot_df.to_string())
+    
+    # Highlight fields with significant differences
+    print("\n🔍 Fields with Major Coverage Differences:")
+    for field in pivot_df.index:
+        if 'Historical' in pivot_df.columns and 'Current' in pivot_df.columns:
+            diff = abs(pivot_df.loc[field, 'Historical'] - pivot_df.loc[field, 'Current'])
+            if diff > 20:
+                hist_val = pivot_df.loc[field, 'Historical']
+                curr_val = pivot_df.loc[field, 'Current']
+                print(f"   {field}: Historical={hist_val}%, Current={curr_val}% (diff={diff:.1f}%)")
 ```
 
 ## Missing Duties and Qualifications Analysis

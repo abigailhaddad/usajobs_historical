@@ -47,17 +47,16 @@ class FieldRationalizer:
                 'position_close_date': 'close_date',
                 'locations': 'locations',
                 'work_schedule': 'work_schedule',
-                'travel_requirement': 'travel_requirement',
                 'telework_eligible': 'telework_eligible',
                 'security_clearance_required': 'security_clearance_required',
-                'who_may_apply': 'who_may_apply'
+                'hiring_path': 'hiring_path'
             },
             'current_to_unified': {
                 # Raw current API field names (MatchedObjectDescriptor)
                 'MatchedObjectId': 'control_number',
                 'PositionTitle': 'position_title', 
-                'DepartmentName': 'agency_name',
-                'OrganizationName': 'department_name',
+                'DepartmentName': 'department_name',
+                'OrganizationName': 'agency_name',
                 'SubAgency': 'sub_agency',
                 'PositionStartDate': 'open_date',
                 'PositionEndDate': 'close_date',
@@ -81,10 +80,9 @@ class FieldRationalizer:
                 'positionOpenDate': 'open_date',
                 'positionCloseDate': 'close_date',
                 'workSchedule': 'work_schedule',
-                'travelRequirement': 'travel_requirement',
                 'teleworkEligible': 'telework_eligible',
                 'securityClearanceRequired': 'security_clearance_required',
-                'whoMayApply': 'who_may_apply',
+                'whoMayApply': 'hiring_path',
                 'qualificationSummary': 'qualification_summary',
                 'majorDuties': 'major_duties',
                 'requirements': 'requirements',
@@ -104,7 +102,6 @@ class FieldRationalizer:
         return {
             # Identifiers
             'control_number': 'str',
-            'announcement_number': 'str',
             
             # Basic Info
             'position_title': 'str',
@@ -126,18 +123,15 @@ class FieldRationalizer:
             # Dates
             'open_date': 'date',
             'close_date': 'date',
-            'posted_date': 'date',
             
             # Location
             'locations': 'str',
-            'primary_location': 'str',
             
             # Work Details
             'work_schedule': 'str',
-            'travel_requirement': 'str',
             'telework_eligible': 'str',
             'security_clearance_required': 'str',
-            'who_may_apply': 'str',
+            'hiring_path': 'str',
             
             # Content (Current API fields)
             'qualification_summary': 'text',
@@ -159,7 +153,6 @@ class FieldRationalizer:
             'job_summary': 'text',
             'total_openings': 'str',
             'promotion_potential': 'str', 
-            'remote_indicator': 'str',
             'relocation_assistance': 'str',
             
             # Content (Scraped fields)
@@ -169,8 +162,7 @@ class FieldRationalizer:
             
             # Metadata
             'data_sources': 'json',
-            'rationalization_date': 'timestamp',
-            'confidence_score': 'float'
+            'rationalization_date': 'timestamp'
         }
     
     def rationalize_job_record(self, historical_data: Optional[Dict] = None, 
@@ -188,7 +180,6 @@ class FieldRationalizer:
         
         unified_record = {}
         data_sources = []
-        confidence_scores = []
         dedup_strategy = "none"
         
         # Determine deduplication strategy  
@@ -207,15 +198,11 @@ class FieldRationalizer:
             curr_mapped = self._map_fields(current_data, 'current_to_unified')
             unified_record.update(curr_mapped)
             data_sources.append('current_api_priority')
-            confidence_scores.append(0.98)  # Highest confidence for current data in dedup scenario
             
             # Add historical metadata that current API doesn't have
             hist_mapped = self._map_fields(historical_data, 'historical_to_unified')
             historical_only_fields = [
-                'announcement_number', 'pay_scale', 'travel_requirement', 
-                'telework_eligible', 'security_clearance_required', 'hiring_paths',
-                'vendor', 'promotion_potential', 'drug_test_required',
-                'relocation_expenses_reimbursed', 'supervisory_status'
+                'pay_scale', 'promotion_potential', 'total_openings'
             ]
             
             for field, value in hist_mapped.items():
@@ -223,7 +210,6 @@ class FieldRationalizer:
                     unified_record[field] = value
             
             data_sources.append('historical_metadata_supplement')
-            confidence_scores.append(0.85)  # Lower confidence for supplemental historical data
             
         else:
             # NO DUPLICATES: Standard processing
@@ -233,7 +219,6 @@ class FieldRationalizer:
                 hist_mapped = self._map_fields(historical_data, 'historical_to_unified')
                 unified_record.update(hist_mapped)
                 data_sources.append('historical_api')
-                confidence_scores.append(0.9)  # High confidence for structured data
             
             # Process current API data (overwrites historical where current is more detailed)
             if current_data:
@@ -253,7 +238,6 @@ class FieldRationalizer:
                         unified_record[field] = value
                 
                 data_sources.append('current_api')
-                confidence_scores.append(0.95)  # Highest confidence for current data
         
         # Process scraped data (fills gaps and adds rich content)
         if scraped_data:
@@ -269,15 +253,16 @@ class FieldRationalizer:
                     unified_record[field] = value
             
             data_sources.append('scraping')
-            confidence_scores.append(0.7)  # Lower confidence for scraped data
         
         # Add metadata
         unified_record['data_sources'] = data_sources
         unified_record['rationalization_date'] = datetime.now().isoformat()
-        unified_record['confidence_score'] = sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0.0
         
         # Data quality enhancements
         unified_record = self._enhance_data_quality(unified_record)
+        
+        # Ensure JSON fields are properly serialized before database insertion
+        unified_record = self._serialize_json_fields(unified_record)
         
         return unified_record
     
@@ -295,6 +280,7 @@ class FieldRationalizer:
         
         # Map scraped sections to unified fields (using new Current API field names)
         section_mappings = {
+            'Summary': 'job_summary',
             'MajorDuties': 'major_duties',
             'QualificationSummary': 'qualification_summary', 
             'Requirements': 'requirements',
@@ -348,6 +334,32 @@ class FieldRationalizer:
                 if converted_value is not None:
                     mapped_data[unified_field] = converted_value
         
+        # Special handling for historical API raw_data extraction
+        # Only extract fields that have 0% coverage in historical data
+        if mapping_key == 'historical_to_unified' and 'raw_data' in source_data:
+            try:
+                import json
+                raw_data = json.loads(source_data['raw_data']) if isinstance(source_data['raw_data'], str) else source_data['raw_data']
+                
+                # Only extract metadata fields that historical API has but current doesn't
+                # DO NOT extract content fields - those come from scraping
+                
+                if 'payScale' in raw_data and raw_data['payScale']:
+                    mapped_data['pay_scale'] = raw_data['payScale']
+                
+                if 'promotionPotential' in raw_data and raw_data['promotionPotential']:
+                    mapped_data['promotion_potential'] = raw_data['promotionPotential']
+                
+                if 'totalOpenings' in raw_data and raw_data['totalOpenings']:
+                    mapped_data['total_openings'] = str(raw_data['totalOpenings'])
+                
+                # Telework - convert Y/N to Yes/No
+                if 'teleworkEligible' in raw_data:
+                    mapped_data['telework_eligible'] = 'Yes' if raw_data['teleworkEligible'] == 'Y' else 'No'
+                    
+            except (json.JSONDecodeError, TypeError):
+                pass  # Skip if raw_data parsing fails
+        
         # Special handling for nested current API fields
         if mapping_key == 'current_to_unified':
             # Extract job series from JobCategory array
@@ -373,19 +385,6 @@ class FieldRationalizer:
                     }
                     mapped_data['work_schedule'] = schedule_map.get(schedule_code, schedule_name or schedule_code)
             
-            # Extract travel requirement from TravelCode
-            if 'TravelCode' in source_data:
-                travel_code = str(source_data['TravelCode'])
-                # Map travel codes to meaningful values
-                travel_map = {
-                    '0': 'Not Required',
-                    '1': 'Occasional travel',
-                    '2': '25% or less',
-                    '3': '50% or less',
-                    '4': '75% or less',
-                    '5': '75% or greater'
-                }
-                mapped_data['travel_requirement'] = travel_map.get(travel_code, f"{travel_code}% travel")
             
             # Extract salary range from PositionRemuneration array
             if 'PositionRemuneration' in source_data and isinstance(source_data['PositionRemuneration'], list):
@@ -448,7 +447,6 @@ class FieldRationalizer:
                 'PromotionPotential': 'promotion_potential',
                 'SecurityClearance': 'security_clearance_required',
                 'TeleworkEligible': 'telework_eligible',
-                'RemoteIndicator': 'remote_indicator',
                 'Relocation': 'relocation_assistance',
                 'Benefits': 'benefits',
                 'OtherInformation': 'other_information',
@@ -456,7 +454,9 @@ class FieldRationalizer:
                 'HowToApply': 'how_to_apply',
                 'WhatToExpectNext': 'what_to_expect_next',
                 'RequiredDocuments': 'required_documents',
-                'Education': 'education'
+                'Education': 'education',
+                'LowGrade': 'min_grade',
+                'HighGrade': 'max_grade'
             }
             
             for api_field, unified_field in job_posting_fields.items():
@@ -470,6 +470,14 @@ class FieldRationalizer:
                         mapped_data[unified_field] = '\n\n'.join(str(item) for item in value)
                     else:
                         mapped_data[unified_field] = str(value).strip()
+            
+            # Extract HiringPath from UserArea.Details (better source than WhoMayApply)
+            if 'HiringPath' in details and details['HiringPath']:
+                hiring_paths = details['HiringPath']
+                if isinstance(hiring_paths, list):
+                    mapped_data['hiring_path'] = ', '.join(hiring_paths)
+                else:
+                    mapped_data['hiring_path'] = str(hiring_paths)
             
             # Extract rich content fields that match our unified schema
             userarea_mappings = {
@@ -509,7 +517,17 @@ class FieldRationalizer:
                 return float(value)
             elif target_type == 'int':
                 return int(value)
-            elif target_type in ['json', 'text']:
+            elif target_type == 'json':
+                # Ensure JSON fields are properly serialized
+                if isinstance(value, (dict, list)):
+                    import json
+                    return json.dumps(value)
+                elif isinstance(value, str):
+                    return value  # Already a JSON string
+                else:
+                    import json
+                    return json.dumps(value)
+            elif target_type == 'text':
                 return value  # Keep as-is
             elif target_type == 'date':
                 # Handle various date formats
@@ -576,6 +594,25 @@ class FieldRationalizer:
             location = re.sub(r'\s+', ' ', location)
             location = re.sub(r'\s*\|\s*', ' | ', location)
             record['locations'] = location
+        
+        return record
+    
+    def _serialize_json_fields(self, record: Dict[str, Any]) -> Dict[str, Any]:
+        """Ensure all JSON fields are properly serialized as strings"""
+        import json
+        
+        # Get fields that should be JSON from the schema
+        json_fields = [field for field, field_type in self.unified_schema.items() if field_type == 'json']
+        
+        for field in json_fields:
+            if field in record and record[field] is not None:
+                value = record[field]
+                # Only serialize if it's not already a JSON string
+                if isinstance(value, (dict, list)):
+                    record[field] = json.dumps(value)
+                elif not isinstance(value, str):
+                    # Convert other types to JSON as well
+                    record[field] = json.dumps(value)
         
         return record
 
@@ -707,9 +744,9 @@ def save_to_duckdb(records: List[Dict], output_path: str, schema: Dict[str, str]
     
     # Drop and create table with appropriate schema
     conn.execute("DROP TABLE IF EXISTS unified_jobs")
+    conn.execute("DROP TABLE IF EXISTS overlap_samples")
     create_table_sql = """CREATE TABLE unified_jobs (
         control_number VARCHAR PRIMARY KEY,
-        announcement_number VARCHAR,
         position_title VARCHAR,
         agency_name VARCHAR,
         department_name VARCHAR,
@@ -723,14 +760,59 @@ def save_to_duckdb(records: List[Dict], output_path: str, schema: Dict[str, str]
         salary_text VARCHAR,
         open_date DATE,
         close_date DATE,
-        posted_date DATE,
         locations VARCHAR,
-        primary_location VARCHAR,
+        work_schedule VARCHAR,
+        telework_eligible VARCHAR,
+        security_clearance_required VARCHAR,
+        hiring_path VARCHAR,
+        qualification_summary TEXT,
+        major_duties TEXT,
+        requirements TEXT,
+        how_to_apply TEXT,
+        apply_url VARCHAR,
+        position_uri VARCHAR,
+        evaluations TEXT,
+        benefits TEXT,
+        other_information TEXT,
+        required_documents TEXT,
+        what_to_expect_next TEXT,
+        education TEXT,
+        job_summary TEXT,
+        total_openings VARCHAR,
+        promotion_potential VARCHAR,
+        relocation_assistance VARCHAR,
+        scraped_sections JSON,
+        full_content TEXT,
+        extraction_metadata JSON,
+        data_sources JSON,
+        rationalization_date TIMESTAMP
+    )"""
+    
+    conn.execute(create_table_sql)
+    
+    # Create overlap samples table for comparison analysis
+    overlap_table_sql = """CREATE TABLE overlap_samples (
+        control_number VARCHAR,
+        source_type VARCHAR,  -- 'historical' or 'current'
+        position_title VARCHAR,
+        agency_name VARCHAR,
+        department_name VARCHAR,
+        sub_agency VARCHAR,
+        job_series VARCHAR,
+        min_grade VARCHAR,
+        max_grade VARCHAR,
+        pay_scale VARCHAR,
+        min_salary DOUBLE,
+        max_salary DOUBLE,
+        salary_text VARCHAR,
+        open_date DATE,
+        close_date DATE,
+        locations VARCHAR,
         work_schedule VARCHAR,
         travel_requirement VARCHAR,
         telework_eligible VARCHAR,
         security_clearance_required VARCHAR,
-        who_may_apply VARCHAR,
+        hiring_path VARCHAR,
         qualification_summary TEXT,
         major_duties TEXT,
         requirements TEXT,
@@ -747,19 +829,14 @@ def save_to_duckdb(records: List[Dict], output_path: str, schema: Dict[str, str]
         total_openings VARCHAR,
         promotion_potential VARCHAR,
         remote_indicator VARCHAR,
-        relocation_assistance VARCHAR,
-        scraped_sections JSON,
-        full_content TEXT,
-        extraction_metadata JSON,
-        data_sources JSON,
-        rationalization_date TIMESTAMP,
-        confidence_score DOUBLE
+        relocation_assistance VARCHAR
     )"""
     
-    conn.execute(create_table_sql)
+    conn.execute(overlap_table_sql)
     
     # Clear existing data
     conn.execute("DELETE FROM unified_jobs")
+    conn.execute("DELETE FROM overlap_samples")
     
     # Insert records
     if records:
@@ -787,8 +864,7 @@ def save_to_duckdb(records: List[Dict], output_path: str, schema: Dict[str, str]
             COUNT(DISTINCT agency_name) as unique_agencies,
             COUNT(DISTINCT job_series) as unique_series,
             MIN(open_date) as earliest_posting,
-            MAX(open_date) as latest_posting,
-            AVG(confidence_score) as avg_confidence
+            MAX(open_date) as latest_posting
         FROM unified_jobs
     """)
     
@@ -859,6 +935,10 @@ def main():
     if overlapping_controls:
         print(f"   📝 Sample overlapping controls: {list(overlapping_controls)[:5]}")
     
+    # Save overlap samples for analysis (first 3 overlaps)
+    overlap_samples = []
+    overlap_count = 0
+    
     # Process historical records first (will handle duplicates)
     for hist_record in historical_data:
         control_num = str(hist_record.get('control_number', ''))
@@ -867,6 +947,36 @@ def main():
             
             if current_record:
                 duplicate_count += 1
+                
+                # Save first 3 overlaps for comparison analysis
+                if overlap_count < 3:
+                    # Save historical version with scraped content
+                    hist_mapped = rationalizer._map_fields(hist_record, 'historical_to_unified')
+                    
+                    # Add scraped content to historical sample if available
+                    if hist_record.get('scraped_content'):
+                        scraped_mapped = rationalizer._map_fields(hist_record['scraped_content'], 'scraped_to_unified')
+                        scraped_content = rationalizer._extract_scraped_content(hist_record['scraped_content'])
+                        scraped_mapped.update(scraped_content)
+                        
+                        # Add scraped data where historical doesn't have it
+                        for field, value in scraped_mapped.items():
+                            if field not in hist_mapped or not hist_mapped[field]:
+                                hist_mapped[field] = value
+                    
+                    hist_sample = {k: v for k, v in hist_mapped.items() if k in rationalizer.unified_schema}
+                    hist_sample['control_number'] = control_num
+                    hist_sample['source_type'] = 'historical'
+                    overlap_samples.append(hist_sample)
+                    
+                    # Save current version  
+                    curr_mapped = rationalizer._map_fields(current_record, 'current_to_unified')
+                    curr_sample = {k: v for k, v in curr_mapped.items() if k in rationalizer.unified_schema}
+                    curr_sample['control_number'] = control_num
+                    curr_sample['source_type'] = 'current'
+                    overlap_samples.append(curr_sample)
+                    
+                    overlap_count += 1
             
             unified_record = rationalizer.rationalize_job_record(
                 historical_data=hist_record,
@@ -903,6 +1013,32 @@ def main():
         # Save to DuckDB
         success = save_to_duckdb(rationalized_records, args.output, rationalizer.unified_schema)
         
+        # Save overlap samples if any exist
+        if overlap_samples:
+            conn = duckdb.connect(args.output)
+            for sample in overlap_samples:
+                # Prepare values for fields that exist in overlap_samples table
+                overlap_table_fields = [
+                    'position_title', 'agency_name', 'department_name', 'sub_agency', 'job_series',
+                    'min_grade', 'max_grade', 'pay_scale', 'min_salary', 'max_salary', 'salary_text',
+                    'open_date', 'close_date', 'locations', 'work_schedule',
+                    'telework_eligible', 'security_clearance_required', 'hiring_path',
+                    'qualification_summary', 'major_duties', 'requirements', 'how_to_apply',
+                    'apply_url', 'position_uri', 'evaluations', 'benefits', 'other_information',
+                    'required_documents', 'what_to_expect_next', 'education', 'job_summary',
+                    'total_openings', 'promotion_potential', 'relocation_assistance'
+                ]
+                field_names = ['control_number', 'source_type'] + overlap_table_fields
+                values = [sample.get('control_number'), sample.get('source_type')] + [sample.get(field) for field in overlap_table_fields]
+                placeholders = ','.join(['?' for _ in field_names])
+                field_list = ','.join(field_names)
+                
+                conn.execute(f"INSERT INTO overlap_samples ({field_list}) VALUES ({placeholders})", values)
+            
+            conn.commit()
+            conn.close()
+            print(f"   💾 Saved {len(overlap_samples)} overlap samples for analysis")
+        
         if success:
             print(f"\n✅ Rationalization complete!")
             print(f"   📊 Processed {len(rationalized_records)} unified records")
@@ -919,7 +1055,6 @@ def main():
                 print(f"   Unique agencies: {stats[1]}")
                 print(f"   Unique job series: {stats[2]}")
                 print(f"   Date range: {stats[3]} to {stats[4]}")
-                print(f"   Average confidence: {stats[5]:.2f}")
     else:
         # Save as JSON (original behavior)
         output_data = {
@@ -951,7 +1086,6 @@ def main():
         print(f"   Position Title: {sample.get('position_title')}")
         print(f"   Agency: {sample.get('agency_name')}")
         print(f"   Data Sources: {sample.get('data_sources')}")
-        print(f"   Confidence: {sample.get('confidence_score', 0):.2f}")
 
 if __name__ == "__main__":
     main()

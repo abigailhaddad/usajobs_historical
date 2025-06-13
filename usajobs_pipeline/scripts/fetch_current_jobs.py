@@ -119,15 +119,15 @@ def flatten_current_job(job_item: dict) -> dict:
         
         # Position details
         "positionTitle": job.get("PositionTitle"),
-        "minimumGrade": job.get("JobGrade", [{}])[0].get("Code") if job.get("JobGrade") else None,
-        "maximumGrade": job.get("JobGrade", [{}])[-1].get("Code") if job.get("JobGrade") else None,
-        "promotionPotential": None,  # Not directly available
+        "minimumGrade": job.get("UserArea", {}).get("Details", {}).get("LowGrade"),
+        "maximumGrade": job.get("UserArea", {}).get("Details", {}).get("HighGrade"),
+        "promotionPotential": job.get("UserArea", {}).get("Details", {}).get("PromotionPotential"),
         "appointmentType": job.get("PositionSchedule", [{}])[0].get("Name") if job.get("PositionSchedule") else None,
         "workSchedule": job.get("PositionSchedule", [{}])[0].get("Name") if job.get("PositionSchedule") else None,
         "serviceType": None,  # Not directly available
         
         # Compensation
-        "payScale": job.get("PayPlan", [{}])[0].get("Code") if job.get("PayPlan") else None,
+        "payScale": job.get("JobGrade", [{}])[0].get("Code") if job.get("JobGrade") else None,
         "salaryType": None,  # Need to derive from salary info
         "minimumSalary": job.get("PositionRemuneration", [{}])[0].get("MinimumRange") if job.get("PositionRemuneration") else None,
         "maximumSalary": job.get("PositionRemuneration", [{}])[0].get("MaximumRange") if job.get("PositionRemuneration") else None,
@@ -135,15 +135,15 @@ def flatten_current_job(job_item: dict) -> dict:
         # Work details
         "supervisoryStatus": job.get("SupervisoryStatus", [{}])[0].get("Name") if job.get("SupervisoryStatus") else None,
         "travelRequirement": job.get("TravelCode", {}).get("Name"),
-        "teleworkEligible": None,  # Check if available in QualificationSummary
-        "securityClearanceRequired": None,  # Check if in QualificationSummary
-        "securityClearance": None,
-        "drugTestRequired": None,
-        "relocationExpensesReimbursed": None,
+        "teleworkEligible": job.get("UserArea", {}).get("Details", {}).get("TeleworkEligible"),
+        "securityClearanceRequired": job.get("UserArea", {}).get("Details", {}).get("SecurityClearance"),
+        "securityClearance": job.get("UserArea", {}).get("Details", {}).get("SecurityClearance"),
+        "drugTestRequired": job.get("UserArea", {}).get("Details", {}).get("DrugTestRequired"),
+        "relocationExpensesReimbursed": job.get("UserArea", {}).get("Details", {}).get("Relocation"),
         
         # Application details
-        "whoMayApply": job.get("UserArea", {}).get("Details", {}).get("WhoMayApply", {}).get("Name"),
-        "totalOpenings": job.get("PositionOfferingType", [{}])[0].get("Name") if job.get("PositionOfferingType") else None,
+        "whoMayApply": job.get("UserArea", {}).get("Details", {}).get("WhoMayApply"),
+        "totalOpenings": job.get("UserArea", {}).get("Details", {}).get("TotalOpenings"),
         "disableApplyOnline": None,
         
         # Dates
@@ -161,13 +161,14 @@ def flatten_current_job(job_item: dict) -> dict:
         "applyOnlineUrl": job.get("ApplyURI", [None])[0],
         "positionUri": job.get("PositionURI"),
         "qualificationSummary": job.get("QualificationSummary", ""),
-        "majorDuties": job.get("MajorDuties", []),
-        "education": job.get("Education", {}),
-        "requirements": job.get("Requirements", ""),
-        "evaluations": job.get("Evaluations", ""),
-        "howToApply": job.get("HowToApply", ""),
-        "whatToExpectNext": job.get("WhatToExpectNext", ""),
-        "requiredDocuments": job.get("RequiredDocuments", ""),
+        "jobSummary": job.get("UserArea", {}).get("Details", {}).get("JobSummary"),
+        "majorDuties": job.get("UserArea", {}).get("Details", {}).get("MajorDuties"),
+        "education": job.get("UserArea", {}).get("Details", {}).get("Education"),
+        "requirements": job.get("UserArea", {}).get("Details", {}).get("Requirements"),
+        "evaluations": job.get("UserArea", {}).get("Details", {}).get("Evaluations"),
+        "howToApply": job.get("UserArea", {}).get("Details", {}).get("HowToApply"),
+        "whatToExpectNext": job.get("UserArea", {}).get("Details", {}).get("WhatToExpectNext"),
+        "requiredDocuments": job.get("UserArea", {}).get("Details", {}).get("RequiredDocuments"),
         
         # Metadata
         "apiSource": "current",
@@ -229,6 +230,7 @@ def init_current_jobs_duckdb(db_path: str):
             apply_online_url VARCHAR,
             position_uri VARCHAR,
             qualification_summary TEXT,
+            job_summary TEXT,
             major_duties JSON,
             education JSON,
             requirements TEXT,
@@ -271,10 +273,10 @@ def save_jobs_to_duckdb(jobs: List[Dict], db_path: str):
                     drug_test_required, relocation_expenses_reimbursed, who_may_apply,
                     total_openings, disable_apply_online, position_open_date, position_close_date,
                     position_expire_date, position_opening_status, job_series, locations,
-                    apply_online_url, position_uri, qualification_summary, major_duties,
+                    apply_online_url, position_uri, qualification_summary, job_summary, major_duties,
                     education, requirements, evaluations, how_to_apply, what_to_expect_next,
                     required_documents, fetch_date, raw_data
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, [
                 job.get("controlNumber"), job.get("announcementNumber"), job.get("hiringAgencyCode"),
                 job.get("hiringAgencyName"), job.get("hiringDepartmentCode"), job.get("hiringDepartmentName"),
@@ -288,7 +290,7 @@ def save_jobs_to_duckdb(jobs: List[Dict], db_path: str):
                 job.get("disableApplyOnline"), job.get("positionOpenDate"), job.get("positionCloseDate"),
                 job.get("positionExpireDate"), job.get("positionOpeningStatus"), job.get("jobSeries"),
                 job.get("locations"), job.get("applyOnlineUrl"), job.get("positionUri"),
-                job.get("qualificationSummary"), json.dumps(job.get("majorDuties")),
+                job.get("qualificationSummary"), job.get("jobSummary"), json.dumps(job.get("majorDuties")),
                 json.dumps(job.get("education")), job.get("requirements"), job.get("evaluations"),
                 job.get("howToApply"), job.get("whatToExpectNext"), job.get("requiredDocuments"),
                 job.get("fetchDate"), json.dumps(job.get("rawData"))
