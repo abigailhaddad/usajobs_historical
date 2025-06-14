@@ -69,68 +69,44 @@ def parse_all_sections(soup):
     if not main:
         return sections
     
-    # Find all potential headers
-    headers = main.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'dt', 'strong'])
+    # Handle special sections with known containers first
+    sections.update(_parse_special_sections(soup))
+    
+    # Find headers more selectively - exclude <strong> tags that are likely just formatting
+    headers = []
+    for tag in main.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'dt']):
+        headers.append(tag)
+    
+    # Add only <strong> tags that are likely true headers (standalone, short, at start of container)
+    for strong in main.find_all('strong'):
+        text = strong.get_text(strip=True)
+        if (text and len(text) <= 100 and 
+            # Must be in its own element or first child
+            (strong.parent.name in ['div', 'section', 'article'] or 
+             strong == strong.parent.contents[0] or
+             # Or first significant element after whitespace
+             all(isinstance(c, str) and not c.strip() for c in strong.parent.contents[:strong.parent.contents.index(strong)]))):
+            headers.append(strong)
     
     # Sort headers by their position in the document
-    headers.sort(key=lambda h: (h.sourceline or 0, h.sourcepos or 0) if hasattr(h, 'sourceline') else 0)
+    headers.sort(key=lambda h: _get_element_position(h))
     
     for i, header in enumerate(headers):
         header_text = header.get_text(strip=True)
         
-        # Skip very long "headers" (probably not actual headers)
+        # Skip very long "headers" or empty ones
         if not header_text or len(header_text) > 100:
             continue
-            
-        # Skip if this header is inside another header's content
-        if any(header.find_parent() == h for h in headers[:i]):
+        
+        # Skip if already processed in special sections
+        normalized_header = header_text.lower().strip()
+        if any(normalized_header in existing_key.lower() for existing_key in sections.keys()):
             continue
             
-        # Extract content until the next header at same or higher level
-        content_parts = []
+        # Extract content using improved logic
+        content = _extract_section_content(header, headers[i+1:])
         
-        # Get the next header at same or higher level
-        next_header = None
-        for j in range(i + 1, len(headers)):
-            # Check if it's at same level (sibling) or higher level
-            if headers[j].find_parent() != header.find_parent():
-                next_header = headers[j]
-                break
-        
-        # Collect all elements between this header and the next
-        current = header.next_sibling
-        while current:
-            # Stop if we've reached the next header
-            if next_header and current == next_header:
-                break
-                
-            # Stop if current contains the next header
-            if next_header and hasattr(current, 'find_all'):
-                if next_header in current.find_all():
-                    break
-                
-            # Extract text from elements
-            if hasattr(current, 'name') and current.name:
-                # Skip if this is another header
-                if current in headers:
-                    break
-                    
-                text = current.get_text(separator=' ', strip=True)
-                if text:
-                    content_parts.append(text)
-            elif isinstance(current, str):
-                # Handle text nodes
-                text = current.strip()
-                if text:
-                    content_parts.append(text)
-                    
-            current = current.next_sibling
-        
-        # Store the section
-        content = '\n\n'.join(content_parts).strip()
         if content:
-            # Normalize header text for matching
-            normalized_header = header_text.lower().strip()
             # Handle duplicates by appending tag type
             if normalized_header in sections:
                 normalized_header = f"{normalized_header}_{header.name}"
@@ -142,6 +118,102 @@ def parse_all_sections(soup):
             }
     
     return sections
+
+
+def _parse_special_sections(soup):
+    """Parse sections with known container structures."""
+    special_sections = {}
+    
+    # Handle duties section with container div
+    duties_div = soup.find('div', {'id': 'duties'})
+    if duties_div:
+        # Find the header (h2, h3, etc.)
+        duties_header = duties_div.find(['h1', 'h2', 'h3', 'h4', 'h5'])
+        if duties_header:
+            # Get all content in the duties div except the header
+            content_parts = []
+            for elem in duties_div.find_all(['p', 'div', 'li', 'ul', 'ol']):
+                # Skip if this element is the header itself
+                if elem == duties_header or duties_header in elem.parents:
+                    continue
+                text = elem.get_text(separator=' ', strip=True)
+                if text:
+                    content_parts.append(text)
+            
+            content = '\n\n'.join(content_parts).strip()
+            if content:
+                special_sections['duties'] = {
+                    'original_header': duties_header.get_text(strip=True),
+                    'content': content,
+                    'tag': duties_header.name
+                }
+    
+    return special_sections
+
+
+def _get_element_position(element):
+    """Get a sortable position for an element in the document."""
+    # Count all preceding elements
+    count = 0
+    for elem in element.find_all_previous():
+        count += 1
+    return count
+
+
+def _extract_section_content(header, remaining_headers):
+    """Extract content for a section header using improved logic."""
+    content_parts = []
+    
+    # Determine the boundary for this section
+    # Find the next header that would end this section
+    next_boundary = None
+    header_level = _get_header_level(header)
+    
+    for next_header in remaining_headers:
+        next_level = _get_header_level(next_header)
+        # Stop at headers of same or higher level (lower number = higher level)
+        if next_level <= header_level:
+            next_boundary = next_header
+            break
+    
+    # Collect content between header and boundary
+    current = header.next_sibling
+    
+    while current:
+        # Stop if we hit the boundary header
+        if next_boundary and current == next_boundary:
+            break
+        
+        # Stop if current element contains the boundary header
+        if (next_boundary and hasattr(current, 'find_all') and 
+            next_boundary in current.find_all()):
+            break
+            
+        # Extract text content
+        if hasattr(current, 'name') and current.name:
+            text = current.get_text(separator=' ', strip=True)
+            if text:
+                content_parts.append(text)
+        elif isinstance(current, str):
+            text = current.strip()
+            if text:
+                content_parts.append(text)
+                
+        current = current.next_sibling
+    
+    return '\n\n'.join(content_parts).strip()
+
+
+def _get_header_level(header):
+    """Get numeric level of header (1=highest, 6=lowest)."""
+    if header.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+        return int(header.name[1])
+    elif header.name == 'dt':
+        return 3  # Treat definition terms as h3 level
+    elif header.name == 'strong':
+        return 4  # Treat strong as h4 level
+    else:
+        return 5  # Default level
 
 
 def map_sections_to_fields(parsed_sections):

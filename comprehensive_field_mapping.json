@@ -1,0 +1,658 @@
+{
+  "comprehensive_mapping": {
+    "job_identification": {
+      "description": "Basic job identifiers and metadata",
+      "fields": [
+        "Summary",
+        "Overview",
+        "Control number",
+        "Announcement number",
+        "Position Description/PD#:",
+        "About the Position:",
+        "About the position:"
+      ]
+    },
+    "job_specifications": {
+      "description": "Detailed job specifications and requirements",
+      "fields": [
+        "Job family (Series)",
+        "Pay scale & grade",
+        "Salary",
+        "Work schedule",
+        "Appointment type",
+        "Promotion potential",
+        "Supervisory status",
+        "Security clearance",
+        "Drug test",
+        "Telework eligible",
+        "Remote job",
+        "Travel Required",
+        "Location",
+        "Relocation expenses reimbursed",
+        "Service",
+        "Bargaining unit status",
+        "Financial disclosure",
+        "Position sensitivity and risk",
+        "Trust determination process"
+      ]
+    },
+    "duties_responsibilities": {
+      "description": "Job duties, responsibilities, and daily tasks",
+      "fields": [
+        "Duties",
+        "Major Duties",
+        "Key Duties",
+        "Responsibilities",
+        "What You Will Do",
+        "Job Duties",
+        "Primary Duties",
+        "Essential Duties"
+      ]
+    },
+    "qualifications_requirements": {
+      "description": "Required and preferred qualifications",
+      "fields": [
+        "Qualifications",
+        "Requirements",
+        "Basic Requirements",
+        "SPECIALIZED EXPERIENCE:",
+        "Specialized Experience:",
+        "Preferred Experience:",
+        "Physical Requirements:",
+        "PART-TIME OR UNPAID EXPERIENCE:",
+        "VOLUNTEER WORK EXPERIENCE:",
+        "Working Conditions:",
+        "Conditions of Employment"
+      ]
+    },
+    "education_requirements": {
+      "description": "Education requirements and degree information",
+      "fields": [
+        "Education",
+        "Education:",
+        "FOREIGN EDUCATION:",
+        "IF USING EDUCATION TO QUALIFY:",
+        "Transcripts",
+        "Degree:",
+        "GRADUATE EDUCATION:",
+        "OREDUCATION:",
+        "If you are relying on your education to meet qualification requirements:"
+      ]
+    },
+    "application_process": {
+      "description": "How to apply and application requirements",
+      "fields": [
+        "How to Apply",
+        "Apply",
+        "Apply Online",
+        "Application Process",
+        "Application Instructions",
+        "Who May Apply",
+        "Who May Apply:",
+        "Proof of Eligibility to Apply:",
+        "This job is open to",
+        "click to continue with the application process",
+        "You must re-select your resume and/or other documents from your USAJOBS account or your application will be incomplete."
+      ]
+    },
+    "required_documents": {
+      "description": "Documents needed for application",
+      "fields": [
+        "Required Documents",
+        "Required Documents:",
+        "Documentation is required to award preference.",
+        "Time-in-grade documentation:",
+        "Veterans' Preference Documentation:",
+        "select your resume and/or other supporting documents"
+      ]
+    },
+    "evaluation_process": {
+      "description": "How candidates will be evaluated and selected",
+      "fields": [
+        "How You Will Be Evaluated",
+        "BASIS OF RATING:",
+        "Direct Hire Evaluation:",
+        "Evaluation",
+        "Rating and Ranking",
+        "Selection Process"
+      ]
+    },
+    "benefits_compensation": {
+      "description": "Salary, benefits, and compensation details",
+      "fields": [
+        "Benefits",
+        "Compensation",
+        "Pay:",
+        "What We Offer",
+        "Perks",
+        "Pay-Band (NF or CY) Allowances and Differentials",
+        "Education Debt Reduction Program (Student Loan Repayment):",
+        "If authorized, only regular (full-time, part-time, limited tenure and seasonal) employees may be paid Sunday premium pay."
+      ]
+    },
+    "timeline_next_steps": {
+      "description": "Application timeline and what happens next",
+      "fields": [
+        "Open & closing dates",
+        "Next steps",
+        "What to Expect Next",
+        "After You Apply",
+        "Selection Process"
+      ]
+    },
+    "agency_information": {
+      "description": "Information about the hiring agency",
+      "fields": [
+        "Agency contact information",
+        "Clarification from the agency",
+        "About the Agency",
+        "Department",
+        "Office",
+        "Organization",
+        "Interagency Career Transition Assistance Program (ICTAP):",
+        "Career Transition Assistance Program (CTAP)/Interagency Career Transition Assistance Program (ICTAP)"
+      ]
+    },
+    "contact_information": {
+      "description": "Contact details for questions",
+      "fields": [
+        "Address",
+        "Email",
+        "Phone",
+        "Website",
+        "Fax"
+      ]
+    },
+    "additional_information": {
+      "description": "Other important information and notes",
+      "fields": [
+        "Additional information",
+        "Other Information",
+        "Notes",
+        "IMPORTANT:",
+        "IMPORTANT",
+        "NOTE:",
+        "Note:",
+        "For Important General Applicant Information and Definitions go to:",
+        "Fair & Transparent",
+        "Videos"
+      ]
+    }
+  },
+  "scraper_target_sections": {
+    "job_identification_Summary": [
+      "Summary",
+      "summary"
+    ],
+    "job_identification_Overview": [
+      "Overview",
+      "overview"
+    ],
+    "job_identification_Control_number": [
+      "Control number",
+      "control number"
+    ],
+    "job_identification_Announcement_number": [
+      "Announcement number",
+      "announcement number"
+    ],
+    "job_identification_Position_Description_PD#": [
+      "Position Description/PD#:",
+      "Position Description/PD#",
+      "position description/pd#:"
+    ],
+    "job_identification_About_the_Position": [
+      "About the Position:",
+      "About the Position",
+      "about the position:"
+    ],
+    "job_identification_About_the_position": [
+      "About the position:",
+      "About the position",
+      "about the position:"
+    ],
+    "job_specifications_Job_family_Series": [
+      "Job family (Series)",
+      "job family (series)"
+    ],
+    "job_specifications_Pay_scale_&_grade": [
+      "Pay scale & grade",
+      "pay scale & grade"
+    ],
+    "job_specifications_Salary": [
+      "Salary",
+      "salary"
+    ],
+    "job_specifications_Work_schedule": [
+      "Work schedule",
+      "work schedule"
+    ],
+    "job_specifications_Appointment_type": [
+      "Appointment type",
+      "appointment type"
+    ],
+    "job_specifications_Promotion_potential": [
+      "Promotion potential",
+      "promotion potential"
+    ],
+    "job_specifications_Supervisory_status": [
+      "Supervisory status",
+      "supervisory status"
+    ],
+    "job_specifications_Security_clearance": [
+      "Security clearance",
+      "security clearance"
+    ],
+    "job_specifications_Drug_test": [
+      "Drug test",
+      "drug test"
+    ],
+    "job_specifications_Telework_eligible": [
+      "Telework eligible",
+      "telework eligible"
+    ],
+    "job_specifications_Remote_job": [
+      "Remote job",
+      "remote job"
+    ],
+    "job_specifications_Travel_Required": [
+      "Travel Required",
+      "travel required"
+    ],
+    "job_specifications_Location": [
+      "Location",
+      "location"
+    ],
+    "job_specifications_Relocation_expenses_reimbursed": [
+      "Relocation expenses reimbursed",
+      "relocation expenses reimbursed"
+    ],
+    "job_specifications_Service": [
+      "Service",
+      "service"
+    ],
+    "job_specifications_Bargaining_unit_status": [
+      "Bargaining unit status",
+      "bargaining unit status"
+    ],
+    "job_specifications_Financial_disclosure": [
+      "Financial disclosure",
+      "financial disclosure"
+    ],
+    "job_specifications_Position_sensitivity_and_risk": [
+      "Position sensitivity and risk",
+      "position sensitivity and risk"
+    ],
+    "job_specifications_Trust_determination_process": [
+      "Trust determination process",
+      "trust determination process"
+    ],
+    "duties_responsibilities_Duties": [
+      "Duties",
+      "duties"
+    ],
+    "duties_responsibilities_Major_Duties": [
+      "Major Duties",
+      "major duties"
+    ],
+    "duties_responsibilities_Key_Duties": [
+      "Key Duties",
+      "key duties"
+    ],
+    "duties_responsibilities_Responsibilities": [
+      "Responsibilities",
+      "responsibilities"
+    ],
+    "duties_responsibilities_What_You_Will_Do": [
+      "What You Will Do",
+      "what you will do"
+    ],
+    "duties_responsibilities_Job_Duties": [
+      "Job Duties",
+      "job duties"
+    ],
+    "duties_responsibilities_Primary_Duties": [
+      "Primary Duties",
+      "primary duties"
+    ],
+    "duties_responsibilities_Essential_Duties": [
+      "Essential Duties",
+      "essential duties"
+    ],
+    "qualifications_requirements_Qualifications": [
+      "Qualifications",
+      "qualifications"
+    ],
+    "qualifications_requirements_Requirements": [
+      "Requirements",
+      "requirements"
+    ],
+    "qualifications_requirements_Basic_Requirements": [
+      "Basic Requirements",
+      "basic requirements"
+    ],
+    "qualifications_requirements_SPECIALIZED_EXPERIENCE": [
+      "SPECIALIZED EXPERIENCE:",
+      "SPECIALIZED EXPERIENCE",
+      "specialized experience:"
+    ],
+    "qualifications_requirements_Specialized_Experience": [
+      "Specialized Experience:",
+      "Specialized Experience",
+      "specialized experience:"
+    ],
+    "qualifications_requirements_Preferred_Experience": [
+      "Preferred Experience:",
+      "Preferred Experience",
+      "preferred experience:"
+    ],
+    "qualifications_requirements_Physical_Requirements": [
+      "Physical Requirements:",
+      "Physical Requirements",
+      "physical requirements:"
+    ],
+    "qualifications_requirements_PART-TIME_OR_UNPAID_EXPERIENCE": [
+      "PART-TIME OR UNPAID EXPERIENCE:",
+      "PART-TIME OR UNPAID EXPERIENCE",
+      "part-time or unpaid experience:"
+    ],
+    "qualifications_requirements_VOLUNTEER_WORK_EXPERIENCE": [
+      "VOLUNTEER WORK EXPERIENCE:",
+      "VOLUNTEER WORK EXPERIENCE",
+      "volunteer work experience:"
+    ],
+    "qualifications_requirements_Working_Conditions": [
+      "Working Conditions:",
+      "Working Conditions",
+      "working conditions:"
+    ],
+    "qualifications_requirements_Conditions_of_Employment": [
+      "Conditions of Employment",
+      "conditions of employment"
+    ],
+    "education_requirements_Education": [
+      "Education:",
+      "Education",
+      "education:"
+    ],
+    "education_requirements_FOREIGN_EDUCATION": [
+      "FOREIGN EDUCATION:",
+      "FOREIGN EDUCATION",
+      "foreign education:"
+    ],
+    "education_requirements_IF_USING_EDUCATION_TO_QUALIFY": [
+      "IF USING EDUCATION TO QUALIFY:",
+      "IF USING EDUCATION TO QUALIFY",
+      "if using education to qualify:"
+    ],
+    "education_requirements_Transcripts": [
+      "Transcripts",
+      "transcripts"
+    ],
+    "education_requirements_Degree": [
+      "Degree:",
+      "Degree",
+      "degree:"
+    ],
+    "education_requirements_GRADUATE_EDUCATION": [
+      "GRADUATE EDUCATION:",
+      "GRADUATE EDUCATION",
+      "graduate education:"
+    ],
+    "education_requirements_OREDUCATION": [
+      "OREDUCATION:",
+      "OREDUCATION",
+      "oreducation:"
+    ],
+    "education_requirements_If_you_are_relying_on_your_education_to_meet_qualification_requirements": [
+      "If you are relying on your education to meet qualification requirements:",
+      "If you are relying on your education to meet qualification requirements",
+      "if you are relying on your education to meet qualification requirements:"
+    ],
+    "application_process_How_to_Apply": [
+      "How to Apply",
+      "how to apply"
+    ],
+    "application_process_Apply": [
+      "Apply",
+      "apply"
+    ],
+    "application_process_Apply_Online": [
+      "Apply Online",
+      "apply online"
+    ],
+    "application_process_Application_Process": [
+      "Application Process",
+      "application process"
+    ],
+    "application_process_Application_Instructions": [
+      "Application Instructions",
+      "application instructions"
+    ],
+    "application_process_Who_May_Apply": [
+      "Who May Apply:",
+      "Who May Apply",
+      "who may apply:"
+    ],
+    "application_process_Proof_of_Eligibility_to_Apply": [
+      "Proof of Eligibility to Apply:",
+      "Proof of Eligibility to Apply",
+      "proof of eligibility to apply:"
+    ],
+    "application_process_This_job_is_open_to": [
+      "This job is open to",
+      "this job is open to"
+    ],
+    "application_process_click_to_continue_with_the_application_process": [
+      "click to continue with the application process",
+      "click to continue with the application process"
+    ],
+    "application_process_You_must_re-select_your_resume_and_or_other_documents_from_your_USAJOBS_account_or_your_application_will_be_incomplete": [
+      "You must re-select your resume and/or other documents from your USAJOBS account or your application will be incomplete.",
+      "You must re-select your resume and/or other documents from your USAJOBS account or your application will be incomplete",
+      "you must re-select your resume and/or other documents from your usajobs account or your application will be incomplete."
+    ],
+    "required_documents_Required_Documents": [
+      "Required Documents:",
+      "Required Documents",
+      "required documents:"
+    ],
+    "required_documents_Documentation_is_required_to_award_preference": [
+      "Documentation is required to award preference.",
+      "Documentation is required to award preference",
+      "documentation is required to award preference."
+    ],
+    "required_documents_Time-in-grade_documentation": [
+      "Time-in-grade documentation:",
+      "Time-in-grade documentation",
+      "time-in-grade documentation:"
+    ],
+    "required_documents_Veterans'_Preference_Documentation": [
+      "Veterans' Preference Documentation:",
+      "Veterans' Preference Documentation",
+      "veterans' preference documentation:"
+    ],
+    "required_documents_select_your_resume_and_or_other_supporting_documents": [
+      "select your resume and/or other supporting documents",
+      "select your resume and/or other supporting documents"
+    ],
+    "evaluation_process_How_You_Will_Be_Evaluated": [
+      "How You Will Be Evaluated",
+      "how you will be evaluated"
+    ],
+    "evaluation_process_BASIS_OF_RATING": [
+      "BASIS OF RATING:",
+      "BASIS OF RATING",
+      "basis of rating:"
+    ],
+    "evaluation_process_Direct_Hire_Evaluation": [
+      "Direct Hire Evaluation:",
+      "Direct Hire Evaluation",
+      "direct hire evaluation:"
+    ],
+    "evaluation_process_Evaluation": [
+      "Evaluation",
+      "evaluation"
+    ],
+    "evaluation_process_Rating_and_Ranking": [
+      "Rating and Ranking",
+      "rating and ranking"
+    ],
+    "evaluation_process_Selection_Process": [
+      "Selection Process",
+      "selection process"
+    ],
+    "benefits_compensation_Benefits": [
+      "Benefits",
+      "benefits"
+    ],
+    "benefits_compensation_Compensation": [
+      "Compensation",
+      "compensation"
+    ],
+    "benefits_compensation_Pay": [
+      "Pay:",
+      "Pay",
+      "pay:"
+    ],
+    "benefits_compensation_What_We_Offer": [
+      "What We Offer",
+      "what we offer"
+    ],
+    "benefits_compensation_Perks": [
+      "Perks",
+      "perks"
+    ],
+    "benefits_compensation_Pay-Band_NF_or_CY_Allowances_and_Differentials": [
+      "Pay-Band (NF or CY) Allowances and Differentials",
+      "pay-band (nf or cy) allowances and differentials"
+    ],
+    "benefits_compensation_Education_Debt_Reduction_Program_Student_Loan_Repayment": [
+      "Education Debt Reduction Program (Student Loan Repayment):",
+      "Education Debt Reduction Program (Student Loan Repayment)",
+      "education debt reduction program (student loan repayment):"
+    ],
+    "benefits_compensation_If_authorized,_only_regular_full-time,_part-time,_limited_tenure_and_seasonal_employees_may_be_paid_Sunday_premium_pay": [
+      "If authorized, only regular (full-time, part-time, limited tenure and seasonal) employees may be paid Sunday premium pay.",
+      "If authorized, only regular (full-time, part-time, limited tenure and seasonal) employees may be paid Sunday premium pay",
+      "if authorized, only regular (full-time, part-time, limited tenure and seasonal) employees may be paid sunday premium pay."
+    ],
+    "timeline_next_steps_Open_&_closing_dates": [
+      "Open & closing dates",
+      "open & closing dates"
+    ],
+    "timeline_next_steps_Next_steps": [
+      "Next steps",
+      "next steps"
+    ],
+    "timeline_next_steps_What_to_Expect_Next": [
+      "What to Expect Next",
+      "what to expect next"
+    ],
+    "timeline_next_steps_After_You_Apply": [
+      "After You Apply",
+      "after you apply"
+    ],
+    "timeline_next_steps_Selection_Process": [
+      "Selection Process",
+      "selection process"
+    ],
+    "agency_information_Agency_contact_information": [
+      "Agency contact information",
+      "agency contact information"
+    ],
+    "agency_information_Clarification_from_the_agency": [
+      "Clarification from the agency",
+      "clarification from the agency"
+    ],
+    "agency_information_About_the_Agency": [
+      "About the Agency",
+      "about the agency"
+    ],
+    "agency_information_Department": [
+      "Department",
+      "department"
+    ],
+    "agency_information_Office": [
+      "Office",
+      "office"
+    ],
+    "agency_information_Organization": [
+      "Organization",
+      "organization"
+    ],
+    "agency_information_Interagency_Career_Transition_Assistance_Program_ICTAP": [
+      "Interagency Career Transition Assistance Program (ICTAP):",
+      "Interagency Career Transition Assistance Program (ICTAP)",
+      "interagency career transition assistance program (ictap):"
+    ],
+    "agency_information_Career_Transition_Assistance_Program_CTAP_Interagency_Career_Transition_Assistance_Program_ICTAP": [
+      "Career Transition Assistance Program (CTAP)/Interagency Career Transition Assistance Program (ICTAP)",
+      "career transition assistance program (ctap)/interagency career transition assistance program (ictap)"
+    ],
+    "contact_information_Address": [
+      "Address",
+      "address"
+    ],
+    "contact_information_Email": [
+      "Email",
+      "email"
+    ],
+    "contact_information_Phone": [
+      "Phone",
+      "phone"
+    ],
+    "contact_information_Website": [
+      "Website",
+      "website"
+    ],
+    "contact_information_Fax": [
+      "Fax",
+      "fax"
+    ],
+    "additional_information_Additional_information": [
+      "Additional information",
+      "additional information"
+    ],
+    "additional_information_Other_Information": [
+      "Other Information",
+      "other information"
+    ],
+    "additional_information_Notes": [
+      "Notes",
+      "notes"
+    ],
+    "additional_information_IMPORTANT": [
+      "IMPORTANT",
+      "important"
+    ],
+    "additional_information_NOTE": [
+      "NOTE:",
+      "NOTE",
+      "note:"
+    ],
+    "additional_information_Note": [
+      "Note:",
+      "Note",
+      "note:"
+    ],
+    "additional_information_For_Important_General_Applicant_Information_and_Definitions_go_to": [
+      "For Important General Applicant Information and Definitions go to:",
+      "For Important General Applicant Information and Definitions go to",
+      "for important general applicant information and definitions go to:"
+    ],
+    "additional_information_Fair_&_Transparent": [
+      "Fair & Transparent",
+      "fair & transparent"
+    ],
+    "additional_information_Videos": [
+      "Videos",
+      "videos"
+    ]
+  },
+  "analysis_summary": {
+    "total_categories": 13,
+    "total_mapped_fields": 113,
+    "generated_at": "2025-06-14T14:00:29.546335"
+  }
+}
