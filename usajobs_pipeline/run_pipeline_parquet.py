@@ -351,7 +351,7 @@ def run_rationalization(storage: ParquetJobStorage):
         # Always create scraped_content structure, even if empty
         job['scraped_content'] = {'content_sections': {}}
         
-        if 'scraped_sections' in job and job['scraped_sections']:
+        if 'scraped_sections' in job and job.get('scraped_sections'):
             try:
                 scraped_sections = job['scraped_sections']
                 if scraped_sections and scraped_sections != '{}':
@@ -364,7 +364,7 @@ def run_rationalization(storage: ParquetJobStorage):
                         jobs_with_content += 1
                         logger.debug(f"Job {control_num} has scraped sections: {list(sections.keys())}")
                     
-                if 'scraped_metadata' in job and job['scraped_metadata']:
+                if 'scraped_metadata' in job and job.get('scraped_metadata'):
                     metadata = json.loads(job['scraped_metadata'])
                     job['scraped_content'].update(metadata)
             except json.JSONDecodeError as e:

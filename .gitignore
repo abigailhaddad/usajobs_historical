@@ -13,6 +13,9 @@ data/duckdb/*.duckdb.wal
 data_parquet/
 *.parquet
 
+# HTML cache files (large files, exclude from repo)
+html_cache/
+
 # CSV exports (include in repo for sharing)
 # data/exports/*.csv
 

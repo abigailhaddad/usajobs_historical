@@ -26,7 +26,11 @@ import argparse
 import json
 import re
 from datetime import datetime
+from pathlib import Path
+import os
 
+# Default cache directory in root
+DEFAULT_CACHE_DIR = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))) / "html_cache"
 
 # Content sections using Current API field names
 TARGET_SECTIONS = {
@@ -44,143 +48,149 @@ TARGET_SECTIONS = {
 }
 
 
-def extract_content_sections(soup):
-    """Extract ONLY the content sections we need"""
+def parse_all_sections(soup):
+    """
+    Parse the entire job posting into sections based on headers.
+    Returns a dict mapping header text to content.
+    """
     sections = {}
     
-    for section_key, header_variations in TARGET_SECTIONS.items():
-        content = extract_section_by_headers(soup, header_variations)
+    # Remove script, style elements first (but keep nav as it may contain content)
+    for elem in soup(['script', 'style']):
+        elem.decompose()
+    
+    # Focus on job announcement content area - check multiple possible containers
+    main = (soup.find('div', class_='usajobs-joa-overview') or 
+            soup.find('div', class_='usajobs-joa') or
+            soup.find('div', {'id': 'duties'}).parent if soup.find('div', {'id': 'duties'}) else None or
+            soup.find('main') or 
+            soup.body)
+    
+    if not main:
+        return sections
+    
+    # Find all potential headers
+    headers = main.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'dt', 'strong'])
+    
+    # Sort headers by their position in the document
+    headers.sort(key=lambda h: (h.sourceline or 0, h.sourcepos or 0) if hasattr(h, 'sourceline') else 0)
+    
+    for i, header in enumerate(headers):
+        header_text = header.get_text(strip=True)
+        
+        # Skip very long "headers" (probably not actual headers)
+        if not header_text or len(header_text) > 100:
+            continue
+            
+        # Skip if this header is inside another header's content
+        if any(header.find_parent() == h for h in headers[:i]):
+            continue
+            
+        # Extract content until the next header at same or higher level
+        content_parts = []
+        
+        # Get the next header at same or higher level
+        next_header = None
+        for j in range(i + 1, len(headers)):
+            # Check if it's at same level (sibling) or higher level
+            if headers[j].find_parent() != header.find_parent():
+                next_header = headers[j]
+                break
+        
+        # Collect all elements between this header and the next
+        current = header.next_sibling
+        while current:
+            # Stop if we've reached the next header
+            if next_header and current == next_header:
+                break
+                
+            # Stop if current contains the next header
+            if next_header and hasattr(current, 'find_all'):
+                if next_header in current.find_all():
+                    break
+                
+            # Extract text from elements
+            if hasattr(current, 'name') and current.name:
+                # Skip if this is another header
+                if current in headers:
+                    break
+                    
+                text = current.get_text(separator=' ', strip=True)
+                if text:
+                    content_parts.append(text)
+            elif isinstance(current, str):
+                # Handle text nodes
+                text = current.strip()
+                if text:
+                    content_parts.append(text)
+                    
+            current = current.next_sibling
+        
+        # Store the section
+        content = '\n\n'.join(content_parts).strip()
         if content:
-            sections[section_key] = content
+            # Normalize header text for matching
+            normalized_header = header_text.lower().strip()
+            # Handle duplicates by appending tag type
+            if normalized_header in sections:
+                normalized_header = f"{normalized_header}_{header.name}"
+                
+            sections[normalized_header] = {
+                'original_header': header_text,
+                'content': content,
+                'tag': header.name
+            }
     
     return sections
 
 
-def extract_section_by_headers(soup, header_variations):
-    """Extract content for a section using multiple header variations"""
+def map_sections_to_fields(parsed_sections):
+    """
+    Map parsed sections to our target field names.
+    Uses fuzzy matching to handle variations in header text.
+    """
+    mapped = {}
     
-    for header_text in header_variations:
-        # Try multiple approaches to find headers
-        content = None
+    # For each target field, find the best matching section
+    for field_name, header_variations in TARGET_SECTIONS.items():
+        best_match = None
+        best_content = None
         
-        # Approach 1: Direct header search
-        headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'dt', 'strong'], 
-                               string=lambda text: text and header_text.lower() in text.lower() if text else False)
-        
-        if headers:
-            # Try each header until we find one with reasonable content
-            for header in headers:
-                content = extract_content_after_header(header)
-                if content and content.strip():
-                    # Prefer content that's a reasonable length (not too long, not too short)
-                    content_len = len(content)
-                    if 500 < content_len < 5000:  # Reasonable content length
-                        return content
+        # Try each variation
+        for variation in header_variations:
+            variation_lower = variation.lower().strip()
             
-            # If no reasonable content found, use the first non-empty result
-            for header in headers:
-                content = extract_content_after_header(header)
-                if content and content.strip():
-                    return content
-        
-        # Approach 2: Class-based search
-        class_name = header_text.lower().replace(' ', '-')
-        class_elements = soup.find_all(['div', 'section'], 
-                                     class_=lambda x: x and class_name in ' '.join(x).lower() if x else False)
-        
-        for elem in class_elements:
-            content = extract_element_content(elem)
-            if content and content.strip():
-                return content
-        
-        # Approach 3: ID-based search
-        id_elements = soup.find_all(['div', 'section'],
-                                   id=lambda x: x and class_name in x.lower() if x else False)
-        
-        for elem in id_elements:
-            content = extract_element_content(elem)
-            if content and content.strip():
-                return content
-    
-    return None
-
-
-def extract_content_after_header(header_elem):
-    """Extract all content following a header until the next header"""
-    content_parts = []
-    
-    # Get all following siblings
-    current = header_elem.find_next_sibling()
-    
-    while current:
-        # Stop at next header (direct sibling)
-        if current.name in ['h1', 'h2', 'h3', 'h4', 'h5'] or (
-            current.name in ['dt', 'strong'] and len(current.get_text(strip=True)) < 100
-        ):
-            break
-        
-        # Also stop if current element contains a header as its first child
-        if current.name and hasattr(current, 'children'):
-            first_child = next((child for child in current.children if hasattr(child, 'name') and child.name), None)
-            if first_child and first_child.name in ['h1', 'h2', 'h3', 'h4', 'h5']:
+            # Look for exact matches first
+            if variation_lower in parsed_sections:
+                best_match = variation_lower
+                best_content = parsed_sections[variation_lower]['content']
                 break
+                
+            # Then try partial matches
+            for section_header, section_data in parsed_sections.items():
+                if variation_lower in section_header or section_header in variation_lower:
+                    # Prefer shorter headers (more specific)
+                    if best_match is None or len(section_header) < len(best_match):
+                        best_match = section_header
+                        best_content = section_data['content']
         
-        # Extract text content
-        if current.name:
-            text = current.get_text(separator=' ', strip=True)
-            if text and text.strip():
-                content_parts.append(text)
-        
-        current = current.find_next_sibling()
-    
-    # Also try parent container approach - but be more selective
-    if not content_parts:
-        parent = header_elem.find_parent(['div', 'section', 'dd'])
-        if parent:
-            # Instead of taking all parent text, look for the first immediate content
-            # after this header but before any other headers
-            header_text = header_elem.get_text(strip=True)
+        if best_content:
+            mapped[field_name] = best_content
             
-            # Find the position of this header in the parent
-            header_found = False
-            for child in parent.descendants:
-                if child == header_elem:
-                    header_found = True
-                    continue
-                    
-                if header_found and hasattr(child, 'name'):
-                    # Stop if we hit another header
-                    if child.name in ['h1', 'h2', 'h3', 'h4', 'h5']:
-                        break
-                    # Collect text from this element if it's substantial
-                    if child.name and child.get_text(strip=True):
-                        text = child.get_text(separator=' ', strip=True)
-                        if len(text) > 50:  # Only substantial content
-                            content_parts.append(text)
-                            break  # Take only the first substantial content block
-    
-    # Special handling for education content
-    result = '\n\n'.join(content_parts)
-    if not result.strip() and header_elem.get_text(strip=True).lower() in ['education', 'educational requirements']:
-        # Look harder for education content
-        parent = header_elem.find_parent(['div', 'section'])
-        if parent:
-            # Find any paragraphs or divs after the header
-            for elem in parent.find_all(['p', 'div', 'ul']):
-                text = elem.get_text(strip=True)
-                if text and text not in result:
-                    result += ' ' + text
-    
-    return result
+    return mapped
 
 
-def extract_element_content(elem):
-    """Extract clean content from an element"""
-    # Remove any nested headers first
-    for header in elem.find_all(['h1', 'h2', 'h3', 'h4', 'h5']):
-        header.decompose()
+def extract_content_sections(soup):
+    """Extract content sections using improved parsing"""
+    # First parse all sections
+    all_sections = parse_all_sections(soup)
     
-    return elem.get_text(separator=' ', strip=True)
+    # Then map to our target fields
+    mapped_sections = map_sections_to_fields(all_sections)
+    
+    return mapped_sections
+
+
 
 
 def extract_full_text(soup):
@@ -198,40 +208,141 @@ def extract_full_text(soup):
     return soup.get_text(separator='\n', strip=True)
 
 
-def scrape_enhanced_job_posting(control_number, save_html=False):
+def get_cache_path(control_number, cache_dir=None):
+    """
+    Get the cache file path for a control number.
+    Uses subdirectories to avoid too many files in one directory.
+    
+    Example: 837670300 -> html_cache/837/670/837670300.html
+    """
+    if cache_dir is None:
+        cache_dir = DEFAULT_CACHE_DIR
+    
+    control_str = str(control_number)
+    
+    # Create subdirectory structure based on control number
+    if len(control_str) >= 6:
+        # Split into chunks for directory structure
+        subdir1 = control_str[:3]
+        subdir2 = control_str[3:6]
+        cache_path = cache_dir / subdir1 / subdir2 / f"{control_number}.html"
+    else:
+        # Fallback for short control numbers
+        cache_path = cache_dir / f"{control_number}.html"
+    
+    return cache_path
+
+
+def load_from_cache(control_number, cache_dir=None):
+    """
+    Load HTML from cache if it exists.
+    
+    Returns:
+        str: Cached HTML content if found, None otherwise
+    """
+    cache_path = get_cache_path(control_number, cache_dir)
+    
+    if cache_path.exists():
+        try:
+            with open(cache_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception as e:
+            print(f"Error reading cache for {control_number}: {e}")
+            return None
+    
+    return None
+
+
+def save_to_cache(control_number, html_content, cache_dir=None):
+    """
+    Save HTML content to cache.
+    """
+    cache_path = get_cache_path(control_number, cache_dir)
+    
+    try:
+        # Create directory structure if needed
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(cache_path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+    except Exception as e:
+        print(f"Error caching {control_number}: {e}")
+
+
+def scrape_enhanced_job_posting(control_number, save_html=False, cache_dir=None, force_refresh=False):
     """
     Scrape job posting content sections missing from historical API
     
     Args:
         control_number: Job control number
-        save_html: Whether to save raw HTML for debugging
+        save_html: Whether to save additional copy for debugging
+        cache_dir: Cache directory (defaults to root html_cache)
+        force_refresh: Force fetch from web even if cached
     
     Returns:
         dict: Extracted content sections and metadata
+    
+    Note: HTML is always cached to html_cache/ folder for future use
     """
     url = f"https://www.usajobs.gov/job/{control_number}"
+    html_content = None
+    cache_used = False
     
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-    }
+    # Try to load from cache first (unless force refresh)
+    if not force_refresh:
+        html_content = load_from_cache(control_number, cache_dir)
+        if html_content:
+            cache_used = True
+            print(f"💾 Using cached HTML for {control_number}")
     
+    # Fetch from web if not cached or force refresh
+    if html_content is None:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+        }
+    
+        try:
+            print(f"📡 Fetching from web: {url}")
+            response = requests.get(url, headers=headers, timeout=30)
+            response.raise_for_status()
+            html_content = response.text
+            
+            # Always save to cache (which saves HTML to root/html_cache/)
+            save_to_cache(control_number, html_content, cache_dir)
+            
+            # Optional: save additional copy for debugging
+            if save_html:
+                # Save to root directory, not scripts folder
+                root_dir = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+                html_debug_dir = root_dir / "html_debug"
+                html_debug_dir.mkdir(exist_ok=True)
+                html_file_path = html_debug_dir / f"job_{control_number}.html"
+                
+                with open(html_file_path, 'w', encoding='utf-8') as f:
+                    f.write(html_content)
+                print(f"Saved additional copy to {html_file_path}")
+        
+        except requests.exceptions.RequestException as e:
+            return {
+                'control_number': control_number,
+                'url': url,
+                'status': 'error',
+                'error': str(e),
+                'scraped_at': datetime.now().isoformat(),
+                'cache_used': False
+            }
+    
+    # Parse HTML (whether from cache or web)
     try:
-        print(f"Fetching: {url}")
-        response = requests.get(url, headers=headers, timeout=30)
-        response.raise_for_status()
+        soup = BeautifulSoup(html_content, 'html.parser')
         
-        # Save raw HTML if requested
-        if save_html:
-            with open(f"job_{control_number}.html", 'w', encoding='utf-8') as f:
-                f.write(response.text)
-            print(f"Saved raw HTML to job_{control_number}.html")
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
+        # Parse all sections first for debugging
+        all_sections = parse_all_sections(soup)
         
         # Extract content
         job_data = {
@@ -239,48 +350,52 @@ def scrape_enhanced_job_posting(control_number, save_html=False):
             'url': url,
             'status': 'success',
             'scraped_at': datetime.now().isoformat(),
-            'scraper_version': 'optimized_v2',
-            'content_sections': extract_content_sections(soup),
+            'scraper_version': 'section_parser_v1',
+            'cache_used': cache_used,
+            'content_sections': map_sections_to_fields(all_sections),
             'full_text': extract_full_text(soup)
         }
         
         # Add extraction statistics
         job_data['extraction_stats'] = {
             'sections_found': len(job_data['content_sections']),
+            'total_sections_parsed': len(all_sections),
+            'all_section_headers': [data['original_header'] for data in all_sections.values()],
             'total_content_length': sum(len(v) for v in job_data['content_sections'].values()),
             'full_text_length': len(job_data['full_text']),
             'sections_extracted': list(job_data['content_sections'].keys())
         }
         
         return job_data
-        
-    except requests.exceptions.RequestException as e:
-        return {
-            'control_number': control_number,
-            'url': url,
-            'status': 'error',
-            'error': str(e),
-            'scraped_at': datetime.now().isoformat()
-        }
     except Exception as e:
         return {
             'control_number': control_number,
             'url': url,
             'status': 'error',
             'error': f"Parsing error: {str(e)}",
-            'scraped_at': datetime.now().isoformat()
+            'scraped_at': datetime.now().isoformat(),
+            'cache_used': cache_used
         }
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Scrape USAJobs content sections')
+    parser = argparse.ArgumentParser(description='Scrape USAJobs content sections (HTML always cached)')
     parser.add_argument('control_number', help='Job control number')
-    parser.add_argument('--save-html', action='store_true', help='Save raw HTML file')
+    parser.add_argument('--save-html', action='store_true', help='Save additional debug copy')
+    parser.add_argument('--force-refresh', action='store_true', help='Force fetch from web even if cached')
+    parser.add_argument('--cache-dir', help='Cache directory (default: root html_cache)')
     parser.add_argument('--output', '-o', help='Output JSON file')
     
     args = parser.parse_args()
     
-    result = scrape_enhanced_job_posting(args.control_number, save_html=args.save_html)
+    cache_dir = Path(args.cache_dir) if args.cache_dir else None
+    
+    result = scrape_enhanced_job_posting(
+        args.control_number, 
+        save_html=args.save_html,
+        cache_dir=cache_dir,
+        force_refresh=args.force_refresh
+    )
     
     if args.output:
         with open(args.output, 'w', encoding='utf-8') as f:
@@ -289,8 +404,9 @@ def main():
     else:
         print(json.dumps(result, indent=2, ensure_ascii=False))
     
-    # Add delay to be respectful
-    time.sleep(1)
+    # Add delay to be respectful (only if we fetched from web)
+    if not result.get('cache_used', False):
+        time.sleep(1)
 
 
 if __name__ == "__main__":
