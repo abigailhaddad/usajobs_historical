@@ -207,9 +207,25 @@ def _extract_section_content(header, remaining_headers):
         if next_boundary and current == next_boundary:
             break
         
-        # Stop if current element contains the boundary header
+        # If current element contains the boundary header, extract content up to that header
         if (next_boundary and hasattr(current, 'find_all') and 
             next_boundary in current.find_all()):
+            # Extract content from this element up to (but not including) the boundary
+            content_up_to_boundary = []
+            for child in current.children:
+                if child == next_boundary:
+                    break
+                if hasattr(child, 'get_text'):
+                    text = child.get_text(separator=' ', strip=True)
+                    if text:
+                        content_up_to_boundary.append(text)
+                elif isinstance(child, str):
+                    text = child.strip()
+                    if text:
+                        content_up_to_boundary.append(text)
+            
+            if content_up_to_boundary:
+                content_parts.extend(content_up_to_boundary)
             break
             
         # Collect elements with content
@@ -262,26 +278,35 @@ def map_sections_to_fields(parsed_sections):
         best_match = None
         best_content = None
         
-        # Try each variation
-        for variation in header_variations:
-            variation_lower = variation.lower().strip()
-            
-            # Look for exact matches first
-            if variation_lower in parsed_sections:
-                best_match = variation_lower
-                best_content = parsed_sections[variation_lower]['content']
-                break
+        # Special handling for QualificationSummary - prefer plain "Qualifications" if it exists
+        if field_name == 'QualificationSummary' and 'qualifications' in parsed_sections:
+            best_match = 'qualifications'
+            best_content = parsed_sections['qualifications']['content']
+        else:
+            # Try each variation
+            for variation in header_variations:
+                variation_lower = variation.lower().strip()
                 
-            # Then try partial matches (but be more careful)
-            for section_header, section_data in parsed_sections.items():
-                # Avoid matching single words in longer phrases (e.g., "requirements" in "educational requirements")
-                if (variation_lower in section_header and 
-                    len(variation_lower) > 3 and  # Only for longer variations
-                    len(section_header) / len(variation_lower) < 3):  # Avoid too-long matches
-                    # Prefer shorter headers (more specific)
-                    if best_match is None or len(section_header) < len(best_match):
-                        best_match = section_header
-                        best_content = section_data['content']
+                # Look for exact matches first
+                if variation_lower in parsed_sections:
+                    best_match = variation_lower
+                    best_content = parsed_sections[variation_lower]['content']
+                    break
+                    
+                # Then try partial matches (but be more careful)
+                for section_header, section_data in parsed_sections.items():
+                    # Skip problematic partial sections for certain fields (but allow minimum qualifications)
+                    if field_name == 'QualificationSummary' and any(skip in section_header.lower() for skip in ['basic qualifications', 'preferred qualifications']):
+                        continue
+                        
+                    # Avoid matching single words in longer phrases (e.g., "requirements" in "educational requirements")
+                    if (variation_lower in section_header and 
+                        len(variation_lower) > 3 and  # Only for longer variations
+                        len(section_header) / len(variation_lower) < 3):  # Avoid too-long matches
+                        # Prefer shorter headers (more specific)
+                        if best_match is None or len(section_header) < len(best_match):
+                            best_match = section_header
+                            best_content = section_data['content']
         
         if best_content:
             mapped[field_name] = best_content

@@ -1,0 +1,1300 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scraped Content vs Current API Comparison</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #9b59b6 0%, #3498db 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .summary {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .field-section {
+            background: white;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .field-header {
+            background: #8e44ad;
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .field-stats {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            background: #f8f9fa;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #8e44ad;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        .examples {
+            padding: 20px;
+        }
+        .example-category {
+            margin-bottom: 25px;
+        }
+        .example-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+        .example-title.identical { background: #d5edda; }
+        .example-title.similar { background: #fff3cd; }
+        .example-title.different { background: #f8d7da; }
+        .example-item {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .example-header {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .content-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        .content-side {
+            padding: 15px;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        .content-side.scraped {
+            background: #f3e5f5;
+            border-right: 1px solid #dee2e6;
+        }
+        .content-side.api {
+            background: #e8f4f8;
+        }
+        .content-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 Scraped Content vs Current API</h1>
+        <p>Comparing web-scraped content vs Current USAJobs API content for the same jobs</p>
+        <p>Generated: 2025-06-15 12:54:45</p>
+    </div>
+    
+    <div class="summary">
+        <h2>📊 Analysis Overview</h2>
+        <p><strong>Total Job Pairs Analyzed:</strong> 5,619</p>
+        <p>This analysis compares content extracted by web scraping job pages versus the content provided by the Current USAJobs API for the same job postings.</p>
+        <p><strong>Purpose:</strong> Determine which source provides better/more complete content for each field type.</p>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            Summary (scraped) vs job_summary (API) - 5617 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">99.9%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1.000</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title different">Different Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #837268200 - Similarity: 0.876
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            The Long Beach VA Health Care Systems Health Administration Service is recruiting for multiple Medical Support Assistant positions. Welcome to VA Long Beach Tibor Rubin - History This is an open continuous announcement. Applications will be accepted on an ongoing basis and qualified candidates will ...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            The Long Beach VA Health Care Systems Health Administration Service is recruiting for multiple Medical Support Assistant positions. Welcome to VA Long Beach Tibor Rubin - History This is an open continuous announcement. Applications will be accepted on an ongoing basis and qualified candidates will ...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #837274100 - Similarity: 0.879
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            The Long Beach VA Health Care Systems Health Administration Service is recruiting for multiple Medical Support Assistant (Advanced) positions. Welcome to VA Long Beach Tibor Rubin - History This is an open continuous announcement. Applications will be accepted on an ongoing basis and qualified candi...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            The Long Beach VA Health Care Systems Health Administration Service is recruiting for multiple Medical Support Assistant (Advanced) positions. Welcome to VA Long Beach Tibor Rubin - History This is an open continuous announcement. Applications will be accepted on an ongoing basis and qualified candi...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title similar">Similar Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #837736100 - Similarity: 0.968
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Serves as a Cook in the Kitchen Department of the Hale Koa Hotel. This position will remain open  until filled  with a first cut off date of 06/11/2025 for employment consideration.   Additional lists will be pulled after this first cut-off date at the request of the hiring manager. Local candidates...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Serves as a Cook in the Kitchen Department of the Hale Koa Hotel. This position will remain open until filled with a first cut off date of 06/11/2025 for employment consideration. Additional lists will be pulled after this first cut-off date at the request of the hiring manager. Local candidates wil...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #837925800 - Similarity: 0.990
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Who May Apply: Current, permanent DFAS employees in the competitive service, and current DFAS VRA employees in the local commuting area, and eligible DoD PPP Military Spouse preference applicants. This announcement will be used to fill position at either the GS-11, or GS-12 grade level with a target...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Who May Apply: Current, permanent DFAS employees in the competitive service, and current DFAS VRA employees in the local commuting area, and eligible DoD PPP Military Spouse preference applicants. This announcement will be used to fill position at either the GS-11, or GS-12 grade level with a target...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title identical">Identical Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            This position is a Medical Support Assistant, Division of Dental, located at the Naytahwaush Health Center, located in Naytahwaush, MN. This position reports to the Chief Dentist or designee. This is an Open Until Filled Announcement and applications will be referred when vacancies occur. Frequent t...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            This position is a Medical Support Assistant, Division of Dental, located at the Naytahwaush Health Center, located in Naytahwaush, MN. This position reports to the Chief Dentist or designee. This is an Open Until Filled Announcement and applications will be referred when vacancies occur. Frequent t...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            This position is located at the Naytahwaush Health Center, located in Naytahwaush, MN. The purpose of this position is to perform chair side assistant duties in all phases of restorative, prosthodontic, surgical, endodontic and periodontal treatment as provided in general dentistry, and to support t...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            This position is located at the Naytahwaush Health Center, located in Naytahwaush, MN. The purpose of this position is to perform chair side assistant duties in all phases of restorative, prosthodontic, surgical, endodontic and periodontal treatment as provided in general dentistry, and to support t...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            This position is a Medical Support Assistant, Division of Dental, located at the Naytahwaush Health Center, located in Naytahwaush, MN. This position reports to the Chief Dentist or designee. This is an Open Until Filled Announcement and applications will be referred when vacancies occur. Frequent t...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            This position is a Medical Support Assistant, Division of Dental, located at the Naytahwaush Health Center, located in Naytahwaush, MN. This position reports to the Chief Dentist or designee. This is an Open Until Filled Announcement and applications will be referred when vacancies occur. Frequent t...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            MajorDuties (scraped) vs major_duties (API) - 5619 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">100.0%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1.000</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title identical">Identical Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Works closely with IHS Purchased and Referred Care, other insurance or government services personnel; with local and surrounding transportation teams for patient's medical appointments. Contacts and arranges appointments and procedures for patients who need further care within medical facility or co...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Works closely with IHS Purchased and Referred Care, other insurance or government services personnel; with local and surrounding transportation teams for patient's medical appointments. Contacts and arranges appointments and procedures for patients who need further care within medical facility or co...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Provide chair side assistance during all routine and complex dental procedures. Relays post-treatment instructions to patients. Perform routine laboratory duties, such as preparing materials, disinfecting and sterilizing instruments, and prepare trays set-ups....
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Provide chair side assistance during all routine and complex dental procedures. Relays post-treatment instructions to patients. Perform routine laboratory duties, such as preparing materials, disinfecting and sterilizing instruments, and prepare trays set-ups....
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Works closely with IHS Purchased and Referred Care, other insurance or government services personnel; with local and surrounding transportation teams for patient's medical appointments. Contacts and arranges appointments and procedures for patients who need further care within medical facility or co...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Works closely with IHS Purchased and Referred Care, other insurance or government services personnel; with local and surrounding transportation teams for patient's medical appointments. Contacts and arranges appointments and procedures for patients who need further care within medical facility or co...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            QualificationSummary (scraped) vs qualification_summary (API) - 5617 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">100.0%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1.000</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title identical">Identical Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL THE VACANCY IS FILLED. IT MAY BE EXTENDED OR CLOSED PRIOR TO THE CURRENT CLOSING DATE. APPLICATIONS MUST BE SUBMITTED BY 11:59 EST TUESDAY TO BE CONSIDERED, FIRST CUT OFF DATE FOR APPLICATIONS IS EVERY TUESDAY THERE AFTER. To qualify for this positi...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL THE VACANCY IS FILLED. IT MAY BE EXTENDED OR CLOSED PRIOR TO THE CURRENT CLOSING DATE. APPLICATIONS MUST BE SUBMITTED BY 11:59 EST TUESDAY TO BE CONSIDERED, FIRST CUT OFF DATE FOR APPLICATIONS IS EVERY TUESDAY THERE AFTER. To qualify for this positi...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL THE VACANCY IS FILLED. IT MAY BE EXTENDED OR CLOSED PRIOR TO THE CURRENT CLOSING DATE. APPLICATIONS MUST BE SUBMITTED BY 11:59 EST TUESDAY TO BE CONSIDERED, FIRST CUT OFF DATE FOR APPLICATIONS IS EVERY TUESDAY THERE AFTER. To qualify for this positi...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL THE VACANCY IS FILLED. IT MAY BE EXTENDED OR CLOSED PRIOR TO THE CURRENT CLOSING DATE. APPLICATIONS MUST BE SUBMITTED BY 11:59 EST TUESDAY TO BE CONSIDERED, FIRST CUT OFF DATE FOR APPLICATIONS IS EVERY TUESDAY THERE AFTER. To qualify for this positi...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL THE VACANCY IS FILLED. IT MAY BE EXTENDED OR CLOSED PRIOR TO THE CURRENT CLOSING DATE. APPLICATIONS MUST BE SUBMITTED BY 11:59 EST TUESDAY TO BE CONSIDERED, FIRST CUT OFF DATE FOR APPLICATIONS IS EVERY TUESDAY THERE AFTER. To qualify for this positi...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL THE VACANCY IS FILLED. IT MAY BE EXTENDED OR CLOSED PRIOR TO THE CURRENT CLOSING DATE. APPLICATIONS MUST BE SUBMITTED BY 11:59 EST TUESDAY TO BE CONSIDERED, FIRST CUT OFF DATE FOR APPLICATIONS IS EVERY TUESDAY THERE AFTER. To qualify for this positi...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            Requirements (scraped) vs requirements (API) - 5612 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">100.0%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1.000</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title identical">Identical Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Must pass pre-employment examination. Selectee may be subject to a probationary/trial period ESEP appointees typically serve a two year trial period U.S. Citizenship is required Selective Service Registration is required for males born after 12/31/1959 Selectee(s) are required to have a viable bank ...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Must pass pre-employment examination. Selectee may be subject to a probationary/trial period ESEP appointees typically serve a two year trial period U.S. Citizenship is required Selective Service Registration is required for males born after 12/31/1959 Selectee(s) are required to have a viable bank ...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Must pass pre-employment examination. Selectee may be subject to a probationary/trial period ESEP appointees typically serve a two year trial period U.S. Citizenship is required Selective Service Registration is required for males born after 12/31/1959 This is a designated position covered by Public...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Must pass pre-employment examination. Selectee may be subject to a probationary/trial period ESEP appointees typically serve a two year trial period U.S. Citizenship is required Selective Service Registration is required for males born after 12/31/1959 This is a designated position covered by Public...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Must pass pre-employment examination. Selectee may be subject to a probationary period U.S. Citizenship is required Selective Service Registration is required for males born after 12/31/1959 Selectee(s) are required to have a viable bank account at a financial institution for electronic direct depos...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Must pass pre-employment examination. Selectee may be subject to a probationary period U.S. Citizenship is required Selective Service Registration is required for males born after 12/31/1959 Selectee(s) are required to have a viable bank account at a financial institution for electronic direct depos...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            Education (scraped) vs education (API) - 4938 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">100.0%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1.000</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title identical">Identical Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            There are no education requirements....
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            There are no education requirements....
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            There are no education requirements....
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            There are no education requirements....
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            There are no education requirements....
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            There are no education requirements....
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            HowToApply (scraped) vs how_to_apply (API) - 5619 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">100.0%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1.000</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title identical">Identical Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            To apply for this position, you must provide a complete Application Package. See required documents below. Click 'Apply' to create an account or log in to your existing USAJOBS account. Follow the prompts to upload your resume and/or supporting documents. Read all Eligibility questions and respond a...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            To apply for this position, you must provide a complete Application Package. See required documents below. Click 'Apply' to create an account or log in to your existing USAJOBS account. Follow the prompts to upload your resume and/or supporting documents. Read all Eligibility questions and respond a...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            To apply for this position, you must provide a complete Application Package. See required documents below. Click 'Apply' to create an account or log in to your existing USAJOBS account. Follow the prompts to upload your resume and/or supporting documents. Read all Eligibility questions and respond a...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            To apply for this position, you must provide a complete Application Package. See required documents below. Click 'Apply' to create an account or log in to your existing USAJOBS account. Follow the prompts to upload your resume and/or supporting documents. Read all Eligibility questions and respond a...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            To apply for this position, you must provide a complete Application Package. See required documents below. Click 'Apply' to create an account or log in to your existing USAJOBS account. Follow the prompts to upload your resume and/or supporting documents. Read all Eligibility questions and respond a...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            To apply for this position, you must provide a complete Application Package. See required documents below. Click 'Apply' to create an account or log in to your existing USAJOBS account. Follow the prompts to upload your resume and/or supporting documents. Read all Eligibility questions and respond a...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            Evaluations (scraped) vs evaluations (API) - 5618 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">68.4%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">31.6%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.829</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title different">Different Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #825850300 - Similarity: 0.949
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            You will be evaluated for this job based on how well you meet the qualifications above. Your latest resume will be used to determine your qualifications. Your application package (resume, supporting documents, and responses to the questionnaire) will be used to determine your eligibility, qualificat...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Your latest resume will be used to determine your qualifications. Your application package (resume, supporting documents, and responses to the questionnaire) will be used to determine your eligibility, qualifications, and quality ranking for this position. Please follow all instructions carefully. E...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #825851900 - Similarity: 0.949
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            You will be evaluated for this job based on how well you meet the qualifications above. Your latest resume will be used to determine your qualifications. Your application package (resume, supporting documents, and responses to the questionnaire) will be used to determine your eligibility, qualificat...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Your latest resume will be used to determine your qualifications. Your application package (resume, supporting documents, and responses to the questionnaire) will be used to determine your eligibility, qualifications, and quality ranking for this position. Please follow all instructions carefully. E...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #825852200 - Similarity: 0.949
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            You will be evaluated for this job based on how well you meet the qualifications above. Your latest resume will be used to determine your qualifications. Your application package (resume, supporting documents, and responses to the questionnaire) will be used to determine your eligibility, qualificat...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Your latest resume will be used to determine your qualifications. Your application package (resume, supporting documents, and responses to the questionnaire) will be used to determine your eligibility, qualifications, and quality ranking for this position. Please follow all instructions carefully. E...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title similar">Similar Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 0.986
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            You will be evaluated for this job based on how well you meet the qualifications above. Additional selections may be made for similar positions across the Department of Health and Human Services (HHS) within the local commuting area(s) of the location identified in this announcement. By applying, yo...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Additional selections may be made for similar positions across the Department of Health and Human Services (HHS) within the local commuting area(s) of the location identified in this announcement. By applying, you agree to have your application shared with interested selecting official(s) at HHS. Cl...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 0.985
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            You will be evaluated for this job based on how well you meet the qualifications above. Additional selections may be made for similar positions across the Department of Health and Human Services (HHS) within the local commuting area(s) of the location identified in this announcement. By applying, yo...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Additional selections may be made for similar positions across the Department of Health and Human Services (HHS) within the local commuting area(s) of the location identified in this announcement. By applying, you agree to have your application shared with interested selecting official(s) at HHS. Cl...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 0.986
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            You will be evaluated for this job based on how well you meet the qualifications above. If you meet the minimum qualifications requirements for this position, your application will be evaluated and rated under Category Rating selection procedures. Once the application process is complete, a review o...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            If you meet the minimum qualifications requirements for this position, your application will be evaluated and rated under Category Rating selection procedures. Once the application process is complete, a review of your qualifications will be conducted to determine if you are qualified for this job. ...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            RequiredDocuments (scraped) vs required_documents (API) - 5613 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">36.3%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">63.7%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.851</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title different">Different Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 0.925
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Resume : You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form you choose then you must describe your job-related qualifications that includes beginning and ending...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Resume: You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form you choose then you must describe your job-related qualifications that includes beginning and ending ...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 0.925
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Resume : You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form you choose then you must describe your job-related qualifications that includes beginning and ending...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Resume: You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form you choose then you must describe your job-related qualifications that includes beginning and ending ...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 0.916
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Resume : You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form you choose then you must describe your job-related qualifications that includes beginning and ending...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Resume: You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form you choose then you must describe your job-related qualifications that includes beginning and ending ...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title identical">Identical Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789493500 - Similarity: 0.994
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Resume : You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form you choose then you must describe your job-related qualifications that includes beginning and ending...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Resume: You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form you choose then you must describe your job-related qualifications that includes beginning and ending ...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #795619700 - Similarity: 0.994
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Resume : You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form you choose then you must describe your job-related qualifications that includes beginning and ending...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Resume: You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form you choose then you must describe your job-related qualifications that includes beginning and ending ...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #824178700 - Similarity: 0.999
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Note: Incomplete packets will not be considered. Failure to submit the required documentation will make you ineligible for this position. The following documents are required from all applicants: Résumé/CV: For each job/position listed, you must include a job title, detailed duties, month and year f...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Note: Incomplete packets will not be considered. Failure to submit the required documentation will make you ineligible for this position. The following documents are required from all applicants: Résumé/CV: For each job/position listed, you must include a job title, detailed duties, month and year f...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            WhatToExpectNext (scraped) vs what_to_expect_next (API) - 5619 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">99.9%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.1%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1.000</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title similar">Similar Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #833381100 - Similarity: 0.990
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Special Agent Application Process The application process consists of the below-listed steps. You must successfully complete each step of the process. Those who meet the screening qualifications will be invited to complete the Phase I exam via an email notification. Step 1 : Application and Screenin...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Special Agent Application Process The application process consists of the below-listed steps. You must successfully complete each step of the process. Those who meet the screening qualifications will be invited to complete the Phase I exam via an email notification. Step 1: Application and Screening...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #837888100 - Similarity: 0.990
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Your status will also be updated on USAJOBS throughout the process. You can check your status, by accessing the USAJOBS website at http://usajobs.gov/ and clicking on "Track Your Online Application."...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Your status will also be updated on USAJOBS throughout the process. You can check your status, by accessing the USAJOBS website at http://usajobs.gov/ and clicking on "Track Your Online Application."...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #838108900 - Similarity: 0.982
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            After the vacancy announcement closes, applicants are evaluated to ensure qualification and eligibility requirements are met. After the review is complete, a referral certificate(s) is issued and applicants will be notified of their status by email. The VA has adopted Core Values and Characteristics...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            After the vacancy announcement closes, applicants are evaluated to ensure qualification and eligibility requirements are met. After the review is complete, a referral certificate(s) is issued and applicants will be notified of their status by email. The VA has adopted Core Values and Characteristics...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title identical">Identical Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            You can track the progress of your application package via your USAJobs account. You will receive an acknowledgement from USAJobs that your submission was successful once we have received your on-line occupational questionnaire, resume, and any supporting documentation. You will be notified of the s...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            You can track the progress of your application package via your USAJobs account. You will receive an acknowledgement from USAJobs that your submission was successful once we have received your on-line occupational questionnaire, resume, and any supporting documentation. You will be notified of the s...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            You can track the progress of your application package via your USAJobs account. You will receive an acknowledgement from USAJobs that your submission was successful once we have received your on-line occupational questionnaire, resume, and any supporting documentation. You will be notified of the s...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            You can track the progress of your application package via your USAJobs account. You will receive an acknowledgement from USAJobs that your submission was successful once we have received your on-line occupational questionnaire, resume, and any supporting documentation. You will be notified of the s...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            You can track the progress of your application package via your USAJobs account. You will receive an acknowledgement from USAJobs that your submission was successful once we have received your on-line occupational questionnaire, resume, and any supporting documentation. You will be notified of the s...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            You can track the progress of your application package via your USAJobs account. You will receive an acknowledgement from USAJobs that your submission was successful once we have received your on-line occupational questionnaire, resume, and any supporting documentation. You will be notified of the s...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            OtherInformation (scraped) vs other_information (API) - 5558 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">91.5%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">8.3%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.2%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.995</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title different">Different Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #829630200 - Similarity: 0.879
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            The AO is an Equal Opportunity Employer.
+
+Read more...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            The AO is an Equal Opportunity Employer....
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #836476200 - Similarity: 0.879
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            The AO is an Equal Opportunity Employer.
+
+Read more...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            The AO is an Equal Opportunity Employer....
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #837599200 - Similarity: 0.949
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            This job is being filled by an alternative hiring process and is not in the competitive civil service.
+
+Read more...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            This job is being filled by an alternative hiring process and is not in the competitive civil service....
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title similar">Similar Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #825161300 - Similarity: 0.989
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            If you are a male applicant who was born after 12/31/1959 and are required to register under the Military Selective Service Act, the Defense Authorization Act of 1986 requires that you be registered or you are not eligible for appointment in this agency (https://www.sss.gov/RegVer/wfRegistration.asp...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            If you are a male applicant who was born after 12/31/1959 and are required to register under the Military Selective Service Act, the Defense Authorization Act of 1986 requires that you be registered or you are not eligible for appointment in this agency (https://www.sss.gov/RegVer/wfRegistration.asp...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #826545400 - Similarity: 0.986
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Additional selections may be made from this vacancy announcement for up to 90 days after the closing date. Payment of Permanent Change of Station (PCS) costs is not authorized based upon a determination that a PCS move is not in the Government interest. Please check out our application information k...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Additional selections may be made from this vacancy announcement for up to 90 days after the closing date. Payment of Permanent Change of Station (PCS) costs is not authorized based upon a determination that a PCS move is not in the Government interest. Please check out our application information k...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #826724200 - Similarity: 0.986
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            If you are a male applicant who was born after 12/31/1959 and are required to register under the Military Selective Service Act, the Defense Authorization Act of 1986 requires that you be registered or you are not eligible for appointment in this agency ( https://www.sss.gov/RegVer/wfRegistration.as...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            If you are a male applicant who was born after 12/31/1959 and are required to register under the Military Selective Service Act, the Defense Authorization Act of 1986 requires that you be registered or you are not eligible for appointment in this agency (https://www.sss.gov/RegVer/wfRegistration.asp...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title identical">Identical Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 0.997
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Per IHS policy (SGM 21-04) IHS selectees to positions located in Federally operated hospitals, health centers, and clinics must be fully vaccinated for COVID-19 before entry on duty or have IHS approve a medical or religious exemption. If an exemption is approved then wearing a face mask and regular...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Per IHS policy (SGM 21-04) IHS selectees to positions located in Federally operated hospitals, health centers, and clinics must be fully vaccinated for COVID-19 before entry on duty or have IHS approve a medical or religious exemption. If an exemption is approved then wearing a face mask and regular...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 0.997
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Per IHS policy (SGM 21-04) IHS selectees to positions located in Federally operated hospitals, health centers, and clinics must be fully vaccinated for COVID-19 before entry on duty or have IHS approve a medical or religious exemption. If an exemption is approved then wearing a face mask and regular...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Per IHS policy (SGM 21-04) IHS selectees to positions located in Federally operated hospitals, health centers, and clinics must be fully vaccinated for COVID-19 before entry on duty or have IHS approve a medical or religious exemption. If an exemption is approved then wearing a face mask and regular...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 0.997
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side scraped">
+                            <div class="content-header">Scraped Content</div>
+                            Per IHS policy (SGM 21-04) IHS selectees to positions located in Federally operated hospitals, health centers, and clinics must be fully vaccinated for COVID-19 before entry on duty or have IHS approve a medical or religious exemption. If an exemption is approved then wearing a face mask and regular...
+                        </div>
+                        <div class="content-side api">
+                            <div class="content-header">Current API Content</div>
+                            Per IHS policy (SGM 21-04) IHS selectees to positions located in Federally operated hospitals, health centers, and clinics must be fully vaccinated for COVID-19 before entry on duty or have IHS approve a medical or religious exemption. If an exemption is approved then wearing a face mask and regular...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="summary">
+        <h2>🔍 Key Insights</h2>
+        <ul>
+            <li><strong>Content Source Quality:</strong> Shows which source (scraping vs API) provides better content for each field</li>
+            <li><strong>Data Completeness:</strong> Identifies gaps where one source has more detailed information</li>
+            <li><strong>Integration Strategy:</strong> Helps determine optimal data source prioritization</li>
+        </ul>
+    </div>
+</body>
+</html>
