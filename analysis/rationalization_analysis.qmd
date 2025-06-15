@@ -26,7 +26,7 @@ from parquet_storage import ParquetJobStorage
 from simple_validation import calculate_field_overlap, generate_simple_validation_html, generate_simple_validation_summary
 
 # Load data from Parquet files
-storage = ParquetJobStorage('data_parquet')
+storage = ParquetJobStorage('../data_parquet')
 ```
 
 ## Dataset Overview
@@ -47,8 +47,20 @@ print(f"📊 Current Jobs: {total_current:,}")
 print(f"📊 Unified Jobs: {total_unified:,}")
 
 # Check scraping coverage
-scraped_jobs = len(historical_df[historical_df['scraped_sections'] != '{}'])
-print(f"🕷️ Scraped Jobs: {scraped_jobs:,} ({scraped_jobs/total_historical*100:.1f}%)")
+try:
+    if 'scraped_sections' in historical_df.columns:
+        scraped_jobs = len(historical_df[
+            (historical_df['scraped_sections'].notna()) & 
+            (historical_df['scraped_sections'] != '{}') &
+            (historical_df['scraped_sections'] != '')
+        ])
+        print(f"🕷️ Scraped Jobs: {scraped_jobs:,} ({scraped_jobs/total_historical*100:.1f}%)")
+    else:
+        print("🕷️ Scraped Jobs: N/A (no scraped_sections column yet)")
+        scraped_jobs = 0
+except Exception as e:
+    print(f"⚠️ Could not calculate scraped jobs coverage: {e}")
+    scraped_jobs = 0
 
 # Try to load overlap samples
 try:

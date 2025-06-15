@@ -25,6 +25,7 @@ from fetch_current_jobs import fetch_all_jobs
 from scrape_enhanced_job_posting import scrape_enhanced_job_posting
 from field_rationalization import FieldRationalizer
 from simple_validation import calculate_field_overlap
+from generate_mismatch_analysis import generate_mismatch_html
 
 # Set up logging
 def setup_logging():
@@ -585,6 +586,15 @@ def main():
         except Exception as e:
             print(f"⚠️ Overlap analysis error: {e}")
     
+    # Generate content mismatch analysis HTML
+    print("\n🔍 Generating content mismatch analysis...")
+    try:
+        mismatch_html_file = generate_mismatch_html()
+        print(f"✅ Content mismatch analysis generated: {mismatch_html_file}")
+    except Exception as e:
+        print(f"⚠️ Mismatch analysis generation failed: {e}")
+        logger.error(f"Mismatch analysis generation failed: {e}")
+    
     # Generate QMD analysis report
     print("\n📊 Generating analysis report...")
     try:
@@ -618,6 +628,7 @@ def main():
     print(f"\n✅ PIPELINE COMPLETE!")
     print(f"📁 Data saved to: {args.output_dir}")
     print(f"📊 View report: rationalization_analysis.html")
+    print(f"🔍 View content mismatches: content_mismatch_analysis.html")
 
 if __name__ == "__main__":
     main()

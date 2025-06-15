@@ -38,7 +38,7 @@ TARGET_SECTIONS = {
     'MajorDuties': ['Duties', 'Major Duties', 'Key Duties', 'Responsibilities', 'What You Will Do'],
     'QualificationSummary': ['Qualifications', 'Required Qualifications', 'Minimum Qualifications', 'Qualification Summary'],
     'Requirements': ['Conditions of Employment', 'Specialized Experience', 'Experience Requirements'],
-    'Education': ['Education', 'Educational Requirements', 'Education Requirements', 'If you are relying on your education to meet qualification requirements:'],
+    'Education': ['Education', 'Educational Requirements', 'Education Requirements'],
     'HowToApply': ['How to Apply', 'Application Process', 'Application Instructions'],
     'Evaluations': ['Evaluation', 'How You Will Be Evaluated', 'Rating and Ranking'],
     'Benefits': ['Benefits', 'What We Offer', 'Compensation'],
@@ -130,12 +130,28 @@ def _parse_special_sections(soup):
         # Find the header (h2, h3, etc.)
         duties_header = duties_div.find(['h1', 'h2', 'h3', 'h4', 'h5'])
         if duties_header:
-            # Get all content in the duties div except the header
-            content_parts = []
-            for elem in duties_div.find_all(['p', 'div', 'li', 'ul', 'ol']):
+            # Get all content elements and filter out nested duplicates
+            all_elements = duties_div.find_all(['p', 'div', 'li', 'ul', 'ol'])
+            filtered_elements = []
+            
+            for elem in all_elements:
                 # Skip if this element is the header itself
                 if elem == duties_header or duties_header in elem.parents:
                     continue
+                
+                # Skip if this element is contained within another element in our list
+                is_nested = False
+                for other_elem in all_elements:
+                    if other_elem != elem and elem in other_elem.find_all():
+                        is_nested = True
+                        break
+                
+                if not is_nested:
+                    filtered_elements.append(elem)
+            
+            # Extract text from filtered elements
+            content_parts = []
+            for elem in filtered_elements:
                 text = elem.get_text(separator=' ', strip=True)
                 if text:
                     content_parts.append(text)
@@ -178,7 +194,9 @@ def _extract_section_content(header, remaining_headers):
     
     # Collect content between header and boundary
     current = header.next_sibling
+    content_elements = []  # Collect all elements first
     
+    # First pass: collect all content elements
     while current:
         # Stop if we hit the boundary header
         if next_boundary and current == next_boundary:
@@ -189,17 +207,28 @@ def _extract_section_content(header, remaining_headers):
             next_boundary in current.find_all()):
             break
             
-        # Extract text content
+        # Collect elements with content
         if hasattr(current, 'name') and current.name:
             text = current.get_text(separator=' ', strip=True)
             if text:
-                content_parts.append(text)
+                content_elements.append(current)
         elif isinstance(current, str):
             text = current.strip()
             if text:
                 content_parts.append(text)
                 
         current = current.next_sibling
+    
+    # Second pass: filter out nested elements and extract text
+    for elem in content_elements:
+        # Check if this element is nested within any other element in our list
+        is_nested = any(elem != other_elem and elem in other_elem.find_all() 
+                       for other_elem in content_elements)
+        
+        if not is_nested:
+            text = elem.get_text(separator=' ', strip=True)
+            if text:
+                content_parts.append(text)
     
     return '\n\n'.join(content_parts).strip()
 

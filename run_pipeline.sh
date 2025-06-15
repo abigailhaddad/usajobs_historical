@@ -41,20 +41,21 @@ run_pipeline() {
             # Change to the pipeline directory for correct imports
             cd usajobs_pipeline
             
-            # Run the pipeline with gentle settings
+            # Run the pipeline with IMPROVED SCRAPER (overwrites old data)
             python run_pipeline_parquet.py \
                 --start-date \"$START_DATE\" \
                 --output-dir \"../$OUTPUT_DIR\" \
                 --scrape-workers 1 \
-                --keep-existing 2>&1 | tee \"../$LOG_DIR/overnight_$TIMESTAMP.log\"
+                2>&1 | tee \"../$LOG_DIR/overnight_improved_$TIMESTAMP.log\"
             
             echo \"\"
             echo \"✅ Pipeline completed at \$(date)\"
             echo \"📊 Check results in: $OUTPUT_DIR\"
-            echo \"📝 Full log: $LOG_DIR/overnight_$TIMESTAMP.log\"
+            echo \"📝 Full log: $LOG_DIR/overnight_improved_$TIMESTAMP.log\"
+            echo \"🔍 View content mismatches: content_mismatch_analysis.html\"
             echo \"\"
-            echo \"Press Enter to exit or Ctrl+C to detach...\"
-            read
+            echo \"🌙 Overnight pipeline finished - session will auto-close in 10 seconds\"
+            sleep 10
         '"
     
     echo ""
