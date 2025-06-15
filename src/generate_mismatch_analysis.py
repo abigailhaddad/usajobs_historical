@@ -10,7 +10,6 @@ import sys
 from datetime import datetime
 from difflib import SequenceMatcher
 
-sys.path.append('scripts')
 from parquet_storage import ParquetJobStorage
 
 def calculate_similarity(text1, text2):
@@ -74,7 +73,7 @@ def generate_mismatch_html():
     """Generate HTML report with side-by-side content comparisons"""
     
     # Load overlap data
-    storage = ParquetJobStorage('../data_parquet')
+    storage = ParquetJobStorage('data')
     overlap_df = storage.load_overlap_samples()
     
     if overlap_df.empty:
@@ -118,41 +117,62 @@ def generate_mismatch_html():
     
     print(f"📊 Found {len(complete_pairs)} complete job pairs")
     
-    # Sample different types of mismatches
-    samples = {
+    # Find different types of mismatches using same thresholds as overlap analysis (95% similarity)
+    all_mismatches = {
         'major_duties_mismatches': [],
         'qualification_mismatches': [],
         'requirements_mismatches': [],
         'education_mismatches': []
     }
     
+    # Count total mismatches for summary
+    mismatch_counts = {
+        'major_duties_mismatches': 0,
+        'qualification_mismatches': 0,
+        'requirements_mismatches': 0,
+        'education_mismatches': 0
+    }
+    
     for pair in complete_pairs:
         sims = pair['similarities']
         
-        # Major duties with low similarity
-        if sims['major_duties'] < 0.5 and sims['major_duties'] > 0:
-            samples['major_duties_mismatches'].append(pair)
+        # Use 95% similarity threshold to match overlap analysis
+        # Major duties mismatches
+        if sims['major_duties'] < 0.95 and sims['major_duties'] > 0:
+            all_mismatches['major_duties_mismatches'].append(pair)
+            mismatch_counts['major_duties_mismatches'] += 1
         
-        # Qualification summary mismatches
-        if sims['qualification_summary'] < 0.9 and sims['qualification_summary'] > 0:
-            samples['qualification_mismatches'].append(pair)
+        # Qualification summary mismatches  
+        if sims['qualification_summary'] < 0.95 and sims['qualification_summary'] > 0:
+            all_mismatches['qualification_mismatches'].append(pair)
+            mismatch_counts['qualification_mismatches'] += 1
         
         # Requirements mismatches
-        if sims['requirements'] < 0.9 and sims['requirements'] > 0:
-            samples['requirements_mismatches'].append(pair)
+        if sims['requirements'] < 0.95 and sims['requirements'] > 0:
+            all_mismatches['requirements_mismatches'].append(pair)
+            mismatch_counts['requirements_mismatches'] += 1
         
         # Education mismatches
-        if sims['education'] < 0.7 and sims['education'] > 0:
-            samples['education_mismatches'].append(pair)
+        if sims['education'] < 0.95 and sims['education'] > 0:
+            all_mismatches['education_mismatches'].append(pair)
+            mismatch_counts['education_mismatches'] += 1
     
-    # Sample 5 examples from each category
-    for category in samples:
-        if samples[category]:
-            samples[category] = random.sample(samples[category], min(5, len(samples[category])))
+    # Sample up to 10 examples from each category for display (not just 5)
+    samples = {}
+    for category in all_mismatches:
+        if all_mismatches[category]:
+            # Show more examples - up to 10 instead of 5
+            samples[category] = random.sample(all_mismatches[category], min(10, len(all_mismatches[category])))
+        else:
+            samples[category] = []
     
-    print(f"📊 Sampled mismatches:")
+    print(f"📊 Total mismatches found (95% similarity threshold):")
+    for category, count in mismatch_counts.items():
+        print(f"   {category}: {count} total mismatches")
+    
+    print(f"📊 Examples selected for display:")
     for category, pairs in samples.items():
-        print(f"   {category}: {len(pairs)} examples")
+        print(f"   {category}: {len(pairs)} examples (showing up to 10)")
     
     # Generate HTML
     html_content = f"""
@@ -312,19 +332,19 @@ def generate_mismatch_html():
                 <div class="stat-label">Total Job Pairs</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">{len(samples['major_duties_mismatches'])}</div>
+                <div class="stat-number">{mismatch_counts['major_duties_mismatches']}</div>
                 <div class="stat-label">Major Duties Mismatches</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">{len(samples['qualification_mismatches'])}</div>
+                <div class="stat-number">{mismatch_counts['qualification_mismatches']}</div>
                 <div class="stat-label">Qualification Mismatches</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">{len(samples['requirements_mismatches'])}</div>
+                <div class="stat-number">{mismatch_counts['requirements_mismatches']}</div>
                 <div class="stat-label">Requirements Mismatches</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">{len(samples['education_mismatches'])}</div>
+                <div class="stat-number">{mismatch_counts['education_mismatches']}</div>
                 <div class="stat-label">Education Mismatches</div>
             </div>
         </div>
@@ -334,10 +354,10 @@ def generate_mismatch_html():
     
     # Add sections for each mismatch type
     section_titles = {
-        'major_duties_mismatches': '📋 Major Duties Mismatches (Low Similarity)',
-        'qualification_mismatches': '🎓 Qualification Summary Mismatches',
-        'requirements_mismatches': '📝 Requirements Mismatches',
-        'education_mismatches': '🎓 Education Mismatches'
+        'major_duties_mismatches': f'📋 Major Duties Mismatches (<95% Similarity) - {mismatch_counts["major_duties_mismatches"]} Total',
+        'qualification_mismatches': f'🎓 Qualification Summary Mismatches (<95% Similarity) - {mismatch_counts["qualification_mismatches"]} Total',
+        'requirements_mismatches': f'📝 Requirements Mismatches (<95% Similarity) - {mismatch_counts["requirements_mismatches"]} Total',
+        'education_mismatches': f'🎓 Education Mismatches (<95% Similarity) - {mismatch_counts["education_mismatches"]} Total'
     }
     
     for category, title in section_titles.items():

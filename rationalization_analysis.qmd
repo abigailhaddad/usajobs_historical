@@ -21,45 +21,63 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
-sys.path.append('scripts')
+sys.path.append('src')
 from parquet_storage import ParquetJobStorage
 from simple_validation import calculate_field_overlap, generate_simple_validation_html, generate_simple_validation_summary
 
 # Load data from Parquet files
-storage = ParquetJobStorage('../data_parquet')
+storage = ParquetJobStorage('data')
 ```
 
 ## Dataset Overview
 
 ```{python}
-# Load datasets
-historical_df = storage.load_historical_jobs()
-current_df = storage.load_current_jobs()
+# Load unified dataset (contains all jobs)
 unified_df = storage.load_unified_jobs()
-
-# Basic dataset statistics
-total_historical = len(historical_df)
-total_current = len(current_df)
 total_unified = len(unified_df)
 
-print(f"📊 Historical Jobs: {total_historical:,}")
-print(f"📊 Current Jobs: {total_current:,}")
 print(f"📊 Unified Jobs: {total_unified:,}")
 
-# Check scraping coverage
-try:
-    if 'scraped_sections' in historical_df.columns:
-        scraped_jobs = len(historical_df[
-            (historical_df['scraped_sections'].notna()) & 
-            (historical_df['scraped_sections'] != '{}') &
-            (historical_df['scraped_sections'] != '')
-        ])
-        print(f"🕷️ Scraped Jobs: {scraped_jobs:,} ({scraped_jobs/total_historical*100:.1f}%)")
-    else:
-        print("🕷️ Scraped Jobs: N/A (no scraped_sections column yet)")
-        scraped_jobs = 0
-except Exception as e:
-    print(f"⚠️ Could not calculate scraped jobs coverage: {e}")
+# Analyze data sources from unified dataset
+if 'data_sources' in unified_df.columns:
+    # Parse data sources and categorize jobs
+    import ast
+    
+    # Helper function to parse data_sources
+    def parse_sources(sources_str):
+        try:
+            if isinstance(sources_str, str):
+                return ast.literal_eval(sources_str)
+            return sources_str if sources_str else []
+        except:
+            return []
+    
+    unified_df['parsed_sources'] = unified_df['data_sources'].apply(parse_sources)
+    
+    # Categorize jobs by source type
+    historical_only = unified_df[unified_df['parsed_sources'].apply(
+        lambda x: 'historical_api' in x and 'current_api' not in x and 'current_api_priority' not in x
+    )]
+    current_only = unified_df[unified_df['parsed_sources'].apply(
+        lambda x: 'current_api' in x and 'historical_api' not in x
+    )]
+    overlap_jobs = unified_df[unified_df['parsed_sources'].apply(
+        lambda x: 'current_api_priority' in x and 'historical_metadata_supplement' in x
+    )]
+    
+    print(f"📊 Historical-only Jobs: {len(historical_only):,}")
+    print(f"📊 Current-only Jobs: {len(current_only):,}")
+    print(f"📊 Overlap Jobs: {len(overlap_jobs):,}")
+    
+    # Check scraping coverage
+    scraped_jobs = unified_df[unified_df['parsed_sources'].apply(lambda x: 'scraping' in x)]
+    print(f"🕷️ Jobs with Scraping: {len(scraped_jobs):,} ({len(scraped_jobs)/total_unified*100:.1f}%)")
+    
+else:
+    print("⚠️ No data_sources column found")
+    historical_only = pd.DataFrame()
+    current_only = pd.DataFrame()
+    overlap_jobs = pd.DataFrame()
     scraped_jobs = 0
 
 # Try to load overlap samples

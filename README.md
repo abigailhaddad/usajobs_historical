@@ -1,180 +1,221 @@
-# USAJobs Historic Data Collection
+# USAJobs Historic Data Pipeline
 
-This repository contains two complementary workflows for collecting and processing USAJobs data from different sources and time periods.
+A comprehensive pipeline for collecting, processing, and analyzing USAJobs data from multiple sources with intelligent field rationalization and web scraping enhancement.
 
-## Workflows Overview
+## Overview
 
-### 1. Enhanced USAJobs Pipeline (`usajobs_pipeline/`)
+This pipeline combines three data sources to create a unified, enriched dataset of federal job postings:
 
-A comprehensive, modern pipeline that combines multiple data sources for enriched job posting analysis.
+1. **Current USAJobs API** - Latest job postings with rich metadata
+2. **Historical USAJobs API** - Historical job data (2015-2024) 
+3. **Web Scraping** - Enhanced content from individual job pages
 
-**Key Features:**
-- **Multi-source integration**: Current API + Historical API + Web scraping
-- **Field rationalization**: Intelligent mapping between different data structures  
-- **Parallel processing**: Fast collection with multiple workers
-- **Parquet storage**: Lock-free parallel processing and efficient storage
-- **Validation**: 100% verified field accuracy on overlapping jobs
-- **Analysis reports**: Automated HTML report generation
+The pipeline automatically handles field mapping between different API versions, caches scraped content for efficiency, and generates comprehensive analysis reports.
 
-**Data Sources:**
-- Current USAJobs API (latest postings with rich metadata)
-- Historical USAJobs API (historical job posting data)
-- Web scraping (enhanced content from individual job pages)
+## Quick Start
 
-**Quick Start:**
 ```bash
-cd usajobs_pipeline/
+# Clone and install dependencies
+git clone <repository-url>
+cd usajobs_historic
+pip install -r requirements.txt
 
-# Run complete pipeline
-python run_pipeline_parquet.py --start-date 2025-01-01
+# Run the complete pipeline
+python run_pipeline.py --start-date 2025-01-01 --output-dir data
 
-# Fast test run (no scraping)
-python run_pipeline_parquet.py --start-date 2025-01-01 --no-scraping
-
-# Custom configuration
-python run_pipeline_parquet.py \
-  --start-date 2025-01-01 \
-  --scrape-workers 8 \
-  --output-dir custom_data
+# Fast test run (recent data only)
+python run_pipeline.py --start-date 2025-06-01 --output-dir data
 ```
 
-**Output:**
-- `data_parquet/historical_jobs/` - Historical API data
-- `data_parquet/current_jobs/` - Current API data  
-- `data_parquet/unified_jobs/` - Rationalized unified dataset
-- `rationalization_analysis.html` - Analysis report
+## Pipeline Features
 
-### 2. Historical API Workflow (`workflows/historical_api/`)
+### ✅ **Multi-Source Data Integration**
+- **Current API**: Latest job postings with complete metadata
+- **Historical API**: Historical job data back to 2015
+- **Web Scraping**: Enhanced content for duties, qualifications, requirements, education
 
-A focused, efficient workflow for collecting pure historical USAJobs API data (2015-2024).
+### ✅ **Intelligent Field Rationalization** 
+- Automatic mapping between Current and Historical API field structures
+- Handles field name changes, data type differences, and missing fields
+- Preserves data integrity while creating unified schema
 
-**Key Features:**
-- **API-only approach**: Fast, reliable historical data collection
-- **DuckDB storage**: Efficient structured data storage by year
-- **Parallel processing**: Multi-worker data collection
-- **PostgreSQL integration**: Optional export to PostgreSQL
-- **Date range filtering**: Collect specific time periods
+### ✅ **Smart Caching & Performance**
+- **HTML Caching**: Scraped content cached locally (79,577+ cached files)
+- **Parallel Processing**: Multi-threaded scraping with rate limiting
+- **Incremental Updates**: Only processes new/changed data
 
-**Data Coverage:**
-- **Total**: 2,947,854+ jobs across 11 years (2015-2025)
-- **Coverage**: 90.6% of expected days from 2015-01-01 to present
-- **Peak years**: 2022-2024 with 400,000+ jobs per year
+### ✅ **Comprehensive Analysis & Validation**
+- **Overlap Analysis**: Compares data quality between APIs
+- **Mismatch Detection**: Identifies content differences requiring attention
+- **Field Coverage**: Shows completeness across data sources
+- **Automated Reports**: HTML reports with interactive analysis
 
-**Quick Start:**
+## Output Files & Reports
+
+After running the pipeline, you'll get:
+
+### 📊 **Data Files**
+- `data/historical_jobs.parquet` - Historical API data
+- `data/current_jobs.parquet` - Current API data  
+- `data/unified_jobs.parquet` - Combined & rationalized dataset
+- `data/overlap_samples.parquet` - Jobs found in both APIs for validation
+
+### 📈 **Analysis Reports**
+- **[rationalization_analysis.html](rationalization_analysis.html)** - Complete data analysis with field coverage, source breakdown, and overlap statistics
+- **[content_mismatch_analysis.html](content_mismatch_analysis.html)** - Side-by-side comparison of content differences between APIs with similarity analysis
+
+### 🗂️ **Cached Content**
+- `html_cache/` - Cached HTML content from scraped job pages (organized by control number)
+- `logs/` - Pipeline execution logs
+
+## Usage Examples
+
+### Basic Pipeline Run
 ```bash
-cd workflows/historical_api/
-
-# Collect full year of data
-python scripts/api/historic_pull_parallel.py \
-  --start-date 2023-01-01 \
-  --end-date 2023-12-31
-
-# Collect with PostgreSQL export
-python scripts/api/historic_pull_parallel.py \
-  --start-date 2023-01-01 \
-  --end-date 2023-12-31 \
-  --load-to-postgres \
-  --workers 8
-
-# Query collected data
-python scripts/database/query_duckdb.py data/historical_jobs_2023.duckdb
+# Collect data from specific date range
+python run_pipeline.py --start-date 2025-01-01 --output-dir data
 ```
 
-**Output:**
-- `data/historical_jobs_[YEAR].duckdb` - Annual historical data files
-- PostgreSQL tables (optional)
-
-## Workflow Comparison
-
-| Feature | Enhanced Pipeline | Historical API |
-|---------|------------------|----------------|
-| **Data Sources** | Current API + Historical API + Web scraping | Historical API only |
-| **Storage Format** | Parquet files | DuckDB |
-| **Time Range** | Current + Recent historical | 2015-2024 historical |
-| **Field Enrichment** | Yes (rationalization + scraping) | No (raw API data) |
-| **Analysis Reports** | Automated HTML reports | Manual querying |
-| **Use Case** | Rich analysis, data validation | Fast historical collection |
-| **Performance** | Moderate (due to scraping) | Fast (API-only) |
-
-## When to Use Which Workflow
-
-### Use Enhanced Pipeline When:
-- You need enriched job content (duties, qualifications, requirements)
-- You want unified data from multiple sources
-- You need current + historical data integration
-- You want automated analysis and validation reports
-- You're doing comprehensive job market analysis
-
-### Use Historical API Workflow When:
-- You need large-scale historical data collection (2015-2024)
-- You want fast, efficient API-only data collection
-- You're building time-series datasets
-- You need PostgreSQL integration
-- You want raw, unprocessed historical job data
-
-## Repository Structure
-
-```
-usajobs_historic/
-├── usajobs_pipeline/          # Enhanced multi-source pipeline
-│   ├── run_pipeline_parquet.py    # Main pipeline script
-│   ├── scripts/                   # Pipeline components
-│   ├── data_parquet/              # Parquet data storage
-│   └── README.md                  # Detailed pipeline docs
-├── workflows/historical_api/   # Historical API workflow
-│   ├── scripts/api/               # API collection scripts
-│   ├── scripts/database/          # Database operations
-│   ├── data/                      # DuckDB storage
-│   └── sql/                       # Database schemas
-├── shared/                     # Shared utilities
-│   └── api/                       # Common API functions
-├── analysis/                   # Analysis notebooks and reports
-└── archive/                    # Legacy code and documentation
+### Background Execution  
+```bash
+# Run in background with logging
+./run_pipeline.sh
 ```
 
-## Dependencies
+### Custom Configuration
+```bash
+# Custom date range and output location
+python run_pipeline.py \
+  --start-date 2024-12-01 \
+  --end-date 2025-01-31 \
+  --output-dir custom_data \
+  --max-workers 4
+```
 
-Both workflows require:
+## Data Quality & Validation
+
+The pipeline includes extensive validation to ensure data quality:
+
+### **Field Coverage Analysis**
+- **Historical-only jobs**: Jobs only in Historical API
+- **Current-only jobs**: Jobs only in Current API  
+- **Overlap jobs**: Jobs in both APIs (enables validation)
+
+### **Content Similarity Analysis**
+- **Perfect matches**: ≥99% content similarity between APIs
+- **Good matches**: ≥95% content similarity
+- **Mismatches**: <95% similarity (flagged for review)
+
+### **Recent Pipeline Results** (5,619 job pairs analyzed)
+- **Major Duties**: 100% coverage, 98.2% perfect matches
+- **Qualification Summary**: 99.8% coverage, 99.1% perfect matches  
+- **Requirements**: 51.9% coverage, 92.4% perfect matches
+- **Education**: 74.8% coverage, 94.8% perfect matches
+
+## Architecture
+
+### **Field Rationalization**
+The pipeline maps between different API structures:
+
+```python
+# Historical API -> Unified Schema
+'JobTitle' -> 'position_title'
+'OrganizationName' -> 'agency_name'  
+'PositionLocation' -> 'locations'
+
+# Current API -> Unified Schema  
+'PositionTitle' -> 'position_title'
+'AgencyName' -> 'agency_name'
+'PositionLocationDisplay' -> 'locations'
+```
+
+### **Content Enhancement**
+Web scraping extracts additional content not available in APIs:
+- **Major Duties**: Detailed job responsibilities
+- **Qualifications**: Required skills and experience
+- **Requirements**: Employment conditions and clearances
+- **Education**: Educational requirements and substitutions
+
+### **Data Sources Integration**
+Each job record tracks its data sources:
+```json
+{
+  "control_number": "838326700",
+  "position_title": "Mission Support Specialist",
+  "data_sources": ["historical_api", "current_api_priority", "scraping"],
+  "rationalization_date": "2025-06-15T08:04:27"
+}
+```
+
+## Requirements
+
+- **Python 3.8+**
+- **Core packages**: `requests`, `pandas`, `beautifulsoup4`, `tqdm`
+- **Analysis**: `quarto` for report generation ([install guide](https://quarto.org/docs/get-started/))
+- **Storage**: Local filesystem (no database required)
+
+Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-Key packages:
-- `requests` - API calls
-- `pandas` - Data processing  
-- `duckdb` - Database operations
-- `tqdm` - Progress bars
-- `beautifulsoup4` - Web scraping (Enhanced Pipeline only)
+## Monitoring & Logs
 
-For Enhanced Pipeline reports:
-- `quarto` - Report generation ([installation guide](https://quarto.org/docs/get-started/))
+The pipeline provides detailed logging and progress tracking:
 
-## Getting Started
+```bash
+# View real-time progress
+tail -f logs/pipeline_[timestamp].log
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd usajobs_historic
-   pip install -r requirements.txt
-   ```
+# Monitor cache usage
+grep "💾 Using cached HTML" logs/pipeline_[timestamp].log | wc -l
 
-2. **Choose your workflow:**
-   - For comprehensive analysis: Use Enhanced Pipeline
-   - For historical data collection: Use Historical API Workflow
+# Check processing status  
+ps aux | grep run_pipeline
+```
 
-3. **Check the individual README files** for detailed usage instructions:
-   - `usajobs_pipeline/README.md` - Enhanced Pipeline details
+## Troubleshooting
 
-## Data Sources
+### **Common Issues**
 
-### USAJobs APIs
-- **Current API**: `https://data.usajobs.gov/api/search` - Latest job postings
-- **Historical API**: `https://data.usajobs.gov/api/historicjoa` - Historical data (2015-2024)
+**Pipeline hanging during scraping:**
+- Check network connectivity
+- Verify HTML cache directory permissions
+- Monitor memory usage for large datasets
 
-### Web Scraping
-- Individual job posting pages for enhanced content extraction
-- Used only in Enhanced Pipeline workflow
+**Field mapping errors:**
+- Review field rationalization logic in `src/field_rationalization.py`
+- Check for new fields in API responses
+
+**Missing analysis reports:**
+- Ensure `quarto` is installed for rationalization_analysis.html
+- Verify sufficient overlap data exists for analysis
+
+### **Performance Optimization**
+
+**Speed up pipeline:**
+- Use cached HTML when available (default behavior)
+- Reduce date range for testing
+- Increase `--max-workers` for faster scraping
+
+**Reduce resource usage:**
+- Limit concurrent workers
+- Use SSD storage for HTML cache
+- Monitor disk space (cache can grow large)
+
+## Contributing
+
+1. **Data validation**: Add new field mappings or validation rules
+2. **Analysis enhancement**: Improve report generation or add new metrics  
+3. **Performance**: Optimize scraping or caching strategies
+4. **Documentation**: Update examples or troubleshooting guides
 
 ## License
 
 See LICENSE file for details.
+
+---
+
+**Last Updated**: 2025-06-15  
+**Pipeline Version**: Field Rationalization v2.0  
+**Data Coverage**: 2015-present with multi-source integration

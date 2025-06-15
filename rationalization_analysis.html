@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Enhanced Pipeline Analysis">
+
+<title>USAJobs Data Rationalization Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="rationalization_analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="rationalization_analysis_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="rationalization_analysis_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="rationalization_analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="rationalization_analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="rationalization_analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="rationalization_analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="rationalization_analysis_files/libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="rationalization_analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="rationalization_analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="rationalization_analysis_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#dataset-overview" id="toc-dataset-overview" class="nav-link active" data-scroll-target="#dataset-overview">Dataset Overview</a></li>
+  <li><a href="#data-source-comparison" id="toc-data-source-comparison" class="nav-link" data-scroll-target="#data-source-comparison">Data Source Comparison</a>
+  <ul class="collapse">
+  <li><a href="#sample-overlapping-jobs" id="toc-sample-overlapping-jobs" class="nav-link" data-scroll-target="#sample-overlapping-jobs">Sample Overlapping Jobs</a></li>
+  </ul></li>
+  <li><a href="#field-overlap-analysis" id="toc-field-overlap-analysis" class="nav-link" data-scroll-target="#field-overlap-analysis">Field Overlap Analysis</a></li>
+  <li><a href="#field-coverage-analysis" id="toc-field-coverage-analysis" class="nav-link" data-scroll-target="#field-coverage-analysis">Field Coverage Analysis</a></li>
+  <li><a href="#analysis-summary-results" id="toc-analysis-summary-results" class="nav-link" data-scroll-target="#analysis-summary-results">Analysis Summary &amp; Results</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">USAJobs Data Rationalization Analysis</h1>
+<p class="subtitle lead">Analysis of unified dataset combining historical and current USAJobs data</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Enhanced Pipeline Analysis </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="942f63ad" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>sys.path.append(<span class="st">'src'</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> parquet_storage <span class="im">import</span> ParquetJobStorage</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> simple_validation <span class="im">import</span> calculate_field_overlap, generate_simple_validation_html, generate_simple_validation_summary</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Load data from Parquet files</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>storage <span class="op">=</span> ParquetJobStorage(<span class="st">'data'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="dataset-overview" class="level2">
+<h2 class="anchored" data-anchor-id="dataset-overview">Dataset Overview</h2>
+<div id="630c4964" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load unified dataset (contains all jobs)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>unified_df <span class="op">=</span> storage.load_unified_jobs()</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>total_unified <span class="op">=</span> <span class="bu">len</span>(unified_df)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"📊 Unified Jobs: </span><span class="sc">{</span>total_unified<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyze data sources from unified dataset</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="st">'data_sources'</span> <span class="kw">in</span> unified_df.columns:</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Parse data sources and categorize jobs</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> ast</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Helper function to parse data_sources</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> parse_sources(sources_str):</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">isinstance</span>(sources_str, <span class="bu">str</span>):</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> ast.literal_eval(sources_str)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> sources_str <span class="cf">if</span> sources_str <span class="cf">else</span> []</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span>:</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> []</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    unified_df[<span class="st">'parsed_sources'</span>] <span class="op">=</span> unified_df[<span class="st">'data_sources'</span>].<span class="bu">apply</span>(parse_sources)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Categorize jobs by source type</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    historical_only <span class="op">=</span> unified_df[unified_df[<span class="st">'parsed_sources'</span>].<span class="bu">apply</span>(</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        <span class="kw">lambda</span> x: <span class="st">'historical_api'</span> <span class="kw">in</span> x <span class="kw">and</span> <span class="st">'current_api'</span> <span class="kw">not</span> <span class="kw">in</span> x <span class="kw">and</span> <span class="st">'current_api_priority'</span> <span class="kw">not</span> <span class="kw">in</span> x</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    )]</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    current_only <span class="op">=</span> unified_df[unified_df[<span class="st">'parsed_sources'</span>].<span class="bu">apply</span>(</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        <span class="kw">lambda</span> x: <span class="st">'current_api'</span> <span class="kw">in</span> x <span class="kw">and</span> <span class="st">'historical_api'</span> <span class="kw">not</span> <span class="kw">in</span> x</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    )]</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    overlap_jobs <span class="op">=</span> unified_df[unified_df[<span class="st">'parsed_sources'</span>].<span class="bu">apply</span>(</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        <span class="kw">lambda</span> x: <span class="st">'current_api_priority'</span> <span class="kw">in</span> x <span class="kw">and</span> <span class="st">'historical_metadata_supplement'</span> <span class="kw">in</span> x</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    )]</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"📊 Historical-only Jobs: </span><span class="sc">{</span><span class="bu">len</span>(historical_only)<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"📊 Current-only Jobs: </span><span class="sc">{</span><span class="bu">len</span>(current_only)<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"📊 Overlap Jobs: </span><span class="sc">{</span><span class="bu">len</span>(overlap_jobs)<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check scraping coverage</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    scraped_jobs <span class="op">=</span> unified_df[unified_df[<span class="st">'parsed_sources'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="st">'scraping'</span> <span class="kw">in</span> x)]</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"🕷️ Jobs with Scraping: </span><span class="sc">{</span><span class="bu">len</span>(scraped_jobs)<span class="sc">:,}</span><span class="ss"> (</span><span class="sc">{</span><span class="bu">len</span>(scraped_jobs)<span class="op">/</span>total_unified<span class="op">*</span><span class="dv">100</span><span class="sc">:.1f}</span><span class="ss">%)"</span>)</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"⚠️ No data_sources column found"</span>)</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    historical_only <span class="op">=</span> pd.DataFrame()</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    current_only <span class="op">=</span> pd.DataFrame()</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    overlap_jobs <span class="op">=</span> pd.DataFrame()</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    scraped_jobs <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Try to load overlap samples</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    overlap_df <span class="op">=</span> storage.load_overlap_samples()</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>    overlap_jobs <span class="op">=</span> <span class="bu">len</span>(overlap_df) <span class="op">//</span> <span class="dv">2</span>  <span class="co"># Each job appears twice (historical + current)</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"🔄 Overlap Jobs: </span><span class="sc">{</span>overlap_jobs<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span>:</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"🔄 Overlap Jobs: 0 (no overlap samples found)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>📖 Loaded 79568 unified jobs
+📊 Unified Jobs: 79,568
+📊 Historical-only Jobs: 70,668
+📊 Current-only Jobs: 3,281
+📊 Overlap Jobs: 5,619
+🕷️ Jobs with Scraping: 79,568 (100.0%)
+📊 Loaded 11238 overlap samples
+🔄 Overlap Jobs: 5,619</code></pre>
+</div>
+</div>
+</section>
+<section id="data-source-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="data-source-comparison">Data Source Comparison</h2>
+<section id="sample-overlapping-jobs" class="level3">
+<h3 class="anchored" data-anchor-id="sample-overlapping-jobs">Sample Overlapping Jobs</h3>
+<div id="0d20e7f4" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if overlap samples exist and has data</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    overlap_df <span class="op">=</span> storage.load_overlap_samples()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> overlap_df.empty:</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Group by control number</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        control_groups <span class="op">=</span> {}</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _, row <span class="kw">in</span> overlap_df.iterrows():</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            control_num <span class="op">=</span> row[<span class="st">'control_number'</span>]</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>            source_type <span class="op">=</span> row[<span class="st">'source_type'</span>]</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> control_num <span class="kw">not</span> <span class="kw">in</span> control_groups:</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>                control_groups[control_num] <span class="op">=</span> {}</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Remove control_number and source_type from the data</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            row_data <span class="op">=</span> row.drop([<span class="st">'control_number'</span>, <span class="st">'source_type'</span>])</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>            control_groups[control_num][source_type] <span class="op">=</span> row_data</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Display first 3 comparisons</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        comparison_count <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> control_num, sources <span class="kw">in</span> control_groups.items():</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="st">'historical'</span> <span class="kw">in</span> sources <span class="kw">and</span> <span class="st">'current'</span> <span class="kw">in</span> sources <span class="kw">and</span> comparison_count <span class="op">&lt;</span> <span class="dv">3</span>:</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>                comparison_count <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"EXAMPLE </span><span class="sc">{</span>comparison_count<span class="sc">}</span><span class="ss">: Job </span><span class="sc">{</span>control_num<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">80</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>                hist_data <span class="op">=</span> sources[<span class="st">'historical'</span>]</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>                curr_data <span class="op">=</span> sources[<span class="st">'current'</span>]</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'Field'</span><span class="sc">:&lt;20}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Historical'</span><span class="sc">:&lt;30}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Current'</span><span class="sc">:&lt;30}</span><span class="ss">"</span>)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">80</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Compare ALL fields (excluding internal metadata)</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>                key_fields <span class="op">=</span> [<span class="st">'position_title'</span>, <span class="st">'agency_name'</span>, <span class="st">'department_name'</span>, <span class="st">'sub_agency'</span>, </span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>                             <span class="st">'min_grade'</span>, <span class="st">'max_grade'</span>, <span class="st">'min_salary'</span>, <span class="st">'max_salary'</span>, <span class="st">'open_date'</span>, <span class="st">'close_date'</span>,</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>                             <span class="st">'locations'</span>, <span class="st">'work_schedule'</span>, <span class="st">'telework_eligible'</span>, <span class="st">'security_clearance_required'</span>,</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>                             <span class="st">'total_openings'</span>, <span class="st">'promotion_potential'</span>, <span class="st">'relocation_assistance'</span>, <span class="st">'hiring_path'</span>,</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>                             <span class="st">'apply_url'</span>, <span class="st">'position_uri'</span>, <span class="st">'job_summary'</span>, <span class="st">'qualification_summary'</span>, </span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>                             <span class="st">'major_duties'</span>, <span class="st">'requirements'</span>, <span class="st">'education'</span>, <span class="st">'how_to_apply'</span>, <span class="st">'evaluations'</span>, </span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>                             <span class="st">'benefits'</span>, <span class="st">'other_information'</span>, <span class="st">'required_documents'</span>, <span class="st">'what_to_expect_next'</span>]</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> field_name <span class="kw">in</span> key_fields:</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> field_name <span class="kw">in</span> hist_data.index:</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>                        hist_val <span class="op">=</span> hist_data[field_name] <span class="cf">if</span> pd.notna(hist_data[field_name]) <span class="kw">and</span> hist_data[field_name] <span class="op">!=</span> <span class="st">''</span> <span class="cf">else</span> <span class="st">"❌"</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>                        curr_val <span class="op">=</span> curr_data[field_name] <span class="cf">if</span> pd.notna(curr_data[field_name]) <span class="kw">and</span> curr_data[field_name] <span class="op">!=</span> <span class="st">''</span> <span class="cf">else</span> <span class="st">"❌"</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>                        </span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># Format for display</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">if</span> <span class="bu">isinstance</span>(hist_val, (<span class="bu">int</span>, <span class="bu">float</span>)) <span class="kw">and</span> <span class="st">'salary'</span> <span class="kw">in</span> field_name:</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>                            hist_val <span class="op">=</span> <span class="ss">f"$</span><span class="sc">{</span>hist_val<span class="sc">:,.0f}</span><span class="ss">"</span> <span class="cf">if</span> hist_val <span class="op">!=</span> <span class="st">"❌"</span> <span class="cf">else</span> <span class="st">"❌"</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">elif</span> hist_val <span class="op">!=</span> <span class="st">"❌"</span>:</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>                            <span class="co"># Handle text fields - truncate for display</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">if</span> field_name <span class="kw">in</span> [<span class="st">'qualification_summary'</span>, <span class="st">'major_duties'</span>, <span class="st">'requirements'</span>]:</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>                                hist_val <span class="op">=</span> (<span class="bu">str</span>(hist_val)[:<span class="dv">50</span>] <span class="op">+</span> <span class="st">"..."</span>) <span class="cf">if</span> <span class="bu">len</span>(<span class="bu">str</span>(hist_val)) <span class="op">&gt;</span> <span class="dv">50</span> <span class="cf">else</span> <span class="bu">str</span>(hist_val)</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">elif</span> <span class="bu">len</span>(<span class="bu">str</span>(hist_val)) <span class="op">&gt;</span> <span class="dv">27</span>:</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>                                hist_val <span class="op">=</span> <span class="bu">str</span>(hist_val)[:<span class="dv">27</span>] <span class="op">+</span> <span class="st">"..."</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">else</span>:</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>                                hist_val <span class="op">=</span> <span class="bu">str</span>(hist_val)</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>                        </span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">if</span> <span class="bu">isinstance</span>(curr_val, (<span class="bu">int</span>, <span class="bu">float</span>)) <span class="kw">and</span> <span class="st">'salary'</span> <span class="kw">in</span> field_name:</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>                            curr_val <span class="op">=</span> <span class="ss">f"$</span><span class="sc">{</span>curr_val<span class="sc">:,.0f}</span><span class="ss">"</span> <span class="cf">if</span> curr_val <span class="op">!=</span> <span class="st">"❌"</span> <span class="cf">else</span> <span class="st">"❌"</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">elif</span> curr_val <span class="op">!=</span> <span class="st">"❌"</span>:</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">if</span> field_name <span class="kw">in</span> [<span class="st">'qualification_summary'</span>, <span class="st">'major_duties'</span>, <span class="st">'requirements'</span>]:</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>                                curr_val <span class="op">=</span> (<span class="bu">str</span>(curr_val)[:<span class="dv">50</span>] <span class="op">+</span> <span class="st">"..."</span>) <span class="cf">if</span> <span class="bu">len</span>(<span class="bu">str</span>(curr_val)) <span class="op">&gt;</span> <span class="dv">50</span> <span class="cf">else</span> <span class="bu">str</span>(curr_val)</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">elif</span> <span class="bu">len</span>(<span class="bu">str</span>(curr_val)) <span class="op">&gt;</span> <span class="dv">27</span>:</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>                                curr_val <span class="op">=</span> <span class="bu">str</span>(curr_val)[:<span class="dv">27</span>] <span class="op">+</span> <span class="st">"..."</span></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">else</span>:</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>                                curr_val <span class="op">=</span> <span class="bu">str</span>(curr_val)</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>                        </span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># Mark differences</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>                        match_indicator <span class="op">=</span> <span class="st">"✅"</span> <span class="cf">if</span> <span class="bu">str</span>(hist_val) <span class="op">==</span> <span class="bu">str</span>(curr_val) <span class="cf">else</span> <span class="st">"❓"</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>                        </span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>field_name<span class="sc">:&lt;20}</span><span class="ss"> </span><span class="sc">{</span><span class="bu">str</span>(hist_val)<span class="sc">:&lt;30}</span><span class="ss"> </span><span class="sc">{</span><span class="bu">str</span>(curr_val)<span class="sc">:&lt;30}</span><span class="ss"> </span><span class="sc">{</span>match_indicator<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>()</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> comparison_count <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="st">"No complete overlap pairs found for comparison."</span>)</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"No overlap samples found for comparison."</span>)</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Overlap analysis not available: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>📊 Loaded 11238 overlap samples
+EXAMPLE 1: Job 789268300
+--------------------------------------------------------------------------------
+Field                Historical                     Current                       
+--------------------------------------------------------------------------------
+position_title       Medical Support Assistant      Medical Support Assistant      ✅
+agency_name          Indian Health Service          Indian Health Service          ✅
+department_name      Department of Health and Hu... Department of Health and Hu... ✅
+sub_agency           Public Health Service          Public Health Service          ✅
+min_grade            2                              2                              ✅
+max_grade            6                              6                              ✅
+min_salary           $29,413                        $29,413                        ✅
+max_salary           $58,445                        $58,445                        ✅
+open_date            2025-01-01                     2025-01-01                     ✅
+close_date           2025-12-31                     2025-12-31                     ✅
+locations            Naytahwaush, Minnesota         Naytahwaush, Minnesota         ✅
+work_schedule        Full-time                      Full-Time                      ❓
+telework_eligible    N                              No                             ❓
+security_clearance_required N                              Not Required                   ❓
+total_openings       ❌                              1                              ❓
+promotion_potential  ❌                              6                              ❓
+relocation_assistance ❌                              False                          ❓
+hiring_path          Individuals with disabiliti... fed-transition, fed-competi... ❓
+apply_url            ❌                              ['https://www.usajobs.gov:4... ❓
+position_uri         ❌                              https://www.usajobs.gov:443... ❓
+job_summary          This position is a Medical ... This position is a Medical ... ✅
+qualification_summary OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL... OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL... ✅
+major_duties         Works closely with IHS Purchased and Referred Care... Works closely with IHS Purchased and Referred Care... ✅
+requirements         Must pass pre-employment examination. Selectee may... Must pass pre-employment examination. Selectee may... ✅
+education            There are no education requ... There are no education requ... ✅
+how_to_apply         To apply for this position,... To apply for this position,... ✅
+evaluations          You will be evaluated for t... Additional selections may b... ❓
+benefits             ❌                              ❌                              ✅
+other_information    Per IHS policy (SGM 21-04) ... Per IHS policy (SGM 21-04) ... ✅
+required_documents   Resume : You are highly enc... Resume: You are highly enco... ❓
+what_to_expect_next  You can track the progress ... You can track the progress ... ✅
+
+EXAMPLE 2: Job 789281200
+--------------------------------------------------------------------------------
+Field                Historical                     Current                       
+--------------------------------------------------------------------------------
+position_title       Dental Assistant (EF)          Dental Assistant (EF)          ✅
+agency_name          Indian Health Service          Indian Health Service          ✅
+department_name      Department of Health and Hu... Department of Health and Hu... ✅
+sub_agency           Public Health Service          Public Health Service          ✅
+min_grade            2                              2                              ✅
+max_grade            6                              6                              ✅
+min_salary           $37,713                        $37,713                        ✅
+max_salary           $67,401                        $67,401                        ✅
+open_date            2025-01-01                     2025-01-01                     ✅
+close_date           2025-12-31                     2025-12-31                     ✅
+locations            Naytahwaush, Minnesota         Naytahwaush, Minnesota         ✅
+work_schedule        Full-time                      Full-Time                      ❓
+telework_eligible    N                              No                             ❓
+security_clearance_required N                              Not Required                   ❓
+total_openings       ❌                              1                              ❓
+promotion_potential  ❌                              6                              ❓
+relocation_assistance ❌                              False                          ❓
+hiring_path          Military spouses, Native Am... fed-transition, fed-competi... ❓
+apply_url            ❌                              ['https://www.usajobs.gov:4... ❓
+position_uri         ❌                              https://www.usajobs.gov:443... ❓
+job_summary          This position is located at... This position is located at... ✅
+qualification_summary OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL... OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL... ✅
+major_duties         Provide chair side assistance during all routine a... Provide chair side assistance during all routine a... ✅
+requirements         Must pass pre-employment examination. Selectee may... Must pass pre-employment examination. Selectee may... ✅
+education            There are no education requ... There are no education requ... ✅
+how_to_apply         To apply for this position,... To apply for this position,... ✅
+evaluations          You will be evaluated for t... Additional selections may b... ❓
+benefits             ❌                              ❌                              ✅
+other_information    Per IHS policy (SGM 21-04) ... Per IHS policy (SGM 21-04) ... ✅
+required_documents   Resume : You are highly enc... Resume: You are highly enco... ❓
+what_to_expect_next  You can track the progress ... You can track the progress ... ✅
+
+EXAMPLE 3: Job 789442700
+--------------------------------------------------------------------------------
+Field                Historical                     Current                       
+--------------------------------------------------------------------------------
+position_title       Medical Support Assistant      Medical Support Assistant      ✅
+agency_name          Indian Health Service          Indian Health Service          ✅
+department_name      Department of Health and Hu... Department of Health and Hu... ✅
+sub_agency           Public Health Service          Public Health Service          ✅
+min_grade            2                              2                              ✅
+max_grade            6                              6                              ✅
+min_salary           $29,413                        $29,413                        ✅
+max_salary           $58,445                        $58,445                        ✅
+open_date            2025-01-01                     2025-01-01                     ✅
+close_date           2025-12-31                     2025-12-31                     ✅
+locations            Naytahwaush, Minnesota         Naytahwaush, Minnesota         ✅
+work_schedule        Full-time                      Full-Time                      ❓
+telework_eligible    N                              No                             ❓
+security_clearance_required N                              Not Required                   ❓
+total_openings       ❌                              1                              ❓
+promotion_potential  ❌                              6                              ❓
+relocation_assistance ❌                              False                          ❓
+hiring_path          The public, Native American... native, public                 ❓
+apply_url            ❌                              ['https://www.usajobs.gov:4... ❓
+position_uri         ❌                              https://www.usajobs.gov:443... ❓
+job_summary          This position is a Medical ... This position is a Medical ... ✅
+qualification_summary OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL... OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL... ✅
+major_duties         Works closely with IHS Purchased and Referred Care... Works closely with IHS Purchased and Referred Care... ✅
+requirements         Must pass pre-employment examination. Selectee may... Must pass pre-employment examination. Selectee may... ✅
+education            There are no education requ... There are no education requ... ✅
+how_to_apply         To apply for this position,... To apply for this position,... ✅
+evaluations          You will be evaluated for t... If you meet the minimum qua... ❓
+benefits             ❌                              ❌                              ✅
+other_information    Per IHS policy (SGM 21-04) ... Per IHS policy (SGM 21-04) ... ✅
+required_documents   Resume : You are highly enc... Resume: You are highly enco... ❓
+what_to_expect_next  You can track the progress ... You can track the progress ... ✅
+</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="field-overlap-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="field-overlap-analysis">Field Overlap Analysis</h2>
+<div id="490db457" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Simple field overlap analysis</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    overlap_df <span class="op">=</span> storage.load_overlap_samples()</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> overlap_df.empty:</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Calculate field overlap</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        overlap_results <span class="op">=</span> calculate_field_overlap(overlap_df)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> overlap_results[<span class="st">'status'</span>] <span class="op">==</span> <span class="st">'success'</span>:</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Display summary</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(generate_simple_validation_summary(overlap_results))</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Generate and display HTML table</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>            <span class="im">from</span> IPython.display <span class="im">import</span> HTML, display</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>            overlap_html <span class="op">=</span> generate_simple_validation_html(overlap_results)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>            display(HTML(overlap_html))</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Overlap analysis failed: </span><span class="sc">{</span>overlap_results<span class="sc">.</span>get(<span class="st">'message'</span>, <span class="st">'Unknown error'</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"No overlap samples available for analysis"</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Overlap analysis not available: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>📊 Loaded 11238 overlap samples
+
+**Content Matching Summary**
+
+- **Overlap Jobs Tested:** 5619
+
+- **Requirements:** 2917 comparisons, 92.4% perfect matches, 0.959 avg similarity
+- **Education:** 4201 comparisons, 94.8% perfect matches, 0.955 avg similarity
+- **Major Duties:** 5619 comparisons, 98.2% perfect matches, 0.999 avg similarity
+- **Qualification Summary:** 5607 comparisons, 99.1% perfect matches, 0.998 avg similarity
+- **Benefits:** 1 comparisons, 0.0% perfect matches, 0.022 avg similarity
+</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div class="simple-validation">
+        <h3 class="anchored">Content Matching Analysis</h3>
+        <p><strong>Overlap Jobs Tested:</strong> 5619</p>
+        
+        
+<table class="overlap-table caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Field</th>
+<th data-quarto-table-cell-role="th">Both Have Content</th>
+<th data-quarto-table-cell-role="th">Perfect Matches</th>
+<th data-quarto-table-cell-role="th">Good Matches (≥95%)</th>
+<th data-quarto-table-cell-role="th">Avg Similarity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Requirements</td>
+<td>51.9% (2917/5619)</td>
+<td>92.4% (2694/2917)</td>
+<td>94.4% (2754/2917)</td>
+<td>0.959</td>
+</tr>
+<tr class="even">
+<td>Education</td>
+<td>74.8% (4201/5619)</td>
+<td>94.8% (3984/4201)</td>
+<td>95.0% (3993/4201)</td>
+<td>0.955</td>
+</tr>
+<tr class="odd">
+<td>Major Duties</td>
+<td>100.0% (5619/5619)</td>
+<td>98.2% (5520/5619)</td>
+<td>99.8% (5605/5619)</td>
+<td>0.999</td>
+</tr>
+<tr class="even">
+<td>Qualification Summary</td>
+<td>99.8% (5607/5619)</td>
+<td>99.1% (5555/5607)</td>
+<td>99.6% (5587/5607)</td>
+<td>0.998</td>
+</tr>
+<tr class="odd">
+<td>Benefits</td>
+<td>0.0% (1/5619)</td>
+<td>0.0% (0/1)</td>
+<td>0.0% (0/1)</td>
+<td>0.022</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    
+    <style>
+    .simple-validation {
+        margin: 20px 0;
+    }
+    
+    .overlap-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+    }
+    
+    .overlap-table th,
+    .overlap-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    
+    .overlap-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+    </style>
+</div>
+</div>
+</section>
+<section id="field-coverage-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="field-coverage-analysis">Field Coverage Analysis</h2>
+<div id="76543151" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyze field coverage using DataFrame operations</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> unified_df.empty:</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get all columns excluding metadata fields</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    excluded_fields <span class="op">=</span> [<span class="st">'data_sources'</span>, <span class="st">'rationalization_date'</span>, <span class="st">'confidence_score'</span>, </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                      <span class="st">'extraction_metadata'</span>, <span class="st">'scraped_sections'</span>, <span class="st">'full_content'</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                      <span class="st">'announcement_number'</span>, <span class="st">'posted_date'</span>, <span class="st">'primary_location'</span>]</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    analysis_fields <span class="op">=</span> [col <span class="cf">for</span> col <span class="kw">in</span> unified_df.columns <span class="cf">if</span> col <span class="kw">not</span> <span class="kw">in</span> excluded_fields]</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    field_coverage_data <span class="op">=</span> []</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Define the three categories</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    hist_mask <span class="op">=</span> unified_df[<span class="st">'data_sources'</span>].<span class="bu">str</span>.contains(<span class="st">'historical'</span>, na<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    curr_mask <span class="op">=</span> unified_df[<span class="st">'data_sources'</span>].<span class="bu">str</span>.contains(<span class="st">'current'</span>, na<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Historical-only (no current API data)</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    hist_only_mask <span class="op">=</span> hist_mask <span class="op">&amp;</span> <span class="op">~</span>curr_mask</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    hist_only_df <span class="op">=</span> unified_df[hist_only_mask]</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    hist_only_total <span class="op">=</span> <span class="bu">len</span>(hist_only_df)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Current-only (no historical API data)</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    curr_only_mask <span class="op">=</span> curr_mask <span class="op">&amp;</span> <span class="op">~</span>hist_mask</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    curr_only_df <span class="op">=</span> unified_df[curr_only_mask]</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    curr_only_total <span class="op">=</span> <span class="bu">len</span>(curr_only_df)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Overlap (both historical AND current)</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    overlap_mask <span class="op">=</span> hist_mask <span class="op">&amp;</span> curr_mask</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    overlap_df <span class="op">=</span> unified_df[overlap_mask]</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    overlap_total <span class="op">=</span> <span class="bu">len</span>(overlap_df)</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"📊 Data source breakdown:"</span>)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"   Historical-only: </span><span class="sc">{</span>hist_only_total<span class="sc">:,}</span><span class="ss"> records"</span>)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"   Current-only: </span><span class="sc">{</span>curr_only_total<span class="sc">:,}</span><span class="ss"> records"</span>)</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"   Overlap: </span><span class="sc">{</span>overlap_total<span class="sc">:,}</span><span class="ss"> records"</span>)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate coverage for each category</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> source_name, source_df, source_total <span class="kw">in</span> [</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'Historical-only'</span>, hist_only_df, hist_only_total),</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'Current-only'</span>, curr_only_df, curr_only_total),</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'Overlap'</span>, overlap_df, overlap_total)</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    ]:</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> source_total <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> field_name <span class="kw">in</span> analysis_fields:</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> field_name <span class="kw">in</span> [<span class="st">'min_salary'</span>, <span class="st">'max_salary'</span>, <span class="st">'total_openings'</span>]:</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Numeric fields - check for non-null values</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>                    complete_count <span class="op">=</span> source_df[field_name].notna().<span class="bu">sum</span>()</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>                <span class="cf">elif</span> field_name <span class="kw">in</span> [<span class="st">'open_date'</span>, <span class="st">'close_date'</span>]:</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Date fields - check for non-null values</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>                    complete_count <span class="op">=</span> source_df[field_name].notna().<span class="bu">sum</span>()</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>:</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># String fields - check for non-null and non-empty values</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>                    complete_count <span class="op">=</span> ((source_df[field_name].notna()) <span class="op">&amp;</span> (source_df[field_name] <span class="op">!=</span> <span class="st">''</span>)).<span class="bu">sum</span>()</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>                percentage <span class="op">=</span> <span class="bu">round</span>(complete_count <span class="op">*</span> <span class="fl">100.0</span> <span class="op">/</span> source_total, <span class="dv">1</span>) <span class="cf">if</span> source_total <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">0</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>                field_coverage_data.append({</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'Source'</span>: source_name,</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'Field'</span>: field_name,</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'Complete'</span>: complete_count,</span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'Total'</span>: source_total,</span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'Percentage'</span>: percentage</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>                })</span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create DataFrame and pivot for better visualization</span></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> field_coverage_data:</span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>        coverage_df <span class="op">=</span> pd.DataFrame(field_coverage_data)</span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>        pivot_df <span class="op">=</span> coverage_df.pivot(index<span class="op">=</span><span class="st">'Field'</span>, columns<span class="op">=</span><span class="st">'Source'</span>, values<span class="op">=</span><span class="st">'Percentage'</span>).fillna(<span class="dv">0</span>)</span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>        pivot_df <span class="op">=</span> pivot_df.<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Sort by field importance</span></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>        field_order <span class="op">=</span> [<span class="st">'control_number'</span>, <span class="st">'position_title'</span>, <span class="st">'agency_name'</span>, <span class="st">'department_name'</span>, </span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'min_salary'</span>, <span class="st">'max_salary'</span>, <span class="st">'job_series'</span>, <span class="st">'locations'</span>, <span class="st">'work_schedule'</span>,</span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'major_duties'</span>, <span class="st">'qualification_summary'</span>, <span class="st">'requirements'</span>, <span class="st">'education'</span>,</span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'benefits'</span>, <span class="st">'how_to_apply'</span>, <span class="st">'hiring_path'</span>]</span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Reorder fields that exist</span></span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>        existing_fields <span class="op">=</span> [f <span class="cf">for</span> f <span class="kw">in</span> field_order <span class="cf">if</span> f <span class="kw">in</span> pivot_df.index]</span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>        other_fields <span class="op">=</span> <span class="bu">sorted</span>([f <span class="cf">for</span> f <span class="kw">in</span> pivot_df.index <span class="cf">if</span> f <span class="kw">not</span> <span class="kw">in</span> field_order])</span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>        pivot_df <span class="op">=</span> pivot_df.reindex(existing_fields <span class="op">+</span> other_fields)</span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"📊 Field Coverage by Data Source Category (</span><span class="sc">% o</span><span class="st">f records with data):"</span>)</span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(pivot_df.to_string())</span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Show specific insights for key content fields</span></span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">🔍 Key Content Fields Analysis:"</span>)</span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a>        content_fields <span class="op">=</span> [<span class="st">'requirements'</span>, <span class="st">'education'</span>, <span class="st">'benefits'</span>, <span class="st">'major_duties'</span>, <span class="st">'qualification_summary'</span>]</span>
+<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> field <span class="kw">in</span> content_fields:</span>
+<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> field <span class="kw">in</span> pivot_df.index:</span>
+<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="sc">{</span>field<span class="sc">.</span>replace(<span class="st">'_'</span>, <span class="st">' '</span>)<span class="sc">.</span>title()<span class="sc">}</span><span class="ss">:"</span>)</span>
+<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="st">'Historical-only'</span> <span class="kw">in</span> pivot_df.columns:</span>
+<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">print</span>(<span class="ss">f"   Historical-only: </span><span class="sc">{</span>pivot_df<span class="sc">.</span>loc[field, <span class="st">'Historical-only'</span>]<span class="sc">:.1f}</span><span class="ss">% (from scraping)"</span>)</span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="st">'Current-only'</span> <span class="kw">in</span> pivot_df.columns:</span>
+<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">print</span>(<span class="ss">f"   Current-only: </span><span class="sc">{</span>pivot_df<span class="sc">.</span>loc[field, <span class="st">'Current-only'</span>]<span class="sc">:.1f}</span><span class="ss">% (from API)"</span>)</span>
+<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="st">'Overlap'</span> <span class="kw">in</span> pivot_df.columns:</span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">print</span>(<span class="ss">f"   Overlap: </span><span class="sc">{</span>pivot_df<span class="sc">.</span>loc[field, <span class="st">'Overlap'</span>]<span class="sc">:.1f}</span><span class="ss">% (from any source)"</span>)</span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"No unified data available for coverage analysis."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>📊 Data source breakdown:
+   Historical-only: 70,668 records
+   Current-only: 3,281 records
+   Overlap: 5,619 records
+
+📊 Field Coverage by Data Source Category (% of records with data):
+Source                       Current-only  Historical-only  Overlap
+Field                                                              
+control_number                      100.0            100.0    100.0
+position_title                      100.0            100.0    100.0
+agency_name                         100.0             99.3    100.0
+department_name                     100.0            100.0    100.0
+min_salary                          100.0            100.0    100.0
+max_salary                          100.0            100.0    100.0
+job_series                          100.0            100.0    100.0
+locations                           100.0            100.0    100.0
+work_schedule                       100.0            100.0    100.0
+major_duties                        100.0            100.0    100.0
+qualification_summary               100.0             99.7    100.0
+requirements                         99.9             99.9     99.9
+education                            86.7             85.9     88.9
+benefits                              7.6              0.2     12.1
+how_to_apply                        100.0            100.0    100.0
+hiring_path                         100.0            100.0    100.0
+apply_url                           100.0              0.0    100.0
+close_date                          100.0            100.0    100.0
+evaluations                         100.0            100.0    100.0
+job_summary                         100.0            100.0    100.0
+max_grade                           100.0            100.0    100.0
+min_grade                           100.0            100.0    100.0
+open_date                           100.0            100.0    100.0
+other_information                    99.0             99.3     98.9
+parsed_sources                      100.0            100.0    100.0
+pay_scale                           100.0              0.0    100.0
+position_uri                        100.0              0.0    100.0
+promotion_potential                 100.0              0.0    100.0
+relocation_assistance               100.0              0.0    100.0
+required_documents                  100.0            100.0    100.0
+salary_text                         100.0              0.0    100.0
+security_clearance_required         100.0            100.0    100.0
+sub_agency                           76.6             69.5     76.2
+telework_eligible                   100.0            100.0    100.0
+total_openings                       89.5              0.0     91.4
+what_to_expect_next                 100.0             99.9    100.0
+
+🔍 Key Content Fields Analysis:
+
+Requirements:
+   Historical-only: 99.9% (from scraping)
+   Current-only: 99.9% (from API)
+   Overlap: 99.9% (from any source)
+
+Education:
+   Historical-only: 85.9% (from scraping)
+   Current-only: 86.7% (from API)
+   Overlap: 88.9% (from any source)
+
+Benefits:
+   Historical-only: 0.2% (from scraping)
+   Current-only: 7.6% (from API)
+   Overlap: 12.1% (from any source)
+
+Major Duties:
+   Historical-only: 100.0% (from scraping)
+   Current-only: 100.0% (from API)
+   Overlap: 100.0% (from any source)
+
+Qualification Summary:
+   Historical-only: 99.7% (from scraping)
+   Current-only: 100.0% (from API)
+   Overlap: 100.0% (from any source)</code></pre>
+</div>
+</div>
+</section>
+<section id="analysis-summary-results" class="level2">
+<h2 class="anchored" data-anchor-id="analysis-summary-results">Analysis Summary &amp; Results</h2>
+<div id="ddfa6b77" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> unified_df.empty:</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"✅ **PIPELINE SUCCESS SUMMARY**"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"📊 Total Unified Records: </span><span class="sc">{</span><span class="bu">len</span>(unified_df)<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"📊 Total Fields: </span><span class="sc">{</span><span class="bu">len</span>(unified_df.columns)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Data source analysis</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> categorize_source(data_sources):</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> pd.isna(data_sources):</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="st">'Other'</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>            sources <span class="op">=</span> json.loads(data_sources) <span class="cf">if</span> <span class="bu">isinstance</span>(data_sources, <span class="bu">str</span>) <span class="cf">else</span> data_sources</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">isinstance</span>(sources, <span class="bu">list</span>):</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>                has_hist <span class="op">=</span> <span class="bu">any</span>(<span class="st">'historical'</span> <span class="kw">in</span> <span class="bu">str</span>(s) <span class="cf">for</span> s <span class="kw">in</span> sources)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>                has_curr <span class="op">=</span> <span class="bu">any</span>(<span class="st">'current'</span> <span class="kw">in</span> <span class="bu">str</span>(s) <span class="cf">for</span> s <span class="kw">in</span> sources)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>                has_scrape <span class="op">=</span> <span class="bu">any</span>(<span class="st">'scraping'</span> <span class="kw">in</span> <span class="bu">str</span>(s) <span class="cf">for</span> s <span class="kw">in</span> sources)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> has_hist <span class="kw">and</span> has_curr:</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span> <span class="st">'Both APIs'</span> <span class="op">+</span> (<span class="st">' + Scraping'</span> <span class="cf">if</span> has_scrape <span class="cf">else</span> <span class="st">''</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>                <span class="cf">elif</span> has_hist:</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span> <span class="st">'Historical Only'</span> <span class="op">+</span> (<span class="st">' + Scraping'</span> <span class="cf">if</span> has_scrape <span class="cf">else</span> <span class="st">''</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>                <span class="cf">elif</span> has_curr:</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span> <span class="st">'Current Only'</span> <span class="op">+</span> (<span class="st">' + Scraping'</span> <span class="cf">if</span> has_scrape <span class="cf">else</span> <span class="st">''</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="st">'Other'</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span>:</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="st">'Other'</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    unified_df[<span class="st">'source_category'</span>] <span class="op">=</span> unified_df[<span class="st">'data_sources'</span>].<span class="bu">apply</span>(categorize_source)</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    source_counts <span class="op">=</span> unified_df[<span class="st">'source_category'</span>].value_counts()</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">📈 Data Sources Breakdown:"</span>)</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> source_type, count <span class="kw">in</span> source_counts.items():</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>        percentage <span class="op">=</span> count <span class="op">/</span> <span class="bu">len</span>(unified_df) <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"   </span><span class="sc">{</span>source_type<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>count<span class="sc">:,}</span><span class="ss"> records (</span><span class="sc">{</span>percentage<span class="sc">:.1f}</span><span class="ss">%)"</span>)</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Key field coverage</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">📊 Key Field Coverage:"</span>)</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    key_fields <span class="op">=</span> [<span class="st">'control_number'</span>, <span class="st">'position_title'</span>, <span class="st">'agency_name'</span>, <span class="st">'major_duties'</span>, <span class="st">'qualification_summary'</span>, <span class="st">'requirements'</span>, <span class="st">'benefits'</span>]</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> field <span class="kw">in</span> key_fields:</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> field <span class="kw">in</span> unified_df.columns:</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>            non_empty_count <span class="op">=</span> ((unified_df[field].notna()) <span class="op">&amp;</span> (unified_df[field] <span class="op">!=</span> <span class="st">''</span>)).<span class="bu">sum</span>()</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>            coverage <span class="op">=</span> non_empty_count<span class="op">/</span><span class="bu">len</span>(unified_df)<span class="op">*</span><span class="dv">100</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>            status <span class="op">=</span> <span class="st">"✅"</span> <span class="cf">if</span> coverage <span class="op">&gt;=</span> <span class="dv">95</span> <span class="cf">else</span> <span class="st">"⚠️"</span> <span class="cf">if</span> coverage <span class="op">&gt;=</span> <span class="dv">80</span> <span class="cf">else</span> <span class="st">"❌"</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"   </span><span class="sc">{</span>status<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>field<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>coverage<span class="sc">:.1f}</span><span class="ss">% (</span><span class="sc">{</span>non_empty_count<span class="sc">:,}</span><span class="ss">/</span><span class="sc">{</span><span class="bu">len</span>(unified_df)<span class="sc">:,}</span><span class="ss">)"</span>)</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Overlap analysis</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    overlap_count <span class="op">=</span> source_counts.get(<span class="st">'Both APIs + Scraping'</span>, <span class="dv">0</span>) <span class="op">+</span> source_counts.get(<span class="st">'Both APIs'</span>, <span class="dv">0</span>)</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> overlap_count <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>        overlap_pct <span class="op">=</span> overlap_count <span class="op">/</span> <span class="bu">len</span>(unified_df) <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">🔄 API Overlap Analysis:"</span>)</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"   Jobs found in both APIs: </span><span class="sc">{</span>overlap_count<span class="sc">:,}</span><span class="ss"> (</span><span class="sc">{</span>overlap_pct<span class="sc">:.1f}</span><span class="ss">%)"</span>)</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"   This enables accuracy comparison between data sources"</span>)</span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>            overlap_df <span class="op">=</span> storage.load_overlap_samples()</span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> overlap_df.empty:</span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>                sample_count <span class="op">=</span> <span class="bu">len</span>(overlap_df) <span class="op">//</span> <span class="dv">2</span>  <span class="co"># Each job appears twice</span></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"   Overlap samples generated: </span><span class="sc">{</span>sample_count<span class="sc">:,}</span><span class="ss"> job pairs"</span>)</span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span>:</span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"   Overlap samples: Not available"</span>)</span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Scraping success</span></span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>    scraping_records <span class="op">=</span> unified_df[unified_df[<span class="st">'source_category'</span>].<span class="bu">str</span>.contains(<span class="st">'Scraping'</span>, na<span class="op">=</span><span class="va">False</span>)]</span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(scraping_records) <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>        scraping_success <span class="op">=</span> <span class="bu">len</span>(scraping_records)</span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>        total_historical <span class="op">=</span> source_counts.get(<span class="st">'Historical Only + Scraping'</span>, <span class="dv">0</span>) <span class="op">+</span> source_counts.get(<span class="st">'Both APIs + Scraping'</span>, <span class="dv">0</span>)</span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> total_historical <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>            scraping_rate <span class="op">=</span> scraping_success <span class="op">/</span> total_historical <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">🕷️ Web Scraping Results:"</span>)</span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"   Historical jobs with scraping: </span><span class="sc">{</span>scraping_success<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"   Scraping success rate: </span><span class="sc">{</span>scraping_rate<span class="sc">:.1f}</span><span class="ss">%"</span>)</span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">🎯 **OVERALL STATUS: SUCCESS** ✅"</span>)</span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"   Pipeline successfully integrated </span><span class="sc">{</span><span class="bu">len</span>(unified_df)<span class="sc">:,}</span><span class="ss"> job records"</span>)</span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"   from multiple data sources with high field coverage."</span>)</span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"❌ No unified data available for analysis."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ **PIPELINE SUCCESS SUMMARY**
+==================================================
+📊 Total Unified Records: 79,568
+📊 Total Fields: 41
+
+📈 Data Sources Breakdown:
+   Historical Only + Scraping: 70,668 records (88.8%)
+   Both APIs + Scraping: 5,619 records (7.1%)
+   Current Only + Scraping: 3,281 records (4.1%)
+
+📊 Key Field Coverage:
+   ✅ control_number: 100.0% (79,568/79,568)
+   ✅ position_title: 100.0% (79,568/79,568)
+   ✅ agency_name: 99.4% (79,101/79,568)
+   ✅ major_duties: 100.0% (79,560/79,568)
+   ✅ qualification_summary: 99.7% (79,334/79,568)
+   ✅ requirements: 99.9% (79,483/79,568)
+   ❌ benefits: 1.3% (1,037/79,568)
+
+🔄 API Overlap Analysis:
+   Jobs found in both APIs: 5,619 (7.1%)
+   This enables accuracy comparison between data sources
+📊 Loaded 11238 overlap samples
+   Overlap samples generated: 5,619 job pairs
+
+🕷️ Web Scraping Results:
+   Historical jobs with scraping: 79,568
+   Scraping success rate: 104.3%
+
+🎯 **OVERALL STATUS: SUCCESS** ✅
+   Pipeline successfully integrated 79,568 job records
+   from multiple data sources with high field coverage.</code></pre>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

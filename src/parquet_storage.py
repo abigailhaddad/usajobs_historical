@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Parquet-based storage for USAJobs pipeline
+Simplified Parquet-based storage for USAJobs pipeline
 
-Replaces DuckDB to enable parallel processing without locking issues.
-Uses Parquet files for efficient columnar storage and easy parallelization.
+Just stores the final unified dataset and temporary overlap data for analysis.
 """
 
 import pandas as pd
@@ -16,301 +15,166 @@ from typing import List, Dict, Any, Optional
 
 class ParquetJobStorage:
     """
-    Handles storage and retrieval of job data using Parquet files
+    Simplified storage for USAJobs data - just one unified dataset
     """
     
     def __init__(self, base_path: str):
         self.base_path = Path(base_path)
         self.base_path.mkdir(exist_ok=True)
         
-        # Define storage paths
-        self.historical_path = self.base_path / "historical_jobs"
-        self.current_path = self.base_path / "current_jobs" 
-        self.unified_path = self.base_path / "unified_jobs"
-        self.overlap_path = self.base_path / "overlap_samples"
+        # Single files approach
+        self.jobs_file = self.base_path / "usajobs.parquet"
+        self.overlap_file = self.base_path / "overlap_samples.parquet"
         
-        # Create directories
-        for path in [self.historical_path, self.current_path, self.unified_path, self.overlap_path]:
-            path.mkdir(exist_ok=True)
-    
-    def save_historical_jobs(self, jobs: List[Dict], batch_id: str):
-        """Save historical jobs batch to Parquet"""
-        if not jobs:
-            return
-        
-        # Flatten scraped content for better storage
-        flattened_jobs = []
-        for job in jobs:
-            flat_job = job.copy()
-            
-            # Handle scraped content
-            if 'scraped_content' in flat_job and flat_job['scraped_content']:
-                scraped = flat_job['scraped_content']
-                if isinstance(scraped, dict):
-                    # Store as JSON string for complex nested data
-                    flat_job['scraped_sections'] = json.dumps(scraped.get('content_sections', {}))
-                    flat_job['scraped_metadata'] = json.dumps({
-                        k: v for k, v in scraped.items() 
-                        if k != 'content_sections'
-                    })
-                else:
-                    flat_job['scraped_sections'] = json.dumps(scraped)
-                    flat_job['scraped_metadata'] = '{}'
-                
-                del flat_job['scraped_content']
-            else:
-                flat_job['scraped_sections'] = '{}'
-                flat_job['scraped_metadata'] = '{}'
-            
-            # Convert other complex fields to JSON strings
-            for field in ['raw_data', 'UserArea']:
-                if field in flat_job and isinstance(flat_job[field], (dict, list)):
-                    flat_job[field] = json.dumps(flat_job[field])
-            
-            flattened_jobs.append(flat_job)
-        
-        df = pd.DataFrame(flattened_jobs)
-        
-        # Add batch metadata
-        df['batch_id'] = batch_id
-        df['created_at'] = datetime.now().isoformat()
-        
-        # Save to Parquet
-        file_path = self.historical_path / f"batch_{batch_id}.parquet"
-        df.to_parquet(file_path, index=False)
-        
-        print(f"💾 Saved {len(jobs)} historical jobs to {file_path}")
+        # Keep track of intermediate data in memory for analysis
+        self.current_jobs_data = []
+        self.historical_jobs_data = []
     
     def save_current_jobs(self, jobs: List[Dict]):
-        """Save current API jobs to Parquet"""
-        if not jobs:
-            return
-        
-        # Flatten complex fields
-        flattened_jobs = []
-        for job in jobs:
-            flat_job = job.copy()
-            
-            # Convert complex fields to JSON strings
-            for field in ['PositionFormattedDescription', 'ApplicationDetails', 'UserArea']:
-                if field in flat_job and isinstance(flat_job[field], (dict, list)):
-                    flat_job[field] = json.dumps(flat_job[field])
-            
-            flattened_jobs.append(flat_job)
-        
-        df = pd.DataFrame(flattened_jobs)
-        df['created_at'] = datetime.now().isoformat()
-        
-        # Save to Parquet
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        file_path = self.current_path / f"current_jobs_{timestamp}.parquet"
-        df.to_parquet(file_path, index=False)
-        
-        print(f"💾 Saved {len(jobs)} current jobs to {file_path}")
-        return str(file_path)
+        """Store current jobs in memory for processing"""
+        self.current_jobs_data = jobs
+        print(f"📥 Stored {len(jobs)} current jobs in memory")
     
-    def load_historical_jobs(self) -> pd.DataFrame:
-        """Load all historical jobs from Parquet files"""
-        parquet_files = list(self.historical_path.glob("*.parquet"))
-        
-        if not parquet_files:
-            return pd.DataFrame()
-        
-        # Read and combine all historical batches
-        dfs = []
-        for file_path in parquet_files:
-            df = pd.read_parquet(file_path)
-            dfs.append(df)
-        
-        combined_df = pd.concat(dfs, ignore_index=True)
-        print(f"📊 Loaded {len(combined_df)} historical jobs from {len(parquet_files)} files")
-        
-        return combined_df
-    
-    def load_current_jobs(self) -> pd.DataFrame:
-        """Load current jobs from Parquet files"""
-        parquet_files = list(self.current_path.glob("*.parquet"))
-        
-        if not parquet_files:
-            return pd.DataFrame()
-        
-        # Get the most recent current jobs file
-        latest_file = max(parquet_files, key=lambda f: f.stat().st_mtime)
-        df = pd.read_parquet(latest_file)
-        
-        print(f"📊 Loaded {len(df)} current jobs from {latest_file}")
-        return df
+    def save_historical_jobs(self, jobs: List[Dict], batch_id: str = None):
+        """Store historical jobs in memory for processing"""
+        self.historical_jobs_data = jobs
+        print(f"📥 Stored {len(jobs)} historical jobs in memory")
     
     def save_unified_jobs(self, jobs: List[Dict]):
-        """Save unified/rationalized jobs to Parquet"""
+        """Save final unified jobs to single Parquet file"""
         if not jobs:
             return
         
-        # Flatten complex fields
-        flattened_jobs = []
-        for job in jobs:
-            flat_job = job.copy()
-            
-            # Convert complex fields to JSON strings
-            for field in ['scraped_sections', 'data_sources']:
-                if field in flat_job and isinstance(flat_job[field], (dict, list)):
-                    flat_job[field] = json.dumps(flat_job[field])
-            
-            flattened_jobs.append(flat_job)
+        # Convert to DataFrame
+        df = pd.DataFrame(jobs)
         
-        df = pd.DataFrame(flattened_jobs)
-        df['created_at'] = datetime.now().isoformat()
+        # Add timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
-        # Save to Parquet
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        file_path = self.unified_path / f"unified_jobs_{timestamp}.parquet"
-        df.to_parquet(file_path, index=False)
+        # Save to single file with timestamp in filename
+        timestamped_file = self.base_path / f"usajobs_{timestamp}.parquet"
+        df.to_parquet(timestamped_file, engine='pyarrow')
         
-        print(f"💾 Saved {len(jobs)} unified jobs to {file_path}")
-        return str(file_path)
+        # Also save as main file (overwrite previous)
+        df.to_parquet(self.jobs_file, engine='pyarrow')
+        
+        print(f"💾 Saved {len(jobs)} unified jobs to {self.jobs_file}")
+        print(f"📦 Backup saved to {timestamped_file}")
     
-    def save_overlap_samples(self, overlap_samples: List[Dict]):
-        """Save overlap samples for API vs scraping comparison"""
-        if not overlap_samples:
+    def save_overlap_samples(self, overlap_data: List[Dict]):
+        """Save overlap samples for analysis"""
+        if not overlap_data:
             return
         
-        df = pd.DataFrame(overlap_samples)
-        df['created_at'] = datetime.now().isoformat()
+        df = pd.DataFrame(overlap_data)
         
-        # Save to Parquet
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        file_path = self.overlap_path / f"overlap_samples_{timestamp}.parquet"
-        df.to_parquet(file_path, index=False)
+        # Add timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamped_file = self.base_path / f"overlap_samples_{timestamp}.parquet"
         
-        print(f"💾 Saved {len(overlap_samples)} overlap samples to {file_path}")
-        return str(file_path)
+        # Save with timestamp
+        df.to_parquet(timestamped_file, engine='pyarrow')
+        
+        # Also save as main file (for analysis)
+        df.to_parquet(self.overlap_file, engine='pyarrow')
+        
+        print(f"📊 Saved {len(overlap_data)} overlap samples")
     
     def load_unified_jobs(self) -> pd.DataFrame:
-        """Load unified jobs from Parquet files"""
-        parquet_files = list(self.unified_path.glob("*.parquet"))
-        
-        if not parquet_files:
-            return pd.DataFrame()
-        
-        # Get the most recent unified jobs file
-        latest_file = max(parquet_files, key=lambda f: f.stat().st_mtime)
-        df = pd.read_parquet(latest_file)
-        
-        print(f"📊 Loaded {len(df)} unified jobs from {latest_file}")
-        return df
+        """Load the main unified jobs dataset"""
+        if self.jobs_file.exists():
+            df = pd.read_parquet(self.jobs_file)
+            print(f"📖 Loaded {len(df)} unified jobs")
+            return df
+        return pd.DataFrame()
     
     def load_overlap_samples(self) -> pd.DataFrame:
-        """Load overlap samples from Parquet files"""
-        parquet_files = list(self.overlap_path.glob("*.parquet"))
-        
-        if not parquet_files:
-            return pd.DataFrame()
-        
-        # Get the most recent overlap samples file
-        latest_file = max(parquet_files, key=lambda f: f.stat().st_mtime)
-        df = pd.read_parquet(latest_file)
-        
-        print(f"📊 Loaded {len(df)} overlap samples from {latest_file}")
-        return df
+        """Load overlap samples for analysis"""
+        if self.overlap_file.exists():
+            df = pd.read_parquet(self.overlap_file)
+            print(f"📊 Loaded {len(df)} overlap samples")
+            return df
+        return pd.DataFrame()
+    
+    def load_current_jobs(self) -> pd.DataFrame:
+        """Load current jobs from memory"""
+        if self.current_jobs_data:
+            return pd.DataFrame(self.current_jobs_data)
+        return pd.DataFrame()
+    
+    def load_historical_jobs(self) -> pd.DataFrame:
+        """Load historical jobs from memory"""
+        if self.historical_jobs_data:
+            return pd.DataFrame(self.historical_jobs_data)
+        return pd.DataFrame()
     
     def get_control_numbers_with_scraping(self) -> set:
-        """Get set of control numbers that already have scraping data"""
-        df = self.load_historical_jobs()
+        """Get control numbers that already have scraping data"""
+        # Check memory first
+        control_numbers = set()
         
-        if df.empty:
-            return set()
+        for job in self.historical_jobs_data + self.current_jobs_data:
+            if job.get('scraped_content'):
+                control_num = str(job.get('usajobsControlNumber') or job.get('MatchedObjectId') or job.get('control_number', ''))
+                if control_num:
+                    control_numbers.add(control_num)
         
-        # Find jobs with non-empty scraped content
-        has_scraping = df[
-            (df['scraped_sections'].notna()) & 
-            (df['scraped_sections'] != '{}') &
-            (df['scraped_sections'] != '')
-        ]
+        # Also check saved data if exists
+        if self.jobs_file.exists():
+            df = pd.read_parquet(self.jobs_file)
+            for _, row in df.iterrows():
+                # Check for various scraping indicators
+                has_scraping = (
+                    pd.notna(row.get('major_duties')) or
+                    pd.notna(row.get('qualification_summary')) or
+                    pd.notna(row.get('education')) or
+                    pd.notna(row.get('benefits'))
+                )
+                if has_scraping:
+                    control_num = str(row.get('control_number', ''))
+                    if control_num:
+                        control_numbers.add(control_num)
         
-        # Historical API uses 'usajobsControlNumber' 
-        control_field = 'usajobsControlNumber' if 'usajobsControlNumber' in df.columns else 'control_number'
-        return set(has_scraping[control_field].astype(str))
+        # Check HTML cache directory for already scraped jobs
+        html_cache_dir = Path("html_cache")
+        if html_cache_dir.exists():
+            # Walk through all subdirectories to find .html files
+            for html_file in html_cache_dir.rglob("*.html"):
+                # Extract control number from filename (e.g., "832123456.html" -> "832123456")
+                control_num = html_file.stem
+                if control_num.isdigit():
+                    control_numbers.add(control_num)
+        
+        return control_numbers
     
     def cleanup_old_files(self, keep_latest_n: int = 3):
-        """Clean up old Parquet files, keeping only the most recent ones"""
-        for directory in [self.current_path, self.unified_path, self.overlap_path]:
-            files = list(directory.glob("*.parquet"))
-            if len(files) > keep_latest_n:
-                # Sort by modification time
-                files.sort(key=lambda f: f.stat().st_mtime)
-                
-                # Remove older files
-                for old_file in files[:-keep_latest_n]:
-                    old_file.unlink()
-                    print(f"🗑️ Removed old file: {old_file}")
+        """Clean up old timestamped files, keeping only the latest N"""
+        # Clean up old unified jobs files
+        job_files = list(self.base_path.glob("usajobs_*.parquet"))
+        job_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+        
+        for old_file in job_files[keep_latest_n:]:
+            try:
+                old_file.unlink()
+                print(f"🗑️ Removed old file: {old_file.name}")
+            except Exception as e:
+                print(f"⚠️ Could not remove {old_file.name}: {e}")
+        
+        # Clean up old overlap files
+        overlap_files = list(self.base_path.glob("overlap_samples_*.parquet"))
+        overlap_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+        
+        for old_file in overlap_files[keep_latest_n:]:
+            try:
+                old_file.unlink()
+                print(f"🗑️ Removed old overlap file: {old_file.name}")
+            except Exception as e:
+                print(f"⚠️ Could not remove {old_file.name}: {e}")
 
-def migrate_from_duckdb(duckdb_path: str, parquet_storage: ParquetJobStorage):
-    """
-    Migrate existing data from DuckDB to Parquet format
-    """
-    try:
-        import duckdb
-        
-        conn = duckdb.connect(duckdb_path)
-        
-        # Migrate historical jobs
-        try:
-            hist_df = conn.execute("SELECT * FROM historical_jobs").df()
-            if not hist_df.empty:
-                # Convert to list of dicts for processing
-                hist_jobs = hist_df.to_dict('records')
-                parquet_storage.save_historical_jobs(hist_jobs, "migrated_from_duckdb")
-                print(f"✅ Migrated {len(hist_jobs)} historical jobs")
-        except Exception as e:
-            print(f"⚠️ Could not migrate historical jobs: {e}")
-        
-        # Migrate current jobs  
-        try:
-            curr_df = conn.execute("SELECT * FROM current_jobs").df()
-            if not curr_df.empty:
-                curr_jobs = curr_df.to_dict('records')
-                parquet_storage.save_current_jobs(curr_jobs)
-                print(f"✅ Migrated {len(curr_jobs)} current jobs")
-        except Exception as e:
-            print(f"⚠️ Could not migrate current jobs: {e}")
-        
-        # Migrate unified jobs
-        try:
-            unified_df = conn.execute("SELECT * FROM unified_jobs").df()
-            if not unified_df.empty:
-                unified_jobs = unified_df.to_dict('records')
-                parquet_storage.save_unified_jobs(unified_jobs)
-                print(f"✅ Migrated {len(unified_jobs)} unified jobs")
-        except Exception as e:
-            print(f"⚠️ Could not migrate unified jobs: {e}")
-        
-        # Migrate overlap samples
-        try:
-            overlap_df = conn.execute("SELECT * FROM overlap_samples").df()
-            if not overlap_df.empty:
-                overlap_samples = overlap_df.to_dict('records')
-                parquet_storage.save_overlap_samples(overlap_samples)
-                print(f"✅ Migrated {len(overlap_samples)} overlap samples")
-        except Exception as e:
-            print(f"⚠️ Could not migrate overlap samples: {e}")
-        
-        conn.close()
-        print("✅ Migration from DuckDB completed")
-        
-    except ImportError:
-        print("⚠️ DuckDB not available for migration")
-    except Exception as e:
-        print(f"⚠️ Migration failed: {e}")
 
-if __name__ == "__main__":
-    # Example usage
-    storage = ParquetJobStorage("data_parquet")
-    
-    # Example of loading data
-    hist_df = storage.load_historical_jobs()
-    curr_df = storage.load_current_jobs()
-    unified_df = storage.load_unified_jobs()
-    
-    print(f"Historical: {len(hist_df)} jobs")
-    print(f"Current: {len(curr_df)} jobs") 
-    print(f"Unified: {len(unified_df)} jobs")
+# Legacy migration function (if needed)
+def migrate_from_duckdb(duckdb_path: str, storage: ParquetJobStorage):
+    """Migrate data from old DuckDB format"""
+    print(f"🔄 Migration from DuckDB not implemented in simplified version")
+    print(f"   Old data: {duckdb_path}")
+    print(f"   Please re-run the pipeline to collect fresh data")

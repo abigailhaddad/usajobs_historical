@@ -1,0 +1,1051 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>USAJobs Content Mismatch Analysis</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .summary {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .comparison-section {
+            margin-bottom: 40px;
+        }
+        .section-title {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            margin: 0;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .comparison-container {
+            background: white;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .job-comparison {
+            border-bottom: 3px solid #ecf0f1;
+            padding: 20px;
+        }
+        .job-comparison:last-child {
+            border-bottom: none;
+        }
+        .job-header {
+            background: #3498db;
+            color: white;
+            padding: 10px 15px;
+            margin: -20px -20px 20px -20px;
+            font-weight: bold;
+        }
+        .field-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .source-column {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .source-header {
+            padding: 10px 15px;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .historical-header {
+            background: #e74c3c;
+        }
+        .current-header {
+            background: #27ae60;
+        }
+        .scraped-header {
+            background: #9b59b6;
+        }
+        .data-source-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+        }
+        .source-content {
+            padding: 15px;
+            background: white;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        .similarity-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .similarity-high { background: #27ae60; }
+        .similarity-medium { background: #f39c12; }
+        .similarity-low { background: #e74c3c; }
+        .field-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 USAJobs Content Mismatch Analysis</h1>
+        <p>Side-by-side comparison of content differences between Historical and Current APIs</p>
+        <p>Generated: 2025-06-15 09:19:54</p>
+    </div>
+    
+    <div class="summary">
+        <h2>📊 Analysis Summary</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">5,619</div>
+                <div class="stat-label">Total Job Pairs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Major Duties Mismatches</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">16</div>
+                <div class="stat-label">Qualification Mismatches</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">274</div>
+                <div class="stat-label">Requirements Mismatches</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">205</div>
+                <div class="stat-label">Education Mismatches</div>
+            </div>
+        </div>
+        <p><strong>Key Finding:</strong> Content differences suggest the APIs provide different levels of detail and formatting for the same job postings.</p>
+    </div>
+    
+    <div class="comparison-section">
+        <h2 class="section-title">🎓 Qualification Summary Mismatches (<95% Similarity) - 16 Total</h2>
+        <div class="comparison-container">
+        
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #838329400 - Medical Records Technician - Release of Information at Veterans Health Administration
+                    <span class="similarity-badge similarity-medium">
+                        72.2% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Qualification - Character Counts: Historical (5378) vs Current (5373)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">Basic Requirements : United States Citizenship: Non-citizens may only be appointed when it is not possible to recruit qualified citizens in accordance with VA Policy. English Language Proficiency: MRTs (ROI) must be proficient in spoken and written English, as required by 38 U.S.C. § 7403(f). Experience and/or Education: One year of creditable experience that indicates knowledge of medical terminology and general understanding of health records. Six months of the required one year of creditable experience must have provided the knowledge, skills, and abilities (KSAs) needed to perform MRT (ROI) work OR Have an associate's degree from an accredited college or university recognized by the U.S. Department of Education with a major field of study in health information technology/health information management, or a related degree with a minimum of 12 semester hours in health information technology/health information management (e.g., courses in medical terminology, anatomy and physiology, legal aspects of health care, and introduction to health records) OR Equivalent combinations of creditable experience and education are qualifying towards meeting basic experience requirements. The following experience and educational/training substitutions are appropriate for combining education and creditable experience: Six months of creditable experience that indicates knowledge of medical terminology, privacy and release of information, the health record, and one year above high school with a minimum of six semester hours of health information technology/health information management courses. Six months of creditable experience that indicates knowledge of medical terminology, privacy and release of information, the health record, and successful completion of a course for medical technicians, hospital corpsmen, medical service specialists, or hospital training obtained in a training program given by the Armed Forces or the U.S. Maritime Service under close medical and professional supervision. The training program may be substituted on a month-for-month basis for up to six months of experience provided the training program included courses in anatomy and physiology, and health record techniques and procedures. May qualify based on being covered by the Grandfathering Provision as described in the VA Qualification Standard for this occupation (only applicable to current VHA employees who are in this occupation and meet the criteria). Grade Determinations : GS 4 MRT (ROI): Experience or Education: None beyond basic requirements. GS 5 MRT (ROI): Experience: One year of creditable experience equivalent to the next lower grade level (GS4) OR Education: Successful completion of a bachelor's degree from an accredited college or university recognized by the U.S. Department of Education, with a major field of study in health information management, or a related degree with a minimum of 24 semester hours in health information technology/health information management (e.g., courses in medical terminology, anatomy and physiology, legal aspects of health care, and introduction to health records). Demonstrated Knowledge, Skills, and Abilities (KSAs): In addition to the experience above, the candidate must demonstrate all of the following KSAs: Ability to utilize health information technology and various office software products utilized in MRT (ROI) positions (e.g., the electronic health record, release of information systems, etc.). Knowledge of health record documentation guidelines and processes for disclosing protected health information. Ability to manage priorities and coordinate work in order to complete duties within required timeframes, and the ability to follow-up on pending issues. Knowledge of policies, procedures, laws, and regulations governing privacy and release of information. Ability to communicate with individuals from various backgrounds to obtain the desired effect or gaining information by establishing rapport. GS 6 MRT (ROI):Experience: One year of creditable experience equivalent to the next lower grade level GS5. Demonstrated Knowledge, Skills, and Abilities (KSAs): In addition to the experience above, the candidate must demonstrate all of the following KSAs: Knowledge of the laws and regulations related to the authorization and disclosure of health information (e.g., Privacy Act, Freedom of Information Act, Health Insurance Portability and Accountability Act (HIPAA), and 38 U.S.C. § 7332, Confidentiality of Certain Medical Records). Ability to apply health record documentation guidelines and processes to navigate efficiently through the paper and/or electronic health record to locate, assemble, and disclose protected health information. Ability to apply policies, procedures, laws, and regulations governing privacy and release of information to process requests for release of information. Ability to research and solve difficult questions related to release of health information in an accurate and timely manner. Reference: For more information on this qualification standard, please visit https://www.va.gov/ohrm/QualificationStandards/ . The full performance level of this vacancy is GS 6. The actual grade at which an applicant may be selected for this vacancy is in the range of GS 4 to GS 6. Physical Requirements: See VA Directive and Handbook 5019, Employee Occupational Health Service.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">Basic Requirements: United States Citizenship: Non-citizens may only be appointed when it is not possible to recruit qualified citizens in accordance with VA Policy. English Language Proficiency: MRTs (ROI) must be proficient in spoken and written English, as required by 38 U.S.C. § 7403(f). Experience and/or Education: One year of creditable experience that indicates knowledge of medical terminology and general understanding of health records. Six months of the required one year of creditable experience must have provided the knowledge, skills, and abilities (KSAs) needed to perform MRT (ROI) work OR Have an associate's degree from an accredited college or university recognized by the U.S. Department of Education with a major field of study in health information technology/health information management, or a related degree with a minimum of 12 semester hours in health information technology/health information management (e.g., courses in medical terminology, anatomy and physiology, legal aspects of health care, and introduction to health records) OR Equivalent combinations of creditable experience and education are qualifying towards meeting basic experience requirements. The following experience and educational/training substitutions are appropriate for combining education and creditable experience: Six months of creditable experience that indicates knowledge of medical terminology, privacy and release of information, the health record, and one year above high school with a minimum of six semester hours of health information technology/health information management courses. Six months of creditable experience that indicates knowledge of medical terminology, privacy and release of information, the health record, and successful completion of a course for medical technicians, hospital corpsmen, medical service specialists, or hospital training obtained in a training program given by the Armed Forces or the U.S. Maritime Service under close medical and professional supervision. The training program may be substituted on a month-for-month basis for up to six months of experience provided the training program included courses in anatomy and physiology, and health record techniques and procedures. May qualify based on being covered by the Grandfathering Provision as described in the VA Qualification Standard for this occupation (only applicable to current VHA employees who are in this occupation and meet the criteria). Grade Determinations: GS 4 MRT (ROI):Experience or Education: None beyond basic requirements. GS 5 MRT (ROI):Experience: One year of creditable experience equivalent to the next lower grade level (GS4) OR Education: Successful completion of a bachelor's degree from an accredited college or university recognized by the U.S. Department of Education, with a major field of study in health information management, or a related degree with a minimum of 24 semester hours in health information technology/health information management (e.g., courses in medical terminology, anatomy and physiology, legal aspects of health care, and introduction to health records). Demonstrated Knowledge, Skills, and Abilities (KSAs): In addition to the experience above, the candidate must demonstrate all of the following KSAs: Ability to utilize health information technology and various office software products utilized in MRT (ROI) positions (e.g., the electronic health record, release of information systems, etc.). Knowledge of health record documentation guidelines and processes for disclosing protected health information. Ability to manage priorities and coordinate work in order to complete duties within required timeframes, and the ability to follow-up on pending issues. Knowledge of policies, procedures, laws, and regulations governing privacy and release of information. Ability to communicate with individuals from various backgrounds to obtain the desired effect or gaining information by establishing rapport. GS 6 MRT (ROI):Experience: One year of creditable experience equivalent to the next lower grade level GS5. Demonstrated Knowledge, Skills, and Abilities (KSAs): In addition to the experience above, the candidate must demonstrate all of the following KSAs: Knowledge of the laws and regulations related to the authorization and disclosure of health information (e.g., Privacy Act, Freedom of Information Act, Health Insurance Portability and Accountability Act (HIPAA), and 38 U.S.C. § 7332, Confidentiality of Certain Medical Records). Ability to apply health record documentation guidelines and processes to navigate efficiently through the paper and/or electronic health record to locate, assemble, and disclose protected health information. Ability to apply policies, procedures, laws, and regulations governing privacy and release of information to process requests for release of information. Ability to research and solve difficult questions related to release of health information in an accurate and timely manner. Reference: For more information on this qualification standard, please visit https://www.va.gov/ohrm/QualificationStandards/. The full performance level of this vacancy is GS 6. The actual grade at which an applicant may be selected for this vacancy is in the range of GS 4 to GS 6. Physical Requirements: See VA Directive and Handbook 5019, Employee Occupational Health Service.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #836120200 - Health Technician (Ophthalmology) at Veterans Health Administration
+                    <span class="similarity-badge similarity-low">
+                        1.8% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Qualification - Character Counts: Historical (1445) vs Current (863)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">Applicants pending the completion of educational or certification/licensure requirements may be referred and tentatively selected but may not be hired until all requirements are met.
+:
+Basic Requirements
+United States Citizenship: Non-citizens may only be appointed when it is not possible to recruit qualified citizens in accordance with VA Policy. English Language Proficiency: Health Technicians (Ophthalmology) must be proficient in spoken and written English as required by 38 U.S.C. 7402(d) and 38 U.S.C. 7407(d). Experience and Education: Experience: One year of experience in a health care field, such as but not limited to nursing, medical assistant, or health technician.
+OR
+Education: Two years above high school with a minimum of six semester hours directly related to a health care field or associate's degree in a health care related degree.
+OR
+Experience/Education Combination: Equivalent combinations of experience and education are qualifying. Examples are listed below: 2 (a) Six months of experience in the health care field; and one year above high school; or (b) Six months of experience in the health care field and successful completion of a course for health care technicians, hospital corpsmen, medical service specialists, or ophthalmology technicians given by the U.S. Armed Forces; or (c) Six months of experience in the health care field and completion of an independent study course in Ophthalmic Medical Assisting.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">GS-8 (Full Performance Level):Experience: One year of experience equivalent to the GS-7 grade level.Demonstrated Knowledge, Skills, and Abilities (KSA): In addition to the experience above, the candidate must demonstrate all of the following KSAs: Ability to perform advanced tonometry and pupil evaluation; Ability to perform calculations for selection of intraocular lens; Knowledge of clinic based ophthalmic surgical assisting; Knowledge of eye anatomy and physiology; Knowledge of medication effects and proper instillation in the eye; Knowledge of optics; Knowledge of proper cleaning and maintenance of clinic equipment. Reference: For more information on this qualification standard, please visit https://www.va.gov/ohrm/QualificationStandards/.The full performance level of this vacancy is 8. Requirements: See VA Handbook 5019 for physical requirements.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #834812100 - Intermediate Care Technician at Veterans Health Administration
+                    <span class="similarity-badge similarity-low">
+                        28.3% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Qualification - Character Counts: Historical (809) vs Current (4800)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">Experience in the military as a Hospital Corpsman, Combat Medic, Medical Technician is highly desired.
+Examples of military occupational specialties highly desired, include but are not limited to: 4NOX- Basic Medical Technician, 4NOIC- Independent Duty Medical Technician, X4NO- Aeromedical Evacuation Technician, 1T2X1- Pararescueman, 68W- Combat Medic Specialist, 18D- Army Special Forces (Medic), 68WW1- Special Operations Flight Medic, HM0000- Basic Hospital Corpsman, HM8404- Field Medical Service Technician, HM8425- Surface Force Independent Duty Corpsman, HM8402- Submarine Force Independent Duty Corpsman, HM8401- Search and Rescue Medical Technician, HM8403- Fleet Marine Force Reconnaissance Independent Duty Corpsman, HM8406- Aerospace Medical Technician, and HS- Basic Health Services Technician.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">To qualify for this position, applicants must meet all requirements by the closing date of this announcement, 09/30/2025. Individual Occupational Requirement (IOR): The Health Aid and Technician Series, 0640, has a minimum qualification entry requirement. Specialized Experience (for positions at GS-4 and above): Positions in this series range widely in type and include support duties to medical or health personnel such as audiologists, speech pathologists, medical officers, and optometrists. Therefore, technician experience is experience that required application of the knowledge, methods, and techniques of the position to be filled.In addition to the Individual Occupational Requirement, you may qualify based on your experience and/or education as described below: Specialized Experience: One year of specialized experience (equivalent to the GS-6 grade level in the federal service). Examples of specialized experience include but are not limited to: Prepare and administer medications through various methods, examples include, intramuscular injections, subcutaneous injections, intradermal injections, oral, aerosolized including oxygen, topical, intraocular (eye drops), Otic (ear drops), intranasal, rectal (suppositories), local anesthetics, intraurethral, and intravenous. Perform minor surgical procedures, medical interventions and administer treatments to manage care to combat disease or disabling symptoms example incise and drain various skin infections or abscesses. Order appropriate diagnostic studies under the direction of the supervising Licensed Independent Practitioner (LIP) obtains and Reports Diagnostic and laboratory results. OR, Education: Successfully completed one (1) full year of graduate education (18 semester hours) or an internship in course matter that must include courses directly related to the work of the Intermediate Care Technician position. This education must have been obtained in an accredited college or university. NOTE: Transcripts (unofficial or official) must be submitted with your application materials. Education cannot be credited without documentation. OR, Combination: Combinations of successfully completed graduate level education and specialized experience, as described above, which meet the total experience requirements for this grade level. The education portion must include graduate courses directly related to the work of the Surgical Technician position. This education must have been obtained in an accredited college or university. NOTE: Transcripts (unofficial or official) must be submitted with your application materials. Education cannot be credited without documentation. Preferred Qualifications: Experience in the military as a Hospital Corpsman, Combat Medic, Medical Technician is highly desired. Examples of military occupational specialties highly desired, include but are not limited to: 4NOX- Basic Medical Technician, 4NOIC- Independent Duty Medical Technician, X4NO- Aeromedical Evacuation Technician, 1T2X1- Pararescueman, 68W- Combat Medic Specialist, 18D- Army Special Forces (Medic), 68WW1- Special Operations Flight Medic, HM0000- Basic Hospital Corpsman, HM8404- Field Medical Service Technician, HM8425- Surface Force Independent Duty Corpsman, HM8402- Submarine Force Independent Duty Corpsman, HM8401- Search and Rescue Medical Technician, HM8403- Fleet Marine Force Reconnaissance Independent Duty Corpsman, HM8406- Aerospace Medical Technician, and HS- Basic Health Services Technician. Experience refers to paid and unpaid experience, including volunteer work done through National Service programs (e.g., Peace Corps, AmeriCorps) and other organizations (e.g., professional; philanthropic; religions; spiritual; community; student; social). Volunteer work helps build critical competencies, knowledge, and skills and can provide valuable training and experience that translates directly to paid employment. You will receive credit for all qualifying experience, including volunteer experience. Note: A full year of work is considered to be 35-40 hours of work per week. Part-time experience will be credited on the basis of time actually spent in appropriate activities. Applicants wishing to receive credit for such experience must indicate clearly the nature of their duties and responsibilities in each position and the number of hours a week spent in such employment. Physical Requirements: The work involves extended periods of bending, standing and walking. Generally, the work requires recurring physical exertion with assisting patients. For more information on these qualification standards, please visit the United States Office of Personnel Management's website at https://www.opm.gov/policy-data-oversight/classification-qualifications/general-schedule-qualification-standards/.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #817926200 - Criminal Investigator at Interior, Bureau of Indian Affairs
+                    <span class="similarity-badge similarity-low">
+                        20.7% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Qualification - Character Counts: Historical (5803) vs Current (5796)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">EXPERIENCE AND EDUCATION REQUIREMENTS : (OPM Operating Manual, Qualification Standards ). GL-09 : To qualify at the GL-09 grade level, you must have one year specialized experience at or equivalent to the GL/GS-07 investigating and arresting individuals suspected of crimes; participating in surveillance; collecting evidence; and preparing case reports. OR Education : 2 years of progressively higher level graduate education leading to a master's degree or master's or equivalent graduate degree or a LL.B or J.D., in a related field of study OR a combination of specialized experience and education that totals 100% of the experience requirement. OR A combination of experience and education that totals 100% of the requirement above. GS-11 : In addition to the experience at lower grade level, to qualify at the GS-11 grade level, you must have one (1) year specialized experience at or equivalent to the GL/GS-09 grade level carrying out investigative duties related to narcotics criminal matters including production of reports; testifying in federal, state, tribal and/or local courts; securing search and arrest warrants; gathering information on individuals or organizations suspected of criminal activity; and performing undercover assignments. OR Education : 3 full academic years of progressively higher level graduate education or a Ph.D. or equivalent doctoral degree or a L.L.M. in a related field of study OR a combination of specialized experience and education that totals 100% of the experience requirement. OR A combination of experience and education that totals 100% of the requirement above. GS-12 : In addition to the experience at lower grade levels, to qualify at the GS-12 grade level, you must have one (1) year specialized experience at or equivalent to the GS-11 grade level carrying out the full range of in-depth narcotics investigative duties related to complex criminal matters in multiple locations, conducting surveillance for extended periods of time to obtain evidence and establish probable cause; and independently writing investigative reports. MEDICAL REQUIREMENTS: The duties of this position require moderate to arduous physical exertion involving walking and standing, use of firearms, and exposure to inclement weather. Manual dexterity with comparatively free motion of finger, wrist, elbow, shoulder, hip, and knee joints is required. Arms, hands, legs, and feet must be sufficiently intact and functioning in order that applicants may perform the duties satisfactorily. Sufficiently good vision in each eye, with or without correction, is required to perform duties satisfactorily. Near vision, corrective lenses permitted, must be sufficient to read printed material the size of typewritten characters. Hearing loss, as measured by an audiometer, must not exceed 35 decibels at 1000, 2000, and 3000 Hz levels. Since the duties of these positions are exacting and responsible, and involve activities under trying conditions, applicants must possess emotional and mental stability. Any physical condition that would cause the applicant to be a hazard to himself/herself, or others is disqualifying. MAXIMUM ENTRY AGE LIMIT: The maximum entry-age for this position shall not exceed age 37, unless you have sufficient prior Federal civilian law enforcement [or firefighter, if applicable] experience or you are a preference eligible veteran. If you are a preference eligible veteran, you may be eligible for this position after your 37th birthday. You must supply a copy of your Defense Department Form 214 (DD-214) along with Standard Form 15 (if applicable) and any associated documentation in accordance with the instructions in this vacancy announcement. Failure to provide this documentation with your application will result in the loss of eligibility to receive a waiver of the maximum entry age requirement. FIREARMS REQUIREMENT : This position requires that the incumbent meet initial and continuing qualifications in the use of firearms as outlined in the Gun Control Act of 1968, amended by the Lautenberg Amendment of 1996. An applicant whose background includes any of the following will be ineligible for consideration: 1) convicted of a crime punishable by imprisonment exceeding one year; 2) has any outstanding warrants or is a fugitive from justice; 3) unlawful user of or addicted to any controlled substance; 4) adjudicated as a mental defective or has been committed to a mental institution; 5) illegally or unlawfully in the United States; 6) renounced U. S. citizenship; 7) subject to a court-ordered restraining order from harassing, stalking, or threatening an intimate partner or child; or 8) convicted of a misdemeanor crime of domestic violence. RESIDENCY REQUIREMENT: Upon selection, employees holding sworn law enforcement positions must reside within 50 miles of their duty station unless a waiver is approved by the OJS Director or Assistant Director. A failure to comply may result in removal from a primary law enforcement position. NOTE: To be eligible for Secondary Law Enforcement Coverage, you must 1) move directly from a federal Primary/Rigorous position; 2) complete 3 years of service in a primary/rigorous position, and; 3) must be continuously employed in a secondary position(s) since moving from a primary/rigorous position. All qualification requirements must be met by the closing date of this announcement. Merit Promotion candidates must also meet time-in-grade requirements by the announcement closing date. Preference in filling vacancies is given to qualified Indian candidates in accordance with the Indian Preference Act of 1934 (title 25, USC Section 472). Additional selections may be made from this announcement if identical vacancies occur in the same location within 90 days from the closing date.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">EXPERIENCE AND EDUCATION REQUIREMENTS: (OPM Operating Manual, Qualification Standards ). GL-09: To qualify at the GL-09 grade level, you must have one year specialized experience at or equivalent to the GL/GS-07 investigating and arresting individuals suspected of crimes; participating in surveillance; collecting evidence; and preparing case reports. OR Education: 2 years of progressively higher level graduate education leading to a master's degree or master's or equivalent graduate degree or a LL.B or J.D., in a related field of study OR a combination of specialized experience and education that totals 100% of the experience requirement. OR A combination of experience and education that totals 100% of the requirement above. GS-11: In addition to the experience at lower grade level, to qualify at the GS-11 grade level, you must have one (1) year specialized experience at or equivalent to the GL/GS-09 grade level carrying out investigative duties related to narcotics criminal matters including production of reports; testifying in federal, state, tribal and/or local courts; securing search and arrest warrants; gathering information on individuals or organizations suspected of criminal activity; and performing undercover assignments. OR Education: 3 full academic years of progressively higher level graduate education or a Ph.D. or equivalent doctoral degree or a L.L.M. in a related field of study OR a combination of specialized experience and education that totals 100% of the experience requirement. OR A combination of experience and education that totals 100% of the requirement above. GS-12: In addition to the experience at lower grade levels, to qualify at the GS-12 grade level, you must have one (1) year specialized experience at or equivalent to the GS-11 grade level carrying out the full range of in-depth narcotics investigative duties related to complex criminal matters in multiple locations, conducting surveillance for extended periods of time to obtain evidence and establish probable cause; and independently writing investigative reports. MEDICAL REQUIREMENTS: The duties of this position require moderate to arduous physical exertion involving walking and standing, use of firearms, and exposure to inclement weather. Manual dexterity with comparatively free motion of finger, wrist, elbow, shoulder, hip, and knee joints is required. Arms, hands, legs, and feet must be sufficiently intact and functioning in order that applicants may perform the duties satisfactorily. Sufficiently good vision in each eye, with or without correction, is required to perform duties satisfactorily. Near vision, corrective lenses permitted, must be sufficient to read printed material the size of typewritten characters. Hearing loss, as measured by an audiometer, must not exceed 35 decibels at 1000, 2000, and 3000 Hz levels. Since the duties of these positions are exacting and responsible, and involve activities under trying conditions, applicants must possess emotional and mental stability. Any physical condition that would cause the applicant to be a hazard to himself/herself, or others is disqualifying. MAXIMUM ENTRY AGE LIMIT: The maximum entry-age for this position shall not exceed age 37, unless you have sufficient prior Federal civilian law enforcement [or firefighter, if applicable] experience or you are a preference eligible veteran. If you are a preference eligible veteran, you may be eligible for this position after your 37th birthday. You must supply a copy of your Defense Department Form 214 (DD-214) along with Standard Form 15 (if applicable) and any associated documentation in accordance with the instructions in this vacancy announcement. Failure to provide this documentation with your application will result in the loss of eligibility to receive a waiver of the maximum entry age requirement. FIREARMS REQUIREMENT: This position requires that the incumbent meet initial and continuing qualifications in the use of firearms as outlined in the Gun Control Act of 1968, amended by the Lautenberg Amendment of 1996. An applicant whose background includes any of the following will be ineligible for consideration: 1) convicted of a crime punishable by imprisonment exceeding one year; 2) has any outstanding warrants or is a fugitive from justice; 3) unlawful user of or addicted to any controlled substance; 4) adjudicated as a mental defective or has been committed to a mental institution; 5) illegally or unlawfully in the United States; 6) renounced U. S. citizenship; 7) subject to a court-ordered restraining order from harassing, stalking, or threatening an intimate partner or child; or 8) convicted of a misdemeanor crime of domestic violence. RESIDENCY REQUIREMENT: Upon selection, employees holding sworn law enforcement positions must reside within 50 miles of their duty station unless a waiver is approved by the OJS Director or Assistant Director. A failure to comply may result in removal from a primary law enforcement position. NOTE: To be eligible for Secondary Law Enforcement Coverage, you must 1) move directly from a federal Primary/Rigorous position; 2) complete 3 years of service in a primary/rigorous position, and; 3) must be continuously employed in a secondary position(s) since moving from a primary/rigorous position. All qualification requirements must be met by the closing date of this announcement. Merit Promotion candidates must also meet time-in-grade requirements by the announcement closing date. Preference in filling vacancies is given to qualified Indian candidates in accordance with the Indian Preference Act of 1934 (title 25, USC Section 472). Additional selections may be made from this announcement if identical vacancies occur in the same location within 90 days from the closing date.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #789442700 - Medical Support Assistant at Indian Health Service
+                    <span class="similarity-badge similarity-medium">
+                        79.5% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Qualification - Character Counts: Historical (3480) vs Current (3474)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL THE VACANCY IS FILLED. IT MAY BE EXTENDED OR CLOSED PRIOR TO THE CURRENT CLOSING DATE. APPLICATIONS MUST BE SUBMITTED BY 11:59 EST TUESDAY TO BE CONSIDERED, FIRST CUT OFF DATE FOR APPLICATIONS IS EVERY TUESDAY THERE AFTER. To qualify for this position, your resume must state sufficient experience and/or education, to perform the duties of the specific position for which you are applying. Experience refers to paid and unpaid experience, including volunteer work done through National Service programs (e.g., Peace Corps, AmeriCorps) and other organizations (e.g., professional; philanthropic; religious; spiritual; community; social). You will receive credit for all qualifying experience, including volunteer and part time experience. You must clearly identify the duties and responsibilities in each position held and the total number of hours per week. MINIMUM QUALIFICATIONS: Your resume must demonstrate at least one (1) year of specialized experience equivalent to at least the next lower grade level in the Federal service obtained in either the private or public sector performing the following type of work and/or tasks: GS-02 : Three (3) months of General Experience OR High school graduation or equivalent. GS-03 : Six (6) months of General Experience OR High school graduation or equivalent. GS-04 : One (1) year of General Experience OR Two (2) years above high school. GS-05 : One (1) year of Specialized Experience equivalent to at least the GS-04 grade level. OR Four (4) years above high school. GS-06 : One (1) year of Specialized Experience equivalent to at least the GS-05 grade level. Specialized Experience Defined: GS-05: Experience obtained in a hospital or clinic setting performing all aspects of patient registration that includes interviewing patients, experience obtained with billing and prior authorization of insurance, updating patient registration information, verifying third-party resources, utilizing patient registration systems, and working with various health benefit programs and health insurance programs having different benefits, deductibles and eligibility requirements. GS-06 : Experience and expertise obtained with billing and prior authorization of insurance, hospital or clinic setting performing all aspects of patient registration that includes interviewing patients, updating patient registration information, verifying third-party resources, utilizing patient registration systems, and working with various health benefit programs and health insurance programs having different benefits, deductibles and eligibility requirements. General Experience: Progressively responsible clerical, office, or other work that indicates ability to acquire the particular knowledge and skills needed to perform the duties of the position to be filled. Specialized Experience: Experience that equipped the applicant with the particular knowledge, skills, and abilities (KSA's) to perform successfully the duties of the position, and that is typically in or related to the position to be filled. To be creditable, specialized experience must have been equivalent to at least the next lower grade level. Applicants who have the 1 year of appropriate specialized experience, as indicated in the table, are not required by this standard to have general experience, education above the high school level, or any additional specialized experience to meet the minimum qualification requirements.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">OPEN UNTIL FILLED: THIS ANNOUNCEMENT IS OPEN UNTIL THE VACANCY IS FILLED. IT MAY BE EXTENDED OR CLOSED PRIOR TO THE CURRENT CLOSING DATE. APPLICATIONS MUST BE SUBMITTED BY 11:59 EST TUESDAY TO BE CONSIDERED, FIRST CUT OFF DATE FOR APPLICATIONS IS EVERY TUESDAY THERE AFTER. To qualify for this position, your resume must state sufficient experience and/or education, to perform the duties of the specific position for which you are applying. Experience refers to paid and unpaid experience, including volunteer work done through National Service programs (e.g., Peace Corps, AmeriCorps) and other organizations (e.g., professional; philanthropic; religious; spiritual; community; social). You will receive credit for all qualifying experience, including volunteer and part time experience. You must clearly identify the duties and responsibilities in each position held and the total number of hours per week. MINIMUM QUALIFICATIONS: Your resume must demonstrate at least one (1) year of specialized experience equivalent to at least the next lower grade level in the Federal service obtained in either the private or public sector performing the following type of work and/or tasks: GS-02: Three (3) months of General Experience OR High school graduation or equivalent. GS-03: Six (6) months of General Experience OR High school graduation or equivalent. GS-04: One (1) year of General Experience OR Two (2) years above high school. GS-05: One (1) year of Specialized Experience equivalent to at least the GS-04 grade level. OR Four (4) years above high school. GS-06: One (1) year of Specialized Experience equivalent to at least the GS-05 grade level. Specialized Experience Defined: GS-05: Experience obtained in a hospital or clinic setting performing all aspects of patient registration that includes interviewing patients, experience obtained with billing and prior authorization of insurance, updating patient registration information, verifying third-party resources, utilizing patient registration systems, and working with various health benefit programs and health insurance programs having different benefits, deductibles and eligibility requirements. GS-06: Experience and expertise obtained with billing and prior authorization of insurance, hospital or clinic setting performing all aspects of patient registration that includes interviewing patients, updating patient registration information, verifying third-party resources, utilizing patient registration systems, and working with various health benefit programs and health insurance programs having different benefits, deductibles and eligibility requirements. General Experience: Progressively responsible clerical, office, or other work that indicates ability to acquire the particular knowledge and skills needed to perform the duties of the position to be filled. Specialized Experience: Experience that equipped the applicant with the particular knowledge, skills, and abilities (KSA's) to perform successfully the duties of the position, and that is typically in or related to the position to be filled. To be creditable, specialized experience must have been equivalent to at least the next lower grade level. Applicants who have the 1 year of appropriate specialized experience, as indicated in the table, are not required by this standard to have general experience, education above the high school level, or any additional specialized experience to meet the minimum qualification requirements.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #769825400 - Nursing Assistant at Indian Health Service
+                    <span class="similarity-badge similarity-low">
+                        35.9% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Qualification - Character Counts: Historical (686) vs Current (3122)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">Your resume must demonstrate at least one (1) year of specialized experience equivalent to at least the next lower grade level in the Federal service obtained in either the private or public sector performing the following type of work and/or tasks:
+GS-04: Performing a variety of nonprofessional nursing care work in a hospital, outpatient clinic, nursing home, or other medical, nursing, or patient care facility, or in such work as that of a home health aid.
+GS-05: Providing personal nursing care to react in an emergency situation gathering data, observing patients and reporting to physicians and nurses. Obtaining vital signs and identifying the emergent/non-emergent situations.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">To qualify for this position, your resume must state sufficient experience and/or education, to perform the duties of the specific position for which you are applying. Experience refers to paid and unpaid experience, including volunteer work done through National Service programs (e.g., Peace Corps, AmeriCorps) and other organizations (e.g., professional; philanthropic; religious; spiritual; community; social). You will receive credit for all qualifying experience, including volunteer and part time experience. You must clearly identify the duties and responsibilities in each position held and the total number of hours per week. BASIC REQUIREMENT(S): Experience: Qualifying experience includes nursing care work in a hospital, outpatient clinic, nursing home, or other supervised medical, nursing, or patient care facility that provided a practical knowledge of human body structure and sterile techniques and procedures, performing such duties as: Providing pre- and post-operative patient care. Observing, recording, and reporting changes in behavior of mentally ill patients. Providing reassurance and encouragement to mentally ill patients. Assisting surgeons and registered nurses in operating room activities, including passing instruments, maintaining sterile conditions, and draping and positioning patients. Setting up and operating special medical equipment and apparatus. For GS-4: 6 months of nursing experience is required. For GS-5 and above: 1 year of nursing experience equivalent to at least the next lower grade level is required. OR Education and Training: For GS-4: Successful completion of a 2-year degree program in an accredited community college, junior college, or college or university in practical nursing or in a field of study appropriate to the specialization of the position, such as education in a program for a psychology, psychiatric, or operating room technician. In addition to the Basic Requirements, you must also meet the Minimum Qualifications stated below. MINIMUM QUALIFICATIONS: Your resume must demonstrate at least one (1) year of specialized experience equivalent to at least the next lower grade level in the Federal service obtained in either the private or public sector performing the following type of work and/or tasks: GS-04: Performing a variety of nonprofessional nursing care work in a hospital, outpatient clinic, nursing home, or other medical, nursing, or patient care facility, or in such work as that of a home health aid. GS-05: Providing personal nursing care to react in an emergency situation gathering data, observing patients and reporting to physicians and nurses. Obtaining vital signs and identifying the emergent/non-emergent situations. Time In Grade Federal employees in the competitive service are also subject to the Time-In-Grade Requirements: Merit Promotion (status) candidates must have completed one year of service at the next lower grade level. Time-In-Grade provisions do not apply under the Excepted Service Examining Plan (ESEP). You must meet all qualification requirements within 30 days of the closing date of the announcement.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #768730000 - Pharmacist at Indian Health Service
+                    <span class="similarity-badge similarity-medium">
+                        62.6% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Qualification - Character Counts: Historical (1425) vs Current (3109)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">Your resume must demonstrate at least one (1) year of specialized experience equivalent to at least the next lower grade level in the Federal service obtained in either the private or public sector performing the following type of work and/or tasks:
+GS-11 In addition to meeting the Basic Requirements listed above, Experience or training which demonstrates your ability to perform the work of this position at the GS-11 level.
+Have 3-years of progressively higher level graduate education leading to a Ph.D. degree, Ph.D., Phar.D. or equivalent doctoral degree.
+GS-12 - In addition to meeting the Basic Requirements listed above, Experience which demonstrates your ability to perform the work of this position at the GS-12 level.
+One year of professional pharmacy experience equivalent to at least GS-11 grade level. This experience is related to the work of the position in the Federal service as described in the vacancy announcement. Examples include: Collaborate with physicians to discuss potential incompatibility issues with patient prescriptions; maintain accurate inventory of medications; offer information to assist patients in understanding how to properly take their prescribed medications; work with the pharmaceutical staff to maintain a clean, customer-friendly workplace; assist patients in solving problems, such as identifying old medication or finding an over-the-counter solution to minor health issues.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">To qualify for this position, your resume must state sufficient experience and/or education, to perform the duties of the specific position for which you are applying. Experience refers to paid and unpaid experience, including volunteer work done through National Service programs (e.g., Peace Corps, AmeriCorps) and other organizations (e.g., professional; philanthropic; religious; spiritual; community; social). You will receive credit for all qualifying experience, including volunteer and part time experience. You must clearly identify the duties and responsibilities in each position held and the total number of hours per week. BASIC REQUIREMENT(S): Education A doctoral degree in Pharmacy that is recognized by the Accreditation Council for Pharmacy Education(external link) (ACPE) or an accrediting body recognized by the U.S. Department of Education(external link) at the time the degree was obtained. Licensure Applicants must be licensed to practice pharmacy in a State, the District of Columbia, the Commonwealth of Puerto Rico, or a territory of the United States. Medical Requirements Applicants must be able to distinguish basic colors. In addition to the Basic Requirements, you must also meet the Minimum Qualifications stated below. MINIMUM QUALIFICATIONS: Your resume must demonstrate at least one (1) year of specialized experience equivalent to at least the next lower grade level in the Federal service obtained in either the private or public sector performing the following type of work and/or tasks: GS-11 In addition to meeting the Basic Requirements listed above, Experience or training which demonstrates your ability to perform the work of this position at the GS-11 level. Have 3-years of progressively higher level graduate education leading to a Ph.D. degree, Ph.D., Phar.D. or equivalent doctoral degree. GS-12 - In addition to meeting the Basic Requirements listed above, Experience which demonstrates your ability to perform the work of this position at the GS-12 level. One year of professional pharmacy experience equivalent to at least GS-11 grade level. This experience is related to the work of the position in the Federal service as described in the vacancy announcement. Examples include: Collaborate with physicians to discuss potential incompatibility issues with patient prescriptions; maintain accurate inventory of medications; offer information to assist patients in understanding how to properly take their prescribed medications; work with the pharmaceutical staff to maintain a clean, customer-friendly workplace; assist patients in solving problems, such as identifying old medication or finding an over-the-counter solution to minor health issues. Time In Grade Federal employees in the competitive service are also subject to the Time-In-Grade Requirements: Merit Promotion (status) candidates must have completed one year of service at the next lower grade level. Time-In-Grade provisions do not apply under the Excepted Service Examining Plan (ESEP). You must meet all qualification requirements within 30 days of the closing date of the announcement.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #831074000 - Child and Youth Program Assistant CY-01/02 at Army Installation Management Command
+                    <span class="similarity-badge similarity-low">
+                        49.5% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Qualification - Character Counts: Historical (519) vs Current (516)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">For Entry Level (CY-01 ): At a minimum, must have a high school diploma or General Equivalency Diploma (GED). Must be able to communicate in English, both orally and in writing. For information on the qualification requirements for the higher paying levels such as Skill Level (CY-01) and Target Level (CY-02 ): Refer to our Applicant Information Kit. Note to applicants : College transcripts or certificates may be required at the time of application for applicants who want to be considered for Skill or Target level.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">For Entry Level (CY-01): At a minimum, must have a high school diploma or General Equivalency Diploma (GED). Must be able to communicate in English, both orally and in writing. For information on the qualification requirements for the higher paying levels such as Skill Level (CY-01) and Target Level (CY-02): Refer to our Applicant Information Kit. Note to applicants: College transcripts or certificates may be required at the time of application for applicants who want to be considered for Skill or Target level.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #838182700 - Health System Administrator (Deputy CEO) at Indian Health Service
+                    <span class="similarity-badge similarity-low">
+                        31.1% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Qualification - Character Counts: Historical (783) vs Current (4250)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">Your resume must demonstrate at least one (1) year of specialized experience equivalent to at least the next lower grade level in the Federal service obtained in either the private or public sector performing the following type of work and/or tasks:
+Execute and keep abreast of health care delivery system's polices, rules, regulations, procedures and automated systems as they relate to the quality of care management and support, fiscal management and budget process, personnel administration and management, contracts and administrative services, such as property and supply, real property management, etc., to relate and adapt these requirements to the immediate situation and needs of the organization in the provision of patient care and accomplishment of health care delivery.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">To qualify for this position, your resume must state sufficient experience and/or education, to perform the duties of the specific position for which you are applying. Experience refers to paid and unpaid experience, including volunteer work done through National Service programs (e.g., Peace Corps, AmeriCorps) and other organizations (e.g., professional; philanthropic; religious; spiritual; community; social). You will receive credit for all qualifying experience, including volunteer and part time experience. You must clearly identify the duties and responsibilities in each position held and the total number of hours per week. Individual Occupational Requirements: Undergraduate and Graduate Education: Major study -- hospital administration, public health administration, or related fields such as business or public administration with course work in health care administration. -OR- Specialized Experience (for positions above GS-5): Progressively responsible analytical or administrative, or clinical management or supervisory experience in the health care field. This work may have been performed in an operating health care facility or a higher organizational echelon with advisory or directional authority over such facilities. Work must have involved a close working relationship with facility managers and analysis and/or coordination of administrative, clinical, or other service activities, and provided knowledge of the following: Missions, organizations, programs, and requirements of health care delivery systems; Regulations and standards of various regulatory and credentialing groups; and Government-wide, agency, and facility systems and requirements in various administrative areas such as budget, personnel, and procurement. Applicants must also possess: Management ability to delegate authority, evaluate and oversee people and programs, recognize and adapt to changing priorities; and Knowledge of the interrelationships and interdependencies among various medical and administrative services and programs. Special Provision for Inservice Placement: Successful completion of an agency-sponsored on-the-job training program may be substituted for qualifying experience, provided it included a formal individualized training plan. Such a training program must have been conducted in an operating health care system and included: Assignments providing a knowledge of basic health system administration philosophies, practices, and procedures, and basic government administrative policies and requirements; Practical assignments providing an opportunity to apply health system administration skills and principles (as the individual progresses, work assignments must be characteristic of the grade level to which he or she is assigned); and Oversight by an experienced health system administrator with periodic evaluation of the individual's progress and appropriate adjustment of the training program. In addition to the Occupational Requirements, you must also meet the Minimum Qualifications stated below. MINIMUM QUALIFICATIONS: Your resume must demonstrate at least one (1) year of specialized experience equivalent to at least the next lower grade level in the Federal service obtained in either the private or public sector performing the following type of work and/or tasks: Execute and keep abreast of health care delivery system's polices, rules, regulations, procedures and automated systems as they relate to the quality of care management and support, fiscal management and budget process, personnel administration and management, contracts and administrative services, such as property and supply, real property management, etc., to relate and adapt these requirements to the immediate situation and needs of the organization in the provision of patient care and accomplishment of health care delivery. Time In Grade Federal employees in the competitive service are also subject to the Time-In-Grade Requirements: Merit Promotion (status) candidates must have completed one year of service at the next lower grade level. Time-In-Grade provisions do not apply under the Excepted Service Examining Plan (ESEP). You must meet all qualification requirements within 30 days of the closing date of the announcement.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #837599200 - Applications Administrator at U.S. Courts
+                    <span class="similarity-badge similarity-medium">
+                        76.2% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Qualification - Character Counts: Historical (1217) vs Current (1974)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">Preference will be given to those candidates who possess progressive technical experience developing and supporting web-based applications in the following environments/languages. Microsoft Visual Studio/ASP.Net, C#, SharePoint, SQL, JavaScript (React, Angular, Telerik), HTML, and Drupal. Experience with server operating systems and database products including Red Hat Enterprise Linux, Windows server (2012 and above), Microsoft SQL Server, MySQL, and Informix Dynamic Server is preferred. Server Studio and Microsoft IIS experience is desirable, as is experience with off-the-shelf reporting tools including Crystal Reports, Business Objects, and RePortal. A working knowledge of the Microsoft ecosystem, including power platform, and related robotic process automation (RPA) tools is highly desired. Preference will be given to those candidates whose experience provides evidence of strong customer service skills; the ability to work collaboratively with clients, team members, and managers; the ability to handle multiple priorities in a fast-paced environment; and the ability to follow an assigned project through to completion. A bachelor's degree from an accredited university or college is also preferred.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">To qualify at the CL 28 level, the applicant must have two years specialized experience, including one year equivalent to work at the CL 27. Specialized experience is progressive experience that has provided the applicant with the key areas of knowledge and skills needed to perform this positionÃÂ¢s duties successfully. For this position, the applicant must have a minimum of two years specialized work experience that demonstrates their ability to work with applications in all phases of the ITIL Application life cycle. Education at the masterÃÂ¢s degree level or two years of graduate study may be substituted for required specialized experience if obtained in a field directly related to the subject matter of this position. TECHNICAL QUALIFICATIONS: Preference will be given to those candidates who possess progressive technical experience developing and supporting web-based applications in the following environments/languages. Microsoft Visual Studio/ASP.Net, C#, SharePoint, SQL, JavaScript (React, Angular, Telerik), HTML, and Drupal. Experience with server operating systems and database products including Red Hat Enterprise Linux, Windows server (2012 and above), Microsoft SQL Server, MySQL, and Informix Dynamic Server is preferred. Server Studio and Microsoft IIS experience is desirable, as is experience with off-the-shelf reporting tools including Crystal Reports, Business Objects, and RePortal. A working knowledge of the Microsoft ecosystem, including power platform, and related robotic process automation (RPA) tools is highly desired. Preference will be given to those candidates whose experience provides evidence of strong customer service skills; the ability to work collaboratively with clients, team members, and managers; the ability to handle multiple priorities in a fast-paced environment; and the ability to follow an assigned project through to completion. A bachelor's degree from an accredited university or college is also preferred.</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+        
+    <div class="comparison-section">
+        <h2 class="section-title">📝 Requirements Mismatches (<95% Similarity) - 274 Total</h2>
+        <div class="comparison-container">
+        
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #838192800 - OPERATIONS LEADER (SAKURA THEATER) NF-02 RPT (ALL SOURCES) at U.S. Marine Corps
+                    <span class="similarity-badge similarity-low">
+                        43.6% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Requirements - Character Counts: Historical (42) vs Current (12)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">See Duties and Qualifications
+EVALUATIONS:</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">EVALUATIONS:</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #838322200 - Air Traffic Control Specialist, Traffic Management Coordinator at Federal Aviation Administration
+                    <span class="similarity-badge similarity-low">
+                        6.0% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Requirements - Character Counts: Historical (248) vs Current (51)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">US Citizenship is required. Selective Service Registration is required for males born after 12/31/1959. Must submit an SF50 (See Required Documents). Designated or Random Drug Testing required. REQUIRED: FAA Form 3330-43-1 (See Required Documents).</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">We are not accepting applications from noncitizens.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #838113200 - Management and Program Analyst (Senior Evaluator) at Architect of the Capitol
+                    <span class="similarity-badge similarity-high">
+                        90.1% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Requirements - Character Counts: Historical (952) vs Current (782)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">Appointment subject to background investigation and favorable adjudication. You must be able to pass a drug test. You must meet the definition of specialized experience.
+“To be employed by the Architect of the Capitol in a paid position, an individual must meet one of the categories below: A citizen of the United States; A person who is lawfully admitted for permanent residence and is seeking citizenship as outlined in 8 U.S.C. 1324b(a)(3)(B); A person who is admitted as a refugee under 8 U.S.C. 1157 or is granted asylum under 8 U.S.C. 1158 and has filed a declaration of intention to become a lawful permanent resident and then a citizen when eligible; A person who owes allegiance to the United States (nationals of American Samoa, Swains Island, and the Northern Mariana Islands, and nationals who meet other requirements described in 8 U.S.C. 1408); or A person who is currently an officer or employee of the Government of the United States.”</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">“To be employed by the Architect of the Capitol in a paid position, an individual must meet one of the categories below: A citizen of the United States; A person who is lawfully admitted for permanent residence and is seeking citizenship as outlined in 8 U.S.C. 1324b(a)(3)(B); A person who is admitted as a refugee under 8 U.S.C. 1157 or is granted asylum under 8 U.S.C. 1158 and has filed a declaration of intention to become a lawful permanent resident and then a citizen when eligible; A person who owes allegiance to the United States (nationals of American Samoa, Swains Island, and the Northern Mariana Islands, and nationals who meet other requirements described in 8 U.S.C. 1408); or A person who is currently an officer or employee of the Government of the United States.”</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #837999300 - REC ATTENDANT, NF-01/FLX, MCCS BOWLING PROGRAM, CAMP COURTNEY at U.S. Marine Corps
+                    <span class="similarity-badge similarity-low">
+                        43.6% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Requirements - Character Counts: Historical (42) vs Current (12)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">See Duties and Qualifications
+EVALUATIONS:</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">EVALUATIONS:</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #837861700 - Engineering Technician (Project Coordinator) at Federal Aviation Administration
+                    <span class="similarity-badge similarity-low">
+                        8.1% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Requirements - Character Counts: Historical (172) vs Current (51)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">US Citizenship is required. Selective Service Registration is required for males born after 12/31/1959. Must submit an SF50 (See Required Documents). Supervisor Endorsement</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">We are not accepting applications from noncitizens.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #837649700 - Aerospace Engineer at Federal Aviation Administration
+                    <span class="similarity-badge similarity-low">
+                        6.5% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Requirements - Character Counts: Historical (225) vs Current (51)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">US Citizenship is required. Selective Service Registration is required for males born after 12/31/1959. Must submit an SF50 (See Required Documents). This position has a positive education requirement. Transcript(s) required.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">We are not accepting applications from noncitizens.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #837999500 - IT SPECIALIST (NETWORK INFRASTRUCTURE), NF-4/RFT, INFORMATION MANAGEMENT BRANCH, CAMP FOSTER at U.S. Marine Corps
+                    <span class="similarity-badge similarity-low">
+                        43.6% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Requirements - Character Counts: Historical (42) vs Current (12)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">See Duties and Qualifications
+EVALUATIONS:</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">EVALUATIONS:</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #838191300 - Aviation Safety Inspector, Partial Program Manager at Federal Aviation Administration
+                    <span class="similarity-badge similarity-low">
+                        6.9% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Requirements - Character Counts: Historical (208) vs Current (51)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">US Citizenship is required. Selective Service Registration is required for males born after 12/31/1959. Must submit an SF50 (See Required Documents). Selectee will be required to report to a FAA/AVS facility.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">We are not accepting applications from noncitizens.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #837639000 - Supervisory Air Traffic Control Specialist, Operations Supervisor at Federal Aviation Administration
+                    <span class="similarity-badge similarity-low">
+                        4.8% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Requirements - Character Counts: Historical (321) vs Current (51)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">US Citizenship is required. Selective Service Registration is required for males born after 12/31/1959. Must submit an SF50 (See Required Documents). Designated or Random Drug Testing required. A one-year supervisory/managerial probationary period may be required. Some, all, or none of the candidates may be interviewed.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">We are not accepting applications from noncitizens.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #838308300 - Plumber at National Gallery of Art
+                    <span class="similarity-badge similarity-medium">
+                        76.8% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Requirements - Character Counts: Historical (975) vs Current (608)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">You must be a United States Citizen. This employer participates in the e-Verify program. Males born after 12-31-59 must be registered for Selective Service See "Other Information" section regarding Selective Service requirements. Suitable for Federal employment, determined by a background investigation May be required to successfully complete a probationary period
+Your resume serves as the basis for qualification determinations and must highlight your most relevant and significant work experience and education (if applicable) as it relates to this job opportunity. Experience refers to paid and unpaid experience, including volunteer work done through National Service programs (e.g., Peace Corps, AmeriCorps) and other organizations (e.g., professional; philanthropic; religious; spiritual; community, student, social). Your resume must include the dates of all qualifying experience (from month/year to month/year) and the number of hours worked/volunteered per week.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">Your resume serves as the basis for qualification determinations and must highlight your most relevant and significant work experience and education (if applicable) as it relates to this job opportunity. Experience refers to paid and unpaid experience, including volunteer work done through National Service programs (e.g., Peace Corps, AmeriCorps) and other organizations (e.g., professional; philanthropic; religious; spiritual; community, student, social). Your resume must include the dates of all qualifying experience (from month/year to month/year) and the number of hours worked/volunteered per week.</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+        
+    <div class="comparison-section">
+        <h2 class="section-title">🎓 Education Mismatches (<95% Similarity) - 205 Total</h2>
+        <div class="comparison-container">
+        
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #827773500 - Advanced Practice Nurse (Nurse Practitioner) at Indian Health Service
+                    <span class="similarity-badge similarity-low">
+                        1.3% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Education - Character Counts: Historical (474) vs Current (890)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">A graduate or higher level degree, bachelor's degree, associate degree, or diploma from an accredited professional nursing educational program is required. This education must have been accredited by the
+,
+,
+, or an accrediting body recognized by the
+at the time the degree was obtained.
+Commission on Collegiate Nursing Education
+Council on Accreditation of Nurse Anesthesia Educational Programs
+Accreditation Commission for Midwifery Education
+U.S. Department of Education</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">This position has an education requirement. You are strongly encouraged to submit a copy of your transcripts or a list of your courses including titles, credit hours completed, and grades. Unofficial transcripts will be accepted in the application package. Official transcripts will be required from all selectees prior to receiving an official offer. Only attendance and/or degrees from schools accredited by accrediting institutions recognized by the U.S. Department of Education may be credited. Applicants can verify accreditation at the following website: https://www.ed.gov/accreditation. If you are using foreign education to meet qualification requirements, you must send a Certificate of Foreign Equivalency with your transcript in order to receive credit for that education. For further information, visit https://sites.ed.gov/international/recognition-of-foreign-qualifications/.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #837933100 - Licensed Practical Nurse, Specialty Primary Care (Knoxville) at Veterans Health Administration
+                    <span class="similarity-badge similarity-low">
+                        1.1% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Education - Character Counts: Historical (712) vs Current (557)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">- Graduate of a school of practical or vocational nursing approved by the appropriate State agency and/or accredited by the National League for Nursing Accrediting Commission (NLNAC) at the time the program was completed by the applicant. Exceptions include health care education in the military service or training in the military service which is accepted by the licensing body in the jurisdiction in which the individual is licensed as qualifying for full LPN/LVN licensure will be accepted as meeting the education requirements for VHA employment OR granted a license by a jurisdiction that does not require graduation from an approved school AND have at least one year of successful practice as an LPN/ LVN.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">Note: Only education or degrees recognized by the U.S. Department of Education from accredited colleges, universities, schools, or institutions may be used to qualify for Federal employment. You can verify your education here: http://ope.ed.gov/accreditation/. If you are using foreign education to meet qualification requirements, you must send a Certificate of Foreign Equivalency with your transcript in order to receive credit for that education. For further information, visit: https://sites.ed.gov/international/recognition-of-foreign-qualifications/.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #834210100 - Senior Social Worker - Residential Rehabilitation Treatment Program -Substance Use Disorder at Veterans Health Administration
+                    <span class="similarity-badge similarity-low">
+                        2.7% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Education - Character Counts: Historical (561) vs Current (707)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">Have a master's degree in social work from a school of social work fully accredited by the Council on Social Work Education (CSWE). Graduates of schools of social work that are in candidacy status do not meet this requirement until the School of Social Work is fully accredited. A doctoral degree in social work may not be substituted for the master's degree in social work. Verification of the degree can be made by going to http://www.cswe.org/Accreditation to verify that the social work degree meets the accreditation standards for a masters of social work.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">IMPORTANT: A transcript must be submitted with your application if you are basing all or part of your qualifications on education. Note: Only education or degrees recognized by the U.S. Department of Education from accredited colleges, universities, schools, or institutions may be used to qualify for Federal employment. You can verify your education here: http://ope.ed.gov/accreditation/. If you are using foreign education to meet qualification requirements, you must send a Certificate of Foreign Equivalency with your transcript in order to receive credit for that education. For further information, visit: http://www.ed.gov/about/offices/list/ous/international/usnei/us/edlite-visitus-forrecog.html.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #832114800 - Physician, Hematology/Oncology with Recruitment/Relocation Incentive & EDRP at Veterans Health Administration
+                    <span class="similarity-badge similarity-low">
+                        2.1% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Education - Character Counts: Historical (291) vs Current (1632)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">: Degree of doctor of medicine or an equivalent degree resulting from a course of education in medicine or osteopathic medicine. The degree must have been obtained from one of the schools approved by the Department of Veterans Affairs for the year in which the course of study was completed.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">Degree of Doctor of Medicine or an equivalent degree resulting from a course of education in allopathic medicine or osteopathic medicine. The degree must have been obtained from an institution whose accreditation was in place for the year in which the course of study was completed. Approved schools are: Schools of medicine accredited by the Liaison Committee on Medical Education (LCME) for the year in which the degree was granted, or Schools of osteopathic medicine approved by the Commission on Osteopathic College Accreditation of the American Osteopathic Association for the year in which the degree was granted. For foreign medical graduates not covered in (1) or (2) above, facility officials must verify with the Educational Commission for Foreign Medical Graduates (ECFMG) that the applicant has met requirements for certification, and must obtain a copy of the ECFMG certificate, if claimed by the applicant. [If the applicant does not claim an ECFMG certificate, facility officials must still confirm that the medical school meets (or met) ECFMG eligibility requirements for the year the candidate graduated.] NOTE: The Under Secretary of Health or designee in the VHA Central Office may approve the appointment under authority of 38 U.S.C. 7405 of a physician graduate of a school of medicine not covered above if the candidate is to be assigned to a research, academic, or administrative position with no patient care responsibilities. The appointment will be made only in exceptional circumstances where the candidate's credentials clearly demonstrate high professional attainment or expertise in the specialty area.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #834209900 - Senior Social Worker - Residential Rehabilitation Treatment Program -Substance Use Disorder at Veterans Health Administration
+                    <span class="similarity-badge similarity-low">
+                        2.7% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Education - Character Counts: Historical (561) vs Current (707)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">Have a master's degree in social work from a school of social work fully accredited by the Council on Social Work Education (CSWE). Graduates of schools of social work that are in candidacy status do not meet this requirement until the School of Social Work is fully accredited. A doctoral degree in social work may not be substituted for the master's degree in social work. Verification of the degree can be made by going to http://www.cswe.org/Accreditation to verify that the social work degree meets the accreditation standards for a masters of social work.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">IMPORTANT: A transcript must be submitted with your application if you are basing all or part of your qualifications on education. Note: Only education or degrees recognized by the U.S. Department of Education from accredited colleges, universities, schools, or institutions may be used to qualify for Federal employment. You can verify your education here: http://ope.ed.gov/accreditation/. If you are using foreign education to meet qualification requirements, you must send a Certificate of Foreign Equivalency with your transcript in order to receive credit for that education. For further information, visit: http://www.ed.gov/about/offices/list/ous/international/usnei/us/edlite-visitus-forrecog.html.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #837663300 - Medical Records Technician (Cancer Registrar Coordinator) at Veterans Health Administration
+                    <span class="similarity-badge similarity-low">
+                        2.5% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Education - Character Counts: Historical (194) vs Current (688)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">. Two years above high school with a minimum of 12 semester hours directly related to MRT work (e.g., courses in medical terminology, anatomy and physiology, and introduction to health records).</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">IMPORTANT: A transcript must be submitted with your application if you are basing all or part of your qualifications on education. Note: Only education or degrees recognized by the U.S. Department of Education from accredited colleges, universities, schools, or institutions may be used to qualify for Federal employment. You can verify your education here: http://ope.ed.gov/accreditation/. If you are using foreign education to meet qualification requirements, you must send a Certificate of Foreign Equivalency with your transcript in order to receive credit for that education. For further information, visit: https://sites.ed.gov/international/recognition-of-foreign-qualifications/.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #837678400 - CYS Program Associate Homework Lab NF-03 at Army Installation Management Command
+                    <span class="similarity-badge similarity-low">
+                        17.6% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Education - Character Counts: Historical (22) vs Current (193)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">or a related field.
+2.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">Proof of education is required at the time of application. Note: Education must be directly related to the position to be filled. General Education courses do not count toward the credit total.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #838308700 - Licensed Practical Nurse - Telehealth at Veterans Health Administration
+                    <span class="similarity-badge similarity-low">
+                        2.3% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Education - Character Counts: Historical (936) vs Current (619)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">- Graduate of a school of practical or vocational nursing approved by the appropriate State agency and/or accredited by the National League for Nursing Accrediting Commission (NLNAC) at the time the program was completed by the applicant. Exceptions include health care education in the military service or training in the military service which is accepted by the licensing body in the jurisdiction in which the individual is licensed as qualifying for full LPN/LVN licensure will be accepted as meeting the education requirements for VHA employment OR granted a license by a jurisdiction that does not require graduation from an approved school AND have at least one year of successful practice as an LPN/ LVN.
+- Active, full, current and unrestricted licensure as a Graduate Licensed Practical or Vocational Nurse in a State, Territory, or Commonwealth (i.e., Puerto Rico), of the United States or the District of Columbia.
+Licensure</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">Reference: For more information on this qualification standard, please visit https://www.va.gov/ohrm/QualificationStandards/. NOTE: Current GS-0620 LPN/LVN employee of the Veterans Health Administration (VHA) who were converted to an appointment under 38 U.S.C. 7401(3) in implementation of Public Law 98-160, enacted November 21, 1983, or who was converted to an appointment under 38 U.S.C. 7405 in implementation of Public Law 99-576, enacted October 28, 1986 are considered to have met the Education requirement. The waiver does not apply to persons appointed under 38 U.S.C. 7401(3) or 7405 after these conversions.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #838320800 - Registered Respiratory Therapist at Veterans Health Administration
+                    <span class="similarity-badge similarity-low">
+                        1.5% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Education - Character Counts: Historical (114) vs Current (557)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">. Individuals must have successfully completed a respiratory care program accredited by the CoARC or its successor</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">Note: Only education or degrees recognized by the U.S. Department of Education from accredited colleges, universities, schools, or institutions may be used to qualify for Federal employment. You can verify your education here: http://ope.ed.gov/accreditation/. If you are using foreign education to meet qualification requirements, you must send a Certificate of Foreign Equivalency with your transcript in order to receive credit for that education. For further information, visit: https://sites.ed.gov/international/recognition-of-foreign-qualifications/.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="job-comparison">
+                <div class="job-header">
+                    Job #838218200 - Dietitian (Clinical) at Veterans Health Administration
+                    <span class="similarity-badge similarity-low">
+                        2.6% Similarity
+                    </span>
+                </div>
+                
+                <div class="field-name">Education - Character Counts: Historical (69) vs Current (688)</div>
+                <div class="field-comparison">
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Historical Side</span>
+                            <span class="data-source-badge">Historical API + Scraping</span>
+                        </div>
+                        <div class="source-content">. Master's degree from a regionally accredited university or college.</div>
+                    </div>
+                    <div class="source-column">
+                        <div class="source-header scraped-header">
+                            <span>Current Side</span>
+                            <span class="data-source-badge">Current API + Scraping</span>
+                        </div>
+                        <div class="source-content">Important: A transcript must be submitted with your application if you are basing all or part of your qualifications on education. Note: Only education or degrees recognized by the U.S. Department of Education from accredited colleges, universities, schools, or institutions may be used to qualify for Federal employment. You can verify your education here: http://ope.ed.gov/accreditation/. If you are using foreign education to meet qualification requirements, you must send a Certificate of Foreign Equivalency with your transcript in order to receive credit for that education. For further information, visit: https://sites.ed.gov/international/recognition-of-foreign-qualifications/.</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+        
+    <div class="summary">
+        <h2>🔍 Analysis Insights</h2>
+        <ul>
+            <li><strong>API Content Variations:</strong> The Historical and Current APIs often provide different levels of detail for the same job.</li>
+            <li><strong>Formatting Differences:</strong> Content may be formatted differently (HTML vs plain text, bullet points vs paragraphs).</li>
+            <li><strong>Timing Factor:</strong> Job content may have been updated between API calls.</li>
+            <li><strong>Data Source Reliability:</strong> Web scraping provides consistent content extraction that can bridge these gaps.</li>
+        </ul>
+        <p><strong>Recommendation:</strong> The scraping data provides the most complete and consistent content source. Use it as the primary source for detailed job content.</p>
+    </div>
+</body>
+</html>
+    

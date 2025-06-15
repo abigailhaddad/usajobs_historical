@@ -29,8 +29,8 @@ from datetime import datetime
 from pathlib import Path
 import os
 
-# Default cache directory in root
-DEFAULT_CACHE_DIR = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))) / "html_cache"
+# Default cache directory in project root
+DEFAULT_CACHE_DIR = Path(os.path.dirname(os.path.dirname(__file__))) / "html_cache"
 
 # Content sections using Current API field names
 TARGET_SECTIONS = {
@@ -98,9 +98,9 @@ def parse_all_sections(soup):
         if not header_text or len(header_text) > 100:
             continue
         
-        # Skip if already processed in special sections
+        # Skip if already processed in special sections (exact match only)
         normalized_header = header_text.lower().strip()
-        if any(normalized_header in existing_key.lower() for existing_key in sections.keys()):
+        if normalized_header in [existing_key.lower() for existing_key in sections.keys()]:
             continue
             
         # Extract content using improved logic
@@ -187,8 +187,13 @@ def _extract_section_content(header, remaining_headers):
     
     for next_header in remaining_headers:
         next_level = _get_header_level(next_header)
-        # Stop at headers of same or higher level (lower number = higher level)
-        if next_level <= header_level:
+        
+        # For strong tags, be more conservative - stop at any h1-h3 header
+        if header.name == 'strong' and next_header.name in ['h1', 'h2', 'h3']:
+            next_boundary = next_header
+            break
+        # For regular headers, stop at headers of same or higher level
+        elif next_level <= header_level:
             next_boundary = next_header
             break
     
@@ -267,9 +272,12 @@ def map_sections_to_fields(parsed_sections):
                 best_content = parsed_sections[variation_lower]['content']
                 break
                 
-            # Then try partial matches
+            # Then try partial matches (but be more careful)
             for section_header, section_data in parsed_sections.items():
-                if variation_lower in section_header or section_header in variation_lower:
+                # Avoid matching single words in longer phrases (e.g., "requirements" in "educational requirements")
+                if (variation_lower in section_header and 
+                    len(variation_lower) > 3 and  # Only for longer variations
+                    len(section_header) / len(variation_lower) < 3):  # Avoid too-long matches
                     # Prefer shorter headers (more specific)
                     if best_match is None or len(section_header) < len(best_match):
                         best_match = section_header
@@ -300,8 +308,8 @@ def extract_full_text(soup):
     for elem in soup(['script', 'style', 'nav', 'header', 'footer']):
         elem.decompose()
     
-    # Focus on main content area
-    main = soup.find('main') or soup.find('div', class_='usajobs-joa') or soup.body
+    # Focus on main content area - prioritize usajobs-joa over main to avoid redirect content
+    main = soup.find('div', class_='usajobs-joa') or soup.find('main') or soup.body
     
     if main:
         return main.get_text(separator='\n', strip=True)

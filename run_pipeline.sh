@@ -1,15 +1,15 @@
 #!/bin/bash
-# Overnight USAJobs Pipeline Script with Single Worker
-# Designed to be gentle on the website with single-threaded scraping
+# USAJobs Pipeline Script
+# Fetches current and historical job data with web scraping enhancement
 # Includes caffeinate to prevent system sleep
 
 set -e
 
 # Configuration
 START_DATE="2025-01-01"
-OUTPUT_DIR="data_parquet"
+OUTPUT_DIR="data"
 LOG_DIR="logs"
-SESSION_NAME="usajobs-overnight"
+SESSION_NAME="usajobs-pipeline"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Ensure log directory exists
@@ -22,9 +22,8 @@ session_exists() {
 
 # Function to create and run the pipeline
 run_pipeline() {
-    echo "🌙 Starting overnight USAJobs pipeline..."
+    echo "🚀 Starting USAJobs pipeline..."
     echo "📅 Start date: $START_DATE"
-    echo "👥 Workers: 1 (gentle mode)"
     echo "☕ Caffeinate: Enabled"
     echo "📝 Session: $SESSION_NAME"
     echo "📁 Output: $OUTPUT_DIR"
@@ -34,27 +33,23 @@ run_pipeline() {
     # Create tmux session with caffeinate
     tmux new-session -d -s "$SESSION_NAME" -c "$(pwd)" \
         "caffeinate -i bash -c '
-            echo \"🌙 Overnight pipeline started at \$(date)\"
+            echo \"🌙 USAJobs pipeline started at \$(date)\"
             echo \"☕ Caffeinate enabled - system will not sleep\"
             echo \"===============================================\"
             
-            # Change to the pipeline directory for correct imports
-            cd usajobs_pipeline
-            
-            # Run the pipeline with IMPROVED SCRAPER (overwrites old data)
-            python run_pipeline_parquet.py \
+            # Run the pipeline
+            python run_pipeline.py \
                 --start-date \"$START_DATE\" \
-                --output-dir \"../$OUTPUT_DIR\" \
-                --scrape-workers 1 \
-                2>&1 | tee \"../$LOG_DIR/overnight_improved_$TIMESTAMP.log\"
+                --output-dir \"$OUTPUT_DIR\" \
+                2>&1 | tee \"$LOG_DIR/pipeline_$TIMESTAMP.log\"
             
             echo \"\"
             echo \"✅ Pipeline completed at \$(date)\"
             echo \"📊 Check results in: $OUTPUT_DIR\"
-            echo \"📝 Full log: $LOG_DIR/overnight_improved_$TIMESTAMP.log\"
+            echo \"📝 Full log: $LOG_DIR/pipeline_$TIMESTAMP.log\"
             echo \"🔍 View content mismatches: content_mismatch_analysis.html\"
             echo \"\"
-            echo \"🌙 Overnight pipeline finished - session will auto-close in 10 seconds\"
+            echo \"🌙 Pipeline finished - session will auto-close in 10 seconds\"
             sleep 10
         '"
     
@@ -125,12 +120,12 @@ stop_pipeline() {
 
 # Function to show help
 show_help() {
-    echo "🌙 Overnight USAJobs Pipeline Runner"
+    echo "🚀 USAJobs Pipeline Runner"
     echo ""
     echo "Usage: $0 [command]"
     echo ""
     echo "Commands:"
-    echo "  (none)     Start the overnight pipeline"
+    echo "  (none)     Start the pipeline"
     echo "  attach     Attach to running session"
     echo "  status     Show current status"
     echo "  stop       Stop the pipeline"
@@ -138,15 +133,13 @@ show_help() {
     echo ""
     echo "Features:"
     echo "  ☕ Caffeinate enabled (prevents system sleep)"
-    echo "  👥 Single worker (gentle on the website)"
     echo "  📝 Full logging to logs/ directory"
-    echo "  🌙 Designed for overnight/unattended runs"
-    echo "  🔄 Keeps existing data (incremental)"
+    echo "  🌙 Designed for unattended runs"
+    echo "  🔄 Updates with new current jobs"
     echo ""
     echo "Pipeline settings:"
     echo "  📅 Start date: $START_DATE"
     echo "  📁 Output: $OUTPUT_DIR"
-    echo "  👥 Workers: 1"
     echo "  📝 Session: $SESSION_NAME"
     echo ""
 }

@@ -4,7 +4,6 @@ Simple validation for USAJobs pipeline - just field overlap percentages
 """
 
 import pandas as pd
-import json
 from typing import Dict, Any
 
 
@@ -51,21 +50,10 @@ def calculate_field_overlap(overlap_df: pd.DataFrame) -> Dict[str, Any]:
             api_content = str(current_record[field]).strip() if pd.notna(current_record[field]) else ''
             api_has_data = len(api_content) > 20
             
-            # Check scraped content
+            # Check scraped content - look for the field directly in historical record
             scraped_content = ''
-            if pd.notna(historical_record['scraped_sections']):
-                try:
-                    scraped_sections = json.loads(historical_record['scraped_sections'])
-                    field_map = {
-                        'requirements': 'Requirements',
-                        'education': 'Education',
-                        'major_duties': 'MajorDuties', 
-                        'qualification_summary': 'QualificationSummary',
-                        'benefits': 'Benefits'
-                    }
-                    scraped_content = scraped_sections.get(field_map[field], '').strip()
-                except:
-                    pass
+            if pd.notna(historical_record[field]):
+                scraped_content = str(historical_record[field]).strip()
             
             scraped_has_data = len(scraped_content) > 20
             

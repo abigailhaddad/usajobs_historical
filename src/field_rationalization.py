@@ -15,7 +15,6 @@ Usage:
 
 import json
 import os
-import duckdb
 import argparse
 import pandas as pd
 from datetime import datetime
@@ -1048,7 +1047,7 @@ def main():
     parser.add_argument('--control-numbers', nargs='+', help='Specific control numbers to process')
     parser.add_argument('--limit', type=int, default=50, help='Limit number of records to process')
     parser.add_argument('--min-date', help='Minimum date for current jobs (YYYY-MM-DD), filters out older jobs')
-    parser.add_argument('--output-format', choices=['json', 'duckdb'], default='json', help='Output format (default: json)')
+    parser.add_argument('--output-format', choices=['json'], default='json', help='Output format (default: json)')
     
     args = parser.parse_args()
     

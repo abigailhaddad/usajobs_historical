@@ -14,7 +14,6 @@ import requests
 import json
 import os
 import time
-import duckdb
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import argparse
@@ -38,7 +37,7 @@ def parse_args():
     parser.add_argument("--max-pages", type=int, help="Maximum pages to fetch", default=None)
     parser.add_argument("--who-may-apply", help="Who may apply filter", default="public")
     parser.add_argument("--remote", action="store_true", help="Remote jobs only")
-    parser.add_argument("--save-to-duckdb", action="store_true", help="Save to DuckDB database")
+    # DuckDB support removed - using Parquet storage now
     return parser.parse_args()
 
 
@@ -179,14 +178,12 @@ def flatten_current_job(job_item: dict) -> dict:
     return flat
 
 
-def init_current_jobs_duckdb(db_path: str):
     """Initialize DuckDB for current jobs data."""
     print(f"Initializing current jobs DuckDB: {db_path}")
     
     # Create directory if needed
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
     
-    conn = duckdb.connect(db_path)
     
     # Create table with both historical and current API fields
     conn.execute("""
@@ -256,47 +253,6 @@ def init_current_jobs_duckdb(db_path: str):
     return conn
 
 
-def save_jobs_to_duckdb(jobs: List[Dict], db_path: str):
-    """Save jobs to DuckDB database."""
-    conn = init_current_jobs_duckdb(db_path)
-    
-    for job in jobs:
-        try:
-            conn.execute("""
-                INSERT OR REPLACE INTO current_jobs (
-                    control_number, announcement_number, hiring_agency_code, hiring_agency_name,
-                    hiring_department_code, hiring_department_name, hiring_subelement_name,
-                    position_title, minimum_grade, maximum_grade, promotion_potential,
-                    appointment_type, work_schedule, service_type, pay_scale, salary_type,
-                    minimum_salary, maximum_salary, supervisory_status, travel_requirement,
-                    telework_eligible, security_clearance_required, security_clearance,
-                    drug_test_required, relocation_expenses_reimbursed, who_may_apply,
-                    total_openings, disable_apply_online, position_open_date, position_close_date,
-                    position_expire_date, position_opening_status, job_series, locations,
-                    apply_online_url, position_uri, qualification_summary, job_summary, major_duties,
-                    education, requirements, evaluations, how_to_apply, what_to_expect_next,
-                    required_documents, fetch_date, raw_data
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, [
-                job.get("controlNumber"), job.get("announcementNumber"), job.get("hiringAgencyCode"),
-                job.get("hiringAgencyName"), job.get("hiringDepartmentCode"), job.get("hiringDepartmentName"),
-                job.get("hiringSubelementName"), job.get("positionTitle"), job.get("minimumGrade"),
-                job.get("maximumGrade"), job.get("promotionPotential"), job.get("appointmentType"),
-                job.get("workSchedule"), job.get("serviceType"), job.get("payScale"),
-                job.get("salaryType"), job.get("minimumSalary"), job.get("maximumSalary"),
-                job.get("supervisoryStatus"), job.get("travelRequirement"), job.get("teleworkEligible"),
-                job.get("securityClearanceRequired"), job.get("securityClearance"), job.get("drugTestRequired"),
-                job.get("relocationExpensesReimbursed"), job.get("whoMayApply"), job.get("totalOpenings"),
-                job.get("disableApplyOnline"), job.get("positionOpenDate"), job.get("positionCloseDate"),
-                job.get("positionExpireDate"), job.get("positionOpeningStatus"), job.get("jobSeries"),
-                job.get("locations"), job.get("applyOnlineUrl"), job.get("positionUri"),
-                job.get("qualificationSummary"), job.get("jobSummary"), json.dumps(job.get("majorDuties")),
-                json.dumps(job.get("education")), job.get("requirements"), job.get("evaluations"),
-                job.get("howToApply"), job.get("whatToExpectNext"), job.get("requiredDocuments"),
-                job.get("fetchDate"), json.dumps(job.get("rawData"))
-            ])
-        except Exception as e:
-            print(f"Error saving job {job.get('controlNumber')}: {e}")
     
     # Show results
     count = conn.execute("SELECT COUNT(*) FROM current_jobs").fetchone()[0]
@@ -369,9 +325,7 @@ def main():
     flattened_jobs = [flatten_current_job(job) for job in raw_jobs]
     
     # Save results
-    if args.save_to_duckdb:
-        db_path = "../data/current_jobs.duckdb"
-        save_jobs_to_duckdb(flattened_jobs, db_path)
+    # DuckDB support removed - data now handled by ParquetJobStorage in pipeline
     
     # Always save JSON for inspection
     filename = f"../data/current_jobs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
