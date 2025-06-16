@@ -42,7 +42,7 @@ python run_pipeline.py --start-date 2025-06-01 --output-dir data
 ### ✅ **Smart Caching & Performance**
 - **HTML Caching**: Scraped content cached locally (79,577+ cached files)
 - **Parallel Processing**: Multi-threaded scraping with rate limiting
-- **Incremental Updates**: Only processes new/changed data
+- **Efficient Processing**: Smart caching and parallel processing
 
 ### ✅ **Comprehensive Analysis & Validation**
 - **Overlap Analysis**: Compares data quality between APIs

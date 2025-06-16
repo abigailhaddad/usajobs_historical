@@ -62,7 +62,7 @@ run_pipeline() {
     echo "   tmux kill-session -t $SESSION_NAME  # Stop pipeline"
     echo ""
     echo "📊 Monitor progress:"
-    echo "   tail -f $LOG_DIR/overnight_$TIMESTAMP.log"
+    echo "   tail -f $LOG_DIR/pipeline_$TIMESTAMP.log"
     echo ""
     echo "🔍 Check status:"
     echo "   tmux list-sessions               # List all sessions"
@@ -86,9 +86,9 @@ show_status() {
         tmux list-windows -t "$SESSION_NAME" -F "   Window: #{window_name} (#{window_flags})"
         echo ""
         echo "📝 Recent log entries:"
-        if ls "$LOG_DIR"/overnight_*.log 1> /dev/null 2>&1; then
-            echo "   $(ls -t "$LOG_DIR"/overnight_*.log | head -1)"
-            tail -5 "$(ls -t "$LOG_DIR"/overnight_*.log | head -1)" 2>/dev/null | sed 's/^/   /'
+        if ls "$LOG_DIR"/pipeline_*.log 1> /dev/null 2>&1; then
+            echo "   $(ls -t "$LOG_DIR"/pipeline_*.log | head -1)"
+            tail -5 "$(ls -t "$LOG_DIR"/pipeline_*.log | head -1)" 2>/dev/null | sed 's/^/   /'
         else
             echo "   No log files found"
         fi

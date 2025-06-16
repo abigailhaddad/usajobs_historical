@@ -60,6 +60,7 @@ def fetch_all_jobs(base_params, max_pages=None):
     all_jobs = []
     page = 1
     total_count = None
+    max_safe_pages = 100  # Safety limit to prevent infinite loops
     
     while True:
         print(f"Fetching page {page}...")
@@ -84,12 +85,18 @@ def fetch_all_jobs(base_params, max_pages=None):
             print(f"Total jobs available: {total_count}")
         
         # Check if we've reached the end
-        if len(all_jobs) >= total_count:
+        if total_count and len(all_jobs) >= total_count:
+            print(f"Reached total count ({total_count})")
             break
             
         # Check max pages limit
         if max_pages and page >= max_pages:
             print(f"Reached max pages limit ({max_pages})")
+            break
+            
+        # Safety check to prevent infinite loops
+        if page >= max_safe_pages:
+            print(f"⚠️ Reached safety limit ({max_safe_pages} pages), stopping to prevent infinite loop")
             break
             
         page += 1

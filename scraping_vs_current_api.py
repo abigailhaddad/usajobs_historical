@@ -140,33 +140,33 @@ def scraping_vs_current_api():
                 sim = calculate_similarity(scraped_content, api_content)
                 similarities.append(sim)
                 
-                # Categorize the match
+                # Categorize the match - changed thresholds
                 if sim >= 0.99:
                     identical_content += 1
                     if len(examples['identical']) < 3:
                         examples['identical'].append({
                             'control_number': pair['control_number'],
                             'similarity': sim,
-                            'scraped_content': scraped_content[:300],
-                            'api_content': api_content[:300]
+                            'scraped_content': scraped_content,  # Full content, no truncation
+                            'api_content': api_content  # Full content, no truncation
                         })
-                elif sim >= 0.95:
+                elif sim >= 0.90:  # Changed from 0.95 to 0.90
                     similar_content += 1
                     if len(examples['similar']) < 3:
                         examples['similar'].append({
                             'control_number': pair['control_number'],
                             'similarity': sim,
-                            'scraped_content': scraped_content[:300],
-                            'api_content': api_content[:300]
+                            'scraped_content': scraped_content,  # Full content, no truncation
+                            'api_content': api_content  # Full content, no truncation
                         })
-                else:
+                else:  # Now <90% instead of <95%
                     different_content += 1
                     if len(examples['different']) < 3:
                         examples['different'].append({
                             'control_number': pair['control_number'],
                             'similarity': sim,
-                            'scraped_content': scraped_content[:300],
-                            'api_content': api_content[:300]
+                            'scraped_content': scraped_content,  # Full content, no truncation
+                            'api_content': api_content  # Full content, no truncation
                         })
         
         # Calculate statistics
@@ -349,11 +349,11 @@ def generate_scraping_vs_api_html_report(field_analysis, total_pairs):
             </div>
             <div class="stat-item">
                 <div class="stat-number">{stats['similar_pct']:.1f}%</div>
-                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+                <div class="stat-label">Similar<br>(90-99% similarity)</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number">{stats['different_pct']:.1f}%</div>
-                <div class="stat-label">Different<br>(<95% similarity)</div>
+                <div class="stat-label">Different<br>(<90% similarity)</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number">{stats['avg_similarity']:.3f}</div>
@@ -388,11 +388,11 @@ def generate_scraping_vs_api_html_report(field_analysis, total_pairs):
                     <div class="content-comparison">
                         <div class="content-side scraped">
                             <div class="content-header">Scraped Content</div>
-                            {example['scraped_content']}...
+                            {example['scraped_content']}
                         </div>
                         <div class="content-side api">
                             <div class="content-header">Current API Content</div>
-                            {example['api_content']}...
+                            {example['api_content']}
                         </div>
                     </div>
                 </div>

@@ -15,6 +15,8 @@ import time
 import pandas as pd
 import logging
 import traceback
+import psutil
+import os
 
 sys.path.append('src')
 from parquet_storage import ParquetJobStorage
@@ -71,9 +73,13 @@ def scrape_current_jobs(jobs, storage):
     """Scrape content for current jobs"""
     already_scraped = storage.get_control_numbers_with_scraping()
     print(f"📋 {len(already_scraped)} jobs already have cached HTML")
+    print(f"📊 Processing {len(jobs)} current jobs...")
     
     scraped_count = 0
-    for job in jobs:
+    for idx, job in enumerate(jobs):
+        if idx % 1000 == 0:
+            print(f"   Progress: {idx}/{len(jobs)} ({idx/len(jobs)*100:.1f}%)")
+        
         control_number = str(job.get('MatchedObjectId', ''))
         if control_number:
             # Always call scrape function - it will use cache if available
@@ -91,9 +97,13 @@ def scrape_historical_jobs(jobs, storage):
     """Scrape content for historical jobs"""
     already_scraped = storage.get_control_numbers_with_scraping()
     print(f"📋 {len(already_scraped)} jobs already have cached HTML")
+    print(f"📊 Processing {len(jobs)} historical jobs...")
     
     scraped_count = 0
-    for job in jobs:
+    for idx, job in enumerate(jobs):
+        if idx % 1000 == 0:
+            print(f"   Progress: {idx}/{len(jobs)} ({idx/len(jobs)*100:.1f}%)")
+        
         control_number = str(job.get('usajobsControlNumber', '') or job.get('control_number', ''))
         if control_number:
             # Always call scrape function - it will use cache if available
@@ -185,6 +195,9 @@ def run_rationalization(storage: ParquetJobStorage):
     print(f"📊 Historical jobs: {len(historical_df)}")
     print(f"📊 Current jobs: {len(current_df)}")
     
+    # Process all control numbers
+    processed_control_numbers = set()
+    
     # Convert DataFrames to lists of dicts for rationalization
     historical_jobs = historical_df.to_dict('records') if not historical_df.empty else []
     current_jobs = current_df.to_dict('records') if not current_df.empty else []
@@ -259,15 +272,22 @@ def run_rationalization(storage: ParquetJobStorage):
     
     rationalized_records = []
     overlap_samples = []
-    processed_control_numbers = set()
     duplicate_count = 0
     
     # Process historical records first
     scraped_jobs_count = 0
     scraped_applied_count = 0
-    for hist_record in historical_jobs:
+    total_historical = len(historical_jobs)
+    print(f"\n📊 Processing {total_historical} historical jobs...")
+    
+    for idx, hist_record in enumerate(historical_jobs):
+        if idx % 1000 == 0:
+            # Get memory usage
+            process = psutil.Process(os.getpid())
+            mem_usage = process.memory_info().rss / 1024 / 1024 / 1024  # GB
+            print(f"   Progress: {idx}/{total_historical} ({idx/total_historical*100:.1f}%) - Memory: {mem_usage:.2f}GB")
         control_num = str(hist_record.get('usajobsControlNumber', ''))
-        if control_num and control_num not in processed_control_numbers:
+        if control_num:
             current_record = current_lookup.get(control_num)
             
             # Check if this job has scraped content
@@ -315,7 +335,15 @@ def run_rationalization(storage: ParquetJobStorage):
             processed_control_numbers.add(control_num)
     
     # Process remaining current records
-    for current_record in flattened_current_jobs:
+    total_current = len(flattened_current_jobs)
+    print(f"\n📊 Processing {total_current} current-only jobs...")
+    
+    for idx, current_record in enumerate(flattened_current_jobs):
+        if idx % 1000 == 0:
+            # Get memory usage
+            process = psutil.Process(os.getpid())
+            mem_usage = process.memory_info().rss / 1024 / 1024 / 1024  # GB
+            print(f"   Progress: {idx}/{total_current} ({idx/total_current*100:.1f}%) - Memory: {mem_usage:.2f}GB")
         control_num = str(current_record.get('MatchedObjectId', ''))
         if control_num and control_num not in processed_control_numbers:
             # Check if this current job has scraped content
@@ -343,12 +371,11 @@ def run_rationalization(storage: ParquetJobStorage):
             rationalized_records.append(unified_record)
             processed_control_numbers.add(control_num)
     
+    # Save results
     print(f"   📊 Total unified records: {len(rationalized_records)}")
     print(f"   🔄 Overlapping jobs: {duplicate_count}")
     print(f"   🕷️ Jobs with scraped content: {scraped_jobs_count}")
     
-    
-    # Save results
     if rationalized_records:
         storage.save_unified_jobs(rationalized_records)
         print(f"✅ Saved {len(rationalized_records)} unified jobs")
@@ -369,8 +396,13 @@ def main():
                        help='Start date for historical jobs (YYYY-MM-DD)')
     parser.add_argument('--output-dir', default='data',
                        help='Output directory for data files')
+    parser.add_argument('--full-refresh', action='store_true',
+                       help='Full refresh mode: reprocess all jobs from scratch (default)')
     
     args = parser.parse_args()
+    
+    # Full refresh mode is the default and only mode now
+    print(f"🔄 Running in full refresh mode")
     
     # Run pipeline
     storage = run_pipeline(
@@ -430,6 +462,16 @@ def main():
         print(f"⚠️ Mismatch analysis generation failed: {e}")
         logger.error(f"Mismatch analysis generation failed: {e}")
     
+    # Generate scraping vs API comparison HTML
+    print("\n🔍 Generating scraping vs API comparison...")
+    try:
+        from scraping_vs_current_api import scraping_vs_current_api
+        scraping_vs_current_api()
+        print(f"✅ Scraping vs API comparison generated: scraping_vs_api_comparison.html")
+    except Exception as e:
+        print(f"⚠️ Scraping vs API comparison failed: {e}")
+        logger.error(f"Scraping vs API comparison failed: {e}")
+    
     # Generate QMD analysis report
     print("\n📊 Generating analysis report...")
     try:
@@ -465,6 +507,7 @@ def main():
     print(f"📊 View report: rationalization_analysis.html")
     print(f"🔍 View content mismatches: content_mismatch_analysis.html")
     print(f"📈 View scraping effectiveness: scraping_effectiveness_report.html")
+    print(f"🔬 View scraping vs API comparison: scraping_vs_api_comparison.html")
 
 if __name__ == "__main__":
     main()

@@ -55,16 +55,28 @@ def parse_all_sections(soup):
     """
     sections = {}
     
-    # Remove script, style elements first (but keep nav as it may contain content)
+    # Remove script, style elements and "read more" links first
     for elem in soup(['script', 'style']):
         elem.decompose()
     
+    # Remove "read more" elements and similar UI artifacts
+    for elem in soup.find_all(['a'], class_=lambda x: x and 'read-more' in x):
+        elem.decompose()
+    for elem in soup.find_all(string=lambda text: text and text.strip().lower() in ['read more', 'show more', 'view more']):
+        if elem.parent:
+            elem.parent.decompose()
+    
     # Focus on job announcement content area - check multiple possible containers
-    main = (soup.find('div', class_='usajobs-joa-overview') or 
-            soup.find('div', class_='usajobs-joa') or
-            soup.find('div', {'id': 'duties'}).parent if soup.find('div', {'id': 'duties'}) else None or
-            soup.find('main') or 
-            soup.body)
+    # Include mobile-display-none sections as they often have valuable content
+    main_candidates = [
+        soup.find('div', class_='usajobs-joa-overview'),
+        soup.find('div', class_='usajobs-joa'),
+        soup.find('div', {'id': 'duties'}).parent if soup.find('div', {'id': 'duties'}) else None,
+        soup.find('main'),
+        soup.body
+    ]
+    
+    main = next((candidate for candidate in main_candidates if candidate), None)
     
     if not main:
         return sections
@@ -74,8 +86,17 @@ def parse_all_sections(soup):
     
     # Find headers more selectively - exclude <strong> tags that are likely just formatting
     headers = []
+    
+    # First, find headers in the main container
     for tag in main.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'dt']):
         headers.append(tag)
+    
+    # Also search for headers in common job section containers that might be separate
+    section_containers = soup.find_all('div', class_=lambda x: x and any(cls in x for cls in ['usajobs-joa-section', 'mobile-display-none']))
+    for container in section_containers:
+        for tag in container.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'dt']):
+            if tag not in headers:  # Avoid duplicates
+                headers.append(tag)
     
     # Add only <strong> tags that are likely true headers (standalone, short, at start of container)
     for strong in main.find_all('strong'):
@@ -98,19 +119,39 @@ def parse_all_sections(soup):
         if not header_text or len(header_text) > 100:
             continue
         
-        # Skip if already processed in special sections (exact match only)
         normalized_header = header_text.lower().strip()
-        if normalized_header in [existing_key.lower() for existing_key in sections.keys()]:
+        
+        # Check if we already have a section with this header text
+        existing_key = None
+        for key in sections.keys():
+            if key.lower().strip() == normalized_header:
+                existing_key = key
+                break
+        
+        # If we found an existing section with the same header text
+        if existing_key:
+            # Compare header priorities - lower number = higher priority (h1=1, h2=2, strong=4, etc.)
+            current_priority = _get_header_level(header)
+            existing_priority = _get_header_level_from_tag(sections[existing_key]['tag'])
+            
+            # If current header has higher priority (lower number), replace the existing one
+            if current_priority < existing_priority:
+                # Extract content for the new higher-priority header
+                content = _extract_section_content(header, headers[i+1:])
+                if content:
+                    # Replace the existing section with the higher-priority one
+                    sections[existing_key] = {
+                        'original_header': header_text,
+                        'content': content,
+                        'tag': header.name
+                    }
+            # If current header has same or lower priority, skip it (keep existing)
             continue
             
         # Extract content using improved logic
         content = _extract_section_content(header, headers[i+1:])
         
         if content:
-            # Handle duplicates by appending tag type
-            if normalized_header in sections:
-                normalized_header = f"{normalized_header}_{header.name}"
-                
             sections[normalized_header] = {
                 'original_header': header_text,
                 'content': content,
@@ -266,6 +307,18 @@ def _get_header_level(header):
         return 5  # Default level
 
 
+def _get_header_level_from_tag(tag_name):
+    """Get numeric level of header from tag name string (1=highest, 6=lowest)."""
+    if tag_name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+        return int(tag_name[1])
+    elif tag_name == 'dt':
+        return 3  # Treat definition terms as h3 level
+    elif tag_name == 'strong':
+        return 4  # Treat strong as h4 level
+    else:
+        return 5  # Default level
+
+
 def map_sections_to_fields(parsed_sections):
     """
     Map parsed sections to our target field names.
@@ -303,15 +356,84 @@ def map_sections_to_fields(parsed_sections):
                     if (variation_lower in section_header and 
                         len(variation_lower) > 3 and  # Only for longer variations
                         len(section_header) / len(variation_lower) < 3):  # Avoid too-long matches
-                        # Prefer shorter headers (more specific)
-                        if best_match is None or len(section_header) < len(best_match):
+                        
+                        # For multiple matches, prefer higher-level headers (h1, h2, h3 over h4, h5, strong)
+                        current_header_level = section_data.get('tag', 'unknown')
+                        current_level_priority = _get_header_level_from_tag(current_header_level)
+                        
+                        if best_match is None:
                             best_match = section_header
                             best_content = section_data['content']
+                        else:
+                            # Compare with existing best match
+                            existing_header_level = parsed_sections[best_match].get('tag', 'unknown')
+                            existing_level_priority = _get_header_level_from_tag(existing_header_level)
+                            
+                            # Lower number = higher priority (h1=1, h2=2, etc.)
+                            if current_level_priority < existing_level_priority:
+                                # Current header has higher priority
+                                best_match = section_header
+                                best_content = section_data['content']
+                            elif current_level_priority == existing_level_priority and len(section_header) < len(best_match):
+                                # Same level, prefer shorter header
+                                best_match = section_header
+                                best_content = section_data['content']
         
         if best_content:
             mapped[field_name] = best_content
+    
+    # Post-process specific fields to match Current API format
+    _post_process_fields(mapped)
             
     return mapped
+
+
+def _post_process_fields(mapped_sections):
+    """Post-process specific fields to match Current API format"""
+    
+    # Remove "read more" artifacts from all fields
+    read_more_patterns = [
+        " Read more",
+        " Show more", 
+        " View more",
+        " read more",
+        " show more",
+        " view more"
+    ]
+    
+    for field_name, content in mapped_sections.items():
+        if content:
+            # Remove "read more" artifacts from the end of content
+            for pattern in read_more_patterns:
+                if content.endswith(pattern):
+                    content = content[:-len(pattern)].strip()
+            mapped_sections[field_name] = content
+    
+    # RequiredDocuments: Remove content after "If you are relying on your education" and fix formatting
+    if 'RequiredDocuments' in mapped_sections:
+        content = mapped_sections['RequiredDocuments']
+        
+        # Find where the education qualification section starts
+        education_markers = [
+            "If you are relying on your education to meet qualification requirements",
+            "If you are using education completed in foreign countries",
+            "FOREIGN EDUCATION:",
+            "Foreign Education:"
+        ]
+        
+        for marker in education_markers:
+            if marker in content:
+                # Truncate at this point
+                truncate_index = content.find(marker)
+                content = content[:truncate_index].strip()
+                break
+        
+        # Fix formatting to match Current API: "Resume :" -> "Resume:"
+        content = content.replace("Resume :", "Resume:")
+        content = content.replace("Cover Letter :", "Cover Letter:")
+        content = content.replace("Transcript :", "Transcript:")
+        
+        mapped_sections['RequiredDocuments'] = content
 
 
 def extract_content_sections(soup):
