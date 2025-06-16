@@ -430,7 +430,7 @@ def main():
                 
                 # Generate HTML report
                 validation_html = generate_simple_validation_html(overlap_results)
-                with open('scraping_effectiveness_report.html', 'w', encoding='utf-8') as f:
+                with open('reports/scraping_effectiveness_report.html', 'w', encoding='utf-8') as f:
                         f.write(f"""
 <!DOCTYPE html>
 <html>
@@ -445,7 +445,7 @@ def main():
 </body>
 </html>
                         """)
-                print(f"✅ Scraping effectiveness report generated: scraping_effectiveness_report.html")
+                print(f"✅ Scraping effectiveness report generated: reports/scraping_effectiveness_report.html")
             else:
                 print(f"⚠️ Overlap analysis failed: {overlap_results.get('message', 'Unknown error')}")
         else:
@@ -465,9 +465,9 @@ def main():
     # Generate scraping vs API comparison HTML
     print("\n🔍 Generating scraping vs API comparison...")
     try:
-        from scraping_vs_current_api import scraping_vs_current_api
+        from src.scraping_vs_current_api import scraping_vs_current_api
         scraping_vs_current_api()
-        print(f"✅ Scraping vs API comparison generated: scraping_vs_api_comparison.html")
+        print(f"✅ Scraping vs API comparison generated: reports/scraping_vs_api_comparison.html")
     except Exception as e:
         print(f"⚠️ Scraping vs API comparison failed: {e}")
         logger.error(f"Scraping vs API comparison failed: {e}")
@@ -476,10 +476,10 @@ def main():
     print("\n📊 Generating analysis report...")
     try:
         import subprocess
-        result = subprocess.run(['quarto', 'render', 'rationalization_analysis.qmd'], 
+        result = subprocess.run(['quarto', 'render', 'report_generation/rationalization_analysis.qmd', '--output-dir', 'reports'], 
                               capture_output=True, text=True, cwd='.')
         if result.returncode == 0:
-            print("✅ Analysis report generated: rationalization_analysis.html")
+            print("✅ Analysis report generated: reports/rationalization_analysis.html")
         else:
             print(f"⚠️ QMD generation failed: {result.stderr}")
     except FileNotFoundError:
@@ -504,10 +504,11 @@ def main():
     
     print(f"\n✅ PIPELINE COMPLETE!")
     print(f"📁 Data saved to: {args.output_dir}")
-    print(f"📊 View report: rationalization_analysis.html")
-    print(f"🔍 View content mismatches: content_mismatch_analysis.html")
-    print(f"📈 View scraping effectiveness: scraping_effectiveness_report.html")
-    print(f"🔬 View scraping vs API comparison: scraping_vs_api_comparison.html")
+    print(f"📊 Reports generated in: reports/")
+    print(f"   📊 Analysis report: reports/rationalization_analysis.html")
+    print(f"   🔍 Content mismatches: reports/content_mismatch_analysis.html")
+    print(f"   📈 Scraping effectiveness: reports/scraping_effectiveness_report.html")
+    print(f"   🔬 Scraping vs API comparison: reports/scraping_vs_api_comparison.html")
 
 if __name__ == "__main__":
     main()

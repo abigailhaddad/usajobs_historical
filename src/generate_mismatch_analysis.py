@@ -456,7 +456,7 @@ def generate_mismatch_html():
     """
     
     # Write HTML file
-    output_file = "content_mismatch_analysis.html"
+    output_file = "reports/content_mismatch_analysis.html"
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(html_content)
     

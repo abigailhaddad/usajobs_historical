@@ -60,9 +60,44 @@ After running the pipeline, you'll get:
 - `data/unified_jobs.parquet` - Combined & rationalized dataset
 - `data/overlap_samples.parquet` - Jobs found in both APIs for validation
 
-### 📈 **Analysis Reports**
-- **[rationalization_analysis.html](rationalization_analysis.html)** - Complete data analysis with field coverage, source breakdown, and overlap statistics
-- **[content_mismatch_analysis.html](content_mismatch_analysis.html)** - Side-by-side comparison of content differences between APIs with similarity analysis
+### 📈 **Interactive Reports** (`reports/`)
+
+All reports are generated in the `reports/` folder for easy access:
+
+#### 🎯 **Job Explorer Dashboard**
+- **[job_explorer.html](reports/job_explorer.html)** - Interactive dashboard answering "Who is posting what jobs when?"
+  - Monthly hiring trends by agency and occupation
+  - Federal job posting patterns over time
+  - Clean, focused visualization of hiring activity
+
+#### 📊 **Data Analysis Reports** 
+- **[rationalization_analysis.html](reports/rationalization_analysis.html)** - Complete data analysis with field coverage, source breakdown, and overlap statistics  
+- **[content_mismatch_analysis.html](reports/content_mismatch_analysis.html)** - Side-by-side comparison of content differences between APIs with similarity analysis
+- **[scraping_effectiveness_report.html](reports/scraping_effectiveness_report.html)** - Analysis of web scraping success rates and content quality
+- **[scraping_vs_api_comparison.html](reports/scraping_vs_api_comparison.html)** - Comparison between scraped content and API data
+
+### 🗂️ **Report Generation** (`report_generation/`)
+
+Source files for generating reports:
+- `job_explorer.qmd` - Quarto document for interactive hiring dashboard
+- `rationalization_analysis.qmd` - Quarto document for data analysis report
+- `render_explorer.sh` - Script to generate job explorer dashboard
+
+### 🔬 **Analysis Scripts** (`analysis/`)
+
+One-off analysis scripts for data quality and comparison:
+- `analyze_data_flow.py` - Analyzes data flow through rationalization process
+- `check_mismatches.py` - Quick checks for content mismatches
+- `check_real_similarities.py` - Checks similarity scores between data sources
+- `extract_original_api_content.py` - Extracts original API content for comparison
+- `real_api_comparison.py` - Compares Historical vs Current API content
+
+### 🛠️ **Utility Scripts** (`scripts/`)
+
+Maintenance and data update utilities:
+- `regenerate_analysis.py` - Regenerates analysis reports after data updates
+- `rescrape_overlap_jobs.py` - Re-scrapes overlap jobs with improved parser
+- `update_overlap_scraped_content.py` - Updates overlap data with current scraper
 
 ### 🗂️ **Cached Content**
 - `html_cache/` - Cached HTML content from scraped job pages (organized by control number)
@@ -74,6 +109,16 @@ After running the pipeline, you'll get:
 ```bash
 # Collect data from specific date range
 python run_pipeline.py --start-date 2025-01-01 --output-dir data
+```
+
+### Generate Reports
+```bash
+# Generate all available reports
+./generate_reports.sh
+
+# Or generate specific dashboard
+cd report_generation
+./render_explorer.sh
 ```
 
 ### Background Execution  
@@ -90,6 +135,21 @@ python run_pipeline.py \
   --end-date 2025-01-31 \
   --output-dir custom_data \
   --max-workers 4
+```
+
+### Analysis & Utilities
+```bash
+# Run data quality analysis
+python analysis/check_real_similarities.py
+
+# Compare Historical vs Current API content
+python analysis/real_api_comparison.py
+
+# Re-scrape overlap jobs with updated parser
+python scripts/rescrape_overlap_jobs.py
+
+# Regenerate analysis reports
+python scripts/regenerate_analysis.py
 ```
 
 ## Data Quality & Validation

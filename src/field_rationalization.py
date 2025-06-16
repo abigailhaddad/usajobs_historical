@@ -53,7 +53,8 @@ class FieldRationalizer:
                 # Add the fields from the database columns that are missing
                 'pay_scale': 'pay_scale',
                 'promotion_potential': 'promotion_potential', 
-                'total_openings': 'total_openings'
+                'total_openings': 'total_openings',
+                'positionOpeningStatus': 'position_opening_status'
             },
             'current_to_unified': {
                 # Raw current API field names (MatchedObjectDescriptor)
@@ -91,7 +92,8 @@ class FieldRationalizer:
                 'majorDuties': 'major_duties',
                 'requirements': 'requirements',
                 'howToApply': 'how_to_apply',
-                'applyOnlineUrl': 'apply_url'
+                'applyOnlineUrl': 'apply_url',
+                'positionOpeningStatus': 'position_opening_status'
             },
             'scraped_to_unified': {
                 'control_number': 'control_number',
@@ -136,6 +138,7 @@ class FieldRationalizer:
             'telework_eligible': 'str',
             'security_clearance_required': 'str',
             'hiring_path': 'str',
+            'position_opening_status': 'str',
             
             # Content (Current API fields)
             'qualification_summary': 'text',
