@@ -12,7 +12,7 @@ import glob
 import os
 script_dir = os.path.dirname(os.path.abspath(__file__))
 repo_root = os.path.join(script_dir, '..', '..')
-duckdb_pattern = os.path.join(repo_root, 'data', 'duckdb', 'usajobs_*.duckdb')
+duckdb_pattern = os.path.join(repo_root, 'data', 'usajobs_*.duckdb')
 duckdb_files = glob.glob(duckdb_pattern)
 total_duck_count = 0
 
