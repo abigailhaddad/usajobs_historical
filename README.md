@@ -4,7 +4,7 @@ Fetches historical job listings from the USAJobs Historical API and stores them 
 
 ## Data Coverage
 
-**Total**: 2,947,854 jobs across 11 years (2015-2025)
+**Total**: 2,957,747 jobs across 11 years (2015-2025)
 
 | Year | Job Count | Notes |
 |------|-----------|-------|
@@ -13,14 +13,14 @@ Fetches historical job listings from the USAJobs Historical API and stores them 
 | 2017 | 237,145 | Full coverage |
 | 2018 | 327,905 | Full coverage |
 | 2019 | 349,256 | Full coverage |
-| 2020 | 326,376 | Full coverage |
-| 2021 | 366,943 | Full coverage |
-| 2022 | 441,487 | Full coverage |
-| 2023 | 454,036 | Full coverage |
-| 2024 | 367,193 | Full coverage |
-| 2025 | 73,494 | Current through June 7, 2025 |
+| 2020 | 327,545 | Full coverage |
+| 2021 | 369,151 | Full coverage |
+| 2022 | 441,604 | Full coverage |
+| 2023 | 454,652 | Full coverage |
+| 2024 | 367,187 | Full coverage |
+| 2025 | 79,283 | Current through June 16, 2025 |
 
-**Coverage**: 90.6% of expected days (3,452/3,811 days) from 2015-01-01 to 2025-06-07
+**Coverage**: 87.3% of expected days (3,506/4,018 days) from 2015-01-01 to 2025-12-31
 
 ## Setup
 
@@ -38,36 +38,35 @@ Fetches historical job listings from the USAJobs Historical API and stores them 
 3. **Create .env file:**
    ```bash
    # .env
-   DATABASE_URL=your_postgresql_connection_string_here
+   DATABASE_URL=postgresql://user:password@host/usajobs_historical
+   USAJOBS_API_TOKEN=your_api_token_here  # Get from https://developer.usajobs.gov/
    ```
 
 ## File Structure
 
 ```
-├── scripts/
-│   ├── historical/           # Data collection scripts
-│   │   ├── historic_pull.py     # Main data fetching script
-│   │   ├── load_historical_jobs.py
-│   │   └── retry_failed_dates.py
-│   ├── database/            # Database management
-│   │   ├── query_duckdb.py      # Interactive DuckDB queries
-│   │   ├── fast_postgres_export.py  # Parallel PostgreSQL export
-│   │   ├── reset_databases.py
-│   │   └── export_product_manager_jobs.py
-│   ├── monitoring/          # Progress tracking
-│   │   ├── check_counts.py      # Verify data integrity
-│   │   └── monitor_parallel.sh  # Real-time progress monitoring
-│   └── pipeline/            # Orchestration scripts
-│       ├── run_historical_pipeline.sh  # Main pipeline runner
-│       ├── run_parallel_years.sh
-│       ├── check_parallel_complete.sh
-│       └── export_all_to_postgres.sh
-├── data/
-│   ├── duckdb/             # Local analytical databases
-│   │   └── usajobs_YEAR.duckdb
-│   └── exports/            # CSV exports
-├── logs/                   # Pipeline execution logs
-└── sql/                    # Database schemas
+├── scripts/                 # All scripts in one place
+│   ├── collect_data.py          # Main data collection from USAJobs API
+│   ├── run_parallel.sh          # Run multiple years in parallel (recommended)
+│   ├── run_single.sh            # Run single date range
+│   ├── export_postgres.py       # Export single DuckDB to PostgreSQL
+│   ├── export_all.sh            # Export all DuckDB files to PostgreSQL
+│   ├── check_data.py            # Verify data integrity
+│   ├── query_data.py            # Interactive DuckDB queries
+│   ├── export_analysis.py       # Export specific job analyses
+│   └── upload_schema.sh         # Upload PostgreSQL schema
+├── data/                    # Data storage
+│   ├── usajobs_YEAR.duckdb     # Local analytical databases
+│   └── exports/                # CSV exports
+├── analysis/                # Analysis and reports
+│   ├── product_manager_analysis.qmd    # Quarto analysis
+│   ├── product_manager_analysis.html   # Generated report
+│   └── usajobs_analysis.ipynb          # Jupyter notebook
+├── sql/                     # Database schemas
+│   └── create_historical_jobs.sql      # PostgreSQL table definition
+├── logs/                    # Auto-generated pipeline logs
+├── monitor_current.sh       # Monitor running parallel jobs
+└── check_parallel_complete.sh # Check if parallel jobs finished
 ```
 
 ## Run Pipeline
@@ -75,46 +74,41 @@ Fetches historical job listings from the USAJobs Historical API and stores them 
 **Quick pulls:**
 ```bash
 # Process jobs from last 24 hours
-scripts/pipeline/run_historical_pipeline.sh daily
+scripts/run_single.sh daily
 
 # Process jobs from last 7 days
-scripts/pipeline/run_historical_pipeline.sh days 7
+scripts/run_single.sh days 7
 
 # Process jobs from last 30 days
-scripts/pipeline/run_historical_pipeline.sh month
+scripts/run_single.sh month
 ```
 
-**Large pulls (use tmux for long-running jobs):**
+**Parallel processing (recommended for bulk data):**
 ```bash
-# Process entire year (use tmux for unattended runs)
-tmux new-session -d -s usajobs-2024 'scripts/pipeline/run_historical_pipeline.sh range 2024-01-01 2024-12-31'
-
-# Watch progress
-./monitor.sh  # or tmux attach -t usajobs-2024
-
-# Check completion status
-scripts/pipeline/check_parallel_complete.sh
-
-# Check logs
-tail -f logs/range_pull_*.log
-
-# Kill session
-tmux kill-session -t usajobs-2024
-```
-
-**Parallel processing multiple years:**
-```bash
-# Process multiple years in parallel
-scripts/pipeline/run_parallel_years.sh 2020 2021 2022 2023
+# Process multiple years in parallel (creates one tmux session per year)
+scripts/run_parallel.sh 2019 2023      # Range: 2019-2023
+scripts/run_parallel.sh 2020 2021 2022 # Specific years
 
 # Monitor all parallel jobs
-./monitor.sh
+./monitor_current.sh
+
+# Check completion status
+./check_parallel_complete.sh
+
+# Export all to PostgreSQL after completion
+scripts/export_all.sh
 ```
 
-**Custom date ranges:**
+**Single year processing:**
 ```bash
-# Specific date range
-scripts/pipeline/run_historical_pipeline.sh range 2024-06-01 2024-06-30
+# Process entire year (use tmux for unattended runs)
+tmux new-session -d -s usajobs-2024 'scripts/run_single.sh range 2024-01-01 2024-12-31'
+
+# Watch progress
+tmux attach -t usajobs-2024
+
+# Custom date ranges
+scripts/run_single.sh range 2024-06-01 2024-06-30
 ```
 
 ## Data Storage
@@ -127,34 +121,32 @@ scripts/pipeline/run_historical_pipeline.sh range 2024-06-01 2024-06-30
 
 ```bash
 # Interactive DuckDB queries
-python scripts/database/query_duckdb.py data/duckdb/usajobs_2024.duckdb
+python scripts/query_data.py data/usajobs_2024.duckdb
 
 # Export product manager jobs to CSV
-python scripts/database/export_product_manager_jobs.py
+python scripts/export_analysis.py
 
-# Fast parallel export to PostgreSQL
-python scripts/database/fast_postgres_export.py data/duckdb/usajobs_2024.duckdb 8
+# Check data integrity (compares DuckDB vs PostgreSQL)
+python scripts/check_data.py
 
-# Export all databases to PostgreSQL
-scripts/pipeline/export_all_to_postgres.sh
+# Export all DuckDB files to PostgreSQL
+scripts/export_all.sh
 
-# Check data integrity
-python scripts/monitoring/check_counts.py
-
-# Reset databases (careful!)
-python scripts/database/reset_databases.py --postgresql  # Only reset PostgreSQL
-python scripts/database/reset_databases.py --all         # Reset both
+# Export single year to PostgreSQL
+python scripts/export_postgres.py data/usajobs_2024.duckdb 8
 ```
 
 ## Performance
 
-- **Data collection**: ~12 seconds per day (handles 503 errors with retry)
-- **PostgreSQL export**: 13,322+ jobs/second with parallel processing
+- **Data collection**: ~20 seconds per day (handles 503 errors with retry)
+- **PostgreSQL export**: 10,000-15,000 jobs/second with parallel processing
 - **Local queries**: Instant with DuckDB indexing
 
-The pipeline will:
-1. Fetch historical jobs from USAJobs Historical API
-2. Store data incrementally in DuckDB with deduplication  
-3. Export to PostgreSQL using fast parallel bulk inserts
-4. Handle 503 errors with exponential backoff retry logic
-5. Resume from existing data if interrupted
+## Workflow Overview
+
+1. **Collect Data**: Use `scripts/run_parallel.sh` to fetch historical jobs from USAJobs API
+2. **Store Locally**: Data saved in DuckDB files (`usajobs_YEAR.duckdb`) with deduplication
+3. **Export to Cloud**: Use `scripts/export_all.sh` for fast parallel PostgreSQL upload
+4. **Verify**: Use `scripts/check_data.py` to ensure data integrity between DuckDB and PostgreSQL
+
+The pipeline handles API errors with exponential backoff and can resume from existing data if interrupted.

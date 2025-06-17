@@ -90,7 +90,7 @@ for year in "${YEARS[@]}"; do
     
     # Start the tmux session (run from repo root)
     tmux new-session -d -s "$session_name" \
-        "cd /Users/abigailhaddad/Documents/repos/usajobs_historic && scripts/pipeline/run_historical_pipeline.sh range $start_date $end_date"
+        "cd /Users/abigailhaddad/Documents/repos/usajobs_historic && source venv/bin/activate && scripts/run_single.sh range $start_date $end_date"
     
     if [ $? -eq 0 ]; then
         echo "  ✅ Started successfully"
@@ -273,7 +273,7 @@ echo "🚀 Exporting all DuckDB files to PostgreSQL..."
 echo ""
 
 # Check for DuckDB files
-DUCKDB_FILES=(usajobs_*.duckdb)
+DUCKDB_FILES=(data/usajobs_*.duckdb)
 if [ ${#DUCKDB_FILES[@]} -eq 0 ]; then
     echo "❌ No DuckDB files found!"
     exit 1
@@ -288,14 +288,14 @@ echo ""
 # Export each file
 for db in "${DUCKDB_FILES[@]}"; do
     echo "📤 Exporting $db..."
-    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/database/fast_postgres_export.py "$db" 8
+    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/export_postgres.py "$db" 8
     echo ""
 done
 
 echo "✅ All exports complete!"
 echo ""
 echo "🔍 Verify with:"
-echo "  python check_counts.py"
+echo "  python scripts/check_data.py"
 EOF
 
 chmod +x export_all_to_postgres.sh

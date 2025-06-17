@@ -11,7 +11,7 @@ for session in $(tmux ls 2>/dev/null | grep "usajobs-" | cut -d: -f1); do
 done
 
 # Add years from DuckDB files
-for db in usajobs_*.duckdb; do
+for db in data/usajobs_*.duckdb; do
     if [ -f "$db" ]; then
         year=$(basename "$db" .duckdb | sed 's/usajobs_//')
         if [[ "$year" =~ ^[0-9]{4}$ ]] && [[ ! " ${YEARS[@]} " =~ " $year " ]]; then
@@ -40,8 +40,8 @@ for year in "${YEARS[@]}"; do
         echo "  ⏳ $year: Still running"
         ALL_COMPLETE=false
     else
-        if [ -f "usajobs_$year.duckdb" ]; then
-            count=$(echo "SELECT COUNT(*) FROM historical_jobs;" | duckdb "usajobs_$year.duckdb" -csv 2>/dev/null | tail -1)
+        if [ -f "data/usajobs_$year.duckdb" ]; then
+            count=$(source venv/bin/activate && python -c "import duckdb; print(duckdb.connect('data/usajobs_$year.duckdb').execute('SELECT COUNT(*) FROM historical_jobs').fetchone()[0])" 2>/dev/null)
             if [ -n "$count" ] && [ "$count" -gt 0 ]; then
                 echo "  ✅ $year: Complete ($count jobs)"
             else
@@ -60,7 +60,7 @@ if [ "$ALL_COMPLETE" = true ]; then
     echo "✅ All pulls complete!"
     echo ""
     echo "🚀 Ready to export to PostgreSQL:"
-    echo "  ./export_all_to_postgres.sh"
+    echo "  scripts/export_all.sh"
 else
     echo "⏳ Still processing..."
 fi

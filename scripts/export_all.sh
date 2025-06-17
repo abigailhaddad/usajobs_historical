@@ -20,11 +20,11 @@ echo ""
 # Export each file
 for db in "${DUCKDB_FILES[@]}"; do
     echo "📤 Exporting $db..."
-    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/database/fast_postgres_export.py "$db" 8
+    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/export_postgres.py "$db" 8
     echo ""
 done
 
 echo "✅ All exports complete!"
 echo ""
 echo "🔍 Verify with:"
-echo "  python check_counts.py"
+echo "  python scripts/check_data.py"

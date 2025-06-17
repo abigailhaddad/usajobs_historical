@@ -34,7 +34,7 @@ case $MODE in
     echo "🚀 Running USAJobs Historical Pipeline - DAILY MODE"
     echo "📊 Processing jobs from last 24 hours"
     
-    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/historical/historic_pull.py \
+    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/collect_data.py \
       --start-date $(date -v-1d +%Y-%m-%d) \
       --end-date $(date +%Y-%m-%d) \
       --duckdb "daily_$(date +%Y%m%d).duckdb" \
@@ -50,7 +50,7 @@ case $MODE in
     START_DATE=$(date -v-${DAYS}d +%Y-%m-%d)
     END_DATE=$(date +%Y-%m-%d)
     
-    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/historical/historic_pull.py \
+    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/collect_data.py \
       --start-date "$START_DATE" \
       --end-date "$END_DATE" \
       --duckdb "last_${DAYS}days_$(date +%Y%m%d).duckdb" \
@@ -65,7 +65,7 @@ case $MODE in
     START_DATE=$(date -v-30d +%Y-%m-%d)
     END_DATE=$(date +%Y-%m-%d)
     
-    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/historical/historic_pull.py \
+    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/collect_data.py \
       --start-date "$START_DATE" \
       --end-date "$END_DATE" \
       --duckdb "month_$(date +%Y%m%d).duckdb" \
@@ -94,7 +94,7 @@ case $MODE in
     
     # Run with caffeinate to prevent sleep, logging and error handling
     echo "☕ Using caffeinate to prevent system sleep"
-    if caffeinate -s bash -c "python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/historical/historic_pull.py \
+    if caffeinate -s bash -c "python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/collect_data.py \
       --start-date '$START_DATE' \
       --end-date '$END_DATE' \
       --duckdb 'year_$(date +%Y%m%d).duckdb'" 2>&1 | tee -a "$LOGFILE"; then
@@ -151,7 +151,7 @@ case $MODE in
     
     # If it's a full year (Jan 1 to Dec 31), use year-based naming
     if [[ "$START_DATE" == "$START_YEAR-01-01" ]] && [[ "$END_DATE" == "$END_YEAR-12-31" ]] && [[ "$START_YEAR" == "$END_YEAR" ]]; then
-        DUCKDB_FILE="usajobs_${START_YEAR}.duckdb"
+        DUCKDB_FILE="data/usajobs_${START_YEAR}.duckdb"
         if [ -f "$DUCKDB_FILE" ]; then
             echo "📁 Using existing DuckDB file: $DUCKDB_FILE" | tee -a "$LOGFILE"
         else
@@ -159,16 +159,16 @@ case $MODE in
         fi
     else
         # For partial year ranges, check if year file exists first
-        if [ -f "usajobs_${START_YEAR}.duckdb" ] && [[ "$START_YEAR" == "$END_YEAR" ]]; then
-            DUCKDB_FILE="usajobs_${START_YEAR}.duckdb"
+        if [ -f "data/usajobs_${START_YEAR}.duckdb" ] && [[ "$START_YEAR" == "$END_YEAR" ]]; then
+            DUCKDB_FILE="data/usajobs_${START_YEAR}.duckdb"
             echo "📁 Using existing DuckDB file: $DUCKDB_FILE" | tee -a "$LOGFILE"
         else
-            DUCKDB_FILE="${START_DATE}_to_${END_DATE}.duckdb"
+            DUCKDB_FILE="data/${START_DATE}_to_${END_DATE}.duckdb"
             echo "📁 Creating new DuckDB file: $DUCKDB_FILE" | tee -a "$LOGFILE"
         fi
     fi
     
-    if caffeinate -s bash -c "python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/historical/historic_pull.py \
+    if caffeinate -s bash -c "python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/collect_data.py \
       --start-date '$START_DATE' \
       --end-date '$END_DATE' \
       --duckdb '$DUCKDB_FILE'" 2>&1 | tee -a "$LOGFILE"; then
