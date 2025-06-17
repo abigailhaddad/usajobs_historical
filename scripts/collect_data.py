@@ -32,7 +32,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_job_data_page(params: Optional[Dict] = None, next_url: Optional[str] = None, retries: int = 3) -> Dict:
+def get_job_data_page(params: Optional[Dict] = None, next_url: Optional[str] = None, retries: int = 7) -> Dict:
     """Fetch a page of job data from the API with retry logic."""
     for attempt in range(retries):
         try:
@@ -70,8 +70,8 @@ def get_job_data_page(params: Optional[Dict] = None, next_url: Optional[str] = N
 
 
 
-def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> List[Dict]:
-    """Fetch all jobs for a specific date."""
+def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> tuple[List[Dict], bool]:
+    """Fetch all jobs for a specific date. Returns (jobs_list, success_flag)."""
     jobs_for_date = []
     params = {
         "StartPositionOpenDate": date,
@@ -87,8 +87,8 @@ def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> Lis
         try:
             data = get_job_data_page(params=params, next_url=next_url)
         except Exception as e:
-            print(f"Error fetching job data: {e}")
-            break
+            print(f"  ❌ API FAILURE for {date}: {e}")
+            return jobs_for_date, False  # Return partial data with failure flag
 
         jobs = data.get("data", [])
         jobs_for_date.extend(jobs)
@@ -100,7 +100,7 @@ def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> Lis
         else:
             break
 
-    return jobs_for_date
+    return jobs_for_date, True
 
 
 def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = None, 
@@ -111,6 +111,7 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
     all_jobs = []
     seen_control_numbers = set()  # Track unique jobs
     weekly_batch = []  # Accumulate jobs for weekly saves
+    failed_dates = []  # Track dates that failed to fetch
     
     # If using DuckDB, initialize it first
     duckdb_conn = None
@@ -140,9 +141,16 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
         progress_bar.set_description(f"Fetching {date_str}")
         
         try:
-            jobs = fetch_jobs_for_date(date_str, position_series)
+            jobs, success = fetch_jobs_for_date(date_str, position_series)
+            if not success:
+                failed_dates.append(date_str)
+                progress_bar.write(f"  {date_str}: ❌ API FAILED - retrying later may help")
+                current_date += timedelta(days=1)
+                progress_bar.update(1)
+                continue
         except Exception as e:
-            progress_bar.write(f"❌ Failed to fetch jobs for {date_str}: {e}")
+            progress_bar.write(f"❌ Unexpected error for {date_str}: {e}")
+            failed_dates.append(date_str)
             current_date += timedelta(days=1)
             progress_bar.update(1)
             continue
@@ -162,7 +170,11 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
         # Add daily jobs to weekly batch
         weekly_batch.extend(daily_jobs)
         
-        progress_bar.write(f"  {date_str}: Found {len(jobs)} jobs ({new_jobs} new)")
+        # Distinguish between 0 jobs (legitimate) and failures
+        if len(jobs) == 0:
+            progress_bar.write(f"  {date_str}: Found 0 jobs (✅ legitimate)")
+        else:
+            progress_bar.write(f"  {date_str}: Found {len(jobs)} jobs ({new_jobs} new)")
         days_processed += 1
         
         # Save to DuckDB weekly (every 7 days) or at the end
@@ -197,7 +209,19 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
     if duckdb_conn:
         duckdb_conn.close()
     
-    print(f"\nTotal unique jobs found: {len(all_jobs)}")
+    # Report results and any failures
+    print(f"\n✅ Total unique jobs found: {len(all_jobs)}")
+    
+    if failed_dates:
+        print(f"\n⚠️  ATTENTION: {len(failed_dates)} dates failed to fetch:")
+        for failed_date in failed_dates:
+            print(f"  ❌ {failed_date}")
+        print(f"\n💡 Tip: Re-run the same date range to retry failed dates:")
+        print(f"    scripts/collect_data.py --start-date {start_date} --end-date {end_date} --duckdb {duckdb_path}")
+        print(f"    (Uses higher retry count: 7 attempts per request)")
+    else:
+        print("✅ All dates fetched successfully!")
+    
     return all_jobs
 
 

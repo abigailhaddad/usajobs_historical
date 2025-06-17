@@ -138,9 +138,10 @@ python scripts/export_postgres.py data/usajobs_2024.duckdb 8
 
 ## Performance
 
-- **Data collection**: ~20 seconds per day (handles 503 errors with retry)
-- **PostgreSQL export**: 10,000-15,000 jobs/second with parallel processing
+- **Data collection**: ~20 seconds per day (handles 503 errors with 7 retries per request)
+- **PostgreSQL export**: 10,000-15,000 jobs/second with parallel processing  
 - **Local queries**: Instant with DuckDB indexing
+- **Error handling**: Distinguishes between legitimate 0-job days and API failures
 
 ## Workflow Overview
 
