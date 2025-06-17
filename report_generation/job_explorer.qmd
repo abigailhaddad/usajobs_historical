@@ -1,0 +1,94 @@
+---
+title: "Federal Job Postings - Monthly Summary"
+format: 
+  html:
+    theme: bootstrap
+    toc: false
+    code-fold: true
+execute:
+  echo: false
+  warning: false
+jupyter: python3
+---
+
+```{python}
+import pandas as pd
+import numpy as np
+
+# Load and clean data
+jobs_df = pd.read_parquet("../data/usajobs.parquet")
+
+# Convert dates and filter to 2025 onwards
+jobs_df['open_date'] = pd.to_datetime(jobs_df['open_date'])
+jobs_df = jobs_df[jobs_df['open_date'] >= '2025-01-01'].copy()
+jobs_df['open_month'] = jobs_df['open_date'].dt.to_period('M').astype(str)
+
+# Clean agency names
+jobs_df['agency_clean'] = jobs_df['agency_name'].fillna('Unknown Agency')
+
+print(f"📊 Analyzing {len(jobs_df):,} federal job postings from 2025-01-01 onwards")
+print(f"🗓️ Date range: {jobs_df['open_date'].min().strftime('%Y-%m-%d')} to {jobs_df['open_date'].max().strftime('%Y-%m-%d')}")
+```
+
+## Jobs by Month and Agency
+
+```{python}
+# Create agency by month table
+agency_month = jobs_df.groupby(['open_month', 'agency_clean']).size().reset_index(name='job_count')
+agency_pivot = agency_month.pivot(index='agency_clean', columns='open_month', values='job_count').fillna(0).astype(int)
+
+# Sort by total jobs and take top 20 agencies
+agency_pivot['Total'] = agency_pivot.sum(axis=1)
+agency_pivot = agency_pivot.sort_values('Total', ascending=False).head(20)
+
+print("Top 20 Agencies by Job Postings (by Month)")
+print("=" * 80)
+print(agency_pivot.to_string())
+```
+
+## Jobs by Month and Position Opening Status
+
+```{python}
+# Check if positionOpeningStatus exists, if not derive from dates
+if 'positionOpeningStatus' in jobs_df.columns:
+    print("✅ Using positionOpeningStatus from data")
+    status_field = 'positionOpeningStatus'
+else:
+    print("⚠️ positionOpeningStatus not found - deriving from dates")
+    jobs_df['derived_status'] = jobs_df.apply(lambda row: 'Open' if row['close_date'] >= pd.Timestamp.now() else 'Closed', axis=1)
+    status_field = 'derived_status'
+
+# Create status by month table
+status_month = jobs_df.groupby(['open_month', status_field]).size().reset_index(name='job_count')
+status_pivot = status_month.pivot(index=status_field, columns='open_month', values='job_count').fillna(0).astype(int)
+
+# Add total column
+status_pivot['Total'] = status_pivot.sum(axis=1)
+
+print("\nJob Postings by Month and Opening Status")
+print("=" * 60)
+print(status_pivot.to_string())
+```
+
+## Summary
+
+```{python}
+total_jobs = len(jobs_df)
+total_agencies = jobs_df['agency_clean'].nunique()
+top_agency = jobs_df['agency_clean'].value_counts().index[0]
+peak_month = jobs_df['open_month'].value_counts().index[0]
+
+print(f"\n📈 SUMMARY")
+print(f"• Total jobs: {total_jobs:,}")
+print(f"• Agencies posting: {total_agencies}")
+print(f"• Most active agency: {top_agency}")
+print(f"• Peak month: {peak_month}")
+
+if 'positionOpeningStatus' not in jobs_df.columns:
+    print(f"\n⚠️ NOTE: positionOpeningStatus field not found in data.")
+    print(f"   Run the pipeline again to capture this field in future datasets.")
+```
+
+---
+
+*Generated: {python} f"{pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}"*

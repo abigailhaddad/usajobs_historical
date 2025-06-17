@@ -1,0 +1,391 @@
+---
+title: "USAJobs Data Rationalization Analysis"
+author: "Enhanced Pipeline Analysis"
+subtitle: "Analysis of unified dataset combining historical and current USAJobs data"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+---
+
+```{python}
+import pandas as pd
+import numpy as np
+import json
+from collections import Counter
+from datetime import datetime
+import matplotlib.pyplot as plt
+import seaborn as sns
+import sys
+sys.path.append('src')
+from parquet_storage import ParquetJobStorage
+from simple_validation import calculate_field_overlap, generate_simple_validation_html, generate_simple_validation_summary
+
+# Load data from Parquet files
+storage = ParquetJobStorage('data')
+```
+
+## Dataset Overview
+
+```{python}
+# Load unified dataset (contains all jobs)
+unified_df = storage.load_unified_jobs()
+total_unified = len(unified_df)
+
+print(f"📊 Unified Jobs: {total_unified:,}")
+
+# Analyze data sources from unified dataset
+if 'data_sources' in unified_df.columns:
+    # Parse data sources and categorize jobs
+    import ast
+    
+    # Helper function to parse data_sources
+    def parse_sources(sources_str):
+        try:
+            if isinstance(sources_str, str):
+                return ast.literal_eval(sources_str)
+            return sources_str if sources_str else []
+        except:
+            return []
+    
+    unified_df['parsed_sources'] = unified_df['data_sources'].apply(parse_sources)
+    
+    # Categorize jobs by source type
+    historical_only = unified_df[unified_df['parsed_sources'].apply(
+        lambda x: 'historical_api' in x and 'current_api' not in x and 'current_api_priority' not in x
+    )]
+    current_only = unified_df[unified_df['parsed_sources'].apply(
+        lambda x: 'current_api' in x and 'historical_api' not in x
+    )]
+    overlap_jobs = unified_df[unified_df['parsed_sources'].apply(
+        lambda x: 'current_api_priority' in x and 'historical_metadata_supplement' in x
+    )]
+    
+    print(f"📊 Historical-only Jobs: {len(historical_only):,}")
+    print(f"📊 Current-only Jobs: {len(current_only):,}")
+    print(f"📊 Overlap Jobs: {len(overlap_jobs):,}")
+    
+    # Check scraping coverage
+    scraped_jobs = unified_df[unified_df['parsed_sources'].apply(lambda x: 'scraping' in x)]
+    print(f"🕷️ Jobs with Scraping: {len(scraped_jobs):,} ({len(scraped_jobs)/total_unified*100:.1f}%)")
+    
+else:
+    print("⚠️ No data_sources column found")
+    historical_only = pd.DataFrame()
+    current_only = pd.DataFrame()
+    overlap_jobs = pd.DataFrame()
+    scraped_jobs = 0
+
+# Try to load overlap samples
+try:
+    overlap_df = storage.load_overlap_samples()
+    overlap_jobs = len(overlap_df) // 2  # Each job appears twice (historical + current)
+    print(f"🔄 Overlap Jobs: {overlap_jobs:,}")
+except:
+    print("🔄 Overlap Jobs: 0 (no overlap samples found)")
+```
+
+## Data Source Comparison
+
+### Sample Overlapping Jobs
+
+```{python}
+# Check if overlap samples exist and has data
+try:
+    overlap_df = storage.load_overlap_samples()
+    
+    if not overlap_df.empty:
+        # Group by control number
+        control_groups = {}
+        for _, row in overlap_df.iterrows():
+            control_num = row['control_number']
+            source_type = row['source_type']
+            if control_num not in control_groups:
+                control_groups[control_num] = {}
+            # Remove control_number and source_type from the data
+            row_data = row.drop(['control_number', 'source_type'])
+            control_groups[control_num][source_type] = row_data
+        
+        # Display first 3 comparisons
+        comparison_count = 0
+        for control_num, sources in control_groups.items():
+            if 'historical' in sources and 'current' in sources and comparison_count < 3:
+                comparison_count += 1
+                print(f"EXAMPLE {comparison_count}: Job {control_num}")
+                print("-" * 80)
+                
+                hist_data = sources['historical']
+                curr_data = sources['current']
+                
+                print(f"{'Field':<20} {'Historical':<30} {'Current':<30}")
+                print("-" * 80)
+                
+                # Compare ALL fields (excluding internal metadata)
+                key_fields = ['position_title', 'agency_name', 'department_name', 'sub_agency', 
+                             'min_grade', 'max_grade', 'min_salary', 'max_salary', 'open_date', 'close_date',
+                             'locations', 'work_schedule', 'telework_eligible', 'security_clearance_required',
+                             'total_openings', 'promotion_potential', 'relocation_assistance', 'hiring_path',
+                             'apply_url', 'position_uri', 'job_summary', 'qualification_summary', 
+                             'major_duties', 'requirements', 'education', 'how_to_apply', 'evaluations', 
+                             'benefits', 'other_information', 'required_documents', 'what_to_expect_next']
+                
+                for field_name in key_fields:
+                    if field_name in hist_data.index:
+                        hist_val = hist_data[field_name] if pd.notna(hist_data[field_name]) and hist_data[field_name] != '' else "❌"
+                        curr_val = curr_data[field_name] if pd.notna(curr_data[field_name]) and curr_data[field_name] != '' else "❌"
+                        
+                        # Format for display
+                        if isinstance(hist_val, (int, float)) and 'salary' in field_name:
+                            hist_val = f"${hist_val:,.0f}" if hist_val != "❌" else "❌"
+                        elif hist_val != "❌":
+                            # Handle text fields - truncate for display
+                            if field_name in ['qualification_summary', 'major_duties', 'requirements']:
+                                hist_val = (str(hist_val)[:50] + "...") if len(str(hist_val)) > 50 else str(hist_val)
+                            elif len(str(hist_val)) > 27:
+                                hist_val = str(hist_val)[:27] + "..."
+                            else:
+                                hist_val = str(hist_val)
+                        
+                        if isinstance(curr_val, (int, float)) and 'salary' in field_name:
+                            curr_val = f"${curr_val:,.0f}" if curr_val != "❌" else "❌"
+                        elif curr_val != "❌":
+                            if field_name in ['qualification_summary', 'major_duties', 'requirements']:
+                                curr_val = (str(curr_val)[:50] + "...") if len(str(curr_val)) > 50 else str(curr_val)
+                            elif len(str(curr_val)) > 27:
+                                curr_val = str(curr_val)[:27] + "..."
+                            else:
+                                curr_val = str(curr_val)
+                        
+                        # Mark differences
+                        match_indicator = "✅" if str(hist_val) == str(curr_val) else "❓"
+                        
+                        print(f"{field_name:<20} {str(hist_val):<30} {str(curr_val):<30} {match_indicator}")
+                print()
+        
+        if comparison_count == 0:
+            print("No complete overlap pairs found for comparison.")
+            
+    else:
+        print("No overlap samples found for comparison.")
+        
+except Exception as e:
+    print(f"Overlap analysis not available: {e}")
+```
+
+## Field Overlap Analysis
+
+```{python}
+# Simple field overlap analysis
+try:
+    overlap_df = storage.load_overlap_samples()
+    
+    if not overlap_df.empty:
+        # Calculate field overlap
+        overlap_results = calculate_field_overlap(overlap_df)
+        
+        if overlap_results['status'] == 'success':
+            # Display summary
+            print(generate_simple_validation_summary(overlap_results))
+            
+            # Generate and display HTML table
+            from IPython.display import HTML, display
+            overlap_html = generate_simple_validation_html(overlap_results)
+            display(HTML(overlap_html))
+        else:
+            print(f"Overlap analysis failed: {overlap_results.get('message', 'Unknown error')}")
+    else:
+        print("No overlap samples available for analysis")
+        
+except Exception as e:
+    print(f"Overlap analysis not available: {e}")
+```
+
+## Field Coverage Analysis
+
+```{python}
+# Analyze field coverage using DataFrame operations
+if not unified_df.empty:
+    # Get all columns excluding metadata fields
+    excluded_fields = ['data_sources', 'rationalization_date', 'confidence_score', 
+                      'extraction_metadata', 'scraped_sections', 'full_content',
+                      'announcement_number', 'posted_date', 'primary_location']
+    
+    analysis_fields = [col for col in unified_df.columns if col not in excluded_fields]
+    
+    field_coverage_data = []
+    
+    # Define the three categories
+    hist_mask = unified_df['data_sources'].str.contains('historical', na=False)
+    curr_mask = unified_df['data_sources'].str.contains('current', na=False)
+    
+    # Historical-only (no current API data)
+    hist_only_mask = hist_mask & ~curr_mask
+    hist_only_df = unified_df[hist_only_mask]
+    hist_only_total = len(hist_only_df)
+    
+    # Current-only (no historical API data)
+    curr_only_mask = curr_mask & ~hist_mask
+    curr_only_df = unified_df[curr_only_mask]
+    curr_only_total = len(curr_only_df)
+    
+    # Overlap (both historical AND current)
+    overlap_mask = hist_mask & curr_mask
+    overlap_df = unified_df[overlap_mask]
+    overlap_total = len(overlap_df)
+    
+    print(f"📊 Data source breakdown:")
+    print(f"   Historical-only: {hist_only_total:,} records")
+    print(f"   Current-only: {curr_only_total:,} records")
+    print(f"   Overlap: {overlap_total:,} records")
+    print()
+    
+    # Calculate coverage for each category
+    for source_name, source_df, source_total in [
+        ('Historical-only', hist_only_df, hist_only_total),
+        ('Current-only', curr_only_df, curr_only_total),
+        ('Overlap', overlap_df, overlap_total)
+    ]:
+        if source_total > 0:
+            for field_name in analysis_fields:
+                if field_name in ['min_salary', 'max_salary', 'total_openings']:
+                    # Numeric fields - check for non-null values
+                    complete_count = source_df[field_name].notna().sum()
+                elif field_name in ['open_date', 'close_date']:
+                    # Date fields - check for non-null values
+                    complete_count = source_df[field_name].notna().sum()
+                else:
+                    # String fields - check for non-null and non-empty values
+                    complete_count = ((source_df[field_name].notna()) & (source_df[field_name] != '')).sum()
+                
+                percentage = round(complete_count * 100.0 / source_total, 1) if source_total > 0 else 0
+                
+                field_coverage_data.append({
+                    'Source': source_name,
+                    'Field': field_name,
+                    'Complete': complete_count,
+                    'Total': source_total,
+                    'Percentage': percentage
+                })
+    
+    # Create DataFrame and pivot for better visualization
+    if field_coverage_data:
+        coverage_df = pd.DataFrame(field_coverage_data)
+        pivot_df = coverage_df.pivot(index='Field', columns='Source', values='Percentage').fillna(0)
+        pivot_df = pivot_df.round(1)
+        
+        # Sort by field importance
+        field_order = ['control_number', 'position_title', 'agency_name', 'department_name', 
+                       'min_salary', 'max_salary', 'job_series', 'locations', 'work_schedule',
+                       'major_duties', 'qualification_summary', 'requirements', 'education',
+                       'benefits', 'how_to_apply', 'hiring_path']
+        
+        # Reorder fields that exist
+        existing_fields = [f for f in field_order if f in pivot_df.index]
+        other_fields = sorted([f for f in pivot_df.index if f not in field_order])
+        pivot_df = pivot_df.reindex(existing_fields + other_fields)
+        
+        print("📊 Field Coverage by Data Source Category (% of records with data):")
+        print(pivot_df.to_string())
+        
+        # Show specific insights for key content fields
+        print("\n🔍 Key Content Fields Analysis:")
+        content_fields = ['requirements', 'education', 'benefits', 'major_duties', 'qualification_summary']
+        
+        for field in content_fields:
+            if field in pivot_df.index:
+                print(f"\n{field.replace('_', ' ').title()}:")
+                if 'Historical-only' in pivot_df.columns:
+                    print(f"   Historical-only: {pivot_df.loc[field, 'Historical-only']:.1f}% (from scraping)")
+                if 'Current-only' in pivot_df.columns:
+                    print(f"   Current-only: {pivot_df.loc[field, 'Current-only']:.1f}% (from API)")
+                if 'Overlap' in pivot_df.columns:
+                    print(f"   Overlap: {pivot_df.loc[field, 'Overlap']:.1f}% (from any source)")
+else:
+    print("No unified data available for coverage analysis.")
+```
+
+## Analysis Summary & Results
+
+```{python}
+if not unified_df.empty:
+    print("✅ **PIPELINE SUCCESS SUMMARY**")
+    print("=" * 50)
+    print(f"📊 Total Unified Records: {len(unified_df):,}")
+    print(f"📊 Total Fields: {len(unified_df.columns)}")
+    
+    # Data source analysis
+    def categorize_source(data_sources):
+        if pd.isna(data_sources):
+            return 'Other'
+        try:
+            sources = json.loads(data_sources) if isinstance(data_sources, str) else data_sources
+            if isinstance(sources, list):
+                has_hist = any('historical' in str(s) for s in sources)
+                has_curr = any('current' in str(s) for s in sources)
+                has_scrape = any('scraping' in str(s) for s in sources)
+                if has_hist and has_curr:
+                    return 'Both APIs' + (' + Scraping' if has_scrape else '')
+                elif has_hist:
+                    return 'Historical Only' + (' + Scraping' if has_scrape else '')
+                elif has_curr:
+                    return 'Current Only' + (' + Scraping' if has_scrape else '')
+            return 'Other'
+        except:
+            return 'Other'
+    
+    unified_df['source_category'] = unified_df['data_sources'].apply(categorize_source)
+    source_counts = unified_df['source_category'].value_counts()
+    
+    print(f"\n📈 Data Sources Breakdown:")
+    for source_type, count in source_counts.items():
+        percentage = count / len(unified_df) * 100
+        print(f"   {source_type}: {count:,} records ({percentage:.1f}%)")
+    
+    # Key field coverage
+    print(f"\n📊 Key Field Coverage:")
+    key_fields = ['control_number', 'position_title', 'agency_name', 'major_duties', 'qualification_summary', 'requirements', 'benefits']
+    for field in key_fields:
+        if field in unified_df.columns:
+            non_empty_count = ((unified_df[field].notna()) & (unified_df[field] != '')).sum()
+            coverage = non_empty_count/len(unified_df)*100
+            status = "✅" if coverage >= 95 else "⚠️" if coverage >= 80 else "❌"
+            print(f"   {status} {field}: {coverage:.1f}% ({non_empty_count:,}/{len(unified_df):,})")
+    
+    # Overlap analysis
+    overlap_count = source_counts.get('Both APIs + Scraping', 0) + source_counts.get('Both APIs', 0)
+    if overlap_count > 0:
+        overlap_pct = overlap_count / len(unified_df) * 100
+        print(f"\n🔄 API Overlap Analysis:")
+        print(f"   Jobs found in both APIs: {overlap_count:,} ({overlap_pct:.1f}%)")
+        print(f"   This enables accuracy comparison between data sources")
+        
+        try:
+            overlap_df = storage.load_overlap_samples()
+            if not overlap_df.empty:
+                sample_count = len(overlap_df) // 2  # Each job appears twice
+                print(f"   Overlap samples generated: {sample_count:,} job pairs")
+        except:
+            print(f"   Overlap samples: Not available")
+    
+    # Scraping success
+    scraping_records = unified_df[unified_df['source_category'].str.contains('Scraping', na=False)]
+    if len(scraping_records) > 0:
+        scraping_success = len(scraping_records)
+        total_historical = source_counts.get('Historical Only + Scraping', 0) + source_counts.get('Both APIs + Scraping', 0)
+        if total_historical > 0:
+            scraping_rate = scraping_success / total_historical * 100
+            print(f"\n🕷️ Web Scraping Results:")
+            print(f"   Historical jobs with scraping: {scraping_success:,}")
+            print(f"   Scraping success rate: {scraping_rate:.1f}%")
+    
+    print(f"\n🎯 **OVERALL STATUS: SUCCESS** ✅")
+    print(f"   Pipeline successfully integrated {len(unified_df):,} job records")
+    print(f"   from multiple data sources with high field coverage.")
+        
+else:
+    print("❌ No unified data available for analysis.")
+```

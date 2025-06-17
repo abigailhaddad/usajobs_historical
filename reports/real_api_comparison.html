@@ -1,0 +1,836 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real API Comparison: Historical vs Current USAJobs APIs</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .summary {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .field-section {
+            background: white;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .field-header {
+            background: #34495e;
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .field-stats {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            background: #ecf0f1;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        .examples {
+            padding: 20px;
+        }
+        .example-category {
+            margin-bottom: 25px;
+        }
+        .example-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+        .example-title.identical { background: #d5edda; }
+        .example-title.similar { background: #fff3cd; }
+        .example-title.different { background: #f8d7da; }
+        .example-item {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .example-header {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .content-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        .content-side {
+            padding: 15px;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        .content-side.historical {
+            background: #fff5f5;
+            border-right: 1px solid #dee2e6;
+        }
+        .content-side.current {
+            background: #f0fff4;
+        }
+        .content-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 Real API Comparison: Historical vs Current</h1>
+        <p>Comparing original content from Historical API vs Current API for the same jobs</p>
+        <p>Generated: 2025-06-15 12:30:46</p>
+    </div>
+    
+    <div class="summary">
+        <h2>📊 Analysis Overview</h2>
+        <p><strong>Total Job Pairs Analyzed:</strong> 5,619</p>
+        <p>This analysis compares the <em>original content</em> from the Historical API versus the Current API for the same job postings, showing real differences between the two data sources.</p>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            Evaluations - 5618 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">68.4%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">31.6%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.829</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title different">Different Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #825850300 - Similarity: 0.949
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            You will be evaluated for this job based on how well you meet the qualifications above. Your latest resume will be used to determine your qualifications. Your application package (resume, supporting d...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Your latest resume will be used to determine your qualifications. Your application package (resume, supporting documents, and responses to the questionnaire) will be used to determine your eligibility...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #825851900 - Similarity: 0.949
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            You will be evaluated for this job based on how well you meet the qualifications above. Your latest resume will be used to determine your qualifications. Your application package (resume, supporting d...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Your latest resume will be used to determine your qualifications. Your application package (resume, supporting documents, and responses to the questionnaire) will be used to determine your eligibility...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #825852200 - Similarity: 0.949
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            You will be evaluated for this job based on how well you meet the qualifications above. Your latest resume will be used to determine your qualifications. Your application package (resume, supporting d...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Your latest resume will be used to determine your qualifications. Your application package (resume, supporting documents, and responses to the questionnaire) will be used to determine your eligibility...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title similar">Similar Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 0.986
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            You will be evaluated for this job based on how well you meet the qualifications above. Additional selections may be made for similar positions across the Department of Health and Human Services (HHS)...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Additional selections may be made for similar positions across the Department of Health and Human Services (HHS) within the local commuting area(s) of the location identified in this announcement. By ...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 0.985
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            You will be evaluated for this job based on how well you meet the qualifications above. Additional selections may be made for similar positions across the Department of Health and Human Services (HHS)...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Additional selections may be made for similar positions across the Department of Health and Human Services (HHS) within the local commuting area(s) of the location identified in this announcement. By ...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 0.986
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            You will be evaluated for this job based on how well you meet the qualifications above. If you meet the minimum qualifications requirements for this position, your application will be evaluated and ra...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            If you meet the minimum qualifications requirements for this position, your application will be evaluated and rated under Category Rating selection procedures. Once the application process is complete...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            Required Documents - 5613 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">36.3%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">63.7%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.851</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title different">Different Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 0.925
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Resume : You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form ...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Resume: You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form y...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 0.925
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Resume : You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form ...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Resume: You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form y...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 0.916
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Resume : You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form ...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Resume: You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form y...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title identical">Identical Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789493500 - Similarity: 0.994
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Resume : You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form ...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Resume: You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form y...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #795619700 - Similarity: 0.994
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Resume : You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form ...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Resume: You are highly encouraged to use USAJOBS Resume Builder to ensure all required information is included in your Resume. If you use your own resume, curriculum vitae, or any other written form y...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #824178700 - Similarity: 0.999
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Note: Incomplete packets will not be considered. Failure to submit the required documentation will make you ineligible for this position. The following documents are required from all applicants: Résu...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Note: Incomplete packets will not be considered. Failure to submit the required documentation will make you ineligible for this position. The following documents are required from all applicants: Résu...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            What To Expect Next - 5618 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">99.9%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.1%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1.000</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title different">Different Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #837681700 - Similarity: 0.712
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Once your online application is submitted you will receive a confirmation notification by email. We will review applications to ensure qualification and eligibility requirements are met. After the rev...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Next steps Once your online application is submitted you will receive a confirmation notification by email. We will review applications to ensure qualification and eligibility requirements are met. Af...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title similar">Similar Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #833381100 - Similarity: 0.990
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Special Agent Application Process The application process consists of the below-listed steps. You must successfully complete each step of the process. Those who meet the screening qualifications will ...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Special Agent Application Process The application process consists of the below-listed steps. You must successfully complete each step of the process. Those who meet the screening qualifications will ...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #837888100 - Similarity: 0.990
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Your status will also be updated on USAJOBS throughout the process. You can check your status, by accessing the USAJOBS website at http://usajobs.gov/ and clicking on "Track Your Online Application."...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Your status will also be updated on USAJOBS throughout the process. You can check your status, by accessing the USAJOBS website at http://usajobs.gov/ and clicking on "Track Your Online Application."...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #838108900 - Similarity: 0.982
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            After the vacancy announcement closes, applicants are evaluated to ensure qualification and eligibility requirements are met. After the review is complete, a referral certificate(s) is issued and appl...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            After the vacancy announcement closes, applicants are evaluated to ensure qualification and eligibility requirements are met. After the review is complete, a referral certificate(s) is issued and appl...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title identical">Identical Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            You can track the progress of your application package via your USAJobs account. You will receive an acknowledgement from USAJobs that your submission was successful once we have received your on-line...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            You can track the progress of your application package via your USAJobs account. You will receive an acknowledgement from USAJobs that your submission was successful once we have received your on-line...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            You can track the progress of your application package via your USAJobs account. You will receive an acknowledgement from USAJobs that your submission was successful once we have received your on-line...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            You can track the progress of your application package via your USAJobs account. You will receive an acknowledgement from USAJobs that your submission was successful once we have received your on-line...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 1.000
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            You can track the progress of your application package via your USAJobs account. You will receive an acknowledgement from USAJobs that your submission was successful once we have received your on-line...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            You can track the progress of your application package via your USAJobs account. You will receive an acknowledgement from USAJobs that your submission was successful once we have received your on-line...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            Other Information - 5548 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">91.5%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">8.3%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.2%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.995</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title different">Different Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #829630200 - Similarity: 0.879
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            The AO is an Equal Opportunity Employer.
+
+Read more...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            The AO is an Equal Opportunity Employer....
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #836476200 - Similarity: 0.879
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            The AO is an Equal Opportunity Employer.
+
+Read more...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            The AO is an Equal Opportunity Employer....
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #837599200 - Similarity: 0.949
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            This job is being filled by an alternative hiring process and is not in the competitive civil service.
+
+Read more...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            This job is being filled by an alternative hiring process and is not in the competitive civil service....
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title similar">Similar Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #825161300 - Similarity: 0.989
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            If you are a male applicant who was born after 12/31/1959 and are required to register under the Military Selective Service Act, the Defense Authorization Act of 1986 requires that you be registered o...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            If you are a male applicant who was born after 12/31/1959 and are required to register under the Military Selective Service Act, the Defense Authorization Act of 1986 requires that you be registered o...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #826545400 - Similarity: 0.986
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Additional selections may be made from this vacancy announcement for up to 90 days after the closing date. Payment of Permanent Change of Station (PCS) costs is not authorized based upon a determinati...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Additional selections may be made from this vacancy announcement for up to 90 days after the closing date. Payment of Permanent Change of Station (PCS) costs is not authorized based upon a determinati...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #826724200 - Similarity: 0.986
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            If you are a male applicant who was born after 12/31/1959 and are required to register under the Military Selective Service Act, the Defense Authorization Act of 1986 requires that you be registered o...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            If you are a male applicant who was born after 12/31/1959 and are required to register under the Military Selective Service Act, the Defense Authorization Act of 1986 requires that you be registered o...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="example-category">
+                <div class="example-title identical">Identical Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 0.997
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Per IHS policy (SGM 21-04) IHS selectees to positions located in Federally operated hospitals, health centers, and clinics must be fully vaccinated for COVID-19 before entry on duty or have IHS approv...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Per IHS policy (SGM 21-04) IHS selectees to positions located in Federally operated hospitals, health centers, and clinics must be fully vaccinated for COVID-19 before entry on duty or have IHS approv...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 0.997
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Per IHS policy (SGM 21-04) IHS selectees to positions located in Federally operated hospitals, health centers, and clinics must be fully vaccinated for COVID-19 before entry on duty or have IHS approv...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Per IHS policy (SGM 21-04) IHS selectees to positions located in Federally operated hospitals, health centers, and clinics must be fully vaccinated for COVID-19 before entry on duty or have IHS approv...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789442700 - Similarity: 0.997
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Per IHS policy (SGM 21-04) IHS selectees to positions located in Federally operated hospitals, health centers, and clinics must be fully vaccinated for COVID-19 before entry on duty or have IHS approv...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            Per IHS policy (SGM 21-04) IHS selectees to positions located in Federally operated hospitals, health centers, and clinics must be fully vaccinated for COVID-19 before entry on duty or have IHS approv...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="field-section">
+        <div class="field-header">
+            Hiring Path - 1694 Jobs Compared
+        </div>
+        
+        <div class="field-stats">
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Identical<br>(≥99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.0%</div>
+                <div class="stat-label">Similar<br>(95-99% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100.0%</div>
+                <div class="stat-label">Different<br>(<95% similarity)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.402</div>
+                <div class="stat-label">Average<br>Similarity</div>
+            </div>
+        </div>
+        
+        <div class="examples">
+
+            <div class="example-category">
+                <div class="example-title different">Different Content Examples</div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789268300 - Similarity: 0.232
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Individuals with disabilities, Veterans, Native Americans, Military spouses, Peace Corps & AmeriCorps Vista, Career transition (CTAP, ICTAP, RPL), Federal employees - Excepted service, Federal employe...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            fed-transition, fed-competitive, fed-excepted, disability, mspouse, native, peace, vet...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789281200 - Similarity: 0.239
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Military spouses, Native Americans, Individuals with disabilities, Veterans, Peace Corps & AmeriCorps Vista, Federal employees - Excepted service, Career transition (CTAP, ICTAP, RPL), Federal employe...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            fed-transition, fed-competitive, fed-excepted, disability, mspouse, native, peace, vet...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-item">
+                    <div class="example-header">
+                        Job #789451300 - Similarity: 0.258
+                    </div>
+                    <div class="content-comparison">
+                        <div class="content-side historical">
+                            <div class="content-header">Historical API</div>
+                            Individuals with disabilities, Peace Corps & AmeriCorps Vista, Native Americans, Military spouses, Veterans, Career transition (CTAP, ICTAP, RPL), Federal employees - Competitive service, Federal empl...
+                        </div>
+                        <div class="content-side current">
+                            <div class="content-header">Current API</div>
+                            fed-transition, fed-competitive, fed-excepted, disability, mspouse, native, peace, vet...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="summary">
+        <h2>🔍 Key Insights</h2>
+        <ul>
+            <li><strong>API Evolution:</strong> Shows how the USAJobs APIs have evolved and what content differs between sources</li>
+            <li><strong>Data Quality:</strong> Identifies fields where one API provides better/more complete information</li>
+            <li><strong>Integration Strategy:</strong> Helps determine which API to prioritize for each type of content</li>
+        </ul>
+    </div>
+</body>
+</html>
