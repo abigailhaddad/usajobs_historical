@@ -1,9 +1,12 @@
 #!/bin/bash
 # Run multiple years in parallel using tmux sessions
+# Now fetches both historical and current jobs, saves to Parquet files
 # Usage: 
-#   ./run_parallel_years.sh                    # Default: 2019-2023
-#   ./run_parallel_years.sh 2015 2020          # Range: 2015-2020
-#   ./run_parallel_years.sh 2019 2020 2021     # Specific years
+#   ./run_parallel.sh                    # Default: 2019-2023
+#   ./run_parallel.sh 2015 2020          # Range: 2015-2020
+#   ./run_parallel.sh 2019 2020 2021     # Specific years
+#
+# NOTE: Uses caffeinate to prevent Mac sleep during long runs
 
 # Parse arguments
 if [ $# -eq 0 ]; then
@@ -39,8 +42,9 @@ if [ -z "${YEARS+x}" ]; then
     done
 fi
 
-echo "🚀 USAJobs Historical Parallel Pull"
+echo "🚀 USAJobs Data Pipeline - Parallel Processing"
 echo "📅 Years to process: ${YEARS[@]}"
+echo "💾 Data will be saved to Parquet files in data/ directory"
 echo ""
 
 # Show estimated time
@@ -48,8 +52,6 @@ NUM_YEARS=${#YEARS[@]}
 EST_HOURS=$(( NUM_YEARS * 365 * 20 / 3600 ))  # ~20 seconds per day
 echo "⏱️  Estimated time: ~${EST_HOURS} hours total (running in parallel)"
 echo ""
-
-# Virtual environment check removed - assume user is already in venv
 
 # Create logs directory
 mkdir -p logs
@@ -67,30 +69,41 @@ check_session() {
 # Kill any existing sessions for these years
 echo "🧹 Cleaning up any existing sessions..."
 for year in "${YEARS[@]}"; do
-    session_name="usajobs-$year"
+    session_name="usajobs-historical-$year"
     if check_session "$session_name"; then
         echo "  Killing existing session: $session_name"
         tmux kill-session -t "$session_name"
     fi
 done
 
+# Also kill the current jobs session if it exists
+if check_session "usajobs-current-all"; then
+    echo "  Killing existing session: usajobs-current-all"
+    tmux kill-session -t "usajobs-current-all"
+fi
+
 echo ""
 echo "🔄 Starting parallel pulls..."
 echo ""
 
-# Start tmux sessions for each year
+# Start tmux sessions for each year (historical data only)
 for year in "${YEARS[@]}"; do
-    session_name="usajobs-$year"
+    session_name="usajobs-historical-$year"
     start_date="$year-01-01"
     end_date="$year-12-31"
     
-    echo "📅 Year $year:"
+    echo "📅 Historical $year:"
     echo "  Session: $session_name"
     echo "  Range: $start_date to $end_date"
+    echo "  File: historical_jobs_$year.parquet"
     
-    # Start the tmux session (run from repo root)
+    # Create log file for this session
+    logfile="logs/historical_${year}_$(date +%Y%m%d_%H%M%S).log"
+    echo "  Log: $logfile"
+    
+    # Start the tmux session for historical data with logging AND caffeinate to prevent sleep
     tmux new-session -d -s "$session_name" \
-        "cd /Users/abigailhaddad/Documents/repos/usajobs_historic && source venv/bin/activate && scripts/run_single.sh range $start_date $end_date"
+        "cd /Users/abigailhaddad/Documents/repos/usajobs_historic && source venv/bin/activate && caffeinate -i python scripts/collect_data.py --start-date $start_date --end-date $end_date --data-dir data 2>&1 | tee $logfile"
     
     if [ $? -eq 0 ]; then
         echo "  ✅ Started successfully"
@@ -103,6 +116,25 @@ for year in "${YEARS[@]}"; do
     sleep 2
 done
 
+# Start one session for ALL current jobs
+# Create log file for current jobs session
+current_logfile="logs/current_all_$(date +%Y%m%d_%H%M%S).log"
+
+echo "📊 Current Jobs (ALL):"
+echo "  Session: usajobs-current-all"
+echo "  Files: current_jobs_YYYY.parquet (distributed by year)"
+echo "  Log: $current_logfile"
+
+tmux new-session -d -s "usajobs-current-all" \
+    "cd /Users/abigailhaddad/Documents/repos/usajobs_historic && source venv/bin/activate && caffeinate -i python scripts/collect_current_data.py --all --data-dir data 2>&1 | tee $current_logfile"
+
+if [ $? -eq 0 ]; then
+    echo "  ✅ Started successfully"
+else
+    echo "  ❌ Failed to start"
+fi
+echo ""
+
 echo "📊 All sessions started!"
 echo ""
 echo "🖥️  TMUX SESSION MANAGEMENT:"
@@ -111,7 +143,7 @@ echo ""
 # Display session status
 echo "Active sessions:"
 for year in "${YEARS[@]}"; do
-    session_name="usajobs-$year"
+    session_name="usajobs-historical-$year"
     if check_session "$session_name"; then
         echo "  ✅ $session_name - Running"
     else
@@ -119,190 +151,24 @@ for year in "${YEARS[@]}"; do
     fi
 done
 
+# Check current jobs session
+if check_session "usajobs-current-all"; then
+    echo "  ✅ usajobs-current-all - Running"
+else
+    echo "  ❌ usajobs-current-all - Not running"
+fi
+
 echo ""
 echo "📝 Useful commands:"
 echo "  Watch all sessions:     tmux ls"
-echo "  Attach to a session:    tmux attach -t usajobs-2023"
+echo "  Attach to a session:    tmux attach -t usajobs-historical-2023"
 echo "  Detach from session:    Press Ctrl+B then D"
-echo "  Kill a session:         tmux kill-session -t usajobs-2023"
-echo "  Kill all sessions:      for y in ${YEARS[@]}; do tmux kill-session -t usajobs-\$y; done"
+echo "  Kill a session:         tmux kill-session -t usajobs-historical-2023"
 echo ""
 echo "📊 Monitor progress:"
-echo "  All logs:              tail -f ../../logs/range_pull_*.log"
-echo "  Specific year:         tail -f ../../logs/range_pull_2023*.log"
+echo "  ./scripts/monitor_parallel.sh"
 echo ""
-echo "💾 Check DuckDB files:"
-echo "  ls -lh usajobs_*.duckdb"
+echo "💾 Check data:"
+echo "  ls -lh data/*.parquet"
 echo ""
-
-# Create monitoring script
-cat > monitor_parallel.sh << 'EOF'
-#!/bin/bash
-# Monitor parallel job progress
-
-echo "🔍 Monitoring parallel USAJobs pulls..."
-echo ""
-
-while true; do
-    clear
-    echo "📊 USAJobs Parallel Pull Status - $(date)"
-    echo "================================================"
-    echo ""
-    
-    # Check tmux sessions
-    echo "📺 Active Sessions:"
-    tmux ls 2>/dev/null | grep usajobs || echo "  No active sessions"
-    echo ""
-    
-    # Check DuckDB files
-    echo "💾 DuckDB Files:"
-    ls -lh usajobs_*.duckdb 2>/dev/null | awk '{print "  " $9 ": " $5}' || echo "  No DuckDB files yet"
-    echo ""
-    
-    # Check latest log entries
-    echo "📝 Latest Activity:"
-    for log in ../../logs/range_pull_*.log; do
-        if [ -f "$log" ]; then
-            year=$(basename "$log" | grep -o "20[0-9][0-9]" | head -1)
-            last_line=$(tail -1 "$log" | sed 's/^/  /')
-            echo "  $year: $last_line" | cut -c1-80
-        fi
-    done
-    echo ""
-    
-    # Check job counts in DuckDB files
-    echo "📈 Job Counts:"
-    for db in usajobs_*.duckdb; do
-        if [ -f "$db" ]; then
-            year=$(basename "$db" .duckdb | grep -o "[0-9]*")
-            count=$(echo "SELECT COUNT(*) FROM historical_jobs;" | duckdb "$db" -csv | tail -1)
-            echo "  $year: $count jobs"
-        fi
-    done
-    echo ""
-    
-    echo "Press Ctrl+C to exit monitoring"
-    sleep 30
-done
-EOF
-
-chmod +x monitor_parallel.sh
-
-echo "🔍 To monitor progress continuously:"
-echo "  ./monitor_parallel.sh"
-echo ""
-
-# Create completion check script
-cat > check_parallel_complete.sh << EOF
-#!/bin/bash
-# Check if all parallel pulls are complete
-
-# Get years from running tmux sessions and DuckDB files
-YEARS=()
-
-# Add years from tmux sessions
-for session in \$(tmux ls 2>/dev/null | grep "usajobs-" | cut -d: -f1); do
-    year=\${session#usajobs-}
-    YEARS+=(\$year)
-done
-
-# Add years from DuckDB files
-for db in usajobs_*.duckdb; do
-    if [ -f "\$db" ]; then
-        year=\$(basename "\$db" .duckdb | sed 's/usajobs_//')
-        if [[ "\$year" =~ ^[0-9]{4}\$ ]] && [[ ! " \${YEARS[@]} " =~ " \$year " ]]; then
-            YEARS+=(\$year)
-        fi
-    fi
-done
-
-# Sort years
-IFS=\$'\\n' YEARS=(\$(sort -n <<<"\${YEARS[*]}"))
-unset IFS
-
-ALL_COMPLETE=true
-
-echo "🔍 Checking parallel pull completion..."
-echo ""
-
-if [ \${#YEARS[@]} -eq 0 ]; then
-    echo "❌ No USAJobs pulls found!"
-    exit 1
-fi
-
-for year in "\${YEARS[@]}"; do
-    session_name="usajobs-\$year"
-    if tmux has-session -t "\$session_name" 2>/dev/null; then
-        echo "  ⏳ \$year: Still running"
-        ALL_COMPLETE=false
-    else
-        if [ -f "usajobs_\$year.duckdb" ]; then
-            count=\$(echo "SELECT COUNT(*) FROM historical_jobs;" | duckdb "usajobs_\$year.duckdb" -csv 2>/dev/null | tail -1)
-            if [ -n "\$count" ] && [ "\$count" -gt 0 ]; then
-                echo "  ✅ \$year: Complete (\$count jobs)"
-            else
-                echo "  ⚠️  \$year: DuckDB exists but empty"
-                ALL_COMPLETE=false
-            fi
-        else
-            echo "  ❌ \$year: Not started or failed"
-            ALL_COMPLETE=false
-        fi
-    fi
-done
-
-echo ""
-if [ "\$ALL_COMPLETE" = true ]; then
-    echo "✅ All pulls complete!"
-    echo ""
-    echo "🚀 Ready to export to PostgreSQL:"
-    echo "  ./export_all_to_postgres.sh"
-else
-    echo "⏳ Still processing..."
-fi
-EOF
-
-chmod +x check_parallel_complete.sh
-
-# Create PostgreSQL export script
-cat > export_all_to_postgres.sh << 'EOF'
-#!/bin/bash
-# Export all DuckDB files to PostgreSQL
-
-echo "🚀 Exporting all DuckDB files to PostgreSQL..."
-echo ""
-
-# Check for DuckDB files
-DUCKDB_FILES=(data/usajobs_*.duckdb)
-if [ ${#DUCKDB_FILES[@]} -eq 0 ]; then
-    echo "❌ No DuckDB files found!"
-    exit 1
-fi
-
-echo "📊 Found ${#DUCKDB_FILES[@]} DuckDB files to export:"
-for db in "${DUCKDB_FILES[@]}"; do
-    echo "  - $db"
-done
-echo ""
-
-# Export each file
-for db in "${DUCKDB_FILES[@]}"; do
-    echo "📤 Exporting $db..."
-    python /Users/abigailhaddad/Documents/repos/usajobs_historic/scripts/export_postgres.py "$db" 8
-    echo ""
-done
-
-echo "✅ All exports complete!"
-echo ""
-echo "🔍 Verify with:"
-echo "  python scripts/check_data.py"
-EOF
-
-chmod +x export_all_to_postgres.sh
-
 echo "✅ Setup complete!"
-echo ""
-echo "🎯 Next steps:"
-echo "  1. Monitor progress:     ./monitor_parallel.sh"
-echo "  2. Check completion:     ./check_parallel_complete.sh"
-echo "  3. Export to PostgreSQL: ./export_all_to_postgres.sh (after all complete)"

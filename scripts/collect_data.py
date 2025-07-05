@@ -211,7 +211,13 @@ def load_existing_jobs(parquet_path: str) -> set:
     """Load existing job control numbers from parquet file."""
     try:
         df = pd.read_parquet(parquet_path)
-        return set(df['usajobsControlNumber'].astype(str))
+        # Use usajobs_control_number if available (consistent with current script), otherwise fall back
+        if 'usajobs_control_number' in df.columns:
+            return set(df['usajobs_control_number'].dropna().astype(str))
+        elif 'usajobsControlNumber' in df.columns:
+            return set(df['usajobsControlNumber'].dropna().astype(str))
+        else:
+            return set()
     except (FileNotFoundError, KeyError):
         return set()
 
@@ -221,14 +227,25 @@ def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
     if not jobs:
         return
     
-    # Convert nested fields to JSON strings to match existing format
+    # Convert nested fields to JSON strings and add field rationalization
     processed_jobs = []
     for job in jobs:
         processed_job = job.copy()
+        
         # Convert arrays to JSON strings
         for field in ['HiringPaths', 'JobCategories', 'PositionLocations']:
             if field in processed_job and isinstance(processed_job[field], (list, dict)):
                 processed_job[field] = json.dumps(processed_job[field])
+        
+        # Add field rationalization to match current data script format
+        # Ensure usajobs_control_number is string for consistency (like current script does)
+        if 'usajobsControlNumber' in processed_job:
+            processed_job['usajobs_control_number'] = str(processed_job['usajobsControlNumber'])
+        
+        # Fix the typo that exists in API response: disableAppyOnline -> disableApplyOnline
+        if 'disableAppyOnline' in processed_job:
+            processed_job['disableApplyOnline'] = processed_job.pop('disableAppyOnline')
+        
         # Add metadata
         processed_job['inserted_at'] = datetime.now().isoformat()
         processed_jobs.append(processed_job)
@@ -239,9 +256,11 @@ def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
     # Load existing data if file exists
     if os.path.exists(parquet_path):
         existing_df = pd.read_parquet(parquet_path)
-        # Combine and deduplicate
+        # Remove any duplicate control numbers (keep new data)
+        if 'usajobs_control_number' in existing_df.columns:
+            existing_df = existing_df[~existing_df['usajobs_control_number'].isin(new_df['usajobs_control_number'])]
+        # Combine dataframes
         combined_df = pd.concat([existing_df, new_df], ignore_index=True)
-        combined_df = combined_df.drop_duplicates(subset=['usajobsControlNumber'], keep='last')
     else:
         combined_df = new_df
     

@@ -1,6 +1,6 @@
 # USAJobs Historical Data Pipeline
 
-Fetches historical job listings from the USAJobs Historical API and stores them in DuckDB for local analysis and PostgreSQL for cloud storage.
+Fetches historical and current job listings from the USAJobs APIs and stores them in Parquet files for local analysis and PostgreSQL for cloud storage.
 
 ## Data Coverage
 
@@ -21,6 +21,15 @@ Fetches historical job listings from the USAJobs Historical API and stores them 
 | 2025 | 79,283 | Current through June 16, 2025 |
 
 **Coverage**: 87.3% of expected days (3,506/4,018 days) from 2015-01-01 to 2025-12-31
+
+## Data Sources
+
+The pipeline collects data from two USAJobs APIs:
+
+1. **Historical API** (`/api/historicjoa`) - Past job announcements by date range
+2. **Current API** (`/api/Search`) - Currently active job postings
+
+Both APIs are normalized to a common schema and stored in year-based Parquet files.
 
 ## Setup
 
@@ -46,41 +55,43 @@ Fetches historical job listings from the USAJobs Historical API and stores them 
 
 ```
 ├── scripts/                 # All scripts in one place
-│   ├── collect_data.py          # Main data collection from USAJobs API
+│   ├── collect_data.py          # Historical data collection
+│   ├── collect_current_data.py  # Current jobs collection
 │   ├── run_parallel.sh          # Run multiple years in parallel (recommended)
-│   ├── run_single.sh            # Run single date range
-│   ├── export_postgres.py       # Export single DuckDB to PostgreSQL
-│   ├── export_all.sh            # Export all DuckDB files to PostgreSQL
+│   ├── run_single.sh            # Run single date range or current jobs
+│   ├── monitor_parallel.sh      # Monitor parallel job progress
+│   ├── export_postgres.py       # Export Parquet files to PostgreSQL
+│   ├── export_all.sh            # Export all Parquet files to PostgreSQL
 │   ├── check_data.py            # Verify data integrity
-│   ├── query_data.py            # Interactive DuckDB queries
-│   ├── export_analysis.py       # Export specific job analyses
 │   └── upload_schema.sh         # Upload PostgreSQL schema
 ├── data/                    # Data storage
-│   ├── usajobs_YEAR.duckdb     # Local analytical databases
-│   └── exports/                # CSV exports
+│   ├── historical_jobs_YEAR.parquet  # Historical jobs by year
+│   ├── current_jobs_YEAR.parquet     # Current jobs by year
+│   └── exports/                      # CSV exports
 ├── analysis/                # Analysis and reports
 │   ├── product_manager_analysis.qmd    # Quarto analysis
 │   ├── product_manager_analysis.html   # Generated report
 │   └── usajobs_analysis.ipynb          # Jupyter notebook
 ├── sql/                     # Database schemas
 │   └── create_historical_jobs.sql      # PostgreSQL table definition
-├── logs/                    # Auto-generated pipeline logs
-├── monitor_current.sh       # Monitor running parallel jobs
-└── check_parallel_complete.sh # Check if parallel jobs finished
+└── logs/                    # Auto-generated pipeline logs
 ```
 
 ## Run Pipeline
 
 **Quick pulls:**
 ```bash
-# Process jobs from last 24 hours
+# Process jobs from last 24 hours (both APIs)
 scripts/run_single.sh daily
 
-# Process jobs from last 7 days
+# Process jobs from last 7 days (both APIs)
 scripts/run_single.sh days 7
 
-# Process jobs from last 30 days
+# Process jobs from last 30 days (both APIs)
 scripts/run_single.sh month
+
+# Process current jobs only (last 7 days)
+scripts/run_single.sh current 7
 ```
 
 **Parallel processing (recommended for bulk data):**
@@ -89,11 +100,8 @@ scripts/run_single.sh month
 scripts/run_parallel.sh 2019 2023      # Range: 2019-2023
 scripts/run_parallel.sh 2020 2021 2022 # Specific years
 
-# Monitor all parallel jobs
-./monitor_current.sh
-
-# Check completion status
-./check_parallel_complete.sh
+# Monitor all parallel jobs with live progress
+scripts/monitor_parallel.sh
 
 # Export all to PostgreSQL after completion
 scripts/export_all.sh
@@ -113,41 +121,75 @@ scripts/run_single.sh range 2024-06-01 2024-06-30
 
 ## Data Storage
 
-- **DuckDB**: Local analytical database (`usajobs_YEAR.duckdb`) for fast querying
-- **PostgreSQL**: Cloud database for final storage (exported from DuckDB)
+- **Parquet Files**: Primary storage format for efficient analytics
+  - `historical_jobs_YEAR.parquet`: Historical job announcements by year
+  - `current_jobs_YEAR.parquet`: Current job postings by year
+- **PostgreSQL**: Cloud database for final storage (exported from Parquet)
 - **Logs**: Stored in `logs/` directory
+
+## Data Architecture
+
+The pipeline uses a "keep everything + overlay" approach:
+
+- **Historical API**: Keeps all 40+ original fields (these field names are our standard)
+- **Current API**: Keeps all original nested fields PLUS adds overlay fields using historical API names
+- **Result**: No data loss + consistent querying across both APIs
+
+## API Field Mapping
+
+Key fields are normalized using historical API field names for consistent querying:
+
+### Key Normalized Fields
+| Historical Field Name | Historical API Source | Current API Source | Notes |
+|----------------------|----------------------|-------------------|-------|
+| `usajobsControlNumber` | `usajobsControlNumber` | `PositionID` | Unique job identifier |
+| `announcementNumber` | `announcementNumber` | `AnnouncementNumber` | Public announcement ID |
+| `hiringAgencyName` | `hiringAgencyName` | `DepartmentName` | Agency name |
+| `hiringAgencyCode` | `hiringAgencyCode` | `OrganizationCodes` (first part) | Agency code |
+| `positionTitle` | `positionTitle` | `PositionTitle` | Job title |
+| `minimumGrade` | `minimumGrade` | `JobGrade[0].Code` | Minimum grade level |
+| `maximumGrade` | `maximumGrade` | `JobGrade[-1].Code` | Maximum grade level |
+| `minimumSalary` | `minimumSalary` | `PositionRemuneration[0].MinimumRange` | Minimum salary |
+| `maximumSalary` | `maximumSalary` | `PositionRemuneration[0].MaximumRange` | Maximum salary |
+| `positionOpenDate` | `positionOpenDate` | `PositionStartDate` | Position open date |
+| `positionCloseDate` | `positionCloseDate` | `PositionEndDate` | Position close date |
+
+### Data Structure
+- **Historical API**: ~40 fields including nested arrays (`HiringPaths`, `JobCategories`, `PositionLocations`)
+- **Current API**: ~25 overlay fields + full original nested structure (`MatchedObjectDescriptor`, etc.)
+- **Both APIs**: Can be queried using historical field names for consistency
+
+### Pipeline-Added Fields
+| Field | Description |
+|-------|-------------|
+| `inserted_at` | Timestamp when pulled from API |
 
 ## Query Data
 
 ```bash
-# Interactive DuckDB queries
-python scripts/query_data.py data/usajobs_2024.duckdb
-
-# Export product manager jobs to CSV
-python scripts/export_analysis.py
-
-# Check data integrity (compares DuckDB vs PostgreSQL)
+# Check data integrity and counts
 python scripts/check_data.py
 
-# Export all DuckDB files to PostgreSQL
+# Export all Parquet files to PostgreSQL
 scripts/export_all.sh
 
 # Export single year to PostgreSQL
-python scripts/export_postgres.py data/usajobs_2024.duckdb 8
+python scripts/export_postgres.py data/historical_jobs_2024.parquet 8
 ```
 
 ## Performance
 
-- **Data collection**: ~20 seconds per day (handles 503 errors with 7 retries per request)
+- **Data collection**: ~1.5 seconds per day (handles 503 errors with 7 retries per request)
 - **PostgreSQL export**: 10,000-15,000 jobs/second with parallel processing  
-- **Local queries**: Instant with DuckDB indexing
+- **Local queries**: Fast with Parquet columnar format
 - **Error handling**: Distinguishes between legitimate 0-job days and API failures
 
 ## Workflow Overview
 
-1. **Collect Data**: Use `scripts/run_parallel.sh` to fetch historical jobs from USAJobs API
-2. **Store Locally**: Data saved in DuckDB files (`usajobs_YEAR.duckdb`) with deduplication
-3. **Export to Cloud**: Use `scripts/export_all.sh` for fast parallel PostgreSQL upload
-4. **Verify**: Use `scripts/check_data.py` to ensure data integrity between DuckDB and PostgreSQL
+1. **Collect Data**: Use `scripts/run_parallel.sh` to fetch historical and current jobs
+2. **Store Locally**: Data saved in year-based Parquet files with deduplication
+3. **Monitor Progress**: Use `scripts/monitor_parallel.sh` to watch live progress
+4. **Export to Cloud**: Use `scripts/export_all.sh` for fast parallel PostgreSQL upload
+5. **Verify**: Use `scripts/check_data.py` to ensure data integrity
 
 The pipeline handles API errors with exponential backoff and can resume from existing data if interrupted.
