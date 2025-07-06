@@ -103,7 +103,7 @@ for year in "${YEARS[@]}"; do
     
     # Start the tmux session for historical data with logging AND caffeinate to prevent sleep
     tmux new-session -d -s "$session_name" \
-        "cd /Users/abigailhaddad/Documents/repos/usajobs_historic && source venv/bin/activate && caffeinate -i python scripts/collect_data.py --start-date $start_date --end-date $end_date --data-dir data 2>&1 | tee $logfile"
+        "cd $(pwd) && source venv/bin/activate && caffeinate -i python scripts/collect_data.py --start-date $start_date --end-date $end_date --data-dir data 2>&1 | tee $logfile"
     
     if [ $? -eq 0 ]; then
         echo "  ✅ Started successfully"
@@ -126,7 +126,7 @@ echo "  Files: current_jobs_YYYY.parquet (distributed by year)"
 echo "  Log: $current_logfile"
 
 tmux new-session -d -s "usajobs-current-all" \
-    "cd /Users/abigailhaddad/Documents/repos/usajobs_historic && source venv/bin/activate && caffeinate -i python scripts/collect_current_data.py --all --data-dir data 2>&1 | tee $current_logfile"
+    "cd $(pwd) && source venv/bin/activate && caffeinate -i python scripts/collect_current_data.py --all --data-dir data 2>&1 | tee $current_logfile"
 
 if [ $? -eq 0 ]; then
     echo "  ✅ Started successfully"
