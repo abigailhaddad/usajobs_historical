@@ -115,7 +115,7 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 ## File Structure
 
 ```
-├── scripts/                 # All scripts in one place
+├── scripts/                 
 │   ├── collect_data.py          # Historical data collection
 │   ├── collect_current_data.py  # Current jobs collection
 │   ├── run_parallel.sh          # Run multiple years in parallel 
