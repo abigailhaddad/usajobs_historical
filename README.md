@@ -7,7 +7,7 @@
 ## Resources
 
 - [Field documentation](https://abigailhaddad.github.io/usajobs_historical/) - Guide to data fields and statistics
-- [USAJobs API documentation](https://developer.usajobs.gov/)
+- [USAJobs API documentation](https://developer.usajobs.gov/) - Official U.S. government developer documentation for USAJOBS APIs
 
 **Job dataset with 2,974,930 job announcements from Historical + Current APIs**
 
@@ -142,8 +142,11 @@ python [update/update_all.py](https://github.com/abigailhaddad/usajobs_historica
 
 **Historical data collection (if needed):**
 ```bash
-# Single year: [scripts/run_single.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_single.sh) range 2024-01-01 2024-12-31
-# Multiple years: [scripts/run_parallel.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_parallel.sh) 2020 2021 2022
+# Single year:
+[scripts/run_single.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_single.sh) range 2024-01-01 2024-12-31
+
+# Multiple years:
+[scripts/run_parallel.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_parallel.sh) 2020 2021 2022
 ```
 
 ## Monitoring Data Collection
