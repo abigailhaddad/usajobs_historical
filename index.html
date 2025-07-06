@@ -140,7 +140,7 @@
                 <tr><td>2014</td><td>24</td><td>19</td><td>Very limited</td></tr>
                 <tr><td>2015</td><td>140</td><td>131</td><td>Very limited</td></tr>
                 <tr><td>2016</td><td>3,879</td><td>1,633</td><td>Very limited</td></tr>
-                <tr><td>2017</td><td>237,145</td><td>226,248</td><td>✅ Complete year</td></tr>
+                <tr><td>2017</td><td>237,145</td><td>226,248</td><td>Appears complete from March</td></tr>
                 <tr><td>2018</td><td>328,111</td><td>315,729</td><td>✅ Complete year</td></tr>
                 <tr><td>2019</td><td>349,256</td><td>336,608</td><td>✅ Complete year</td></tr>
                 <tr><td>2020</td><td>327,545</td><td>315,161</td><td>✅ Complete year</td></tr>
@@ -527,15 +527,23 @@
         </ul>
 
         <h2 id="code-examples">Code Examples from examples.py</h2>
+        <p>The <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py">examples.py</a> script demonstrates both local file access and direct GitHub downloads. It runs complete analysis on 2.97M job postings and automatically cleans up downloaded files.</p>
 
-        <h3>Basic Data Loading</h3>
+        <h3>Local Data Loading</h3>
         <pre>import pandas as pd
 
 # Load a single year
 df_2024 = pd.read_parquet('data/historical_jobs_2024.parquet')
-print(f"✓ Successfully loaded {len(df_2024):,} job postings from 2024")
-print(f"  Columns: {df_2024.shape[1]}")
-print(f"  Memory usage: {df_2024.memory_usage(deep=True).sum() / 1024**2:.1f} MB")</pre>
+print(f"✓ Successfully loaded {len(df_2024):,} job postings from 2024")</pre>
+
+        <h3>GitHub Download Example</h3>
+        <pre>import pandas as pd
+import requests
+
+# Download directly from GitHub
+url = 'https://github.com/abigailhaddad/usajobs_historical/raw/main/data/historical_jobs_2024.parquet'
+df = pd.read_parquet(url)
+print(f"✓ Downloaded {len(df):,} job postings")</pre>
 
         <div class="code-example">
             <strong>Output:</strong><br>

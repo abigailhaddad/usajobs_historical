@@ -56,7 +56,7 @@ Data collection last run: 2025-07-06. Early years are incomplete, mostly consist
 | 2024 | 367,744 | 352,296 |
 | 2025 | 95,674 | 94,583 |
 
-Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,638 closed that year). 
+Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,633 closed that year). 2017 starts with limited data in January-February, then ramps up significantly from March onward. 
 
 Some job postings may have future opening dates. 
 

@@ -64,7 +64,7 @@ def run_local_examples():
         print("\nThis script expects you to have cloned the full repository.")
         print("If you haven't cloned the repo, the download examples below will work instead.")
         print("\nTo use local files:")
-        print("1. Clone the repository: git clone https://github.com/yourusername/usajobs_historic.git")
+        print("1. Clone the repository: git clone https://github.com/abigailhaddad/usajobs_historical.git")
         print("2. Run this script from the repository root directory")
         return None
     
@@ -96,7 +96,7 @@ def run_download_examples():
     ensure_directory_exists(download_dir)
     
     # Download URL - use 2024 data as it's substantial but not too large
-    base_url = 'https://github.com/yourusername/usajobs_historic/raw/main/data/'
+    base_url = 'https://github.com/abigailhaddad/usajobs_historical/raw/main/data/'
     filename = 'historical_jobs_2024.parquet'
     url = base_url + filename
     local_download_path = os.path.join(download_dir, filename)
@@ -301,7 +301,7 @@ def run_duckdb_examples(filenames=None):
     ensure_directory_exists(download_dir)
 
     # ---------- 2. Check for local files first, then download if needed ----------
-    base_url = "https://github.com/yourusername/usajobs_historic/raw/main/data/"
+    base_url = "https://github.com/abigailhaddad/usajobs_historical/raw/main/data/"
     local_files = []
     
     for filename in filenames:
@@ -487,7 +487,7 @@ def main():
 ║  This script demonstrates working with 2.97M job postings       ║
 ║  from 2013-2025.                                                ║
 ║                                                                  ║
-║  Data source: https://github.com/yourusername/usajobs_historic  ║
+║  Data source: https://github.com/abigailhaddad/usajobs_historical  ║
 ╚══════════════════════════════════════════════════════════════════╝
     """)
     
@@ -499,17 +499,24 @@ def main():
         # Run DuckDB multi-year analysis
         run_duckdb_examples()
     else:
-        print("\nNo local files found. To run examples:")
-        print("1. Clone the repository and ensure data/ directory contains Parquet files")
-        print("2. Or run the data collection pipeline first")
+        print("No local files found.")
+    
+    # Always run download examples to demonstrate GitHub access
+    print("\nNow running download examples from GitHub...")
+    df_download = run_download_examples()
+    if df_download is not None:
+        analyze_data(df_download, "DOWNLOADED FILES")
     
     print("\n" + "="*80)
     print("EXAMPLES COMPLETE")
     print("="*80)
     print("\nFor more information:")
-    print("- Repository: https://github.com/yourusername/usajobs_historic")
+    print("- Repository: https://github.com/abigailhaddad/usajobs_historical")
     print("- Analysis Reports: analysis/national_parks/ (specialized analyses)")
     print("- Official USAJobs: https://www.usajobs.gov/")
+    
+    # Clean up downloaded files at the end
+    cleanup_download_folder()
 
 def main_with_output_capture():
     """Run main function and capture output to file"""
