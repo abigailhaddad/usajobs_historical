@@ -115,16 +115,16 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 ## File Structure
 
 ```
-├── [scripts/](https://github.com/abigailhaddad/usajobs_historical/tree/main/scripts)                 # All scripts in one place
-│   ├── [collect_data.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_data.py)          # Historical data collection
-│   ├── [collect_current_data.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_current_data.py)  # Current jobs collection
-│   ├── [run_parallel.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_parallel.sh)          # Run multiple years in parallel 
-│   ├── [run_single.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_single.sh)            # Run single date range or current jobs
-│   └── [monitor_parallel.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/monitor_parallel.sh)      # Monitor parallel job progress
-├── [update/](https://github.com/abigailhaddad/usajobs_historical/tree/main/update)                  # Automated update scripts
-│   ├── [update_all.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/update/update_all.py)            # Comprehensive update: data + docs
-│   ├── [generate_docs_data.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/update/generate_docs_data.py)    # Generate documentation data
-│   └── [update_docs.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/update/update_docs.py)           # Update README and index.html
+├── scripts/                 # All scripts in one place
+│   ├── collect_data.py          # Historical data collection
+│   ├── collect_current_data.py  # Current jobs collection
+│   ├── run_parallel.sh          # Run multiple years in parallel 
+│   ├── run_single.sh            # Run single date range or current jobs
+│   └── monitor_parallel.sh      # Monitor parallel job progress
+├── update/                  # Automated update scripts
+│   ├── update_all.py            # Comprehensive update: data + docs
+│   ├── generate_docs_data.py    # Generate documentation data
+│   └── update_docs.py           # Update README and index.html
 ├── data/                    # Data storage
 │   ├── historical_jobs_YEAR.parquet  # Historical jobs by year
 │   └── current_jobs_YEAR.parquet     # Current jobs by year
@@ -187,36 +187,6 @@ The pipeline uses a "keep everything + overlay" approach:
 - **Historical API**: Keeps all 40+ original fields (these field names are our standard)
 - **Current API**: Keeps all original nested fields PLUS adds overlay fields using historical API names
 - **Result**: No data loss + consistent querying across both APIs
-
-## API Field Mapping
-
-Key fields are normalized using historical API field names for consistent querying:
-
-### Key Normalized Fields
-| Historical Field Name | Historical API Source | Current API Source | Notes |
-|----------------------|----------------------|-------------------|-------|
-| `usajobsControlNumber` | `usajobsControlNumber` | Extracted from `PositionURI` | Numeric job identifier |
-| `announcementNumber` | `announcementNumber` | `PositionID` | Public announcement ID |
-| `hiringAgencyName` | `hiringAgencyName` | `DepartmentName` | Agency name |
-| `hiringAgencyCode` | `hiringAgencyCode` | `OrganizationCodes` (first part) | Agency code |
-| `positionTitle` | `positionTitle` | `PositionTitle` | Job title |
-| `minimumGrade` | `minimumGrade` | `JobGrade[0].Code` | Minimum grade level |
-| `maximumGrade` | `maximumGrade` | `JobGrade[-1].Code` | Maximum grade level |
-| `minimumSalary` | `minimumSalary` | `PositionRemuneration[0].MinimumRange` | Minimum salary |
-| `maximumSalary` | `maximumSalary` | `PositionRemuneration[0].MaximumRange` | Maximum salary |
-| `positionOpenDate` | `positionOpenDate` | `PositionStartDate` | Position open date |
-| `positionCloseDate` | `positionCloseDate` | `PositionEndDate` | Position close date |
-
-### Data Structure
-- **Historical API**: ~40 fields including nested arrays (`HiringPaths`, `JobCategories`, `PositionLocations`)
-- **Current API**: ~25 overlay fields + full original nested structure (`MatchedObjectDescriptor`, etc.)
-- **Both APIs**: Can be queried using historical field names for consistency
-
-### Pipeline-Added Fields
-| Field | Description |
-|-------|-------------|
-| `inserted_at` | Timestamp when pulled from API |
-
 
 ## Analysis
 
