@@ -1,6 +1,13 @@
 # USAJobs Data Pipeline
 
+**⚠️ This is not an official USAJobs project**
+
 **Data collection last run: 2025-07-06**
+
+## Resources
+
+- [Field documentation](https://abigailhaddad.github.io/usajobs_historical/) - Guide to data fields and statistics
+- [USAJobs API documentation](https://developer.usajobs.gov/)
 
 **Job dataset with 2,974,930 job announcements from Historical + Current APIs**
 
