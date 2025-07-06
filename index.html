@@ -100,10 +100,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>USAJobs Historical Data (2013-2025)</h1>
+        <h1>USAJobs Historical API Data</h1>
         
         <div class="stats">
-            <strong>Dataset:</strong> 2,965,854 total job postings | <strong>Coverage:</strong> 2013-2025 | <strong>Source:</strong> USAJobs Historical + Current APIs with field normalization and deduplication
+            <strong>Dataset:</strong> 2,965,854 total job postings | <strong>Coverage:</strong> | <strong>Source:</strong> USAJobs Historical + Current APIs with field normalization and deduplication
         </div>
 
         <h2>Table of Contents</h2>
@@ -154,123 +154,255 @@
             </thead>
             <tbody>
                 <tr>
-                    <td><code class="field-name">usajobsControlNumber</code></td>
+                    <td><code class="field-name">agencyLevel</code></td>
+                    <td>Integer</td>
+                    <td class="examples">1, 2, 2</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">agencyLevelSort</code></td>
                     <td>String</td>
-                    <td class="examples">765432123, 765321456, 765234567</td>
+                    <td class="examples">Social Security Administration, Department of the Navy\Naval Facilities Engineering Systems Command</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">announcementClosingTypeCode</code></td>
+                    <td>String</td>
+                    <td class="examples">01, 01, 01</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">announcementClosingTypeDescription</code></td>
+                    <td>String</td>
+                    <td class="examples">Closing Date, Closing Date, Closing Date</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">announcementNumber</code></td>
                     <td>String</td>
-                    <td class="examples">HHS-IHS-25-12345678, USDA-NRCS-24-98765432</td>
+                    <td class="examples">SH-11046466, DE-11762133-22-RT, 23-DAS-11812912</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">appointmentType</code></td>
+                    <td>String</td>
+                    <td class="examples">Permanent, Permanent, Permanent</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">disableApplyOnline</code></td>
+                    <td>String</td>
+                    <td class="examples">N, Y, N</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">drugTestRequired</code></td>
+                    <td>String</td>
+                    <td class="examples">N, N, N</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">HiringPaths</code></td>
+                    <td>JSON Array</td>
+                    <td class="examples">[{"hiringPath": "Custom announcement"}], [{"hiringPath": "The public"}]</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">hiringAgencyCode</code></td>
+                    <td>String</td>
+                    <td class="examples">SZ00, NV25, JL04</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringAgencyName</code></td>
                     <td>String</td>
-                    <td class="examples">Veterans Health Administration, National Park Service, Internal Revenue Service</td>
+                    <td class="examples">Social Security Administration, Naval Facilities Engineering Systems Command</td>
                     <td class="completeness good">99.1%</td>
                 </tr>
                 <tr>
-                    <td><code class="field-name">hiringAgencyCode</code></td>
+                    <td><code class="field-name">hiringDepartmentCode</code></td>
                     <td>String</td>
-                    <td class="examples">VA, USDA, DOD, HHS, DOI</td>
-                    <td class="completeness good">98.8%</td>
-                </tr>
-                <tr>
-                    <td><code class="field-name">organizationName</code></td>
-                    <td>String</td>
-                    <td class="examples">Department of Veterans Affairs, Department of Agriculture</td>
-                    <td class="completeness good">92.1%</td>
-                </tr>
-                <tr>
-                    <td><code class="field-name">organizationCode</code></td>
-                    <td>String</td>
-                    <td class="examples">VA36, USDA07, DOD-N</td>
-                    <td class="completeness warning">89.3%</td>
-                </tr>
-                <tr>
-                    <td><code class="field-name">positionTitle</code></td>
-                    <td>String</td>
-                    <td class="examples">Program Analyst, Park Ranger, Budget Analyst, Contract Specialist</td>
+                    <td class="examples">SZ, NV, JL</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
-                    <td><code class="field-name">minimumSalary</code></td>
-                    <td>Integer</td>
-                    <td class="examples">45000, 72553, 95000, 120000</td>
+                    <td><code class="field-name">hiringDepartmentName</code></td>
+                    <td>String</td>
+                    <td class="examples">Other Agencies and Independent Organizations, Department of the Navy, Judicial Branch</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">hiringSubelementName</code></td>
+                    <td>String</td>
+                    <td class="examples">Procurement Office (FPO), Financial Data & Controls Division, (FDCD)</td>
+                    <td class="completeness warning">61.6%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">inserted_at</code></td>
+                    <td>DateTime</td>
+                    <td class="examples">2025-07-05T12:54:02.514862, 2025-07-05T12:54:02.514895</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">JobCategories</code></td>
+                    <td>JSON Array</td>
+                    <td class="examples">[{"series": "0301"}], [{"series": "0850"}], [{"series": "2210"}]</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">maximumGrade</code></td>
+                    <td>String</td>
+                    <td class="examples">15, 12, 00</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">maximumSalary</code></td>
-                    <td>Integer</td>
-                    <td class="examples">95000, 105612, 150000, 272100</td>
+                    <td>Number</td>
+                    <td class="examples">186854.0, 124677.0, 176555.0</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">minimumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">GS-11, GS-13, GS-14, WG-10, GG-12</td>
-                    <td class="completeness good">95.2%</td>
+                    <td class="examples">4, 11, 00</td>
+                    <td class="completeness good">100%</td>
                 </tr>
                 <tr>
-                    <td><code class="field-name">maximumGrade</code></td>
+                    <td><code class="field-name">minimumSalary</code></td>
+                    <td>Number</td>
+                    <td class="examples">35373.0, 80015.0, 94199.0</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">payScale</code></td>
                     <td>String</td>
-                    <td class="examples">GS-13, GS-14, GS-15, WG-12, SES</td>
-                    <td class="completeness good">95.2%</td>
-                </tr>
-                <tr>
-                    <td><code class="field-name">positionOpenDate</code></td>
-                    <td>DateTime</td>
-                    <td class="examples">2024-03-15, 2024-01-08, 2023-11-20</td>
+                    <td class="examples">GS, GS, AD</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionCloseDate</code></td>
-                    <td>DateTime</td>
-                    <td class="examples">2024-04-01, 2024-02-15, Open Continuous</td>
-                    <td class="completeness good">99.8%</td>
+                    <td>String</td>
+                    <td class="examples">2024-12-31, 2024-12-31, 2024-01-14</td>
+                    <td class="completeness good">100%</td>
                 </tr>
                 <tr>
-                    <td><code class="field-name">appointmentType</code></td>
+                    <td><code class="field-name">positionExpireDate</code></td>
                     <td>String</td>
-                    <td class="examples">Permanent, Term, Temporary, Seasonal, Internships</td>
-                    <td class="completeness good">98.9%</td>
-                </tr>
-                <tr>
-                    <td><code class="field-name">totalOpenings</code></td>
-                    <td>String</td>
-                    <td class="examples">1, 5, 15, Many, Few, Several</td>
-                    <td class="completeness warning">78.4%</td>
-                </tr>
-                <tr>
-                    <td><code class="field-name">workSchedule</code></td>
-                    <td>String</td>
-                    <td class="examples">Full-time, Part-time, Intermittent, Shift work, Job sharing</td>
-                    <td class="completeness good">97.8%</td>
+                    <td class="examples">2024-01-11, 2023-01-25, 2023-03-30</td>
+                    <td class="completeness poor">8.8%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">PositionLocations</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"City": "Washington", "State": "DC", "Country": "US"}], Remote work eligible</td>
-                    <td class="completeness good">94.5%</td>
+                    <td class="examples">[{"positionLocationCity": "Urbana", "positionLocationState": "Maryland"}]</td>
+                    <td class="completeness good">100%</td>
                 </tr>
                 <tr>
-                    <td><code class="field-name">JobCategories</code></td>
-                    <td>JSON Array</td>
-                    <td class="examples">[{"series": "0025", "title": "PARK RANGER"}], [{"series": "0343", "title": "MANAGEMENT ANALYST"}]</td>
-                    <td class="completeness good">96.2%</td>
+                    <td><code class="field-name">positionOpenDate</code></td>
+                    <td>String</td>
+                    <td class="examples">2024-01-01, 2024-01-01, 2024-01-01</td>
+                    <td class="completeness good">100%</td>
                 </tr>
                 <tr>
-                    <td><code class="field-name">HiringPaths</code></td>
-                    <td>JSON Array</td>
-                    <td class="examples">["public"], ["veterans"], ["students", "graduates"]</td>
-                    <td class="completeness warning">71.8%</td>
+                    <td><code class="field-name">positionOpeningStatus</code></td>
+                    <td>String</td>
+                    <td class="examples">Applications under review, Job closed, Job closed</td>
+                    <td class="completeness good">100%</td>
                 </tr>
                 <tr>
-                    <td><code class="field-name">inserted_at</code></td>
-                    <td>DateTime</td>
-                    <td class="examples">2024-07-05 14:30:15, 2024-07-06 09:22:41</td>
+                    <td><code class="field-name">positionTitle</code></td>
+                    <td>String</td>
+                    <td class="examples">SSA-4100 General Availability for Assignment - Headquarters, Electrical Engineer</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">promotionPotential</code></td>
+                    <td>String</td>
+                    <td class="examples">None, 12, 00</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">relocationExpensesReimbursed</code></td>
+                    <td>String</td>
+                    <td class="examples">N, N, N</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">salaryType</code></td>
+                    <td>String</td>
+                    <td class="examples">Per Year, Per Year, Per Year</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">securityClearance</code></td>
+                    <td>String</td>
+                    <td class="examples">Not Required, Secret, Not Required</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">securityClearanceRequired</code></td>
+                    <td>String</td>
+                    <td class="examples">N, Y, N</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">serviceType</code></td>
+                    <td>String</td>
+                    <td class="examples">Competitive, Competitive, Excepted</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">supervisoryStatus</code></td>
+                    <td>String</td>
+                    <td class="examples">N, N, N</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">teleworkEligible</code></td>
+                    <td>String</td>
+                    <td class="examples">N, N, N</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">totalOpenings</code></td>
+                    <td>String</td>
+                    <td class="examples">Many, 2, 1</td>
+                    <td class="completeness good">90.0%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">travelRequirement</code></td>
+                    <td>String</td>
+                    <td class="examples">Not required, Occasional travel, Occasional travel</td>
+                    <td class="completeness good">99.7%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">usajobsControlNumber</code></td>
+                    <td>Integer</td>
+                    <td class="examples">593449300, 693894500, 702096500</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">usajobs_control_number</code></td>
+                    <td>String</td>
+                    <td class="examples">593449300, 693894500, 702096500</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">vendor</code></td>
+                    <td>String</td>
+                    <td class="examples">USASTAFFING, USASTAFFING, USASTAFFING</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">whoMayApply</code></td>
+                    <td>String</td>
+                    <td class="examples">Status Candidates (Merit Promotion and VEOA Eligibles)</td>
+                    <td class="completeness poor">0.0%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">workSchedule</code></td>
+                    <td>String</td>
+                    <td class="examples">Full-time, Full-time, Full-time</td>
                     <td class="completeness good">100%</td>
                 </tr>
             </tbody>
@@ -281,13 +413,13 @@
         
         <h3>API Sources</h3>
         <ul>
-            <li><strong>Historical API</strong> (<code>/api/historicjoa</code>): Past job announcements by date range (2013-2025)</li>
-            <li><strong>Current API</strong> (<code>/api/Search</code>): Currently active job postings (2024-2025)</li>
+            <li><strong>Historical API</strong> (<code>/api/historicjoa</code>): Past job announcements by date range </li>
+            <li><strong>Current API</strong> (<code>/api/Search</code>): Currently active job postings </li>
         </ul>
         
         <p><strong>Note:</strong> There is overlap between the APIs (2024-2025 jobs appear in both), but we collect from both APIs for completeness.</p>
 
-        <h3>Key Normalized Fields</h3>
+        <h3>Normalized Fields</h3>
         <table>
             <thead>
                 <tr>
@@ -408,7 +540,7 @@ for i, (agency, count) in enumerate(top_agencies.items(), 1):
     print(f"{i:2d}. {agency}: {count:,} jobs ({percentage:.1f}%)")</pre>
 
         <div class="code-example">
-            <strong>Real output from examples.py:</strong><br>
+            <strong>Output:</strong><br>
             1. Veterans Health Administration: 59,233 jobs (16.1%)<br>
             2. Army National Guard Units: 10,323 jobs (2.8%)<br>
             3. Commander, Navy Installations: 9,198 jobs (2.5%)<br>
@@ -436,7 +568,7 @@ print(f"Maximum salary range: {max_range}")
 print(f"Median salary range: {median_range}")</pre>
 
         <div class="code-example">
-            <strong>Real output from examples.py:</strong><br>
+            <strong>Output:</strong><br>
             Records with salary data: 367,177 (100.0%)<br>
             Minimum salary range: $0 - $400,000<br>
             Maximum salary range: $0 - $470,281<br>
@@ -481,7 +613,7 @@ salary_trends = conn.execute("""
 print(salary_trends)</pre>
 
         <div class="code-example">
-            <strong>Real output from examples.py:</strong><br>
+            <strong>Output:</strong><br>
             Year | Avg Min | Avg Max | Median Min | Median Max | Jobs<br>
             -----|---------|---------|------------|------------|-----<br>
             2024 | $ 74222 | $104262 | $   72553 | $  105612 | 366772<br>
@@ -499,7 +631,7 @@ for month, count in monthly_posts.items():
     print(f"    {month_names[month-1]}: {count:,} jobs ({percentage:.1f}%)")</pre>
 
         <div class="code-example">
-            <strong>Real output from examples.py:</strong><br>
+            <strong>Output:</strong><br>
             Monthly posting patterns:<br>
             &nbsp;&nbsp;&nbsp;&nbsp;Jan: 35,939 jobs (9.8%)<br>
             &nbsp;&nbsp;&nbsp;&nbsp;Feb: 34,076 jobs (9.3%)<br>
@@ -524,7 +656,7 @@ for i, (title, count) in enumerate(common_titles.items(), 1):
     print(f"   {i:2d}. {title}: {count:,} ({percentage:.1f}%)")</pre>
 
         <div class="code-example">
-            <strong>Real output from examples.py:</strong><br>
+            <strong>Output:</strong><br>
             Most common position titles:<br>
             &nbsp;&nbsp;&nbsp;&nbsp;1. Program Analyst: 3,324 (0.9%)<br>
             &nbsp;&nbsp;&nbsp;&nbsp;2. Management and Program Analyst: 2,628 (0.7%)<br>

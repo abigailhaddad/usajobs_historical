@@ -26,13 +26,6 @@ This provides 430MB of clean, structured data that works with Python, R, or any 
 ### Option 2: Run the Pipeline Yourself
 The pipeline collects data from USAJobs APIs and saves to Parquet files. Note that the USAJobs API can be unreliable - expect some failed requests that require retries. The system logs all failures and provides specific retry commands.
 
-Use this option to:
-- Keep data current with latest postings
-- Collect specific date ranges or job series
-- Understand how the data is processed
-
-Continue reading for full setup instructions below.
-
 ## Data Coverage
 
 Early years of the data are incomplete, mostly consisting of jobs with closing dates years after the opening dates. 
@@ -100,7 +93,6 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 3. **Create .env file:**
    ```bash
    # .env
-   DATABASE_URL=postgresql://user:password@host/usajobs_historical
    USAJOBS_API_TOKEN=your_api_token_here  # Get from https://developer.usajobs.gov/
    ```
 
@@ -110,15 +102,12 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 ├── scripts/                 # All scripts in one place
 │   ├── collect_data.py          # Historical data collection
 │   ├── collect_current_data.py  # Current jobs collection
-│   ├── run_parallel.sh          # Run multiple years in parallel (recommended)
+│   ├── run_parallel.sh          # Run multiple years in parallel 
 │   ├── run_single.sh            # Run single date range or current jobs
 │   └── monitor_parallel.sh      # Monitor parallel job progress
 ├── data/                    # Data storage
 │   ├── historical_jobs_YEAR.parquet  # Historical jobs by year
-│   ├── current_jobs_YEAR.parquet     # Current jobs by year
-│   └── exports/                      # CSV exports
-├── analysis/                # Specialized data analyses
-│   └── national_parks/             # National Parks Service analysis
+│   └── current_jobs_YEAR.parquet     # Current jobs by year
 └── logs/                    # Auto-generated pipeline logs
 ```
 
@@ -235,21 +224,9 @@ Key fields are normalized using historical API field names for consistent queryi
 python examples.py
 ```
 
-## Performance
-
-- **Data collection**: ~1.5 seconds per day (handles 503 errors with 7 retries per request)
-- **Local queries**: Fast with Parquet columnar format  
-- **Error handling**: Aggressive logging distinguishes between legitimate 0-job days and API failures
-- **Data gaps**: Violently flagged with specific retry commands and failure rate calculations
-
 ## Analysis
 
-See `examples.py` for comprehensive usage examples showing how to analyze the data.
-
-### Available Analyses
-
-The `analysis/` directory contains specialized analyses of the USAJobs data:
-- **National Parks Analysis** (`analysis/national_parks/`): Detailed examination of National Park Service hiring trends from 2018-2025, including occupational changes and appointment type patterns
+See `examples.py` for usage examples.
 
 ## Workflow Overview
 
