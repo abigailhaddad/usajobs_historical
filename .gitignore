@@ -19,9 +19,9 @@ download/*.duckdb
 # PostgreSQL export scripts (personal use)
 postgres_export/
 
-# Log files
-logs/*.log
-scripts/pipeline/logs/*.log
+# Log files (exclude all logs from repo)
+logs/
+*.log
 
 # Temporary files
 *.tmp

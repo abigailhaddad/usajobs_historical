@@ -136,15 +136,13 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 │   ├── collect_current_data.py  # Current jobs collection
 │   ├── run_parallel.sh          # Run multiple years in parallel (recommended)
 │   ├── run_single.sh            # Run single date range or current jobs
-│   ├── monitor_parallel.sh      # Monitor parallel job progress
-│   ├── check_data.py            # Verify data integrity
-│   └── upload_schema.sh         # Upload PostgreSQL schema
+│   └── monitor_parallel.sh      # Monitor parallel job progress
 ├── data/                    # Data storage
 │   ├── historical_jobs_YEAR.parquet  # Historical jobs by year
 │   ├── current_jobs_YEAR.parquet     # Current jobs by year
 │   └── exports/                      # CSV exports
-├── sql/                     # Database schemas
-│   └── create_historical_jobs.sql      # PostgreSQL table definition
+├── analysis/                # Specialized data analyses
+│   └── national_parks/             # National Parks Service analysis
 └── logs/                    # Auto-generated pipeline logs
 ```
 
@@ -189,13 +187,37 @@ tmux attach -t usajobs-2024
 scripts/run_single.sh range 2024-06-01 2024-06-30
 ```
 
+## Aggressive Data Gap Detection
+
+The pipeline includes aggressive logging that **violently flags** any missing data:
+
+- **🚨 Critical Failures**: Failed API calls are logged with detailed retry commands
+- **⚠️ Suspicious Zeros**: Days with 0 jobs are flagged (may be weekends/holidays or API issues)
+- **📝 Detailed Logs**: All runs create timestamped logs in `logs/` directory
+
+### Handling Failed Dates
+
+When data collection fails, you'll see dramatic console warnings and get specific retry commands:
+
+```bash
+# The system will show failed dates and provide exact retry commands:
+python scripts/collect_data.py --start-date 2024-01-15 --end-date 2024-01-15 --data-dir data
+python scripts/collect_data.py --start-date 2024-01-20 --end-date 2024-01-20 --data-dir data
+
+# Or retry the entire range to catch any missed dates:
+python scripts/collect_data.py --start-date 2024-01-01 --end-date 2024-01-31 --data-dir data
+```
+
+**Check logs for:** 
+- `logs/historical_YYYY-MM-DD_to_YYYY-MM-DD_TIMESTAMP.log` - Full run details
+- `logs/DATA_GAPS_TIMESTAMP.log` - Critical data gap warnings with retry commands
+
 ## Data Storage
 
 - **Parquet Files**: Primary storage format for efficient analytics
   - `historical_jobs_YEAR.parquet`: Historical job announcements by year
   - `current_jobs_YEAR.parquet`: Current job postings by year
-- **PostgreSQL**: Cloud database for final storage (exported from Parquet)
-- **Logs**: Stored in `logs/` directory
+- **Logs**: Stored in `logs/` directory with aggressive data gap detection
 
 ## Data Architecture
 
@@ -237,16 +259,16 @@ Key fields are normalized using historical API field names for consistent queryi
 ## Query Data
 
 ```bash
-# Check data integrity and counts
-python scripts/check_data.py
+# Load and analyze any year's data
+python examples.py
 ```
 
 ## Performance
 
 - **Data collection**: ~1.5 seconds per day (handles 503 errors with 7 retries per request)
-  
-- **Local queries**: Fast with Parquet columnar format
-- **Error handling**: Distinguishes between legitimate 0-job days and API failures
+- **Local queries**: Fast with Parquet columnar format  
+- **Error handling**: Aggressive logging distinguishes between legitimate 0-job days and API failures
+- **Data gaps**: Violently flagged with specific retry commands and failure rate calculations
 
 ## Analysis
 
@@ -263,6 +285,5 @@ The `analysis/` directory contains specialized analyses of the USAJobs data:
 2. **Store Locally**: Data saved in year-based Parquet files with deduplication
 3. **Monitor Progress**: Use `scripts/monitor_parallel.sh` to watch live progress
 4. **Analyze**: Use `examples.py` for data analysis patterns
-5. **Verify Data**: Use `scripts/check_data.py` to verify data integrity
 
 The pipeline handles API errors with fallback strategies and can resume from existing data if interrupted.

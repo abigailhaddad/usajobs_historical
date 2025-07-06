@@ -18,9 +18,82 @@ import pandas as pd
 from datetime import datetime, timedelta
 import os
 from tqdm import tqdm
+import logging
+import sys
 
 # Base URL for API requests
 
+def setup_aggressive_logging(data_dir: str, start_date: str, end_date: str):
+    """Set up aggressive logging system that violently flags data issues."""
+    # Create logs directory
+    log_dir = os.path.join(data_dir, "..", "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    
+    # Create timestamp for log file
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = os.path.join(log_dir, f"historical_{start_date}_to_{end_date}_{timestamp}.log")
+    
+    # Configure aggressive logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
+    
+    # Create custom logger for data issues
+    data_logger = logging.getLogger('DATA_ISSUES')
+    data_handler = logging.FileHandler(os.path.join(log_dir, f"DATA_GAPS_{timestamp}.log"))
+    data_handler.setFormatter(logging.Formatter('%(asctime)s - 🚨 CRITICAL DATA ISSUE 🚨 - %(message)s'))
+    data_logger.addHandler(data_handler)
+    data_logger.setLevel(logging.CRITICAL)
+    
+    return logging.getLogger(__name__), data_logger
+
+def log_violent_data_gap_warning(data_logger, failed_dates: List[str], start_date: str, end_date: str):
+    """Violently flag missing data with aggressive warnings."""
+    if not failed_dates:
+        return
+    
+    warning_msg = f"""
+    ═══════════════════════════════════════════════════════════════════════════════
+    🚨🚨🚨 CRITICAL DATA COLLECTION FAILURE 🚨🚨🚨
+    ═══════════════════════════════════════════════════════════════════════════════
+    
+    DATA RANGE: {start_date} to {end_date}
+    FAILED DATES: {len(failed_dates)} out of {(datetime.strptime(end_date, '%Y-%m-%d') - datetime.strptime(start_date, '%Y-%m-%d')).days + 1} total days
+    FAILURE RATE: {len(failed_dates) / ((datetime.strptime(end_date, '%Y-%m-%d') - datetime.strptime(start_date, '%Y-%m-%d')).days + 1) * 100:.1f}%
+    
+    MISSING DATA FOR THESE DATES:
+    {chr(10).join([f"    💀 {date} - NO DATA COLLECTED" for date in failed_dates])}
+    
+    ⚠️  WARNING: These gaps represent MISSING FEDERAL JOB DATA that may never be recoverable!
+    ⚠️  WARNING: Analysis based on this dataset will be INCOMPLETE and INACCURATE!
+    ⚠️  WARNING: Immediate action required - retry failed dates ASAP!
+    
+    RETRY COMMAND:
+    python scripts/collect_data.py --start-date {start_date} --end-date {end_date} --data-dir data
+    
+    INDIVIDUAL RETRY COMMANDS:
+    {chr(10).join([f"    python scripts/collect_data.py --start-date {date} --end-date {date} --data-dir data" for date in failed_dates[:10]])}
+    {"    ... (showing first 10 failed dates only)" if len(failed_dates) > 10 else ""}
+    
+    ═══════════════════════════════════════════════════════════════════════════════
+    """
+    
+    data_logger.critical(warning_msg)
+    
+    # Also print to console with extra emphasis
+    print("\n" + "🚨" * 80)
+    print("🚨" + " CRITICAL DATA COLLECTION FAILURE ".center(78) + "🚨")
+    print("🚨" * 80)
+    print(f"🚨 {len(failed_dates)} DATES FAILED TO COLLECT DATA!")
+    print(f"🚨 FAILURE RATE: {len(failed_dates) / ((datetime.strptime(end_date, '%Y-%m-%d') - datetime.strptime(start_date, '%Y-%m-%d')).days + 1) * 100:.1f}%")
+    print("🚨" * 80)
+    print("🚨 CHECK LOGS FOR FULL DETAILS AND RETRY COMMANDS!")
+    print("🚨" * 80 + "\n")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch USAJobs historical jobs")
@@ -298,10 +371,15 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
                data_dir: str = "data") -> List[Dict]:
     """Fetch job data from the API for a date range, iterating day by day with weekly saves."""
     
+    # Set up aggressive logging
+    logger, data_logger = setup_aggressive_logging(data_dir, start_date, end_date)
+    logger.info(f"🚀 Starting data collection for {start_date} to {end_date}")
+    
     all_jobs = []
     seen_control_numbers = set()  # Track unique jobs
     weekly_batch = []  # Accumulate jobs for weekly saves
     failed_dates = []  # Track dates that failed to fetch
+    suspicious_zero_days = []  # Track days with 0 jobs (may be legitimate but worth flagging)
     
     # Create data directory if it doesn't exist
     os.makedirs(data_dir, exist_ok=True)
@@ -337,13 +415,17 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
             jobs, success = fetch_jobs_for_date(date_str, position_series)
             if not success:
                 failed_dates.append(date_str)
+                logger.critical(f"💀 CRITICAL FAILURE: No data collected for {date_str}")
+                data_logger.critical(f"FAILED TO COLLECT DATA: {date_str} - API errors or connectivity issues")
                 progress_bar.write(f"  {date_str}: ❌ API FAILED - retrying later may help")
                 current_date += timedelta(days=1)
                 progress_bar.update(1)
                 continue
         except Exception as e:
-            progress_bar.write(f"❌ Unexpected error for {date_str}: {e}")
             failed_dates.append(date_str)
+            logger.critical(f"💀 CRITICAL FAILURE: Unexpected error for {date_str}: {e}")
+            data_logger.critical(f"FAILED TO COLLECT DATA: {date_str} - Exception: {e}")
+            progress_bar.write(f"❌ Unexpected error for {date_str}: {e}")
             current_date += timedelta(days=1)
             progress_bar.update(1)
             continue
@@ -364,8 +446,11 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
         
         # Distinguish between 0 jobs (legitimate) and failures
         if len(jobs) == 0:
-            progress_bar.write(f"  {date_str}: Found 0 jobs (✅ legitimate)")
+            suspicious_zero_days.append(date_str)
+            logger.warning(f"⚠️  SUSPICIOUS: Found 0 jobs for {date_str} - may be legitimate weekend/holiday or API issue")
+            progress_bar.write(f"  {date_str}: Found 0 jobs (⚠️  suspicious - check if legitimate)")
         else:
+            logger.info(f"✅ SUCCESS: {date_str} - {len(jobs)} jobs ({new_jobs} new)")
             progress_bar.write(f"  {date_str}: Found {len(jobs)} jobs ({new_jobs} new)")
         days_processed += 1
         
@@ -404,17 +489,26 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
         
         print(f"💾 Saved final {len(weekly_batch)} jobs to year-based parquet files")
     
-    # Report results and any failures
+    # Report results and any failures with aggressive warnings
+    logger.info(f"✅ Total unique jobs found: {len(all_jobs)}")
     print(f"\n✅ Total unique jobs found: {len(all_jobs)}")
     
+    # Violently flag any data issues
     if failed_dates:
-        print(f"\n⚠️  ATTENTION: {len(failed_dates)} dates failed to fetch:")
-        for failed_date in failed_dates:
-            print(f"  ❌ {failed_date}")
-        print(f"\n💡 Tip: Re-run the same date range to retry failed dates:")
-        print(f"    python scripts/collect_data.py --start-date {start_date} --end-date {end_date} --data-dir {data_dir}")
-    else:
-        print("✅ All dates fetched successfully!")
+        log_violent_data_gap_warning(data_logger, failed_dates, start_date, end_date)
+    
+    # Flag suspicious zero-job days
+    if suspicious_zero_days:
+        logger.warning(f"⚠️  SUSPICIOUS: {len(suspicious_zero_days)} days had 0 jobs - verify if legitimate:")
+        data_logger.critical(f"SUSPICIOUS ZERO-JOB DAYS: {', '.join(suspicious_zero_days)}")
+        print(f"\n⚠️  WARNING: {len(suspicious_zero_days)} days had 0 jobs (may be weekends/holidays or API issues):")
+        for zero_date in suspicious_zero_days:
+            print(f"  🤔 {zero_date}")
+        print(f"💡 If these aren't weekends/holidays, consider re-running those dates")
+    
+    if not failed_dates and not suspicious_zero_days:
+        logger.info("🎉 PERFECT RUN: All dates fetched successfully with data!")
+        print("🎉 All dates fetched successfully!")
     
     return all_jobs
 
