@@ -1,15 +1,15 @@
 # USAJobs Data Pipeline
 
-**Job dataset from 2013-2025 with 2.97M job announcements from Historical + Current APIs**
+**Job dataset with 2.97M job announcements from Historical + Current APIs**
 
 This repository provides USAJobs data combining both Historical and Current APIs, with deduplication and field normalization. Data is available in two ways:
-1. **📁 Ready-to-use Parquet files** - Download and analyze immediately (recommended for most users)
-2. **⚙️ Full data pipeline** - Replicate the collection process yourself (for advanced users)
+1. **📁 Ready-to-use Parquet files** - Download and analyze immediately
+2. **⚙️ Full data pipeline** - Replicate the collection process yourself
 
 ## 🚀 Quick Start Options
 
-### Option 1: Use Pre-Built Data Files (Recommended)
-Perfect for data scientists, researchers, and analysts who want to dive straight into analysis:
+### Option 1: Use Pre-Built Data Files
+Download and analyze the data immediately:
 
 ```python
 import pandas as pd
@@ -21,11 +21,11 @@ print(f"Loaded {len(df_2024):,} federal job postings from 2024")
 # See examples.py for more analysis patterns
 ```
 
-**Benefits:**
-- ✅ No setup required
-- ✅ 430MB of clean, structured data
-- ✅ Immediate analysis capability
-- ✅ Works with Python, R, or any Parquet-compatible tool
+This option provides:
+- No setup required
+- 430MB of clean, structured data
+- Immediate analysis capability
+- Works with Python, R, or any Parquet-compatible tool
 
 ### Option 2: Replicate the Pipeline
 For users who want to:
@@ -38,28 +38,7 @@ Continue reading for full setup instructions below.
 
 ## Data Coverage
 
-**Total**: 2,965,854 jobs across 13 years (2013-2025)
-
-| Year | Job Count | Notes |
-|------|-----------|-------|
-| 2013 | 5 | ⚠️ Minimal data - API testing/early development |
-| 2014 | 24 | ⚠️ Minimal data - API testing/early development |
-| 2015 | 140 | ⚠️ Limited data - API coverage started mid-year |
-| 2016 | 3,879 | ⚠️ Limited data - partial API coverage |
-| 2017 | 237,145 | Full coverage |
-| 2018 | 328,111 | Full coverage |
-| 2019 | 349,256 | Full coverage |
-| 2020 | 327,545 | Full coverage |
-| 2021 | 369,151 | Full coverage |
-| 2022 | 441,604 | Full coverage |
-| 2023 | 454,652 | Full coverage |
-| 2024 | 367,177 | Full coverage |
-| 2025 | 87,165 | Current through July 6, 2025 |
-
-**Coverage**: 87.3% of expected days (3,506/4,018 days) from 2015-01-01 to 2025-12-31
-
-### Opening vs Closing Patterns
-The table below shows jobs opened vs closed by year, explaining data patterns in early years:
+Early years of the data are incomplete, mostly consisting of jobs with closing dates years after the opening dates. 
 
 | Year | Jobs Opened | Jobs Closed |
 |------|-------------|-------------|
@@ -85,8 +64,8 @@ Early years show many long-duration postings (e.g., 3,879 opened in 2016 but onl
 This dataset combines data from **two USAJobs APIs** with the following processing:
 
 ### API Sources
-- **Historical API** (`/api/historicjoa`): Past job announcements by date range (2013-2024)
-- **Current API** (`/api/Search`): Currently active job postings (2024-2025)
+- **Historical API** (`/api/historicjoa`): Past job announcements by date range
+- **Current API** (`/api/Search`): Currently active job postings
 
 **Note**: In our analysis, we've found that Current API jobs generally also appear in the Historical API data, but we collect from both APIs to ensure complete coverage.
 
@@ -163,7 +142,7 @@ scripts/run_single.sh month
 scripts/run_single.sh current 7
 ```
 
-**Parallel processing (recommended for bulk data):**
+**Parallel processing:**
 ```bash
 # Process multiple years in parallel (creates one tmux session per year)
 scripts/run_parallel.sh 2019 2023      # Range: 2019-2023
