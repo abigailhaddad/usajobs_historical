@@ -20,7 +20,7 @@ import pandas as pd
 df_2024 = pd.read_parquet('data/historical_jobs_2024.parquet')
 print(f"Loaded {len(df_2024):,} federal job postings from 2024")
 
-# See examples.py for more analysis patterns
+# See [examples.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py) for more analysis patterns
 ```
 
 This provides 437MB of data that works with Python, R, or any Parquet-compatible tool.
@@ -94,7 +94,7 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 
 2. **Install dependencies:**
    ```bash
-   pip install -r requirements.txt
+   pip install -r [requirements.txt](https://github.com/abigailhaddad/usajobs_historical/blob/main/requirements.txt)
    ```
 
 3. **Create .env file (only needed for current jobs collection):**
@@ -108,16 +108,16 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 ## File Structure
 
 ```
-├── scripts/                 # All scripts in one place
-│   ├── collect_data.py          # Historical data collection
-│   ├── collect_current_data.py  # Current jobs collection
-│   ├── run_parallel.sh          # Run multiple years in parallel 
-│   ├── run_single.sh            # Run single date range or current jobs
-│   └── monitor_parallel.sh      # Monitor parallel job progress
-├── update/                  # Automated update scripts
-│   ├── update_all.py            # Comprehensive update: data + docs
-│   ├── generate_docs_data.py    # Generate documentation data
-│   └── update_docs.py           # Update README and index.html
+├── [scripts/](https://github.com/abigailhaddad/usajobs_historical/tree/main/scripts)                 # All scripts in one place
+│   ├── [collect_data.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_data.py)          # Historical data collection
+│   ├── [collect_current_data.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_current_data.py)  # Current jobs collection
+│   ├── [run_parallel.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_parallel.sh)          # Run multiple years in parallel 
+│   ├── [run_single.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_single.sh)            # Run single date range or current jobs
+│   └── [monitor_parallel.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/monitor_parallel.sh)      # Monitor parallel job progress
+├── [update/](https://github.com/abigailhaddad/usajobs_historical/tree/main/update)                  # Automated update scripts
+│   ├── [update_all.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/update/update_all.py)            # Comprehensive update: data + docs
+│   ├── [generate_docs_data.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/update/generate_docs_data.py)    # Generate documentation data
+│   └── [update_docs.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/update/update_docs.py)           # Update README and index.html
 ├── data/                    # Data storage
 │   ├── historical_jobs_YEAR.parquet  # Historical jobs by year
 │   └── current_jobs_YEAR.parquet     # Current jobs by year
@@ -130,13 +130,13 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 
 ```bash
 # Collect current jobs and update documentation
-python update/update_all.py      # Update data + docs
+python [update/update_all.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/update/update_all.py)      # Update data + docs
 ```
 
 **Historical data collection (if needed):**
 ```bash
-# Single year: scripts/run_single.sh range 2024-01-01 2024-12-31
-# Multiple years: scripts/run_parallel.sh 2020 2021 2022
+# Single year: [scripts/run_single.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_single.sh) range 2024-01-01 2024-12-31
+# Multiple years: [scripts/run_parallel.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_parallel.sh) 2020 2021 2022
 ```
 
 ## Monitoring Data Collection
@@ -149,11 +149,11 @@ If dates fail to collect, the system provides specific retry commands:
 
 ```bash
 # The system will show failed dates and provide exact retry commands:
-python scripts/collect_data.py --start-date 2024-01-15 --end-date 2024-01-15 --data-dir data
-python scripts/collect_data.py --start-date 2024-01-20 --end-date 2024-01-20 --data-dir data
+python [scripts/collect_data.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_data.py) --start-date 2024-01-15 --end-date 2024-01-15 --data-dir data
+python [scripts/collect_data.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_data.py) --start-date 2024-01-20 --end-date 2024-01-20 --data-dir data
 
 # Or retry the entire range to catch any missed dates:
-python scripts/collect_data.py --start-date 2024-01-01 --end-date 2024-01-31 --data-dir data
+python [scripts/collect_data.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_data.py) --start-date 2024-01-01 --end-date 2024-01-31 --data-dir data
 ```
 
 **Check logs for:** 
@@ -207,4 +207,4 @@ Key fields are normalized using historical API field names for consistent queryi
 
 ## Analysis
 
-See `examples.py` for usage examples.
+See [`examples.py`](https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py) for usage examples.

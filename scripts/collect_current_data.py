@@ -71,8 +71,15 @@ def flatten_current_job(job_item: dict) -> dict:
     """
     Keep all fields from current API job, plus add normalized fields to match historical API.
     """
+    import json
+    
     # Start with the entire job item to keep everything
     flattened = job_item.copy()
+    
+    # Convert MatchedObjectDescriptor dict to JSON string for Parquet compatibility
+    if "MatchedObjectDescriptor" in flattened and isinstance(flattened["MatchedObjectDescriptor"], dict):
+        flattened["MatchedObjectDescriptor"] = json.dumps(flattened["MatchedObjectDescriptor"])
+    
     job = job_item.get("MatchedObjectDescriptor", {})
     user_area = job.get("UserArea", {}).get("Details", {})
     

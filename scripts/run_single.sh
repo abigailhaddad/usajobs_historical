@@ -45,7 +45,7 @@ run_both_apis() {
     
     # Run historical jobs collection
     echo "📈 Fetching historical jobs..."
-    python scripts/collect_data.py \
+    python $(dirname "$0")/collect_data.py \
       --start-date "$start_date" \
       --end-date "$end_date" \
       --data-dir "$DATA_DIR"
@@ -59,11 +59,11 @@ run_both_apis() {
     DAYS_DIFF=$(( ( $(date -jf "%Y-%m-%d" "$end_date" "+%s") - $(date -jf "%Y-%m-%d" "$start_date" "+%s") ) / 86400 + 1 ))
     if [ $DAYS_DIFF -gt 90 ]; then
         echo "⚠️  Current API limited to 90 days, using --days-posted 90"
-        python scripts/collect_current_data.py \
+        python $(dirname "$0")/collect_current_data.py \
           --days-posted 90 \
           --data-dir "$DATA_DIR"
     else
-        python scripts/collect_current_data.py \
+        python $(dirname "$0")/collect_current_data.py \
           --days-posted $DAYS_DIFF \
           --data-dir "$DATA_DIR"
     fi
@@ -97,7 +97,7 @@ run_current_only() {
     echo "💾 Saving to parquet files in: $DATA_DIR/"
     echo ""
     
-    python scripts/collect_current_data.py \
+    python $(dirname "$0")/collect_current_data.py \
       --days-posted $days \
       --data-dir "$DATA_DIR"
 }
@@ -155,14 +155,14 @@ case $MODE in
     echo "☕ Using caffeinate to prevent system sleep"
     if caffeinate -s bash -c "
         echo '📈 Fetching historical jobs...' | tee -a '$LOGFILE'
-        python scripts/collect_data.py \
+        python $(dirname "$0")/collect_data.py \
           --start-date '$START_DATE' \
           --end-date '$END_DATE' \
           --data-dir '$DATA_DIR' 2>&1 | tee -a '$LOGFILE'
         
         echo '' | tee -a '$LOGFILE'
         echo '📊 Fetching current jobs (last 90 days)...' | tee -a '$LOGFILE'
-        python scripts/collect_current_data.py \
+        python $(dirname "$0")/collect_current_data.py \
           --days-posted 90 \
           --data-dir '$DATA_DIR' 2>&1 | tee -a '$LOGFILE'
     "; then
@@ -215,7 +215,7 @@ case $MODE in
     echo "☕ Using caffeinate to prevent system sleep"
     if caffeinate -s bash -c "
         echo '📈 Fetching historical jobs...' | tee -a '$LOGFILE'
-        python scripts/collect_data.py \
+        python $(dirname "$0")/collect_data.py \
           --start-date '$START_DATE' \
           --end-date '$END_DATE' \
           --data-dir '$DATA_DIR' 2>&1 | tee -a '$LOGFILE'
@@ -224,11 +224,11 @@ case $MODE in
         echo '📊 Fetching current jobs...' | tee -a '$LOGFILE'
         if [ $DAYS_DIFF -gt 90 ]; then
             echo 'Current API limited to 90 days, using --days-posted 90' | tee -a '$LOGFILE'
-            python scripts/collect_current_data.py \
+            python $(dirname "$0")/collect_current_data.py \
               --days-posted 90 \
               --data-dir '$DATA_DIR' 2>&1 | tee -a '$LOGFILE'
         else
-            python scripts/collect_current_data.py \
+            python $(dirname "$0")/collect_current_data.py \
               --days-posted $DAYS_DIFF \
               --data-dir '$DATA_DIR' 2>&1 | tee -a '$LOGFILE'
         fi
@@ -254,7 +254,7 @@ case $MODE in
     echo "💾 Saving to parquet files in: $DATA_DIR/"
     echo ""
     
-    python scripts/collect_current_data.py \
+    python $(dirname "$0")/collect_current_data.py \
       --all \
       --data-dir "$DATA_DIR"
     ;;

@@ -19,6 +19,9 @@ download/*.duckdb
 # PostgreSQL export scripts (personal use)
 postgres_export/
 
+# Generated documentation data (regenerated when pipeline runs)
+docs_data.json
+
 # Log files (exclude all logs from repo)
 logs/
 *.log
