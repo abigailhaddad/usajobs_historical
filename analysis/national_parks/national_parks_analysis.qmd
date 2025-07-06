@@ -70,7 +70,7 @@ def load_nps_data():
     for year in years:
         # Load historical data
         try:
-            df = pd.read_parquet(f'data/historical_jobs_{year}.parquet')
+            df = pd.read_parquet(f'../../data/historical_jobs_{year}.parquet')
             year_counts.append({'Year': year, 'Jobs Loaded': f"{len(df):,}"})
             all_data.append(df)
         except FileNotFoundError:
@@ -78,7 +78,7 @@ def load_nps_data():
         
         # Load current data if available and deduplicate
         try:
-            current_df = pd.read_parquet(f'data/current_jobs_{year}.parquet')
+            current_df = pd.read_parquet(f'../../data/current_jobs_{year}.parquet')
             if len(current_df) > 0:
                 # Deduplicate by usajobsControlNumber before combining
                 existing_control_numbers = set(df['usajobsControlNumber']) if 'df' in locals() else set()
@@ -323,7 +323,7 @@ create_heatmap_table(temp_df,
 def analyze_occupation_changes():
     """Analyze 2025 Jan-Jun vs historical Jan-Jun occupational series changes"""
     # Load occupation mapping
-    occ_mapping = pd.read_csv('DTocc.txt')
+    occ_mapping = pd.read_csv('../../DTocc.txt')
     occ_dict = dict(zip(occ_mapping['OCC'].astype(str).str.zfill(4), occ_mapping['OCCT']))
     
     # Filter for January-June only for ALL years

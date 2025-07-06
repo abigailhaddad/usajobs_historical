@@ -260,17 +260,12 @@ python scripts/export_postgres.py data/historical_jobs_2024.parquet 8
 
 ## Analysis
 
-```bash
-# Generate federal hiring analysis report
-quarto render analysis_2025.qmd
-open analysis_2025.html
-```
+See `examples.py` for comprehensive usage examples showing how to analyze the data.
 
-The analysis includes:
-- **Year-over-year comparison**: 2024 vs 2025 hiring trends (January-June)
-- **Agency rankings**: Top federal agencies by job postings
-- **Monthly breakdowns**: Hiring patterns by position open date
-- **Data source tracking**: Current vs historical job counts with deduplication
+### Available Analyses
+
+The `analysis/` directory contains specialized analyses of the USAJobs data:
+- **National Parks Analysis** (`analysis/national_parks/`): Detailed examination of National Park Service hiring trends from 2018-2025, including occupational changes and appointment type patterns
 
 ## Workflow Overview
 
