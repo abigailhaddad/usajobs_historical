@@ -4,12 +4,19 @@ author: "Abigail Haddad"
 date: today
 format:
   html:
-    output-file: public/index.html
+    output-file: index.html
     theme: cosmo
     toc: true
+    toc-depth: 2
+    toc-location: left
     code-fold: true
+    code-tools: true
     fig-width: 12
     fig-height: 8
+    self-contained: true
+execute:
+  echo: true
+  warning: false
 jupyter: python3
 ---
 
@@ -35,19 +42,28 @@ def create_standard_gt_table(data, title, subtitle="", align_left_cols=None, ali
     elif include_source and not subtitle:
         subtitle = "USAJobs Historical Data"
     
-    gt_table = (
-        GT(data.reset_index(drop=True))
-        .tab_header(title=title, subtitle=subtitle)
-        .tab_source_note(md("*Source: github.com/abigailhaddad/usajobs_historical*"))
-        .tab_options(quarto_disable_processing=True)
-    )
+    # Start with basic table
+    gt_table = GT(data.reset_index(drop=True))
+    gt_table = gt_table.tab_header(title=title, subtitle=subtitle)
+    gt_table = gt_table.tab_source_note(md("*Source: github.com/abigailhaddad/usajobs_historical*"))
     
+    # Apply alignments
     if align_left_cols:
         gt_table = gt_table.cols_align(align="left", columns=align_left_cols)
     if align_center_cols:
         gt_table = gt_table.cols_align(align="center", columns=align_center_cols)
+    
+    # Apply widths
     if col_widths:
         gt_table = gt_table.cols_width(col_widths)
+    
+    # Apply options with container width constraint
+    gt_table = gt_table.tab_options(
+        quarto_disable_processing=True,
+        container_width="800px",  # Set maximum width
+        table_margin_left="auto",  # Center the table
+        table_margin_right="auto"
+    )
     
     return gt_table
 
@@ -156,13 +172,25 @@ nps_2025_jan_jun = nps_jan_jun[nps_jan_jun['year'] == 2025]
 nps_historical_jan_jun = nps_jan_jun[nps_jan_jun['year'].between(2018, 2024)]
 
 # Display data loading summary as Great Table
-gt_loading_stats = create_standard_gt_table(
-    data=loading_stats,
-    title="Data Loading & Filtering Summary",
-    subtitle="USAJobs Data Processing Results",
-    align_left_cols=["Metric"],
-    align_center_cols=["Value"],
-    col_widths={"Metric": "60%", "Value": "40%"}
+gt_loading_stats = (
+    GT(loading_stats.reset_index(drop=True))
+    .tab_header(
+        title="Data Loading & Filtering Summary",
+        subtitle="USAJobs Data Processing Results"
+    )
+    .cols_align(
+        align="left",
+        columns=["Metric"]
+    )
+    .cols_align(
+        align="center",
+        columns=["Value"]
+    )
+    .cols_width({
+        "Metric": "60%",
+        "Value": "40%"
+    })
+    .tab_options(quarto_disable_processing=True)
 )
 gt_loading_stats.show()
 
@@ -317,25 +345,13 @@ def analyze_occupation_changes():
         'Count': [f"{len(nps_2025_jan_jun):,}", f"{historical_avg:,.0f}", f"{pct_change:.0f}%"]
     })
     
-    gt_scope = (
-        GT(summary_data.reset_index(drop=True))
-        .tab_header(
-            title="Analysis Scope",
-            subtitle="January-June Comparison Only"
-        )
-        .cols_align(
-            align="left",
-            columns=["Period"]
-        )
-        .cols_align(
-            align="center",
-            columns=["Count"]
-        )
-        .cols_width({
-            "Period": "70%",
-            "Count": "30%"
-        })
-        .tab_options(quarto_disable_processing=True)
+    gt_scope = create_standard_gt_table(
+        data=summary_data,
+        title="Analysis Scope",
+        subtitle="January-June Comparison Only",
+        align_left_cols=["Period"],
+        align_center_cols=["Count"],
+        col_widths={"Period": "70%", "Count": "30%"}
     )
     gt_scope.show()
     
