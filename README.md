@@ -11,7 +11,7 @@
 
 **Job dataset with 2,974,930 job announcements from Historical + Current APIs**
 
-This repository provides USAJobs data combining both Historical and Current APIs, with deduplication and field normalization. Data is available in two ways:
+This repository provides USAJobs data combining both Historical and Current APIs, with deduplication and field rationalization. Data is available in two ways:
 1. **📁 Ready-to-use Parquet files** - Download and analyze immediately
 2. **⚙️ Full data pipeline** - Replicate the collection process yourself
 
@@ -72,8 +72,8 @@ This dataset combines data from **two USAJobs APIs** with the following processi
 **Note**: In our analysis, we've found that Current API jobs generally also appear in the Historical API data, but we collect from both APIs to ensure complete coverage.
 
 ### Data Processing
-- **Field Normalization**: Current API fields mapped to historical naming conventions for consistent querying
-- **Data Preservation**: All original fields from both APIs retained alongside normalized overlay fields
+- **Field Rationalization**: Current API fields mapped to historical naming conventions for consistent querying
+- **Data Preservation**: All original fields from both APIs retained alongside rationalized overlay fields
 - **No Data Loss**: "Keep everything + overlay" approach ensures complete data accessibility
 - **Deduplication Available**: Use `usajobsControlNumber` to identify records appearing in both APIs when needed
 
@@ -89,7 +89,7 @@ The pipeline collects data from two USAJobs APIs:
 
 See the [USAJobs API Documentation](https://developer.usajobs.gov/) for complete API details.
 
-Both APIs are normalized to a common schema and stored in year-based Parquet files.
+Both APIs are rationalized to a common schema and stored in year-based Parquet files.
 
 ## Setup
 

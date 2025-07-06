@@ -114,7 +114,7 @@
             </ul>
         </div>
         <div class="stats">
-            <strong>Dataset:</strong> 2,974,930 total job postings | <strong>Coverage:</strong> | <strong>Source:</strong> USAJobs Historical + Current APIs with field normalization and deduplication
+            <strong>Dataset:</strong> 2,974,930 total job postings | <strong>Coverage:</strong> | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
         </div>
 
         <h2>Table of Contents</h2>
@@ -153,7 +153,7 @@
         </table>
 
         <h2 id="all-fields">All Fields</h2>
-        <p><strong>Note:</strong> This table shows fields from historical jobs data. Current jobs API contains additional fields that are preserved in the original nested structure but not included in this normalized view.</p>
+        <p><strong>Note:</strong> This table shows fields from historical jobs data. Current jobs API contains additional fields that are preserved in the original nested structure but not included in this rationalized view.</p>
         <table>
             <thead>
                 <tr>
@@ -420,7 +420,7 @@
         </table>
 
         <h2 id="api-mapping">API Field Mapping & Normalization</h2>
-        <p>This dataset combines data from <strong>two USAJobs APIs</strong> with field normalization for consistent querying:</p>
+        <p>This dataset combines data from <strong>two USAJobs APIs</strong> with field rationalization for consistent querying:</p>
         
         <h3>API Sources</h3>
         <ul>
@@ -513,8 +513,8 @@
 
         <h3>Data Processing Approach</h3>
         <ul>
-            <li><strong>Field Normalization:</strong> Current API fields mapped to historical naming conventions for consistent querying</li>
-            <li><strong>Data Preservation:</strong> All original fields from both APIs retained alongside normalized overlay fields</li>
+            <li><strong>Field Rationalization:</strong> Current API fields mapped to historical naming conventions for consistent querying</li>
+            <li><strong>Data Preservation:</strong> All original fields from both APIs retained alongside rationalized overlay fields</li>
             <li><strong>No Data Loss:</strong> "Keep everything + overlay" approach ensures complete data accessibility</li>
             <li><strong>Deduplication Available:</strong> Use <code>usajobsControlNumber</code> to identify records appearing in both APIs when needed</li>
         </ul>
