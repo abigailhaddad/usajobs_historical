@@ -323,7 +323,7 @@ create_heatmap_table(temp_df,
 def analyze_occupation_changes():
     """Analyze 2025 Jan-Jun vs historical Jan-Jun occupational series changes"""
     # Load occupation mapping
-    occ_mapping = pd.read_csv('../../DTocc.txt')
+    occ_mapping = pd.read_csv('../DTocc.txt')
     occ_dict = dict(zip(occ_mapping['OCC'].astype(str).str.zfill(4), occ_mapping['OCCT']))
     
     # Filter for January-June only for ALL years

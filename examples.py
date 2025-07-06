@@ -508,7 +508,7 @@ def main():
     print("="*80)
     print("\nFor more information:")
     print("- Repository: https://github.com/yourusername/usajobs_historic")
-    print("- Analysis Reports: analysis_2025.html, national_parks_analysis.html")
+    print("- Analysis Reports: analysis/national_parks/ (specialized analyses)")
     print("- Official USAJobs: https://www.usajobs.gov/")
 
 def main_with_output_capture():

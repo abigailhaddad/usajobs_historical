@@ -8,9 +8,16 @@ data/duckdb/*.duckdb
 data/duckdb/*.duckdb.wal
 *.duckdb
 *.duckdb.wal
+download/*.duckdb
+
+# Data files - Parquet (include in repo for sharing)
+# data/*.parquet
 
 # CSV exports (include in repo for sharing)
 # data/exports/*.csv
+
+# PostgreSQL export scripts (personal use)
+postgres_export/
 
 # Log files
 logs/*.log

@@ -137,16 +137,12 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 │   ├── run_parallel.sh          # Run multiple years in parallel (recommended)
 │   ├── run_single.sh            # Run single date range or current jobs
 │   ├── monitor_parallel.sh      # Monitor parallel job progress
-│   ├── export_postgres.py       # Export Parquet files to PostgreSQL
-│   ├── export_all.sh            # Export all Parquet files to PostgreSQL
 │   ├── check_data.py            # Verify data integrity
 │   └── upload_schema.sh         # Upload PostgreSQL schema
 ├── data/                    # Data storage
 │   ├── historical_jobs_YEAR.parquet  # Historical jobs by year
 │   ├── current_jobs_YEAR.parquet     # Current jobs by year
 │   └── exports/                      # CSV exports
-├── analysis_2025.qmd        # Federal hiring analysis (Quarto)
-├── analysis_2025.html       # Rendered analysis report
 ├── sql/                     # Database schemas
 │   └── create_historical_jobs.sql      # PostgreSQL table definition
 └── logs/                    # Auto-generated pipeline logs
@@ -243,18 +239,12 @@ Key fields are normalized using historical API field names for consistent queryi
 ```bash
 # Check data integrity and counts
 python scripts/check_data.py
-
-# Export all Parquet files to PostgreSQL
-scripts/export_all.sh
-
-# Export single year to PostgreSQL
-python scripts/export_postgres.py data/historical_jobs_2024.parquet 8
 ```
 
 ## Performance
 
 - **Data collection**: ~1.5 seconds per day (handles 503 errors with 7 retries per request)
-- **PostgreSQL export**: 10,000-15,000 jobs/second with parallel processing  
+  
 - **Local queries**: Fast with Parquet columnar format
 - **Error handling**: Distinguishes between legitimate 0-job days and API failures
 
@@ -272,7 +262,7 @@ The `analysis/` directory contains specialized analyses of the USAJobs data:
 1. **Collect Data**: Use `scripts/run_parallel.sh` to fetch historical and current jobs
 2. **Store Locally**: Data saved in year-based Parquet files with deduplication
 3. **Monitor Progress**: Use `scripts/monitor_parallel.sh` to watch live progress
-4. **Analyze**: Use `analysis_2025.qmd` for federal hiring trend analysis
-5. **Export to Cloud**: Use `scripts/export_all.sh` for PostgreSQL upload (optional)
+4. **Analyze**: Use `examples.py` for data analysis patterns
+5. **Verify Data**: Use `scripts/check_data.py` to verify data integrity
 
 The pipeline handles API errors with fallback strategies and can resume from existing data if interrupted.
