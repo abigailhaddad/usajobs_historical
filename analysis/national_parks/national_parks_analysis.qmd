@@ -8,7 +8,7 @@ format:
     theme: cosmo
     toc: true
     toc-depth: 2
-    toc-location: left
+    toc-location: right
     code-fold: true
     code-tools: true
     fig-width: 12
@@ -57,12 +57,9 @@ def create_standard_gt_table(data, title, subtitle="", align_left_cols=None, ali
     if col_widths:
         gt_table = gt_table.cols_width(col_widths)
     
-    # Apply options with container width constraint
+    # Apply options without width constraints
     gt_table = gt_table.tab_options(
-        quarto_disable_processing=True,
-        container_width="800px",  # Set maximum width
-        table_margin_left="auto",  # Center the table
-        table_margin_right="auto"
+        quarto_disable_processing=True
     )
     
     return gt_table
@@ -397,21 +394,23 @@ changes_df = analyze_occupation_changes()
 # Display top 10
 gt_df_top10 = changes_df.head(10).reset_index(drop=True)
 
+# Create wider table for occupation names
 gt_table_top10 = (
-    create_standard_gt_table(
-        data=gt_df_top10,
+    GT(gt_df_top10.reset_index(drop=True))
+    .tab_header(
         title="National Park Service: Top 10 Occupations by Biggest Changes",
-        subtitle="Jan-Jun 2018-2024 Average vs Jan-Jun 2025",
-        align_left_cols=["Occupation"],
-        align_center_cols=["Historical\nAvg", "2025\nActual", "Change", "% Change"],
-        col_widths={
-            "Occupation": "45%",
-            "Historical\nAvg": "18%",
-            "2025\nActual": "12%", 
-            "Change": "12%",
-            "% Change": "13%"
-        }
+        subtitle="Jan-June 2018-2024 vs Jan-June 2025 | USAJobs Historical Data"
     )
+    .tab_source_note(md("*Source: github.com/abigailhaddad/usajobs_historical*"))
+    .cols_align(align="left", columns=["Occupation"])
+    .cols_align(align="center", columns=["Historical\nAvg", "2025\nActual", "Change", "% Change"])
+    .cols_width({
+        "Occupation": "45%",
+        "Historical\nAvg": "18%",
+        "2025\nActual": "12%", 
+        "Change": "12%",
+        "% Change": "13%"
+    })
     .fmt_number(columns=["Historical\nAvg", "Change"], decimals=0)
     .fmt_number(columns=["2025\nActual"], decimals=0)
     .fmt_number(columns=["% Change"], decimals=0, pattern="{x}%")
@@ -420,6 +419,7 @@ gt_table_top10 = (
         palette=["red", "white", "green"],
         domain=[-100, 50]
     )
+    .tab_options(quarto_disable_processing=True)
 )
 
 gt_table_top10.show()
@@ -442,21 +442,23 @@ if len(changes_df) > 10:
     # Display all results
     gt_df_all = changes_df.reset_index(drop=True)
     
+    # Create wider table for all occupations  
     gt_table_all = (
-        create_standard_gt_table(
-            data=gt_df_all,
+        GT(gt_df_all.reset_index(drop=True))
+        .tab_header(
             title="National Park Service: All Occupational Changes",
-            subtitle="Jan-Jun 2018-2024 Average vs Jan-Jun 2025",
-            align_left_cols=["Occupation"],
-            align_center_cols=["Historical\nAvg", "2025\nActual", "Change", "% Change"],
-            col_widths={
-                "Occupation": "45%",
-                "Historical\nAvg": "18%",
-                "2025\nActual": "12%", 
-                "Change": "12%",
-                "% Change": "13%"
-            }
+            subtitle="Jan-June 2018-2024 vs Jan-June 2025 | USAJobs Historical Data"
         )
+        .tab_source_note(md("*Source: github.com/abigailhaddad/usajobs_historical*"))
+        .cols_align(align="left", columns=["Occupation"])
+        .cols_align(align="center", columns=["Historical\nAvg", "2025\nActual", "Change", "% Change"])
+        .cols_width({
+            "Occupation": "45%",
+            "Historical\nAvg": "18%",
+            "2025\nActual": "12%", 
+            "Change": "12%",
+            "% Change": "13%"
+        })
         .fmt_number(columns=["Historical\nAvg", "Change"], decimals=0)
         .fmt_number(columns=["2025\nActual"], decimals=0)
         .fmt_number(columns=["% Change"], decimals=0, pattern="{x}%")
@@ -465,6 +467,7 @@ if len(changes_df) > 10:
             palette=["red", "white", "green"],
             domain=[-100, 50]
         )
+        .tab_options(quarto_disable_processing=True)
     )
     
     gt_table_all.show()
@@ -560,6 +563,7 @@ analyze_opening_types()
 
 ---
 ```{python}
+from IPython.display import display, Markdown
 dt_info = get_current_datetime()
-print(f"*Analysis generated on {dt_info['formatted']}*")
+display(Markdown(f"*Analysis generated on {dt_info['formatted']}*"))
 ```
