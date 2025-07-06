@@ -21,18 +21,15 @@ print(f"Loaded {len(df_2024):,} federal job postings from 2024")
 # See examples.py for more analysis patterns
 ```
 
-This option provides:
-- No setup required
-- 430MB of clean, structured data
-- Immediate analysis capability
-- Works with Python, R, or any Parquet-compatible tool
+This provides 430MB of clean, structured data that works with Python, R, or any Parquet-compatible tool.
 
-### Option 2: Replicate the Pipeline
-For users who want to:
+### Option 2: Run the Pipeline Yourself
+The pipeline collects data from USAJobs APIs and saves to Parquet files. Note that the USAJobs API can be unreliable - expect some failed requests that require retries. The system logs all failures and provides specific retry commands.
+
+Use this option to:
 - Keep data current with latest postings
-- Customize the collection process
-- Understand the data pipeline
-- Contribute to the project
+- Collect specific date ranges or job series
+- Understand how the data is processed
 
 Continue reading for full setup instructions below.
 
@@ -166,17 +163,13 @@ tmux attach -t usajobs-2024
 scripts/run_single.sh range 2024-06-01 2024-06-30
 ```
 
-## Aggressive Data Gap Detection
+## Monitoring Data Collection
 
-The pipeline includes aggressive logging that **violently flags** any missing data:
+Sometimes the USAJobs API has issues. Monitor your runs and check log files for any failed dates:
 
-- **🚨 Critical Failures**: Failed API calls are logged with detailed retry commands
-- **⚠️ Suspicious Zeros**: Days with 0 jobs are flagged (may be weekends/holidays or API issues)
-- **📝 Detailed Logs**: All runs create timestamped logs in `logs/` directory
+### Retrying Failed Dates
 
-### Handling Failed Dates
-
-When data collection fails, you'll see dramatic console warnings and get specific retry commands:
+If dates fail to collect, the system provides specific retry commands:
 
 ```bash
 # The system will show failed dates and provide exact retry commands:
