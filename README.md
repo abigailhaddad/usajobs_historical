@@ -1,26 +1,103 @@
-# USAJobs Historical Data Pipeline
+# USAJobs Data Pipeline
 
-Fetches historical and current job listings from the USAJobs APIs and stores them in Parquet files for local analysis and PostgreSQL for cloud storage.
+**Job dataset from 2013-2025 with 2.97M job announcements from Historical + Current APIs**
+
+This repository provides USAJobs data combining both Historical and Current APIs, with deduplication and field normalization. Data is available in two ways:
+1. **📁 Ready-to-use Parquet files** - Download and analyze immediately (recommended for most users)
+2. **⚙️ Full data pipeline** - Replicate the collection process yourself (for advanced users)
+
+## 🚀 Quick Start Options
+
+### Option 1: Use Pre-Built Data Files (Recommended)
+Perfect for data scientists, researchers, and analysts who want to dive straight into analysis:
+
+```python
+import pandas as pd
+
+# Load any year's data
+df_2024 = pd.read_parquet('data/historical_jobs_2024.parquet')
+print(f"Loaded {len(df_2024):,} federal job postings from 2024")
+
+# See examples.py for more analysis patterns
+```
+
+**Benefits:**
+- ✅ No setup required
+- ✅ 430MB of clean, structured data
+- ✅ Immediate analysis capability
+- ✅ Works with Python, R, or any Parquet-compatible tool
+
+### Option 2: Replicate the Pipeline
+For users who want to:
+- Keep data current with latest postings
+- Customize the collection process
+- Understand the data pipeline
+- Contribute to the project
+
+Continue reading for full setup instructions below.
 
 ## Data Coverage
 
-**Total**: 2,957,747 jobs across 11 years (2015-2025)
+**Total**: 2,965,854 jobs across 13 years (2013-2025)
 
 | Year | Job Count | Notes |
 |------|-----------|-------|
+| 2013 | 5 | ⚠️ Minimal data - API testing/early development |
+| 2014 | 24 | ⚠️ Minimal data - API testing/early development |
 | 2015 | 140 | ⚠️ Limited data - API coverage started mid-year |
 | 2016 | 3,879 | ⚠️ Limited data - partial API coverage |
 | 2017 | 237,145 | Full coverage |
-| 2018 | 327,905 | Full coverage |
+| 2018 | 328,111 | Full coverage |
 | 2019 | 349,256 | Full coverage |
 | 2020 | 327,545 | Full coverage |
 | 2021 | 369,151 | Full coverage |
 | 2022 | 441,604 | Full coverage |
 | 2023 | 454,652 | Full coverage |
-| 2024 | 367,187 | Full coverage |
-| 2025 | 79,283 | Current through June 16, 2025 |
+| 2024 | 367,177 | Full coverage |
+| 2025 | 87,165 | Current through July 6, 2025 |
 
 **Coverage**: 87.3% of expected days (3,506/4,018 days) from 2015-01-01 to 2025-12-31
+
+### Opening vs Closing Patterns
+The table below shows jobs opened vs closed by year, explaining data patterns in early years:
+
+| Year | Jobs Opened | Jobs Closed |
+|------|-------------|-------------|
+| 2013 | 5 | 0 |
+| 2014 | 24 | 23 |
+| 2015 | 140 | 134 |
+| 2016 | 3,879 | 1,638 |
+| 2017 | 237,145 | 228,499 |
+| 2018 | 328,111 | 326,578 |
+| 2019 | 349,256 | 349,002 |
+| 2020 | 327,545 | 327,845 |
+| 2021 | 369,151 | 364,761 |
+| 2022 | 441,604 | 436,071 |
+| 2023 | 454,652 | 456,836 |
+| 2024 | 367,177 | 372,421 |
+| 2025 | 87,165 | 101,429 |
+| 2026 | 0 | 617 |
+
+Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,638 closed that year).
+
+## 🔄 Dual API Integration & Deduplication
+
+This dataset combines data from **two USAJobs APIs** with the following processing:
+
+### API Sources
+- **Historical API** (`/api/historicjoa`): Past job announcements by date range (2013-2024)
+- **Current API** (`/api/Search`): Currently active job postings (2024-2025)
+
+**Note**: In our analysis, we've found that Current API jobs generally also appear in the Historical API data, but we collect from both APIs to ensure complete coverage.
+
+### Data Processing
+- **Field Normalization**: Current API fields mapped to historical naming conventions for consistent querying
+- **Data Preservation**: All original fields from both APIs retained alongside normalized overlay fields
+- **No Data Loss**: "Keep everything + overlay" approach ensures complete data accessibility
+- **Deduplication Available**: Use `usajobsControlNumber` to identify records appearing in both APIs when needed
+
+### Result
+Query any year using consistent field names (e.g., `hiringAgencyName`, `positionTitle`) while retaining full access to original nested structures from both APIs. Some jobs may appear in both Historical and Current API data - deduplicate using `usajobsControlNumber` when combining datasets.
 
 ## Data Sources
 
@@ -68,10 +145,8 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 │   ├── historical_jobs_YEAR.parquet  # Historical jobs by year
 │   ├── current_jobs_YEAR.parquet     # Current jobs by year
 │   └── exports/                      # CSV exports
-├── analysis/                # Analysis and reports
-│   ├── product_manager_analysis.qmd    # Quarto analysis
-│   ├── product_manager_analysis.html   # Generated report
-│   └── usajobs_analysis.ipynb          # Jupyter notebook
+├── analysis_2025.qmd        # Federal hiring analysis (Quarto)
+├── analysis_2025.html       # Rendered analysis report
 ├── sql/                     # Database schemas
 │   └── create_historical_jobs.sql      # PostgreSQL table definition
 └── logs/                    # Auto-generated pipeline logs
@@ -103,8 +178,7 @@ scripts/run_parallel.sh 2020 2021 2022 # Specific years
 # Monitor all parallel jobs with live progress
 scripts/monitor_parallel.sh
 
-# Export all to PostgreSQL after completion
-scripts/export_all.sh
+# Uses caffeinate to prevent Mac sleep during long runs
 ```
 
 **Single year processing:**
@@ -142,8 +216,8 @@ Key fields are normalized using historical API field names for consistent queryi
 ### Key Normalized Fields
 | Historical Field Name | Historical API Source | Current API Source | Notes |
 |----------------------|----------------------|-------------------|-------|
-| `usajobsControlNumber` | `usajobsControlNumber` | `PositionID` | Unique job identifier |
-| `announcementNumber` | `announcementNumber` | `AnnouncementNumber` | Public announcement ID |
+| `usajobsControlNumber` | `usajobsControlNumber` | Extracted from `PositionURI` | Numeric job identifier |
+| `announcementNumber` | `announcementNumber` | `PositionID` | Public announcement ID |
 | `hiringAgencyName` | `hiringAgencyName` | `DepartmentName` | Agency name |
 | `hiringAgencyCode` | `hiringAgencyCode` | `OrganizationCodes` (first part) | Agency code |
 | `positionTitle` | `positionTitle` | `PositionTitle` | Job title |
@@ -184,12 +258,26 @@ python scripts/export_postgres.py data/historical_jobs_2024.parquet 8
 - **Local queries**: Fast with Parquet columnar format
 - **Error handling**: Distinguishes between legitimate 0-job days and API failures
 
+## Analysis
+
+```bash
+# Generate federal hiring analysis report
+quarto render analysis_2025.qmd
+open analysis_2025.html
+```
+
+The analysis includes:
+- **Year-over-year comparison**: 2024 vs 2025 hiring trends (January-June)
+- **Agency rankings**: Top federal agencies by job postings
+- **Monthly breakdowns**: Hiring patterns by position open date
+- **Data source tracking**: Current vs historical job counts with deduplication
+
 ## Workflow Overview
 
 1. **Collect Data**: Use `scripts/run_parallel.sh` to fetch historical and current jobs
 2. **Store Locally**: Data saved in year-based Parquet files with deduplication
 3. **Monitor Progress**: Use `scripts/monitor_parallel.sh` to watch live progress
-4. **Export to Cloud**: Use `scripts/export_all.sh` for fast parallel PostgreSQL upload
-5. **Verify**: Use `scripts/check_data.py` to ensure data integrity
+4. **Analyze**: Use `analysis_2025.qmd` for federal hiring trend analysis
+5. **Export to Cloud**: Use `scripts/export_all.sh` for PostgreSQL upload (optional)
 
-The pipeline handles API errors with exponential backoff and can resume from existing data if interrupted.
+The pipeline handles API errors with fallback strategies and can resume from existing data if interrupted.

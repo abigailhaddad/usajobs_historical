@@ -1,0 +1,591 @@
+---
+title: "National Parks Service Job Postings Analysis (2019-2025)"
+author: "Abigail Haddad"
+date: today
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-fold: true
+    fig-width: 12
+    fig-height: 8
+jupyter: python3
+---
+
+# National Parks Service Job Postings Analysis
+
+This analysis examines federal job posting trends for the National Park Service from 2018 through 2025.
+
+## Data Loading and Preparation
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from datetime import datetime
+import json
+
+from great_tables import GT
+from great_tables import style, loc
+
+def get_current_datetime():
+    """Get current date and time info for consistent usage"""
+    current_date = datetime.now()
+    return {
+        'date': current_date,
+        'year': current_date.year,
+        'month': current_date.month,
+        'formatted': current_date.strftime('%Y-%m-%d %H:%M:%S')
+    }
+
+def extract_series(job_categories):
+    """Extract occupational series from JobCategories JSON field"""
+    try:
+        if pd.isna(job_categories):
+            return 'Unknown'
+        categories = json.loads(job_categories)
+        if categories and len(categories) > 0 and 'series' in categories[0]:
+            return categories[0]['series']
+        return 'Unknown'
+    except:
+        return 'Unknown'
+
+def categorize_appointment(appt_type):
+    """Categorize appointment types into Permanent, Term/Temporary, or Other"""
+    if appt_type == 'Permanent':
+        return 'Permanent'
+    elif appt_type in ['Term', 'Temporary', 'Seasonal', 'Summer', 'Intermittent', 'Internships']:
+        return 'Term/Temporary'
+    else:
+        return 'Other'
+
+def load_nps_data():
+    """Load and prepare National Park Service job data"""
+    # Load all years from 2018 onwards
+    years = range(2018, 2026)
+    all_data = []
+    year_counts = []
+    
+    for year in years:
+        # Load historical data
+        try:
+            df = pd.read_parquet(f'data/historical_jobs_{year}.parquet')
+            year_counts.append({'Year': year, 'Jobs Loaded': f"{len(df):,}"})
+            all_data.append(df)
+        except FileNotFoundError:
+            year_counts.append({'Year': year, 'Jobs Loaded': "No data"})
+        
+        # Load current data if available and deduplicate
+        try:
+            current_df = pd.read_parquet(f'data/current_jobs_{year}.parquet')
+            if len(current_df) > 0:
+                # Deduplicate by usajobsControlNumber before combining
+                existing_control_numbers = set(df['usajobsControlNumber']) if 'df' in locals() else set()
+                new_current_jobs = current_df[~current_df['usajobsControlNumber'].isin(existing_control_numbers)]
+                if len(new_current_jobs) > 0:
+                    all_data.append(new_current_jobs)
+                    year_counts[-1]['Jobs Loaded'] += f" + {len(new_current_jobs):,} current"
+        except FileNotFoundError:
+            pass
+    
+    # Create data loading summary table
+    loading_summary = pd.DataFrame(year_counts)
+    
+    # Combine all years
+    combined_df = pd.concat(all_data, ignore_index=True)
+    
+    # Convert dates with mixed format handling
+    combined_df['positionOpenDate'] = pd.to_datetime(combined_df['positionOpenDate'], format='mixed')
+    combined_df['year'] = combined_df['positionOpenDate'].dt.year
+    combined_df['month'] = combined_df['positionOpenDate'].dt.month
+    
+    # Filter for National Park Service
+    nps_df = combined_df[combined_df['hiringAgencyName'] == 'National Park Service'].copy()
+    
+    # Extract occupational series and categorize appointments
+    nps_df['occupational_series'] = nps_df['JobCategories'].apply(extract_series)
+    nps_df['appt_category'] = nps_df['appointmentType'].apply(categorize_appointment)
+    
+    # Create summary stats
+    loading_stats = pd.DataFrame({
+        'Metric': ['Total jobs loaded', 'National Park Service jobs', 'Data coverage'],
+        'Value': [
+            f"{len(combined_df):,}",
+            f"{len(nps_df):,}",
+            f"{len(year_counts)} years (2018-2025)"
+        ]
+    })
+    
+    return nps_df, loading_summary, loading_stats
+
+# Load data
+nps_df, loading_summary, loading_stats = load_nps_data()
+
+# Display data loading summary as Great Table
+gt_loading_stats = (
+    GT(loading_stats.reset_index(drop=True))
+    .tab_header(
+        title="Data Loading & Filtering Summary",
+        subtitle="USAJobs Data Processing Results"
+    )
+    .cols_align(
+        align="left",
+        columns=["Metric"]
+    )
+    .cols_align(
+        align="center",
+        columns=["Value"]
+    )
+    .cols_width({
+        "Metric": "60%",
+        "Value": "40%"
+    })
+    .tab_options(quarto_disable_processing=True)
+)
+gt_loading_stats.show()
+
+# Show appointment type categorization as Great Table
+appt_breakdown = pd.DataFrame({
+    'Appointment Type': nps_df['appointmentType'].value_counts().index,
+    'Count': nps_df['appointmentType'].value_counts().values,
+    'Category': [categorize_appointment(x) for x in nps_df['appointmentType'].value_counts().index]
+})
+
+gt_appt = (
+    GT(appt_breakdown.reset_index(drop=True))
+    .tab_header(
+        title="Appointment Type Categorization",
+        subtitle="National Park Service Job Types (2019-2025)"
+    )
+    .fmt_number(
+        columns=["Count"],
+        sep_mark=",",
+        decimals=0
+    )
+    .cols_align(
+        align="left",
+        columns=["Appointment Type", "Category"]
+    )
+    .cols_align(
+        align="center",
+        columns=["Count"]
+    )
+    .cols_width({
+        "Appointment Type": "45%",
+        "Count": "20%",
+        "Category": "35%"
+    })
+    .tab_options(quarto_disable_processing=True)
+)
+gt_appt.show()
+
+```
+
+# Monthly Hiring Heatmaps
+
+```{python}
+# Get current date to limit display
+dt_info = get_current_datetime()
+current_year = dt_info['year']
+current_month = dt_info['month']
+
+# Filter out future months for current year
+def should_show_month(year, month):
+    if year < current_year:
+        return True
+    elif year == current_year:
+        return month <= current_month
+    else:
+        return False
+
+# Create month labels
+month_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+def create_heatmap_table(df_subset, title, subtitle=""):
+    """Create a Great Tables heatmap-style table"""
+    monthly_breakdown = df_subset.groupby(['year', 'month']).size().reset_index(name='job_count')
+    monthly_pivot = monthly_breakdown.pivot(index='month', columns='year', values='job_count').fillna(0)
+    
+    # Mask future months
+    for year in monthly_pivot.columns:
+        for month in monthly_pivot.index:
+            if not should_show_month(year, month):
+                monthly_pivot.loc[month, year] = np.nan
+    
+    # Add month names
+    monthly_pivot.index = month_labels
+    
+    # Reset index to make month a column
+    monthly_pivot_reset = monthly_pivot.reset_index()
+    monthly_pivot_reset.columns.name = None
+    monthly_pivot_reset = monthly_pivot_reset.rename(columns={'index': 'Month'})
+    
+    # Get year columns for formatting - convert to strings to ensure proper handling
+    year_cols = [str(col) for col in monthly_pivot_reset.columns if str(col) != 'Month']
+    
+    # Create color scale values for the data
+    max_val = monthly_pivot.max().max()
+    
+    # Rename columns to strings for Great Tables
+    monthly_pivot_reset.columns = [str(col) for col in monthly_pivot_reset.columns]
+    
+    gt_heatmap = (
+        GT(monthly_pivot_reset)
+        .tab_header(
+            title=title,
+            subtitle=subtitle
+        )
+        .fmt_number(
+            columns=year_cols,
+            decimals=0,
+            sep_mark=","
+        )
+        .data_color(
+            columns=year_cols,
+            palette=["white", "orange", "darkred"],
+            domain=[0, max_val],
+            na_color="lightgray"
+        )
+        .cols_align(
+            align="center",
+            columns=year_cols
+        )
+        .cols_align(
+            align="left",
+            columns=["Month"]
+        )
+        .tab_options(quarto_disable_processing=True)
+    )
+    
+    gt_heatmap.show()
+
+# Create heatmap summary data
+heatmap_summary = pd.DataFrame({
+    'Category': ['All NPS Positions', 'Permanent Positions', 'Term/Temporary Positions'],
+    'Job Count': [
+        f"{len(nps_df):,}",
+        f"{len(nps_df[nps_df['appt_category'] == 'Permanent']):,}",
+        f"{len(nps_df[nps_df['appt_category'] == 'Term/Temporary']):,}"
+    ],
+    'Percentage': [
+        "100%",
+        f"{len(nps_df[nps_df['appt_category'] == 'Permanent']) / len(nps_df) * 100:.0f}%",
+        f"{len(nps_df[nps_df['appt_category'] == 'Term/Temporary']) / len(nps_df) * 100:.0f}%"
+    ]
+})
+
+gt_heatmap_summary = (
+    GT(heatmap_summary.reset_index(drop=True))
+    .tab_header(
+        title="Heatmap Categories Summary",
+        subtitle="National Park Service Job Distribution by Appointment Type"
+    )
+    .cols_align(
+        align="left",
+        columns=["Category"]
+    )
+    .cols_align(
+        align="center",
+        columns=["Job Count", "Percentage"]
+    )
+    .cols_width({
+        "Category": "50%",
+        "Job Count": "25%",
+        "Percentage": "25%"
+    })
+    .tab_options(quarto_disable_processing=True)
+)
+gt_heatmap_summary.show()
+
+# 1. All NPS jobs
+create_heatmap_table(nps_df, 
+                    "National Park Service - All Job Postings by Month and Year",
+                    f"Total: {len(nps_df):,} jobs (2019-2025)")
+
+# 2. Permanent positions only
+permanent_df = nps_df[nps_df['appt_category'] == 'Permanent']
+create_heatmap_table(permanent_df, 
+                    "National Park Service - Permanent Positions",
+                    f"Total: {len(permanent_df):,} jobs ({len(permanent_df)/len(nps_df)*100:.0f}% of all positions)")
+
+# 3. Term/Temporary positions only  
+temp_df = nps_df[nps_df['appt_category'] == 'Term/Temporary']
+create_heatmap_table(temp_df, 
+                    "National Park Service - Term/Temporary Positions",
+                    f"Total: {len(temp_df):,} jobs ({len(temp_df)/len(nps_df)*100:.0f}% of all positions)")
+```
+
+# 2025 vs Previous Years: What's Being Hired Less
+
+```{python}
+def analyze_occupation_changes():
+    """Analyze 2025 Jan-Jun vs historical Jan-Jun occupational series changes"""
+    # Load occupation mapping
+    occ_mapping = pd.read_csv('DTocc.txt')
+    occ_dict = dict(zip(occ_mapping['OCC'].astype(str).str.zfill(4), occ_mapping['OCCT']))
+    
+    # Filter for January-June only for ALL years
+    nps_jan_jun = nps_df[nps_df['month'].between(1, 6)].copy()
+    
+    # Compare 2025 Jan-Jun vs 2018-2024 Jan-Jun average by occupational series
+    nps_2025_jan_jun = nps_jan_jun[nps_jan_jun['year'] == 2025]
+    nps_historical_jan_jun = nps_jan_jun[nps_jan_jun['year'].between(2018, 2024)]
+    
+    # Create summary table first
+    # Calculate average for historical period
+    historical_avg = len(nps_historical_jan_jun) / 7  # 7 years (2018-2024)
+    pct_change = ((len(nps_2025_jan_jun) - historical_avg) / historical_avg) * 100
+    summary_data = pd.DataFrame({
+        'Period': ['2025 Jan-Jun jobs', 'Historical Jan-Jun average (2018-2024)', 'Change'],
+        'Count': [f"{len(nps_2025_jan_jun):,}", f"{historical_avg:,.0f}", f"{pct_change:.0f}%"]
+    })
+    
+    gt_scope = (
+        GT(summary_data.reset_index(drop=True))
+        .tab_header(
+            title="Analysis Scope",
+            subtitle="January-June Comparison Only"
+        )
+        .cols_align(
+            align="left",
+            columns=["Period"]
+        )
+        .cols_align(
+            align="center",
+            columns=["Count"]
+        )
+        .cols_width({
+            "Period": "70%",
+            "Count": "30%"
+        })
+        .tab_options(quarto_disable_processing=True)
+    )
+    gt_scope.show()
+    
+    # Get 2025 Jan-Jun counts by occupational series
+    occ_2025 = nps_2025_jan_jun['occupational_series'].value_counts()
+    
+    # Get historical Jan-Jun average by occupational series
+    occ_historical = nps_historical_jan_jun.groupby(['year', 'occupational_series']).size().reset_index(name='count')
+    occ_historical_avg = occ_historical.groupby('occupational_series')['count'].mean()
+    
+    # Compare and find biggest changes
+    comparison_data = []
+    all_series = set(occ_2025.index) | set(occ_historical_avg.index)
+    
+    for series in all_series:
+        if pd.notna(series) and series != 'Unknown':
+            count_2025 = occ_2025.get(series, 0)
+            avg_historical = occ_historical_avg.get(series, 0)
+            
+            if avg_historical >= 2:  # Only meaningful changes
+                difference = count_2025 - avg_historical
+                pct_change = ((count_2025 - avg_historical) / avg_historical) * 100 if avg_historical > 0 else 0
+                occ_title = occ_dict.get(series, f"Series {series}")
+                comparison_data.append({
+                    'Series': series,
+                    'Occupation': occ_title,
+                    '2018-24 Jan-Jun Avg': round(avg_historical),
+                    '2025 Jan-Jun': count_2025,
+                    'Change': round(difference),
+                    '% Change': round(pct_change, 0)
+                })
+    
+    # Convert to DataFrame and sort by absolute change (biggest changes first)
+    comparison_df = pd.DataFrame(comparison_data)
+    comparison_df['abs_change'] = abs(comparison_df['Change'])
+    comparison_df = comparison_df.sort_values('abs_change', ascending=False).head(15)
+    comparison_df = comparison_df.drop('abs_change', axis=1)
+    
+    return comparison_df
+
+# Analyze changes
+changes_df = analyze_occupation_changes()
+
+# Display with Great Tables
+# Reset index for Great Tables compatibility
+gt_df = changes_df.reset_index(drop=True)
+
+gt_table = (
+    GT(gt_df)
+    .tab_header(
+        title="National Park Service: Biggest Occupational Changes in 2025",
+        subtitle="January-June 2025 vs January-June 2018-2024 Average"
+    )
+    .fmt_number(
+        columns=["2018-24 Jan-Jun Avg", "Change"],
+        decimals=0
+    )
+    .fmt_number(
+        columns=["2025 Jan-Jun"],
+        decimals=0
+    )
+    .fmt_number(
+        columns=["% Change"],
+        decimals=0,
+        pattern="{x}%"
+    )
+    .data_color(
+        columns=["% Change"],
+        palette=["red", "white", "green"],
+        domain=[-100, 50]
+    )
+    .cols_align(
+        align="left",
+        columns=["Occupation"]
+    )
+    .cols_align(
+        align="center",
+        columns=["Series", "2018-24 Jan-Jun Avg", "2025 Jan-Jun", "Change", "% Change"]
+    )
+    .cols_width({
+        "Occupation": "35%",
+        "Series": "10%",
+        "2018-24 Jan-Jun Avg": "18%",
+        "2025 Jan-Jun": "12%", 
+        "Change": "12%",
+        "% Change": "13%"
+    })
+    .tab_options(quarto_disable_processing=True)
+)
+
+gt_table.show()
+```
+
+# "Many" vs Specific Numbers: Are There More Group Announcements?
+
+```{python}
+def categorize_openings(opening_val):
+    """Categorize openings (MANY=Many, FEW=Few, etc.)"""
+    opening_str = str(opening_val).upper()
+    if opening_str in ['MANY', 'FEW', 'SEVERAL']:
+        return opening_str.title()
+    else:
+        try:
+            return str(int(float(opening_val)))
+        except:
+            return 'Other'
+
+def analyze_opening_types():
+    """Analyze opening types comparison between 2025 and historical data"""
+    # Simple analysis to disprove that 2025 decline is due to more "Many" announcements
+    nps_with_openings = nps_df[nps_df['totalOpenings'].notna()].copy()
+    openings_2025 = nps_with_openings[nps_with_openings['year'] == 2025].copy()
+    openings_historical = nps_with_openings[nps_with_openings['year'].between(2018, 2024)].copy()
+    
+    # Apply categorization
+    openings_2025.loc[:, 'opening_category'] = openings_2025['totalOpenings'].apply(categorize_openings)
+    openings_historical.loc[:, 'opening_category'] = openings_historical['totalOpenings'].apply(categorize_openings)
+    
+    # Get top 10 categories for each period
+    hist_top10 = openings_historical['opening_category'].value_counts().head(10)
+    curr_top10 = openings_2025['opening_category'].value_counts().head(10)
+    
+    # Calculate percentages
+    hist_pcts = (hist_top10 / len(openings_historical) * 100).round(0)
+    curr_pcts = (curr_top10 / len(openings_2025) * 100).round(0)
+    
+    # Create simple comparison table
+    comparison_data = []
+    all_categories = set(hist_top10.index) | set(curr_top10.index)
+
+    
+    for category in sorted(all_categories):
+        hist_pct = hist_pcts.get(category, 0)
+        curr_pct = curr_pcts.get(category, 0)
+        comparison_data.append({
+            'Opening Type': category,
+            'Historical %': hist_pct,
+            '2025 %': curr_pct,
+            'Change': round(curr_pct - hist_pct, 0)
+        })
+    
+    comparison_df = pd.DataFrame(comparison_data)
+    comparison_df = comparison_df.sort_values('Historical %', ascending=False)
+    
+    # Display with Great Tables
+    gt_openings_df = comparison_df.reset_index(drop=True)
+    
+    gt_openings = (
+        GT(gt_openings_df)
+        .tab_header(
+            title="Opening Types Comparison: 2025 vs Historical",
+            subtitle="Percentage Distribution (2018-2024 vs 2025 Jan-June)"
+        )
+        .fmt_number(
+            columns=["Historical %", "2025 %", "Change"],
+            decimals=0,
+            pattern="{x}%"
+        )
+        .data_color(
+            columns=["Change"],
+            palette=["red", "white", "green"],
+            domain=[-15, 15]
+        )
+        .cols_align(
+            align="center",
+            columns=["Historical %", "2025 %", "Change"]
+        )
+        .cols_align(
+            align="left",
+            columns=["Opening Type"]
+        )
+        .cols_width({
+            "Opening Type": "35%",
+            "Historical %": "22%",
+            "2025 %": "22%",
+            "Change": "21%"
+        })
+        .tab_options(quarto_disable_processing=True)
+    )
+    
+    gt_openings.show()
+    
+    # Simple conclusion about "Many" usage
+    hist_many_pct = (openings_historical['totalOpenings'].isin(['Many', 'MANY']).sum() / len(openings_historical)) * 100
+    curr_many_pct = (openings_2025['totalOpenings'].isin(['Many', 'MANY']).sum() / len(openings_2025)) * 100
+    
+    # Create "Many" usage summary table
+    many_usage_summary = pd.DataFrame({
+        'Period': ['Historical (2018-2024)', '2025 (Jan-Jun)', 'Change'],
+        'Many Usage %': [
+            f"{hist_many_pct:.0f}%",
+            f"{curr_many_pct:.0f}%",
+            f"{curr_many_pct - hist_many_pct:+.0f} percentage points"
+        ]
+    })
+    
+    gt_many = (
+        GT(many_usage_summary.reset_index(drop=True))
+        .tab_header(
+            title="'Many' Usage Analysis",
+            subtitle="No significant change in group announcements"
+        )
+        .cols_align(
+            align="left",
+            columns=["Period"]
+        )
+        .cols_align(
+            align="center",
+            columns=["Many Usage %"]
+        )
+        .cols_width({
+            "Period": "50%",
+            "Many Usage %": "50%"
+        })
+        .tab_options(quarto_disable_processing=True)
+    )
+    gt_many.show()
+
+# Run the analysis
+analyze_opening_types()
+
+```
+
+---
+```{python}
+dt_info = get_current_datetime()
+print(f"*Analysis generated on {dt_info['formatted']}*")
+```

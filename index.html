@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USAJobs Historical Data Fields</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #2c3e50;
+            margin-top: 25px;
+        }
+        .stats {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        code {
+            background: #f1f2f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+        }
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .field-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .examples {
+            max-width: 400px;
+            word-wrap: break-word;
+        }
+        .completeness {
+            text-align: center;
+        }
+        .good { color: #27ae60; font-weight: 600; }
+        .warning { color: #f39c12; font-weight: 600; }
+        .poor { color: #e74c3c; font-weight: 600; }
+        .code-example {
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>USAJobs Historical Data (2013-2025)</h1>
+        
+        <div class="stats">
+            <strong>Dataset:</strong> 2,965,854 total job postings | <strong>Coverage:</strong> 2013-2025 | <strong>Source:</strong> USAJobs Historical + Current APIs with field normalization and deduplication
+        </div>
+
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#data-coverage">Data Coverage by Year</a></li>
+            <li><a href="#all-fields">All Fields</a></li>
+            <li><a href="#api-mapping">API Field Mapping & Normalization</a></li>
+            <li><a href="#code-examples">Code Examples from examples.py</a></li>
+        </ul>
+
+        <h2 id="data-coverage">Data Coverage by Year</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Jobs Opened</th>
+                    <th>Jobs Closed</th>
+                    <th>Coverage Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>2013</td><td>5</td><td>0</td><td>Very limited</td></tr>
+                <tr><td>2014</td><td>24</td><td>23</td><td>Very limited</td></tr>
+                <tr><td>2015</td><td>140</td><td>134</td><td>Very limited</td></tr>
+                <tr><td>2016</td><td>3,879</td><td>1,638</td><td>Very limited</td></tr>
+                <tr><td>2017</td><td>237,145</td><td>228,499</td><td>✅ Complete year</td></tr>
+                <tr><td>2018</td><td>328,111</td><td>326,578</td><td>✅ Complete year</td></tr>
+                <tr><td>2019</td><td>349,256</td><td>349,002</td><td>✅ Complete year</td></tr>
+                <tr><td>2020</td><td>327,545</td><td>327,845</td><td>✅ Complete year</td></tr>
+                <tr><td>2021</td><td>369,151</td><td>364,761</td><td>✅ Complete year</td></tr>
+                <tr><td>2022</td><td>441,604</td><td>436,071</td><td>✅ Complete year</td></tr>
+                <tr><td>2023</td><td>454,652</td><td>456,836</td><td>✅ Complete year</td></tr>
+                <tr><td>2024</td><td>367,177</td><td>372,421</td><td>✅ Complete year</td></tr>
+                <tr><td>2025</td><td>87,165</td><td>101,429</td><td>Current through July 6, 2025</td></tr>
+                <tr><td>2026</td><td>0</td><td>617</td><td>Closing dates only</td></tr>
+            </tbody>
+        </table>
+
+        <h2 id="all-fields">All Fields</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Examples</th>
+                    <th>Completeness</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code class="field-name">usajobsControlNumber</code></td>
+                    <td>String</td>
+                    <td class="examples">765432123, 765321456, 765234567</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">announcementNumber</code></td>
+                    <td>String</td>
+                    <td class="examples">HHS-IHS-25-12345678, USDA-NRCS-24-98765432</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">hiringAgencyName</code></td>
+                    <td>String</td>
+                    <td class="examples">Veterans Health Administration, National Park Service, Internal Revenue Service</td>
+                    <td class="completeness good">99.1%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">hiringAgencyCode</code></td>
+                    <td>String</td>
+                    <td class="examples">VA, USDA, DOD, HHS, DOI</td>
+                    <td class="completeness good">98.8%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">organizationName</code></td>
+                    <td>String</td>
+                    <td class="examples">Department of Veterans Affairs, Department of Agriculture</td>
+                    <td class="completeness good">92.1%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">organizationCode</code></td>
+                    <td>String</td>
+                    <td class="examples">VA36, USDA07, DOD-N</td>
+                    <td class="completeness warning">89.3%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">positionTitle</code></td>
+                    <td>String</td>
+                    <td class="examples">Program Analyst, Park Ranger, Budget Analyst, Contract Specialist</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">minimumSalary</code></td>
+                    <td>Integer</td>
+                    <td class="examples">45000, 72553, 95000, 120000</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">maximumSalary</code></td>
+                    <td>Integer</td>
+                    <td class="examples">95000, 105612, 150000, 272100</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">minimumGrade</code></td>
+                    <td>String</td>
+                    <td class="examples">GS-11, GS-13, GS-14, WG-10, GG-12</td>
+                    <td class="completeness good">95.2%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">maximumGrade</code></td>
+                    <td>String</td>
+                    <td class="examples">GS-13, GS-14, GS-15, WG-12, SES</td>
+                    <td class="completeness good">95.2%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">positionOpenDate</code></td>
+                    <td>DateTime</td>
+                    <td class="examples">2024-03-15, 2024-01-08, 2023-11-20</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">positionCloseDate</code></td>
+                    <td>DateTime</td>
+                    <td class="examples">2024-04-01, 2024-02-15, Open Continuous</td>
+                    <td class="completeness good">99.8%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">appointmentType</code></td>
+                    <td>String</td>
+                    <td class="examples">Permanent, Term, Temporary, Seasonal, Internships</td>
+                    <td class="completeness good">98.9%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">totalOpenings</code></td>
+                    <td>String</td>
+                    <td class="examples">1, 5, 15, Many, Few, Several</td>
+                    <td class="completeness warning">78.4%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">workSchedule</code></td>
+                    <td>String</td>
+                    <td class="examples">Full-time, Part-time, Intermittent, Shift work, Job sharing</td>
+                    <td class="completeness good">97.8%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">PositionLocations</code></td>
+                    <td>JSON Array</td>
+                    <td class="examples">[{"City": "Washington", "State": "DC", "Country": "US"}], Remote work eligible</td>
+                    <td class="completeness good">94.5%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">JobCategories</code></td>
+                    <td>JSON Array</td>
+                    <td class="examples">[{"series": "0025", "title": "PARK RANGER"}], [{"series": "0343", "title": "MANAGEMENT ANALYST"}]</td>
+                    <td class="completeness good">96.2%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">HiringPaths</code></td>
+                    <td>JSON Array</td>
+                    <td class="examples">["public"], ["veterans"], ["students", "graduates"]</td>
+                    <td class="completeness warning">71.8%</td>
+                </tr>
+                <tr>
+                    <td><code class="field-name">inserted_at</code></td>
+                    <td>DateTime</td>
+                    <td class="examples">2024-07-05 14:30:15, 2024-07-06 09:22:41</td>
+                    <td class="completeness good">100%</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 id="api-mapping">API Field Mapping & Normalization</h2>
+        <p>This dataset combines data from <strong>two USAJobs APIs</strong> with field normalization for consistent querying:</p>
+        
+        <h3>API Sources</h3>
+        <ul>
+            <li><strong>Historical API</strong> (<code>/api/historicjoa</code>): Past job announcements by date range (2013-2025)</li>
+            <li><strong>Current API</strong> (<code>/api/Search</code>): Currently active job postings (2024-2025)</li>
+        </ul>
+        
+        <p><strong>Note:</strong> There is overlap between the APIs (2024-2025 jobs appear in both), but we collect from both APIs for completeness.</p>
+
+        <h3>Key Normalized Fields</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Historical Field Name</th>
+                    <th>Historical API Source</th>
+                    <th>Current API Source</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>usajobsControlNumber</code></td>
+                    <td><code>usajobsControlNumber</code></td>
+                    <td>Extracted from <code>PositionURI</code></td>
+                    <td>Numeric job identifier</td>
+                </tr>
+                <tr>
+                    <td><code>announcementNumber</code></td>
+                    <td><code>announcementNumber</code></td>
+                    <td><code>PositionID</code></td>
+                    <td>Public announcement ID</td>
+                </tr>
+                <tr>
+                    <td><code>hiringAgencyName</code></td>
+                    <td><code>hiringAgencyName</code></td>
+                    <td><code>DepartmentName</code></td>
+                    <td>Agency name</td>
+                </tr>
+                <tr>
+                    <td><code>hiringAgencyCode</code></td>
+                    <td><code>hiringAgencyCode</code></td>
+                    <td><code>OrganizationCodes</code> (first part)</td>
+                    <td>Agency code</td>
+                </tr>
+                <tr>
+                    <td><code>positionTitle</code></td>
+                    <td><code>positionTitle</code></td>
+                    <td><code>PositionTitle</code></td>
+                    <td>Job title</td>
+                </tr>
+                <tr>
+                    <td><code>minimumGrade</code></td>
+                    <td><code>minimumGrade</code></td>
+                    <td><code>JobGrade[0].Code</code></td>
+                    <td>Minimum grade level</td>
+                </tr>
+                <tr>
+                    <td><code>maximumGrade</code></td>
+                    <td><code>maximumGrade</code></td>
+                    <td><code>JobGrade[-1].Code</code></td>
+                    <td>Maximum grade level</td>
+                </tr>
+                <tr>
+                    <td><code>minimumSalary</code></td>
+                    <td><code>minimumSalary</code></td>
+                    <td><code>PositionRemuneration[0].MinimumRange</code></td>
+                    <td>Minimum salary</td>
+                </tr>
+                <tr>
+                    <td><code>maximumSalary</code></td>
+                    <td><code>maximumSalary</code></td>
+                    <td><code>PositionRemuneration[0].MaximumRange</code></td>
+                    <td>Maximum salary</td>
+                </tr>
+                <tr>
+                    <td><code>positionOpenDate</code></td>
+                    <td><code>positionOpenDate</code></td>
+                    <td><code>PositionStartDate</code></td>
+                    <td>Position open date</td>
+                </tr>
+                <tr>
+                    <td><code>positionCloseDate</code></td>
+                    <td><code>positionCloseDate</code></td>
+                    <td><code>PositionEndDate</code></td>
+                    <td>Position close date</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Data Processing Approach</h3>
+        <ul>
+            <li><strong>Field Normalization:</strong> Current API fields mapped to historical naming conventions for consistent querying</li>
+            <li><strong>Data Preservation:</strong> All original fields from both APIs retained alongside normalized overlay fields</li>
+            <li><strong>No Data Loss:</strong> "Keep everything + overlay" approach ensures complete data accessibility</li>
+            <li><strong>Deduplication Available:</strong> Use <code>usajobsControlNumber</code> to identify records appearing in both APIs when needed</li>
+        </ul>
+
+        <h3>Data Structure</h3>
+        <ul>
+            <li><strong>Historical API:</strong> ~40 fields including nested arrays (<code>HiringPaths</code>, <code>JobCategories</code>, <code>PositionLocations</code>)</li>
+            <li><strong>Current API:</strong> ~25 overlay fields + full original nested structure (<code>MatchedObjectDescriptor</code>, etc.)</li>
+            <li><strong>Result:</strong> Query any year using consistent field names (e.g., <code>hiringAgencyName</code>, <code>positionTitle</code>) while retaining access to original nested structures</li>
+        </ul>
+
+        <h2 id="code-examples">Code Examples from examples.py</h2>
+
+        <h3>Basic Data Loading</h3>
+        <pre>import pandas as pd
+
+# Load a single year
+df_2024 = pd.read_parquet('data/historical_jobs_2024.parquet')
+print(f"✓ Successfully loaded {len(df_2024):,} job postings from 2024")
+print(f"  Columns: {df_2024.shape[1]}")
+print(f"  Memory usage: {df_2024.memory_usage(deep=True).sum() / 1024**2:.1f} MB")</pre>
+
+        <div class="code-example">
+            <strong>Output:</strong><br>
+            ✓ Successfully loaded 367,177 job postings from 2024<br>
+            &nbsp;&nbsp;Columns: 42<br>
+            &nbsp;&nbsp;Memory usage: 952.5 MB
+        </div>
+
+        <h3>Top Hiring Agencies Analysis</h3>
+        <pre># 1. TOP 15 HIRING AGENCIES (2024 DATA)
+top_agencies = df_2024['hiringAgencyName'].value_counts().head(15)
+for i, (agency, count) in enumerate(top_agencies.items(), 1):
+    percentage = count / len(df_2024) * 100
+    print(f"{i:2d}. {agency}: {count:,} jobs ({percentage:.1f}%)")</pre>
+
+        <div class="code-example">
+            <strong>Real output from examples.py:</strong><br>
+            1. Veterans Health Administration: 59,233 jobs (16.1%)<br>
+            2. Army National Guard Units: 10,323 jobs (2.8%)<br>
+            3. Commander, Navy Installations: 9,198 jobs (2.5%)<br>
+            4. U.S. Army Corps of Engineers: 9,048 jobs (2.5%)<br>
+            5. Military Treatment Facilities under DHA: 8,859 jobs (2.4%)<br>
+            6. Army Installation Management Command: 8,526 jobs (2.3%)<br>
+            7. U.S. Marine Corps: 7,971 jobs (2.2%)<br>
+            8. Internal Revenue Service: 7,955 jobs (2.2%)<br>
+            9. Justice, Bureau of Prisons/Federal Prison System: 6,993 jobs (1.9%)<br>
+            10. National Park Service: 5,527 jobs (1.5%)
+        </div>
+
+        <h3>Salary Analysis</h3>
+        <pre># Salary statistics
+records_with_salary = df_2024[df_2024['maximumSalary'].notna()]
+print(f"Records with salary data: {len(records_with_salary):,} ({len(records_with_salary)/len(df_2024)*100:.1f}%)")
+
+# Salary ranges
+min_range = f"${records_with_salary['minimumSalary'].min():,.0f} - ${records_with_salary['minimumSalary'].max():,.0f}"
+max_range = f"${records_with_salary['maximumSalary'].min():,.0f} - ${records_with_salary['maximumSalary'].max():,.0f}"
+median_range = f"${records_with_salary['minimumSalary'].median():,.0f} - ${records_with_salary['maximumSalary'].median():,.0f}"
+
+print(f"Minimum salary range: {min_range}")
+print(f"Maximum salary range: {max_range}")  
+print(f"Median salary range: {median_range}")</pre>
+
+        <div class="code-example">
+            <strong>Real output from examples.py:</strong><br>
+            Records with salary data: 367,177 (100.0%)<br>
+            Minimum salary range: $0 - $400,000<br>
+            Maximum salary range: $0 - $470,281<br>
+            Median salary range: $72,553 - $105,612
+        </div>
+
+        <h3>Multi-Year Analysis with DuckDB</h3>
+        <pre>import duckdb
+
+# Create DuckDB connection and register multiple Parquet files
+conn = duckdb.connect('download/usajobs.duckdb')
+
+# Register Parquet files as external tables
+years = ['2022', '2023', '2024']
+for year in years:
+    file_path = f'data/historical_jobs_{year}.parquet'
+    conn.execute(f"CREATE OR REPLACE VIEW jobs_{year} AS SELECT * FROM '{file_path}'")
+
+# Create unified view
+conn.execute("""
+    CREATE OR REPLACE VIEW all_jobs AS 
+    SELECT * FROM jobs_2024 
+    UNION ALL SELECT * FROM jobs_2023 
+    UNION ALL SELECT * FROM jobs_2022
+""")
+
+# Query salary trends by year
+salary_trends = conn.execute("""
+    SELECT 
+        EXTRACT(year FROM positionOpenDate) as year,
+        ROUND(AVG(minimumSalary)) as avg_min,
+        ROUND(AVG(maximumSalary)) as avg_max,
+        ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY minimumSalary)) as median_min,
+        ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY maximumSalary)) as median_max,
+        COUNT(*) as jobs
+    FROM all_jobs 
+    WHERE minimumSalary IS NOT NULL 
+    GROUP BY EXTRACT(year FROM positionOpenDate)
+    ORDER BY year DESC
+""").fetchdf()
+
+print(salary_trends)</pre>
+
+        <div class="code-example">
+            <strong>Real output from examples.py:</strong><br>
+            Year | Avg Min | Avg Max | Median Min | Median Max | Jobs<br>
+            -----|---------|---------|------------|------------|-----<br>
+            2024 | $ 74222 | $104262 | $   72553 | $  105612 | 366772<br>
+            2023 | $ 69048 | $ 97341 | $   69107 | $   93591 | 454348<br>
+            2022 | $ 64748 | $ 91485 | $   62926 | $   88792 | 441351
+        </div>
+
+        <h3>Monthly Hiring Patterns</h3>
+        <pre># Monthly posting patterns
+monthly_posts = df_2024.groupby(df_2024['positionOpenDate'].dt.month).size()
+print("Monthly posting patterns:")
+month_names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+for month, count in monthly_posts.items():
+    percentage = count / len(df_2024) * 100
+    print(f"    {month_names[month-1]}: {count:,} jobs ({percentage:.1f}%)")</pre>
+
+        <div class="code-example">
+            <strong>Real output from examples.py:</strong><br>
+            Monthly posting patterns:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;Jan: 35,939 jobs (9.8%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;Feb: 34,076 jobs (9.3%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;Mar: 32,177 jobs (8.8%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;Apr: 30,956 jobs (8.4%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;May: 29,006 jobs (7.9%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;Jun: 25,996 jobs (7.1%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;Jul: 29,831 jobs (8.1%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;Aug: 31,476 jobs (8.6%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;Sep: 28,414 jobs (7.7%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;Oct: 31,775 jobs (8.7%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;Nov: 28,604 jobs (7.8%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;Dec: 28,927 jobs (7.9%)
+        </div>
+
+        <h3>Most Common Position Titles</h3>
+        <pre># Most common position titles
+common_titles = df_2024['positionTitle'].value_counts().head(10)
+print("Most common position titles:")
+for i, (title, count) in enumerate(common_titles.items(), 1):
+    percentage = count / len(df_2024) * 100
+    print(f"   {i:2d}. {title}: {count:,} ({percentage:.1f}%)")</pre>
+
+        <div class="code-example">
+            <strong>Real output from examples.py:</strong><br>
+            Most common position titles:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;1. Program Analyst: 3,324 (0.9%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;2. Management and Program Analyst: 2,628 (0.7%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;3. PROGRAM ANALYST: 2,203 (0.6%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;4. Budget Analyst: 2,008 (0.5%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;5. Administrative Officer: 1,817 (0.5%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;6. Management Analyst: 1,606 (0.4%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;7. Contract Specialist: 1,569 (0.4%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;8. Logistics Management Specialist: 1,424 (0.4%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;9. FINANCIAL MANAGEMENT ANALYST: 1,207 (0.3%)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;10. LOGISTICS MANAGEMENT SPECIALIST: 1,129 (0.3%)
+        </div>
+
+        <div class="stats">
+            <strong>Access:</strong> Download Parquet files from /data/ directory | <strong>Full examples:</strong> Run examples.py for complete analysis patterns | <strong>Source:</strong> Data collected from USAJobs.gov APIs
+        </div>
+    </div>
+</body>
+</html>
