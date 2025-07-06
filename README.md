@@ -101,7 +101,7 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 
 2. **Install dependencies:**
    ```bash
-   pip install -r [requirements.txt](https://github.com/abigailhaddad/usajobs_historical/blob/main/requirements.txt)
+   pip install -r requirements.txt
    ```
 
 3. **Create .env file (only needed for current jobs collection):**
@@ -137,16 +137,19 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 
 ```bash
 # Collect current jobs and update documentation
-python [update/update_all.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/update/update_all.py)      # Update data + docs
+python update/update_all.py      # Update data + docs
 ```
 
 **Historical data collection (if needed):**
+- Single year: [scripts/run_single.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_single.sh)
+- Multiple years: [scripts/run_parallel.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_parallel.sh)
+
 ```bash
 # Single year:
-[scripts/run_single.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_single.sh) range 2024-01-01 2024-12-31
+scripts/run_single.sh range 2024-01-01 2024-12-31
 
 # Multiple years:
-[scripts/run_parallel.sh](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/run_parallel.sh) 2020 2021 2022
+scripts/run_parallel.sh 2020 2021 2022
 ```
 
 ## Monitoring Data Collection
@@ -159,11 +162,11 @@ If dates fail to collect, the system provides specific retry commands:
 
 ```bash
 # The system will show failed dates and provide exact retry commands:
-python [scripts/collect_data.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_data.py) --start-date 2024-01-15 --end-date 2024-01-15 --data-dir data
-python [scripts/collect_data.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_data.py) --start-date 2024-01-20 --end-date 2024-01-20 --data-dir data
+python scripts/collect_data.py --start-date 2024-01-15 --end-date 2024-01-15 --data-dir data
+python scripts/collect_data.py --start-date 2024-01-20 --end-date 2024-01-20 --data-dir data
 
 # Or retry the entire range to catch any missed dates:
-python [scripts/collect_data.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_data.py) --start-date 2024-01-01 --end-date 2024-01-31 --data-dir data
+python scripts/collect_data.py --start-date 2024-01-01 --end-date 2024-01-31 --data-dir data
 ```
 
 **Check logs for:** 
