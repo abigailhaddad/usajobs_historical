@@ -1,6 +1,8 @@
 # USAJobs Data Pipeline
 
-**Job dataset with 2.97M job announcements from Historical + Current APIs**
+**Data collection last run: 2025-07-06**
+
+**Job dataset with 2,974,930 job announcements from Historical + Current APIs**
 
 This repository provides USAJobs data combining both Historical and Current APIs, with deduplication and field normalization. Data is available in two ways:
 1. **📁 Ready-to-use Parquet files** - Download and analyze immediately
@@ -21,33 +23,35 @@ print(f"Loaded {len(df_2024):,} federal job postings from 2024")
 # See examples.py for more analysis patterns
 ```
 
-This provides 430MB of clean, structured data that works with Python, R, or any Parquet-compatible tool.
+This provides 437MB of data that works with Python, R, or any Parquet-compatible tool.
 
 ### Option 2: Run the Pipeline Yourself
 The pipeline collects data from USAJobs APIs and saves to Parquet files. Note that the USAJobs API can be unreliable - expect some failed requests that require retries. The system logs all failures and provides specific retry commands.
 
 ## Data Coverage
 
-Early years of the data are incomplete, mostly consisting of jobs with closing dates years after the opening dates. 
+Data collection last run: 2025-07-06. Early years are incomplete, mostly consisting of jobs with closing dates years after the opening dates. Note: Some job postings may have future opening dates. Note: Some job postings may have future opening dates. Note: Some job postings may have future opening dates. Note: Some job postings may have future opening dates. 
+
 
 | Year | Jobs Opened | Jobs Closed |
 |------|-------------|-------------|
 | 2013 | 5 | 0 |
-| 2014 | 24 | 23 |
-| 2015 | 140 | 134 |
-| 2016 | 3,879 | 1,638 |
-| 2017 | 237,145 | 228,499 |
-| 2018 | 328,111 | 326,578 |
-| 2019 | 349,256 | 349,002 |
-| 2020 | 327,545 | 327,845 |
-| 2021 | 369,151 | 364,761 |
-| 2022 | 441,604 | 436,071 |
-| 2023 | 454,652 | 456,836 |
-| 2024 | 367,177 | 372,421 |
-| 2025 | 87,165 | 101,429 |
-| 2026 | 0 | 617 |
+| 2014 | 24 | 19 |
+| 2015 | 140 | 131 |
+| 2016 | 3,879 | 1,633 |
+| 2017 | 237,145 | 226,248 |
+| 2018 | 328,111 | 315,729 |
+| 2019 | 349,256 | 336,608 |
+| 2020 | 327,545 | 315,161 |
+| 2021 | 369,151 | 352,375 |
+| 2022 | 441,604 | 419,295 |
+| 2023 | 454,652 | 434,527 |
+| 2024 | 367,744 | 352,296 |
+| 2025 | 95,674 | 94,583 |
 
-Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,638 closed that year).
+Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,638 closed that year). 
+
+Some job postings may have future opening dates. 
 
 ## 🔄 Dual API Integration & Deduplication
 
@@ -56,6 +60,7 @@ This dataset combines data from **two USAJobs APIs** with the following processi
 ### API Sources
 - **Historical API** (`/api/historicjoa`): Past job announcements by date range
 - **Current API** (`/api/Search`): Currently active job postings
+- **API Documentation**: [https://developer.usajobs.gov/](https://developer.usajobs.gov/)
 
 **Note**: In our analysis, we've found that Current API jobs generally also appear in the Historical API data, but we collect from both APIs to ensure complete coverage.
 
@@ -75,6 +80,8 @@ The pipeline collects data from two USAJobs APIs:
 1. **Historical API** (`/api/historicjoa`) - Past job announcements by date range
 2. **Current API** (`/api/Search`) - Currently active job postings
 
+See the [USAJobs API Documentation](https://developer.usajobs.gov/) for complete API details.
+
 Both APIs are normalized to a common schema and stored in year-based Parquet files.
 
 ## Setup
@@ -90,11 +97,13 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
    pip install -r requirements.txt
    ```
 
-3. **Create .env file:**
+3. **Create .env file (only needed for current jobs collection):**
    ```bash
    # .env
    USAJOBS_API_TOKEN=your_api_token_here  # Get from https://developer.usajobs.gov/
    ```
+   
+   **Note:** The API key is only required for collecting current jobs. Historical data collection does not require authentication.
 
 ## File Structure
 
@@ -105,6 +114,10 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 │   ├── run_parallel.sh          # Run multiple years in parallel 
 │   ├── run_single.sh            # Run single date range or current jobs
 │   └── monitor_parallel.sh      # Monitor parallel job progress
+├── update/                  # Automated update scripts
+│   ├── update_all.py            # Comprehensive update: data + docs
+│   ├── generate_docs_data.py    # Generate documentation data
+│   └── update_docs.py           # Update README and index.html
 ├── data/                    # Data storage
 │   ├── historical_jobs_YEAR.parquet  # Historical jobs by year
 │   └── current_jobs_YEAR.parquet     # Current jobs by year
@@ -113,43 +126,17 @@ Both APIs are normalized to a common schema and stored in year-based Parquet fil
 
 ## Run Pipeline
 
-**Quick pulls:**
+**Workflow for data updates:**
+
 ```bash
-# Process jobs from last 24 hours (both APIs)
-scripts/run_single.sh daily
-
-# Process jobs from last 7 days (both APIs)
-scripts/run_single.sh days 7
-
-# Process jobs from last 30 days (both APIs)
-scripts/run_single.sh month
-
-# Process current jobs only (last 7 days)
-scripts/run_single.sh current 7
+# Collect current jobs and update documentation
+python update/update_all.py      # Update data + docs
 ```
 
-**Parallel processing:**
+**Historical data collection (if needed):**
 ```bash
-# Process multiple years in parallel (creates one tmux session per year)
-scripts/run_parallel.sh 2019 2023      # Range: 2019-2023
-scripts/run_parallel.sh 2020 2021 2022 # Specific years
-
-# Monitor all parallel jobs with live progress
-scripts/monitor_parallel.sh
-
-# Uses caffeinate to prevent Mac sleep during long runs
-```
-
-**Single year processing:**
-```bash
-# Process entire year (use tmux for unattended runs)
-tmux new-session -d -s usajobs-2024 'scripts/run_single.sh range 2024-01-01 2024-12-31'
-
-# Watch progress
-tmux attach -t usajobs-2024
-
-# Custom date ranges
-scripts/run_single.sh range 2024-06-01 2024-06-30
+# Single year: scripts/run_single.sh range 2024-01-01 2024-12-31
+# Multiple years: scripts/run_parallel.sh 2020 2021 2022
 ```
 
 ## Monitoring Data Collection
@@ -175,7 +162,7 @@ python scripts/collect_data.py --start-date 2024-01-01 --end-date 2024-01-31 --d
 
 ## Data Storage
 
-- **Parquet Files**: Primary storage format for efficient analytics
+- **Parquet Files**: Storage format
   - `historical_jobs_YEAR.parquet`: Historical job announcements by year
   - `current_jobs_YEAR.parquet`: Current job postings by year
 - **Logs**: Stored in `logs/` directory with aggressive data gap detection
@@ -217,22 +204,7 @@ Key fields are normalized using historical API field names for consistent queryi
 |-------|-------------|
 | `inserted_at` | Timestamp when pulled from API |
 
-## Query Data
-
-```bash
-# Load and analyze any year's data
-python examples.py
-```
 
 ## Analysis
 
 See `examples.py` for usage examples.
-
-## Workflow Overview
-
-1. **Collect Data**: Use `scripts/run_parallel.sh` to fetch historical and current jobs
-2. **Store Locally**: Data saved in year-based Parquet files with deduplication
-3. **Monitor Progress**: Use `scripts/monitor_parallel.sh` to watch live progress
-4. **Analyze**: Use `examples.py` for data analysis patterns
-
-The pipeline handles API errors with fallback strategies and can resume from existing data if interrupted.
