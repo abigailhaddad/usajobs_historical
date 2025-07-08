@@ -92,11 +92,112 @@ def parse_collection_output(output):
     
     return stats
 
+def record_initial_file_sizes():
+    """Record initial file sizes before data collection"""
+    print("📏 Recording initial file sizes...")
+    
+    data_files = glob.glob('../data/current_jobs_*.parquet') + glob.glob('../data/historical_jobs_*.parquet')
+    initial_sizes = {}
+    
+    for file in data_files:
+        try:
+            initial_size = os.path.getsize(file)
+            initial_sizes[file] = initial_size
+            print(f"📝 {file}: {initial_size:,} bytes")
+        except Exception as e:
+            print(f"⚠️  Could not read {file}: {e}")
+            initial_sizes[file] = 0  # Assume new file
+    
+    return initial_sizes
+
+def check_file_sizes_vs_initial(initial_sizes):
+    """Check that data files are same size or bigger than initial"""
+    print("🔍 Checking data file sizes vs initial...")
+    
+    data_files = glob.glob('../data/current_jobs_*.parquet') + glob.glob('../data/historical_jobs_*.parquet')
+    size_checks = []
+    files_changed = False
+    
+    for file in data_files:
+        try:
+            current_size = os.path.getsize(file)
+            initial_size = initial_sizes.get(file, 0)
+            
+            if current_size < initial_size:
+                print(f"❌ {file} SHRUNK: {initial_size:,} → {current_size:,} bytes")
+                size_checks.append(False)
+            elif current_size == initial_size:
+                print(f"✅ {file}: {current_size:,} bytes (unchanged)")
+                size_checks.append(True)
+            else:
+                print(f"✅ {file}: {initial_size:,} → {current_size:,} bytes (+{current_size-initial_size:,})")
+                size_checks.append(True)
+                files_changed = True
+                
+        except Exception as e:
+            print(f"❌ Could not check size of {file}: {e}")
+            size_checks.append(False)
+    
+    if not all(size_checks):
+        print("⚠️  Some data files shrunk! Skipping git operations for safety.")
+        return False, False
+    
+    return True, files_changed
+
+def commit_and_push_changes():
+    """Commit and push changes to git repository"""
+    print("\n📤 Committing and pushing changes...")
+    
+    # Check git status first
+    success, output = run_command("git status --porcelain", "Checking git status")
+    if not success:
+        print("❌ Could not check git status")
+        return False
+    
+    if not output.strip():
+        print("ℹ️  No changes to commit")
+        return True
+    
+    # Add files - use relative paths from update directory
+    files_to_add = [
+        "../data/current_jobs_*.parquet",
+        "../data/historical_jobs_*.parquet", 
+        "../index.html", 
+        "../README.md",
+        "../docs_data.json"
+    ]
+    
+    for file_pattern in files_to_add:
+        success, _ = run_command(f"git add {file_pattern}", f"Adding {file_pattern}")
+        if not success:
+            print(f"⚠️  Could not add {file_pattern} (may not exist)")
+    
+    # Commit with timestamp
+    today = datetime.now().strftime('%Y-%m-%d')
+    commit_msg = f"Daily data and documentation update - {today}"
+    
+    success, _ = run_command(f'git commit -m "{commit_msg}"', "Committing changes")
+    if not success:
+        print("ℹ️  No changes to commit or commit failed")
+        return False
+    
+    # Push to remote
+    success, _ = run_command("git push", "Pushing to remote repository")
+    if not success:
+        print("❌ Failed to push to remote repository")
+        return False
+    
+    print("✅ Successfully committed and pushed changes")
+    return True
+
 def main():
     print("🚀 USAJobs Data Pipeline - Comprehensive Update")
     print("=" * 50)
     
-    # Step 1: Determine last collection date
+    # Step 1: Record initial file sizes
+    initial_sizes = record_initial_file_sizes()
+    
+    # Step 2: Determine last collection date
     print("📅 Checking last collection date...")
     last_date = get_last_collection_date()
     
@@ -156,7 +257,19 @@ def main():
         print("❌ Current data collection failed. Continuing with documentation update...")
         collection_errors.append("Current data collection failed")
     
-    # Step 4: Update documentation
+    # Step 4: Check data file integrity
+    print("\\n🔍 Checking data file integrity...")
+    files_ok, files_changed = check_file_sizes_vs_initial(initial_sizes)
+    if not files_ok:
+        print("⚠️  Data file checks failed. Skipping git operations for safety.")
+        return
+    
+    if not files_changed:
+        print("ℹ️  No data files changed. Skipping documentation update and git operations.")
+        print("\\n🎉 Update completed - no changes needed!")
+        return
+    
+    # Step 5: Update documentation
     print("\\n📝 Updating documentation...")
     
     # Generate new documentation data
@@ -173,7 +286,12 @@ def main():
         print("❌ Documentation update failed")
         return
     
-    # Step 5: Summary
+    # Step 6: Commit and push changes
+    git_success = commit_and_push_changes()
+    if not git_success:
+        print("⚠️  Git operations failed - changes are local only")
+    
+    # Step 7: Summary
     print("\\n" + "=" * 50)
     print("📊 UPDATE SUMMARY")
     print("=" * 50)
@@ -205,7 +323,10 @@ def main():
     print("\\nNext steps:")
     print("   • Review any error logs in logs/ directory")
     print("   • Check updated documentation in README.md and index.html")
-    print("   • Consider committing changes with git")
+    if git_success:
+        print("   • Changes have been committed and pushed to GitHub")
+    else:
+        print("   • Manual git commit/push may be needed")
 
 if __name__ == "__main__":
     # Ensure we're in the right directory

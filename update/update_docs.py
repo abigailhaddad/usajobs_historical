@@ -21,13 +21,18 @@ def update_readme():
     with open('../README.md', 'r') as f:
         content = f.read()
     
-    # Add bold data collection date at the top if latest_job_date exists
+    # Update data collection date - it must already exist
     if data.get('latest_job_date'):
-        # Only add if not already present
-        if f'**Data collection last run: {data["latest_job_date"]}**' not in content:
-            header_pattern = r'(# USAJobs Data Pipeline\n\n)'
-            header_replacement = f'\\1**Data collection last run: {data["latest_job_date"]}**\n\n'
-            content = re.sub(header_pattern, header_replacement, content)
+        # Look for existing data collection line and replace it
+        date_pattern = r'\*\*Data collection last run: \d{4}-\d{2}-\d{2}\*\*'
+        new_date_text = f'**Data collection last run: {data["latest_job_date"]}**'
+        
+        if re.search(date_pattern, content):
+            # Replace existing date
+            content = re.sub(date_pattern, new_date_text, content)
+        else:
+            # If date line not found, this is an error
+            raise ValueError("Expected to find 'Data collection last run' line in README.md but it was not found")
     
     # Update total jobs count in the header
     old_pattern = r'\*\*Job dataset with [\d,\.M]+ job announcements'
@@ -41,9 +46,10 @@ def update_readme():
     
     # Update Data Coverage section header with latest date
     if data.get('latest_job_date'):
-        old_coverage_pattern = r'## Data Coverage\n\nData.*?jobs with closing dates years after the opening dates\.'
-        new_coverage_text = f"## Data Coverage\n\nData collection last run: {data['latest_job_date']}. Early years are incomplete, mostly consisting of jobs with closing dates years after the opening dates. Note: Some job postings may have future opening dates."
-        content = re.sub(old_coverage_pattern, new_coverage_text, content, flags=re.DOTALL)
+        # Only update the date in the Data Coverage section, not the whole text
+        coverage_pattern = r'(## Data Coverage\n\nData collection last run: )\d{4}-\d{2}-\d{2}'
+        coverage_replacement = f'\\g<1>{data["latest_job_date"]}'
+        content = re.sub(coverage_pattern, coverage_replacement, content)
     
     # Update data coverage table
     coverage_rows = []
@@ -74,13 +80,18 @@ def update_index_html():
     with open('../index.html', 'r') as f:
         content = f.read()
     
-    # Add bold data collection date at the top if latest_job_date exists
+    # Update data collection date - it must already exist
     if data.get('latest_job_date'):
-        # Only add if not already present
-        if f'Data collection last run: {data["latest_job_date"]}' not in content:
-            header_pattern = r'(<h1>USAJobs Historical API Data</h1>\s*)'
-            header_replacement = f'\\1<p><strong>Data collection last run: {data["latest_job_date"]}</strong></p>\n        '
-            content = re.sub(header_pattern, header_replacement, content)
+        # Look for existing data collection line and replace it
+        date_pattern = r'<p><strong>Data collection last run: \d{4}-\d{2}-\d{2}</strong></p>'
+        new_date_text = f'<p><strong>Data collection last run: {data["latest_job_date"]}</strong></p>'
+        
+        if re.search(date_pattern, content):
+            # Replace existing date
+            content = re.sub(date_pattern, new_date_text, content)
+        else:
+            # If date line not found, this is an error
+            raise ValueError("Expected to find 'Data collection last run' line in index.html but it was not found")
     
     # Update dataset stats in header
     old_pattern = r'<strong>Dataset:</strong> [\d,]+ total job postings'
