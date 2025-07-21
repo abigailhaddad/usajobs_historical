@@ -1,8 +1,8 @@
 {
-  "generated_at": "2025-07-21T08:43:16.793242",
-  "total_jobs": 2986859,
+  "generated_at": "2025-07-21T11:13:52.053311",
+  "total_jobs": 2986968,
   "total_fields": 42,
-  "file_size": "492MB",
+  "file_size": "493MB",
   "latest_job_date": "2025-07-21",
   "data_coverage": [
     {
@@ -91,9 +91,9 @@
     },
     {
       "year": 2025,
-      "total_jobs": 107600,
-      "jobs_opened": 107600,
-      "jobs_closed": 106321,
+      "total_jobs": 107709,
+      "jobs_opened": 107709,
+      "jobs_closed": 106430,
       "coverage": "Current through July 21, 2025"
     }
   ],
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0890\"}, {\"series\": \"0810\"}, {\"series\": \"0401\"}], [{\"series\": \"0801\"}, {\"series\": \"0808\"}, {\"series\": \"0807\"}], [{\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"1350\"}, {\"series\": \"0401\"}], [{\"series\": \"0850\"}, {\"series\": \"1320\"}, {\"series\": \"0854\"}, {\"series\": \"0830\"}, {\"series\": \"1301\"}, {\"series\": \"0893\"}, {\"series\": \"0801\"}, {\"series\": \"0806\"}, {\"series\": \"0855\"}, {\"series\": \"0858\"}, {\"series\": \"1310\"}, {\"series\": \"1550\"}] (3060 unique)",
+      "examples": "[{\"series\": \"0401\"}, {\"series\": \"0193\"}, {\"series\": \"1301\"}], [{\"series\": \"0482\"}, {\"series\": \"0486\"}, {\"series\": \"0401\"}, {\"series\": \"0430\"}, {\"series\": \"0408\"}, {\"series\": \"0193\"}], [{\"series\": \"0880\"}], [{\"series\": \"1301\"}, {\"series\": \"0810\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "General Services Administration\\Civilian Board of Contract Appeals, Department of Defense\\Defense Logistics Agency, Department of Transportation, National Mediation Board (542 unique)",
+      "examples": "Department of the Army\\U.S. Army Acquisition Support Center, Department of Veterans Affairs\\Deputy Assistant Secretary for Public Affairs, Department of Veterans Affairs\\Vet Customer Experience (VCE), Department of the Navy\\Bureau of Naval Personnel (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "9G-AFPC-12499829-516678-DL1, DCMA-P6-24-12299432-DH, CBSR-12345510-24-ZAS, 821649-AK-12596007-DE (363801 unique)",
+      "examples": "25-12604608K-TSB-0503-8, C2SCNAFCY-24-12403954, HRSC/ICTAP-2025-0005, 8F-AFPC-12563876-564444-VMB (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Internships, Seasonal, Term, Multiple (15 unique)",
+      "examples": "Permanent, Seasonal, Term, ICTAP Only (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "HURR, QQ00, GB00, AH02 (528 unique)",
+      "examples": "VAPA, AF0V, AG90, HUPP (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Office of Administration, Council of the Inspectors General on Integrity and Efficiency, Architectural and Transportation Barriers Compliance Board, Joint Activities (502 unique)",
+      "examples": "Joint Services and Activities Supported by the Office, Secretary of the Army, Goddard Space Flight Center, National Mediation Board, Office of Workers' Compensation Programs (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "NN, FQ, HB, BW (122 unique)",
+      "examples": "SZ, FC, HE, HS (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Court Services and Offender Supervision Agency for DC, Department of Housing and Urban Development, Department of Agriculture, Judicial Branch (26 unique)",
+      "examples": "Department of Transportation, National Foundation on the Arts and the Humanities, Department of Homeland Security, National Aeronautics and Space Administration (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "V - CHESS, Office of Chief Information Officer, Information Security Division, PDE-I, Division of Information and Intelligent Systems (59973 unique)",
+      "examples": "Office of Hearings Operations; Kansas City Region, DCS FOR RESOURCE MANAGEMENT, G8 OFFICE OF THE G8 BUDGET EXECUTION DIVISION, Office of Research and Development, Health Services Research Center, 773 CIVIL ENGINEER SQn m (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T14:04:05.209052, 2025-07-05T14:10:34.204008, 2025-07-05T14:25:17.414825, 2025-07-05T14:29:28.716149 (367177 unique)",
+      "examples": "2025-07-05T15:05:44.700668, 2025-07-05T14:01:38.940541, 2025-07-05T15:22:10.715024, 2025-07-05T13:52:56.655942 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "J, 11, H, 13 (127 unique)",
+      "examples": "AH, 52, HJ, EK (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "15, 97, AH, 44 (125 unique)",
+      "examples": "27, EK, KL, EL (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "VC, WD, FD, SW (191 unique)",
+      "examples": "XH, AC, PB, CL (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-06-03, 2024-03-13, 2025-02-28, 2025-04-25 (672 unique)",
+      "examples": "2025-09-05, 2024-02-15, 2024-12-26, 2024-11-28 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-06-19, 2024-07-06, 2024-02-18, 2024-03-24 (550 unique)",
+      "examples": "2025-02-05, 2024-03-27, 2024-06-22, 2024-10-22 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-01-22, 2024-01-18, 2024-07-17, 2024-12-04 (365 unique)",
+      "examples": "2024-05-04, 2024-10-23, 2024-06-27, 2024-06-04 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Lead International Cooperation Officer, MOBILIZATION OPERATIONS SPECIALIST, Instructional Systems Specialist (6-12 World Language), TRIAL ATTORNEY (TORTS-CSTL/Bivens) (77986 unique)",
+      "examples": "SUPERVISORY ENVIRONMENTAL PROTECTION SPECIALIST (TITLE 5), Case Administration Specialist, ACCOUNTING TECHNICIAN, Management and Program Analyst, AD-0343-00, 14-equiv grade (Excepted Service) (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "SL, PB1, 43, NO (115 unique)",
+      "examples": "15, NO, 2, 98 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "43, 800, 44, 85 (157 unique)",
+      "examples": "280, 40, 38, 2 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
