@@ -1,8 +1,8 @@
 {
-  "generated_at": "2025-07-21T11:13:52.053311",
-  "total_jobs": 2986968,
+  "generated_at": "2025-07-21T12:34:47.061623",
+  "total_jobs": 2987016,
   "total_fields": 42,
-  "file_size": "493MB",
+  "file_size": "494MB",
   "latest_job_date": "2025-07-21",
   "data_coverage": [
     {
@@ -91,9 +91,9 @@
     },
     {
       "year": 2025,
-      "total_jobs": 107709,
-      "jobs_opened": 107709,
-      "jobs_closed": 106430,
+      "total_jobs": 107757,
+      "jobs_opened": 107757,
+      "jobs_closed": 106477,
       "coverage": "Current through July 21, 2025"
     }
   ],
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0401\"}, {\"series\": \"0193\"}, {\"series\": \"1301\"}], [{\"series\": \"0482\"}, {\"series\": \"0486\"}, {\"series\": \"0401\"}, {\"series\": \"0430\"}, {\"series\": \"0408\"}, {\"series\": \"0193\"}], [{\"series\": \"0880\"}], [{\"series\": \"1301\"}, {\"series\": \"0810\"}] (3060 unique)",
+      "examples": "[{\"series\": \"0850\"}, {\"series\": \"0830\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"1520\"}, {\"series\": \"0855\"}, {\"series\": \"1310\"}, {\"series\": \"1550\"}], [{\"series\": \"2030\"}], [{\"series\": \"0460\"}, {\"series\": \"0810\"}], [{\"series\": \"0808\"}, {\"series\": \"0830\"}, {\"series\": \"0850\"}, {\"series\": \"0810\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Army\\U.S. Army Acquisition Support Center, Department of Veterans Affairs\\Deputy Assistant Secretary for Public Affairs, Department of Veterans Affairs\\Vet Customer Experience (VCE), Department of the Navy\\Bureau of Naval Personnel (542 unique)",
+      "examples": "Department of Justice\\U.S. Trustee Program, Executive Office of the President\\Office of Management and Budget, National Mediation Board, Department of the Air Force\\Air Force District of Washington (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "25-12604608K-TSB-0503-8, C2SCNAFCY-24-12403954, HRSC/ICTAP-2025-0005, 8F-AFPC-12563876-564444-VMB (363801 unique)",
+      "examples": "AWA-AGC-24-15030AN-89411, PEN 24-12492729, DECA-24-12333118-DE, 5W-AFPC-12291692-296337-JJ (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Permanent, Seasonal, Term, ICTAP Only (15 unique)",
+      "examples": "Term, Summer, ICTAP Only, Telework (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "VAPA, AF0V, AG90, HUPP (528 unique)",
+      "examples": "AG37, DLWH, VAKB, TD01 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Joint Services and Activities Supported by the Office, Secretary of the Army, Goddard Space Flight Center, National Mediation Board, Office of Workers' Compensation Programs (502 unique)",
+      "examples": "Centers for Medicare & Medicaid Services, Office of Special Counsel, Tennessee Valley Authority, OIG, Architect of the Capitol (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "SZ, FC, HE, HS (122 unique)",
+      "examples": "ED, SK, AG, DO (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Transportation, National Foundation on the Arts and the Humanities, Department of Homeland Security, National Aeronautics and Space Administration (26 unique)",
+      "examples": "Judicial Branch, Department of the Army, Department of Health and Human Services, Department of the Treasury (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Office of Hearings Operations; Kansas City Region, DCS FOR RESOURCE MANAGEMENT, G8 OFFICE OF THE G8 BUDGET EXECUTION DIVISION, Office of Research and Development, Health Services Research Center, 773 CIVIL ENGINEER SQn m (59973 unique)",
+      "examples": "SERVICE CENTER 4A, National Center for Emerging and Zoonotic Infectious Diseases, Division of Vector-Borne Diseases, Jewel Cave National Monument, KY COS (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T15:05:44.700668, 2025-07-05T14:01:38.940541, 2025-07-05T15:22:10.715024, 2025-07-05T13:52:56.655942 (367177 unique)",
+      "examples": "2025-07-05T13:50:17.137555, 2025-07-05T15:12:56.597295, 2025-07-05T14:08:18.570004, 2025-07-05T13:45:23.209806 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "AH, 52, HJ, EK (127 unique)",
+      "examples": "JJ, LH, 31, GJ (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "27, EK, KL, EL (125 unique)",
+      "examples": "02, 23, 07, 20 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "XH, AC, PB, CL (191 unique)",
+      "examples": "GG, NC, TR, PZ (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-09-05, 2024-02-15, 2024-12-26, 2024-11-28 (672 unique)",
+      "examples": "2025-11-21, 2024-05-29, 2025-03-28, 2025-06-27 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-02-05, 2024-03-27, 2024-06-22, 2024-10-22 (550 unique)",
+      "examples": "2024-07-08, 2024-10-15, 2025-07-02, 2025-01-29 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-05-04, 2024-10-23, 2024-06-27, 2024-06-04 (365 unique)",
+      "examples": "2024-01-12, 2024-07-11, 2024-07-31, 2024-12-30 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "SUPERVISORY ENVIRONMENTAL PROTECTION SPECIALIST (TITLE 5), Case Administration Specialist, ACCOUNTING TECHNICIAN, Management and Program Analyst, AD-0343-00, 14-equiv grade (Excepted Service) (77986 unique)",
+      "examples": "Park Ranger (P) District Ranger, TECHNICAL INSPECTOR (ENVIRONMENTAL/HAZARDOUS WASTE), Housing Manager, GS-1173-11, RESTAURANT MANAGER, NF-03/RFT, CAMP FOSTER (TERRA) (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "15, NO, 2, 98 (115 unique)",
+      "examples": "24, 13, 0, 3 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "280, 40, 38, 2 (157 unique)",
+      "examples": "99999, 80, 219, 33 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
