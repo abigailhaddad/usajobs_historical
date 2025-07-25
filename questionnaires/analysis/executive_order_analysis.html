@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Analysis of ‘Advancing President’s Executive Orders’ Question in Federal Job Questionnaires</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="executive_order_analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="executive_order_analysis_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="executive_order_analysis_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="executive_order_analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="executive_order_analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="executive_order_analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="executive_order_analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="executive_order_analysis_files/libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="executive_order_analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="executive_order_analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="executive_order_analysis_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#load-and-process-data" id="toc-load-and-process-data" class="nav-link active" data-scroll-target="#load-and-process-data">Load and Process Data</a></li>
+  <li><a href="#enrich-with-job-details-from-parquet-files" id="toc-enrich-with-job-details-from-parquet-files" class="nav-link" data-scroll-target="#enrich-with-job-details-from-parquet-files">Enrich with Job Details from Parquet Files</a></li>
+  <li><a href="#executive-order-analysis" id="toc-executive-order-analysis" class="nav-link" data-scroll-target="#executive-order-analysis">Executive Order Analysis</a>
+  <ul class="collapse">
+  <li><a href="#overall-statistics" id="toc-overall-statistics" class="nav-link" data-scroll-target="#overall-statistics">Overall Statistics</a></li>
+  <li><a href="#by-agency-scraped-only" id="toc-by-agency-scraped-only" class="nav-link" data-scroll-target="#by-agency-scraped-only">By Agency (Scraped Only)</a></li>
+  <li><a href="#by-occupation-scraped-only" id="toc-by-occupation-scraped-only" class="nav-link" data-scroll-target="#by-occupation-scraped-only">By Occupation (Scraped Only)</a></li>
+  <li><a href="#by-month-posted-scraped-only" id="toc-by-month-posted-scraped-only" class="nav-link" data-scroll-target="#by-month-posted-scraped-only">By Month Posted (Scraped Only)</a></li>
+  <li><a href="#job-postings-with-the-executive-order-question" id="toc-job-postings-with-the-executive-order-question" class="nav-link" data-scroll-target="#job-postings-with-the-executive-order-question">Job Postings with the Executive Order Question</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Analysis of ‘Advancing President’s Executive Orders’ Question in Federal Job Questionnaires</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="41c9600b" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Define paths</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>BASE_DIR <span class="op">=</span> Path(<span class="st">'../..'</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>QUESTIONNAIRE_DIR <span class="op">=</span> Path(<span class="st">'..'</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="op">=</span> BASE_DIR <span class="op">/</span> <span class="st">'data'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="load-and-process-data" class="level2">
+<h2 class="anchored" data-anchor-id="load-and-process-data">Load and Process Data</h2>
+<div id="360f536d" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_questionnaire_links():</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Load the questionnaire links CSV"""</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    csv_path <span class="op">=</span> QUESTIONNAIRE_DIR <span class="op">/</span> <span class="st">'questionnaire_links.csv'</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> csv_path.exists():</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">FileNotFoundError</span>(<span class="ss">f"questionnaire_links.csv not found at </span><span class="sc">{</span>csv_path<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.read_csv(csv_path)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Loaded </span><span class="sc">{</span><span class="bu">len</span>(df)<span class="sc">:,}</span><span class="ss"> questionnaire links"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> check_executive_order_mentions(questionnaire_dir<span class="op">=</span><span class="st">'../raw_questionnaires'</span>):</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Check which questionnaires mention the specific executive order question"""</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    mentions <span class="op">=</span> {}</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Look for the specific question about advancing President's Executive Orders</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    pattern <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r"How would you help advance the President's Executive Orders and policy priorities in this role</span><span class="ch">\?</span><span class="vs">"</span>, re.IGNORECASE)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    questionnaire_path <span class="op">=</span> Path(questionnaire_dir)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> questionnaire_path.exists():</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Warning: </span><span class="sc">{</span>questionnaire_path<span class="sc">}</span><span class="ss"> does not exist"</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> mentions</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    txt_files <span class="op">=</span> <span class="bu">list</span>(questionnaire_path.glob(<span class="st">'*.txt'</span>))</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Found </span><span class="sc">{</span><span class="bu">len</span>(txt_files)<span class="sc">:,}</span><span class="ss"> scraped questionnaire files"</span>)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> txt_file <span class="kw">in</span> txt_files:</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">with</span> <span class="bu">open</span>(txt_file, <span class="st">'r'</span>, encoding<span class="op">=</span><span class="st">'utf-8'</span>) <span class="im">as</span> f:</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>                content <span class="op">=</span> f.read()</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Find all mentions of the specific question</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>            eo_mentions <span class="op">=</span> pattern.findall(content)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> eo_mentions:</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Extract questionnaire ID from filename</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>                file_id <span class="op">=</span> txt_file.stem.split(<span class="st">'_'</span>)[<span class="dv">1</span>]</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>                mentions[file_id] <span class="op">=</span> <span class="bu">len</span>(eo_mentions)</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Error reading </span><span class="sc">{</span>txt_file<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mentions</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Load questionnaire links</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>links_df <span class="op">=</span> load_questionnaire_links()</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Check for the specific executive order question</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>eo_mentions <span class="op">=</span> check_executive_order_mentions()</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Found </span><span class="sc">{</span><span class="bu">len</span>(eo_mentions)<span class="sc">:,}</span><span class="ss"> questionnaires with the 'advancing President's Executive Orders' question"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Loaded 14,836 questionnaire links
+Found 846 scraped questionnaire files
+
+Found 20 questionnaires with the 'advancing President's Executive Orders' question</code></pre>
+</div>
+</div>
+</section>
+<section id="enrich-with-job-details-from-parquet-files" class="level2">
+<h2 class="anchored" data-anchor-id="enrich-with-job-details-from-parquet-files">Enrich with Job Details from Parquet Files</h2>
+<div id="2cb91c73" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_current_jobs():</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Load current job data from parquet files"""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    parquet_files <span class="op">=</span> <span class="bu">sorted</span>(DATA_DIR.glob(<span class="st">'current_jobs_*.parquet'</span>))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Loading data from </span><span class="sc">{</span><span class="bu">len</span>(parquet_files)<span class="sc">}</span><span class="ss"> parquet files..."</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    dfs <span class="op">=</span> []</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> pf <span class="kw">in</span> parquet_files:</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> pd.read_parquet(pf)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Keep only needed columns to save memory, including positionOpenDate</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        columns_to_keep <span class="op">=</span> [<span class="st">'usajobsControlNumber'</span>, <span class="st">'positionTitle'</span>, <span class="st">'hiringAgencyName'</span>, </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>                          <span class="st">'positionLocation'</span>, <span class="st">'gradeCode'</span>, <span class="st">'positionSchedule'</span>, <span class="st">'positionOpenDate'</span>]</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        available_cols <span class="op">=</span> [col <span class="cf">for</span> col <span class="kw">in</span> columns_to_keep <span class="cf">if</span> col <span class="kw">in</span> df.columns]</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        dfs.append(df[available_cols])</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    jobs_df <span class="op">=</span> pd.concat(dfs, ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Loaded </span><span class="sc">{</span><span class="bu">len</span>(jobs_df)<span class="sc">:,}</span><span class="ss"> total job records"</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> jobs_df</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Load job data</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>jobs_df <span class="op">=</span> load_current_jobs()</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Create mapping of questionnaire URL to ID</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> extract_questionnaire_id(url):</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Extract questionnaire ID from URL"""</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> pd.isna(url):</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    match <span class="op">=</span> re.search(<span class="vs">r'/ViewQuestionnaire/</span><span class="kw">(</span><span class="dv">\d</span><span class="op">+</span><span class="kw">)</span><span class="vs">'</span>, url)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> match:</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> match.group(<span class="dv">1</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>links_df[<span class="st">'questionnaire_id'</span>] <span class="op">=</span> links_df[<span class="st">'questionnaire_url'</span>].<span class="bu">apply</span>(extract_questionnaire_id)</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Add executive order flag</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>links_df[<span class="st">'has_executive_order'</span>] <span class="op">=</span> links_df[<span class="st">'questionnaire_id'</span>].isin(eo_mentions)</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>links_df[<span class="st">'eo_mention_count'</span>] <span class="op">=</span> links_df[<span class="st">'questionnaire_id'</span>].<span class="bu">map</span>(eo_mentions).fillna(<span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge with job details</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>enriched_df <span class="op">=</span> links_df.merge(</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    jobs_df, </span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    left_on<span class="op">=</span><span class="st">'usajobs_control_number'</span>, </span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    right_on<span class="op">=</span><span class="st">'usajobsControlNumber'</span>,</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    how<span class="op">=</span><span class="st">'left'</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Enriched dataset has </span><span class="sc">{</span><span class="bu">len</span>(enriched_df)<span class="sc">:,}</span><span class="ss"> records"</span>)</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Records with executive order mentions: </span><span class="sc">{</span>enriched_df[<span class="st">'has_executive_order'</span>]<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">:,}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Loading data from 2 parquet files...
+Loaded 17,883 total job records
+
+Enriched dataset has 14,842 records
+Records with executive order mentions: 20</code></pre>
+</div>
+</div>
+</section>
+<section id="executive-order-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="executive-order-analysis">Executive Order Analysis</h2>
+<section id="overall-statistics" class="level3">
+<h3 class="anchored" data-anchor-id="overall-statistics">Overall Statistics</h3>
+<div id="3ac00bf3" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Only count scraped questionnaires</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>scraped_ids <span class="op">=</span> <span class="bu">set</span>(eo_mentions.keys()) <span class="op">|</span> {extract_questionnaire_id(<span class="ss">f"https://apply.usastaffing.gov/ViewQuestionnaire/</span><span class="sc">{</span>f<span class="sc">.</span>stem<span class="sc">.</span>split(<span class="st">'_'</span>)[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>) </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                                         <span class="cf">for</span> f <span class="kw">in</span> Path(<span class="st">'../raw_questionnaires'</span>).glob(<span class="st">'*.txt'</span>)}</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>scraped_df <span class="op">=</span> links_df[links_df[<span class="st">'questionnaire_id'</span>].isin(scraped_ids)].copy()</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate overall statistics for scraped questionnaires only</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>total_scraped <span class="op">=</span> <span class="bu">len</span>(scraped_df)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>total_with_eo <span class="op">=</span> scraped_df[<span class="st">'has_executive_order'</span>].<span class="bu">sum</span>()</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>percentage_with_eo <span class="op">=</span> (total_with_eo <span class="op">/</span> total_scraped <span class="op">*</span> <span class="dv">100</span>) <span class="cf">if</span> total_scraped <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">0</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total scraped questionnaires: </span><span class="sc">{</span>total_scraped<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Questionnaires with the specific EO question: </span><span class="sc">{</span>total_with_eo<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Percentage with the EO question: </span><span class="sc">{</span>percentage_with_eo<span class="sc">:.1f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total scraped questionnaires: 805
+Questionnaires with the specific EO question: 20
+Percentage with the EO question: 2.5%</code></pre>
+</div>
+</div>
+</section>
+<section id="by-agency-scraped-only" class="level3">
+<h3 class="anchored" data-anchor-id="by-agency-scraped-only">By Agency (Scraped Only)</h3>
+<div id="7d84b744" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter enriched_df to only scraped questionnaires</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>scraped_enriched <span class="op">=</span> enriched_df[enriched_df[<span class="st">'questionnaire_id'</span>].isin(scraped_ids)].copy()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyze by agency - only scraped questionnaires</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>agency_summary <span class="op">=</span> scraped_enriched.groupby(<span class="st">'hiring_agency'</span>).agg({</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'questionnaire_id'</span>: <span class="st">'count'</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'has_executive_order'</span>: <span class="st">'sum'</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>}).reset_index()</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>agency_summary.columns <span class="op">=</span> [<span class="st">'Agency'</span>, <span class="st">'Total_Scraped'</span>, <span class="st">'Count_With_EO'</span>]</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>agency_summary[<span class="st">'Percent'</span>] <span class="op">=</span> (agency_summary[<span class="st">'Count_With_EO'</span>] <span class="op">/</span> agency_summary[<span class="st">'Total_Scraped'</span>] <span class="op">*</span> <span class="dv">100</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort by count with EO mentions</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>agency_summary <span class="op">=</span> agency_summary.sort_values(<span class="st">'Count_With_EO'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Display agency table</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Agencies with the 'advancing President's Executive Orders' question:"</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>agency_summary[[<span class="st">'Agency'</span>, <span class="st">'Total_Scraped'</span>, <span class="st">'Count_With_EO'</span>, <span class="st">'Percent'</span>]].head(<span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Agencies with the 'advancing President's Executive Orders' question:</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Agency</th>
+<th data-quarto-table-cell-role="th">Total_Scraped</th>
+<th data-quarto-table-cell-role="th">Count_With_EO</th>
+<th data-quarto-table-cell-role="th">Percent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">7</td>
+<td>Department of the Air Force</td>
+<td>95</td>
+<td>9</td>
+<td>9.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Department of Agriculture</td>
+<td>9</td>
+<td>4</td>
+<td>44.4</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Department of Commerce</td>
+<td>6</td>
+<td>4</td>
+<td>66.7</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9</td>
+<td>Department of the Interior</td>
+<td>11</td>
+<td>3</td>
+<td>27.3</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Department of Defense</td>
+<td>91</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Department of Health and Human Services</td>
+<td>36</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Department of Homeland Security</td>
+<td>13</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>Department of Justice</td>
+<td>13</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>Department of Veterans Affairs</td>
+<td>368</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">8</td>
+<td>Department of the Army</td>
+<td>86</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">10</td>
+<td>Department of the Navy</td>
+<td>79</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">11</td>
+<td>Department of the Treasury</td>
+<td>2</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="by-occupation-scraped-only" class="level3">
+<h3 class="anchored" data-anchor-id="by-occupation-scraped-only">By Occupation (Scraped Only)</h3>
+<div id="2038f42c" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyze by position title - only scraped questionnaires</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>position_summary <span class="op">=</span> scraped_enriched.groupby(<span class="st">'position_title'</span>).agg({</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'questionnaire_id'</span>: <span class="st">'count'</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'has_executive_order'</span>: <span class="st">'sum'</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>}).reset_index()</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>position_summary.columns <span class="op">=</span> [<span class="st">'Occupation'</span>, <span class="st">'Total_Scraped'</span>, <span class="st">'Count_With_EO'</span>]</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>position_summary[<span class="st">'Percent'</span>] <span class="op">=</span> (position_summary[<span class="st">'Count_With_EO'</span>] <span class="op">/</span> position_summary[<span class="st">'Total_Scraped'</span>] <span class="op">*</span> <span class="dv">100</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort by count with EO mentions</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>position_summary <span class="op">=</span> position_summary.sort_values(<span class="st">'Count_With_EO'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Display occupation table</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Occupations with the 'advancing President's Executive Orders' question:"</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>position_summary[[<span class="st">'Occupation'</span>, <span class="st">'Total_Scraped'</span>, <span class="st">'Count_With_EO'</span>, <span class="st">'Percent'</span>]].head(<span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Occupations with the 'advancing President's Executive Orders' question:</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Occupation</th>
+<th data-quarto-table-cell-role="th">Total_Scraped</th>
+<th data-quarto-table-cell-role="th">Count_With_EO</th>
+<th data-quarto-table-cell-role="th">Percent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">261</td>
+<td>Loan Assistant/Loan Specialist (Agricultural)</td>
+<td>2</td>
+<td>2</td>
+<td>100.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">109</td>
+<td>Criminal Investigator</td>
+<td>3</td>
+<td>2</td>
+<td>66.7</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">464</td>
+<td>SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">215</td>
+<td>LOGISTICS MANAGEMENT SPECIALIST</td>
+<td>4</td>
+<td>1</td>
+<td>25.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">213</td>
+<td>LEGISLATIVE AFFAIRS SPECIALIST</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">209</td>
+<td>Investigation &amp; Compliance Specialist</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">352</td>
+<td>Park Ranger (Protection)</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">485</td>
+<td>Seasonal Hydrologic Technician</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">536</td>
+<td>Supervisory Criminal Investigator (Special Age...</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">113</td>
+<td>DEPUTY DIRECTOR OF OPERATIONS</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">401</td>
+<td>Realty Specialist</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">260</td>
+<td>Loan Assistant/ Loan Specialist (Agricultural)</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">262</td>
+<td>Loan Specialist (Agricultural)</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">470</td>
+<td>SUPERVISORY SUPPLY MANAGEMENT SPECIALIST</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">149</td>
+<td>FOREIGN AFFAIRS SPECIALIST</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">575</td>
+<td>TRANSPORTATION ASSISTANT (QUALITY ASSURANCE)</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">581</td>
+<td>UNIT DEPLOYMENT MANAGER</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">574</td>
+<td>TRANSPORTATION ASSISTANT (PASSENGER)</td>
+<td>1</td>
+<td>1</td>
+<td>100.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">424</td>
+<td>Registered Nurse - Caregiver Support Program C...</td>
+<td>1</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">386</td>
+<td>Psychologist - Veterans Readjustment Counselor</td>
+<td>1</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="by-month-posted-scraped-only" class="level3">
+<h3 class="anchored" data-anchor-id="by-month-posted-scraped-only">By Month Posted (Scraped Only)</h3>
+<div id="7319f310" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract month from positionOpenDate (when the job was actually posted)</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>scraped_enriched[<span class="st">'posted_month'</span>] <span class="op">=</span> pd.to_datetime(scraped_enriched[<span class="st">'positionOpenDate'</span>]).dt.to_period(<span class="st">'M'</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove any rows with missing dates</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>scraped_with_dates <span class="op">=</span> scraped_enriched.dropna(subset<span class="op">=</span>[<span class="st">'posted_month'</span>])</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyze by month posted</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>month_summary <span class="op">=</span> scraped_with_dates.groupby(<span class="st">'posted_month'</span>).agg({</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'questionnaire_id'</span>: <span class="st">'count'</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'has_executive_order'</span>: <span class="st">'sum'</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>}).reset_index()</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>month_summary.columns <span class="op">=</span> [<span class="st">'Month_Posted'</span>, <span class="st">'Total_Scraped'</span>, <span class="st">'Count_With_EO'</span>]</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>month_summary[<span class="st">'Percent'</span>] <span class="op">=</span> (month_summary[<span class="st">'Count_With_EO'</span>] <span class="op">/</span> month_summary[<span class="st">'Total_Scraped'</span>] <span class="op">*</span> <span class="dv">100</span>).<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort by month</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>month_summary <span class="op">=</span> month_summary.sort_values(<span class="st">'Month_Posted'</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert Period to string for display</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>month_summary[<span class="st">'Month_Posted'</span>] <span class="op">=</span> month_summary[<span class="st">'Month_Posted'</span>].astype(<span class="bu">str</span>)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Display month table</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Jobs by month posted with the 'advancing President's Executive Orders' question:"</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(Based on </span><span class="sc">{</span><span class="bu">len</span>(scraped_with_dates)<span class="sc">:,}</span><span class="ss"> scraped questionnaires with valid posting dates)"</span>)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>month_summary[[<span class="st">'Month_Posted'</span>, <span class="st">'Total_Scraped'</span>, <span class="st">'Count_With_EO'</span>, <span class="st">'Percent'</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Jobs by month posted with the 'advancing President's Executive Orders' question:
+(Based on 809 scraped questionnaires with valid posting dates)</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Month_Posted</th>
+<th data-quarto-table-cell-role="th">Total_Scraped</th>
+<th data-quarto-table-cell-role="th">Count_With_EO</th>
+<th data-quarto-table-cell-role="th">Percent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2024-07</td>
+<td>23</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2024-08</td>
+<td>24</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2024-09</td>
+<td>2</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2024-11</td>
+<td>1</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2025-06</td>
+<td>1</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>2025-07</td>
+<td>758</td>
+<td>20</td>
+<td>2.6</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="job-postings-with-the-executive-order-question" class="level3">
+<h3 class="anchored" data-anchor-id="job-postings-with-the-executive-order-question">Job Postings with the Executive Order Question</h3>
+<div id="36af96d5" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get all jobs with EO mentions</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>eo_jobs <span class="op">=</span> scraped_enriched[scraped_enriched[<span class="st">'has_executive_order'</span>]].copy()</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to extract context around executive order mentions</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> extract_eo_context(questionnaire_id, context_length<span class="op">=</span><span class="dv">150</span>):</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Extract context around the specific executive order question"""</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    txt_path <span class="op">=</span> QUESTIONNAIRE_DIR <span class="op">/</span> <span class="st">'raw_questionnaires'</span> <span class="op">/</span> <span class="ss">f'usastaffing_</span><span class="sc">{</span>questionnaire_id<span class="sc">}</span><span class="ss">.txt'</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> txt_path.exists():</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Try other prefixes</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> prefix <span class="kw">in</span> [<span class="st">'monster'</span>, <span class="st">'other'</span>]:</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>            alt_path <span class="op">=</span> QUESTIONNAIRE_DIR <span class="op">/</span> <span class="st">'raw_questionnaires'</span> <span class="op">/</span> <span class="ss">f'</span><span class="sc">{</span>prefix<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>questionnaire_id<span class="sc">}</span><span class="ss">.txt'</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> alt_path.exists():</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>                txt_path <span class="op">=</span> alt_path</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> []</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    contexts <span class="op">=</span> []</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> <span class="bu">open</span>(txt_path, <span class="st">'r'</span>, encoding<span class="op">=</span><span class="st">'utf-8'</span>) <span class="im">as</span> f:</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>            content <span class="op">=</span> f.read()</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Find the specific question with context</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>        pattern <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r"</span><span class="kw">(</span><span class="dv">.</span><span class="vs">{0,"</span> <span class="op">+</span> <span class="bu">str</span>(context_length) <span class="op">+</span> <span class="vs">r"}How would you help advance the President's Executive Orders and policy priorities in this role</span><span class="ch">\?</span><span class="dv">.</span><span class="vs">{0,"</span> <span class="op">+</span> <span class="bu">str</span>(context_length) <span class="op">+</span> <span class="vs">r"}</span><span class="er">)</span><span class="vs">"</span>, re.IGNORECASE <span class="op">|</span> re.DOTALL)</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>        matches <span class="op">=</span> pattern.findall(content)</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> match <span class="kw">in</span> matches:</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Clean up whitespace</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>            context <span class="op">=</span> <span class="st">' '</span>.join(match.split())</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>            contexts.append(context)</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Error reading </span><span class="sc">{</span>txt_path<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> contexts</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to get excerpt</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_eo_excerpt(questionnaire_id):</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Get first executive order mention with context"""</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>    contexts <span class="op">=</span> extract_eo_context(questionnaire_id, context_length<span class="op">=</span><span class="dv">150</span>)</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> contexts:</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> contexts[<span class="dv">0</span>]</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">""</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Build detailed table</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>eo_jobs[<span class="st">'excerpt'</span>] <span class="op">=</span> eo_jobs[<span class="st">'questionnaire_id'</span>].<span class="bu">apply</span>(get_eo_excerpt)</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>eo_jobs[<span class="st">'job_posting_url'</span>] <span class="op">=</span> <span class="st">'https://www.usajobs.gov/job/'</span> <span class="op">+</span> eo_jobs[<span class="st">'usajobs_control_number'</span>].astype(<span class="bu">str</span>)</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Make links clickable HTML</span></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>eo_jobs[<span class="st">'job_posting_link'</span>] <span class="op">=</span> eo_jobs[<span class="st">'job_posting_url'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="ss">f'&lt;a href="</span><span class="sc">{</span>x<span class="sc">}</span><span class="ss">" target="_blank"&gt;USAJobs Link&lt;/a&gt;'</span>)</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>eo_jobs[<span class="st">'questionnaire_link'</span>] <span class="op">=</span> eo_jobs[<span class="st">'questionnaire_url'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="ss">f'&lt;a href="</span><span class="sc">{</span>x<span class="sc">}</span><span class="ss">" target="_blank"&gt;Questionnaire&lt;/a&gt;'</span>)</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Select and rename columns</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>detail_table <span class="op">=</span> eo_jobs[[<span class="st">'position_title'</span>, <span class="st">'hiring_agency'</span>, <span class="st">'job_posting_link'</span>, <span class="st">'questionnaire_link'</span>, <span class="st">'excerpt'</span>]].copy()</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>detail_table.columns <span class="op">=</span> [<span class="st">'Occupation'</span>, <span class="st">'Agency'</span>, <span class="st">'Job_Posting_Link'</span>, <span class="st">'Questionnaire_Link'</span>, <span class="st">'Executive_Order_Excerpt'</span>]</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort by occupation</span></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>detail_table <span class="op">=</span> detail_table.sort_values(<span class="st">'Occupation'</span>)</span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"All </span><span class="sc">{</span><span class="bu">len</span>(detail_table)<span class="sc">}</span><span class="ss"> job postings with the 'advancing President's Executive Orders' question:"</span>)</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a><span class="co"># Display with HTML rendering and text wrapping</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> HTML</span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a><span class="co"># Set pandas display options for better text wrapping</span></span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.max_colwidth'</span>, <span class="va">None</span>)</span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.max_rows'</span>, <span class="va">None</span>)</span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a><span class="co"># Style the table for better display</span></span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>styled_table <span class="op">=</span> detail_table.style.set_properties(<span class="op">**</span>{</span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>    <span class="st">'text-align'</span>: <span class="st">'left'</span>,</span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a>    <span class="st">'white-space'</span>: <span class="st">'pre-wrap'</span>,</span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a>    <span class="st">'word-wrap'</span>: <span class="st">'break-word'</span></span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a>}).set_table_styles([</span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'selector'</span>: <span class="st">'td'</span>, <span class="st">'props'</span>: [(<span class="st">'max-width'</span>, <span class="st">'300px'</span>)]},</span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'selector'</span>: <span class="st">'td:nth-child(5)'</span>, <span class="st">'props'</span>: [(<span class="st">'max-width'</span>, <span class="st">'400px'</span>)]}  <span class="co"># Wider for excerpt column</span></span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a>HTML(styled_table.to_html(escape<span class="op">=</span><span class="va">False</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>All 20 job postings with the 'advancing President's Executive Orders' question:</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<style type="text/css">
+#T_ad42f td {
+  max-width: 300px;
+}
+#T_ad42f td:nth-child(5) {
+  max-width: 400px;
+}
+#T_ad42f_row0_col0, #T_ad42f_row0_col1, #T_ad42f_row0_col2, #T_ad42f_row0_col3, #T_ad42f_row0_col4, #T_ad42f_row1_col0, #T_ad42f_row1_col1, #T_ad42f_row1_col2, #T_ad42f_row1_col3, #T_ad42f_row1_col4, #T_ad42f_row2_col0, #T_ad42f_row2_col1, #T_ad42f_row2_col2, #T_ad42f_row2_col3, #T_ad42f_row2_col4, #T_ad42f_row3_col0, #T_ad42f_row3_col1, #T_ad42f_row3_col2, #T_ad42f_row3_col3, #T_ad42f_row3_col4, #T_ad42f_row4_col0, #T_ad42f_row4_col1, #T_ad42f_row4_col2, #T_ad42f_row4_col3, #T_ad42f_row4_col4, #T_ad42f_row5_col0, #T_ad42f_row5_col1, #T_ad42f_row5_col2, #T_ad42f_row5_col3, #T_ad42f_row5_col4, #T_ad42f_row6_col0, #T_ad42f_row6_col1, #T_ad42f_row6_col2, #T_ad42f_row6_col3, #T_ad42f_row6_col4, #T_ad42f_row7_col0, #T_ad42f_row7_col1, #T_ad42f_row7_col2, #T_ad42f_row7_col3, #T_ad42f_row7_col4, #T_ad42f_row8_col0, #T_ad42f_row8_col1, #T_ad42f_row8_col2, #T_ad42f_row8_col3, #T_ad42f_row8_col4, #T_ad42f_row9_col0, #T_ad42f_row9_col1, #T_ad42f_row9_col2, #T_ad42f_row9_col3, #T_ad42f_row9_col4, #T_ad42f_row10_col0, #T_ad42f_row10_col1, #T_ad42f_row10_col2, #T_ad42f_row10_col3, #T_ad42f_row10_col4, #T_ad42f_row11_col0, #T_ad42f_row11_col1, #T_ad42f_row11_col2, #T_ad42f_row11_col3, #T_ad42f_row11_col4, #T_ad42f_row12_col0, #T_ad42f_row12_col1, #T_ad42f_row12_col2, #T_ad42f_row12_col3, #T_ad42f_row12_col4, #T_ad42f_row13_col0, #T_ad42f_row13_col1, #T_ad42f_row13_col2, #T_ad42f_row13_col3, #T_ad42f_row13_col4, #T_ad42f_row14_col0, #T_ad42f_row14_col1, #T_ad42f_row14_col2, #T_ad42f_row14_col3, #T_ad42f_row14_col4, #T_ad42f_row15_col0, #T_ad42f_row15_col1, #T_ad42f_row15_col2, #T_ad42f_row15_col3, #T_ad42f_row15_col4, #T_ad42f_row16_col0, #T_ad42f_row16_col1, #T_ad42f_row16_col2, #T_ad42f_row16_col3, #T_ad42f_row16_col4, #T_ad42f_row17_col0, #T_ad42f_row17_col1, #T_ad42f_row17_col2, #T_ad42f_row17_col3, #T_ad42f_row17_col4, #T_ad42f_row18_col0, #T_ad42f_row18_col1, #T_ad42f_row18_col2, #T_ad42f_row18_col3, #T_ad42f_row18_col4, #T_ad42f_row19_col0, #T_ad42f_row19_col1, #T_ad42f_row19_col2, #T_ad42f_row19_col3, #T_ad42f_row19_col4 {
+  text-align: left;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+</style>
+
+<table id="T_ad42f" class="caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
+<th id="T_ad42f_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">Occupation</th>
+<th id="T_ad42f_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Agency</th>
+<th id="T_ad42f_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">Job_Posting_Link</th>
+<th id="T_ad42f_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">Questionnaire_Link</th>
+<th id="T_ad42f_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">Executive_Order_Excerpt</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td id="T_ad42f_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">14751</td>
+<td id="T_ad42f_row0_col0" class="data row0 col0">Criminal Investigator</td>
+<td id="T_ad42f_row0_col1" class="data row0 col1">Department of Commerce</td>
+<td id="T_ad42f_row0_col2" class="data row0 col2"><a href="https://www.usajobs.gov/job/841520700" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row0_col3" class="data row0 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12758587" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row0_col4" class="data row0 col4">fficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 7. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="even">
+<td id="T_ad42f_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">14753</td>
+<td id="T_ad42f_row1_col0" class="data row1 col0">Criminal Investigator</td>
+<td id="T_ad42f_row1_col1" class="data row1 col1">Department of Commerce</td>
+<td id="T_ad42f_row1_col2" class="data row1 col2"><a href="https://www.usajobs.gov/job/841526800" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row1_col3" class="data row1 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12758548" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row1_col4" class="data row1 col4">fficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 7. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="odd">
+<td id="T_ad42f_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">14127</td>
+<td id="T_ad42f_row2_col0" class="data row2 col0">DEPUTY DIRECTOR OF OPERATIONS</td>
+<td id="T_ad42f_row2_col1" class="data row2 col1">Department of the Air Force</td>
+<td id="T_ad42f_row2_col2" class="data row2 col2"><a href="https://www.usajobs.gov/job/841445200" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row2_col3" class="data row2 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12770315" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row2_col4" class="data row2 col4">ficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 13. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="even">
+<td id="T_ad42f_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">14281</td>
+<td id="T_ad42f_row3_col0" class="data row3 col0">FOREIGN AFFAIRS SPECIALIST</td>
+<td id="T_ad42f_row3_col1" class="data row3 col1">Department of the Air Force</td>
+<td id="T_ad42f_row3_col2" class="data row3 col2"><a href="https://www.usajobs.gov/job/841476800" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row3_col3" class="data row3 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12770606" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row3_col4" class="data row3 col4">ficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 13. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="odd">
+<td id="T_ad42f_level0_row4" class="row_heading level0 row4" data-quarto-table-cell-role="th">14748</td>
+<td id="T_ad42f_row4_col0" class="data row4 col0">Investigation &amp; Compliance Specialist</td>
+<td id="T_ad42f_row4_col1" class="data row4 col1">Department of Commerce</td>
+<td id="T_ad42f_row4_col2" class="data row4 col2"><a href="https://www.usajobs.gov/job/841533700" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row4_col3" class="data row4 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12756401" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row4_col4" class="data row4 col4">ficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 21. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="even">
+<td id="T_ad42f_level0_row5" class="row_heading level0 row5" data-quarto-table-cell-role="th">14112</td>
+<td id="T_ad42f_row5_col0" class="data row5 col0">LEGISLATIVE AFFAIRS SPECIALIST</td>
+<td id="T_ad42f_row5_col1" class="data row5 col1">Department of the Air Force</td>
+<td id="T_ad42f_row5_col2" class="data row5 col2"><a href="https://www.usajobs.gov/job/841443200" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row5_col3" class="data row5 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12770342" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row5_col4" class="data row5 col4">ficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 13. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="odd">
+<td id="T_ad42f_level0_row6" class="row_heading level0 row6" data-quarto-table-cell-role="th">14546</td>
+<td id="T_ad42f_row6_col0" class="data row6 col0">LOGISTICS MANAGEMENT SPECIALIST</td>
+<td id="T_ad42f_row6_col1" class="data row6 col1">Department of the Air Force</td>
+<td id="T_ad42f_row6_col2" class="data row6 col2"><a href="https://www.usajobs.gov/job/841579500" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row6_col3" class="data row6 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12770657" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row6_col4" class="data row6 col4">ficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 13. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="even">
+<td id="T_ad42f_level0_row7" class="row_heading level0 row7" data-quarto-table-cell-role="th">14404</td>
+<td id="T_ad42f_row7_col0" class="data row7 col0">Loan Assistant/ Loan Specialist (Agricultural)</td>
+<td id="T_ad42f_row7_col1" class="data row7 col1">Department of Agriculture</td>
+<td id="T_ad42f_row7_col2" class="data row7 col2"><a href="https://www.usajobs.gov/job/841506300" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row7_col3" class="data row7 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12770501" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row7_col4" class="data row7 col4">fficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 3. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="odd">
+<td id="T_ad42f_level0_row8" class="row_heading level0 row8" data-quarto-table-cell-role="th">14001</td>
+<td id="T_ad42f_row8_col0" class="data row8 col0">Loan Assistant/Loan Specialist (Agricultural)</td>
+<td id="T_ad42f_row8_col1" class="data row8 col1">Department of Agriculture</td>
+<td id="T_ad42f_row8_col2" class="data row8 col2"><a href="https://www.usajobs.gov/job/841420700" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row8_col3" class="data row8 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12770068" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row8_col4" class="data row8 col4">fficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 3. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="even">
+<td id="T_ad42f_level0_row9" class="row_heading level0 row9" data-quarto-table-cell-role="th">14092</td>
+<td id="T_ad42f_row9_col0" class="data row9 col0">Loan Assistant/Loan Specialist (Agricultural)</td>
+<td id="T_ad42f_row9_col1" class="data row9 col1">Department of Agriculture</td>
+<td id="T_ad42f_row9_col2" class="data row9 col2"><a href="https://www.usajobs.gov/job/841437800" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row9_col3" class="data row9 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12768710" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row9_col4" class="data row9 col4">fficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 3. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="odd">
+<td id="T_ad42f_level0_row10" class="row_heading level0 row10" data-quarto-table-cell-role="th">14196</td>
+<td id="T_ad42f_row10_col0" class="data row10 col0">Loan Specialist (Agricultural)</td>
+<td id="T_ad42f_row10_col1" class="data row10 col1">Department of Agriculture</td>
+<td id="T_ad42f_row10_col2" class="data row10 col2"><a href="https://www.usajobs.gov/job/841458200" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row10_col3" class="data row10 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12768678" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row10_col4" class="data row10 col4">fficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 3. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="even">
+<td id="T_ad42f_level0_row11" class="row_heading level0 row11" data-quarto-table-cell-role="th">14451</td>
+<td id="T_ad42f_row11_col0" class="data row11 col0">Park Ranger (Protection)</td>
+<td id="T_ad42f_row11_col1" class="data row11 col1">Department of the Interior</td>
+<td id="T_ad42f_row11_col2" class="data row11 col2"><a href="https://www.usajobs.gov/job/841543500" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row11_col3" class="data row11 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12767439" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row11_col4" class="data row11 col4">ficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 14. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="odd">
+<td id="T_ad42f_level0_row12" class="row_heading level0 row12" data-quarto-table-cell-role="th">14048</td>
+<td id="T_ad42f_row12_col0" class="data row12 col0">Realty Specialist</td>
+<td id="T_ad42f_row12_col1" class="data row12 col1">Department of the Interior</td>
+<td id="T_ad42f_row12_col2" class="data row12 col2"><a href="https://www.usajobs.gov/job/841430100" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row12_col3" class="data row12 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12764357" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row12_col4" class="data row12 col4">fficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 8. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="even">
+<td id="T_ad42f_level0_row13" class="row_heading level0 row13" data-quarto-table-cell-role="th">14544</td>
+<td id="T_ad42f_row13_col0" class="data row13 col0">SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST</td>
+<td id="T_ad42f_row13_col1" class="data row13 col1">Department of the Air Force</td>
+<td id="T_ad42f_row13_col2" class="data row13 col2"><a href="https://www.usajobs.gov/job/841527900" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row13_col3" class="data row13 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12770289" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row13_col4" class="data row13 col4">ficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 13. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="odd">
+<td id="T_ad42f_level0_row14" class="row_heading level0 row14" data-quarto-table-cell-role="th">14009</td>
+<td id="T_ad42f_row14_col0" class="data row14 col0">SUPERVISORY SUPPLY MANAGEMENT SPECIALIST</td>
+<td id="T_ad42f_row14_col1" class="data row14 col1">Department of the Air Force</td>
+<td id="T_ad42f_row14_col2" class="data row14 col2"><a href="https://www.usajobs.gov/job/841422400" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row14_col3" class="data row14 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12770200" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row14_col4" class="data row14 col4">ficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 12. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="even">
+<td id="T_ad42f_level0_row15" class="row_heading level0 row15" data-quarto-table-cell-role="th">14255</td>
+<td id="T_ad42f_row15_col0" class="data row15 col0">Seasonal Hydrologic Technician</td>
+<td id="T_ad42f_row15_col1" class="data row15 col1">Department of the Interior</td>
+<td id="T_ad42f_row15_col2" class="data row15 col2"><a href="https://www.usajobs.gov/job/841470400" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row15_col3" class="data row15 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12767492" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row15_col4" class="data row15 col4">fficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 3. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="odd">
+<td id="T_ad42f_level0_row16" class="row_heading level0 row16" data-quarto-table-cell-role="th">14752</td>
+<td id="T_ad42f_row16_col0" class="data row16 col0">Supervisory Criminal Investigator (Special Agent in Charge)</td>
+<td id="T_ad42f_row16_col1" class="data row16 col1">Department of Commerce</td>
+<td id="T_ad42f_row16_col2" class="data row16 col2"><a href="https://www.usajobs.gov/job/841523500" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row16_col3" class="data row16 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12758613" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row16_col4" class="data row16 col4">ficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 21. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="even">
+<td id="T_ad42f_level0_row17" class="row_heading level0 row17" data-quarto-table-cell-role="th">14760</td>
+<td id="T_ad42f_row17_col0" class="data row17 col0">TRANSPORTATION ASSISTANT (PASSENGER)</td>
+<td id="T_ad42f_row17_col1" class="data row17 col1">Department of the Air Force</td>
+<td id="T_ad42f_row17_col2" class="data row17 col2"><a href="https://www.usajobs.gov/job/841533000" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row17_col3" class="data row17 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12770936" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row17_col4" class="data row17 col4">ficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 12. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="odd">
+<td id="T_ad42f_level0_row18" class="row_heading level0 row18" data-quarto-table-cell-role="th">14441</td>
+<td id="T_ad42f_row18_col0" class="data row18 col0">TRANSPORTATION ASSISTANT (QUALITY ASSURANCE)</td>
+<td id="T_ad42f_row18_col1" class="data row18 col1">Department of the Air Force</td>
+<td id="T_ad42f_row18_col2" class="data row18 col2"><a href="https://www.usajobs.gov/job/841514000" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row18_col3" class="data row18 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12770647" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row18_col4" class="data row18 col4">ficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 13. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+<tr class="even">
+<td id="T_ad42f_level0_row19" class="row_heading level0 row19" data-quarto-table-cell-role="th">14108</td>
+<td id="T_ad42f_row19_col0" class="data row19 col0">UNIT DEPLOYMENT MANAGER</td>
+<td id="T_ad42f_row19_col1" class="data row19 col1">Department of the Air Force</td>
+<td id="T_ad42f_row19_col2" class="data row19 col2"><a href="https://www.usajobs.gov/job/841441900" target="_blank">USAJobs Link</a></td>
+<td id="T_ad42f_row19_col3" class="data row19 col3"><a href="https://apply.usastaffing.gov/ViewQuestionnaire/12770409" target="_blank">Questionnaire</a></td>
+<td id="T_ad42f_row19_col4" class="data row19 col4">ficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes. (limit 1,200 characters) 13. How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hir</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>summary_text <span class="op">=</span> <span class="ss">f"""</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ss">This analysis examined **</span><span class="sc">{</span>total_scraped<span class="sc">:,}</span><span class="ss">** scraped federal job questionnaires and found that **</span><span class="sc">{</span>total_with_eo<span class="sc">:,}</span><span class="ss">** (</span><span class="sc">{</span>percentage_with_eo<span class="sc">:.1f}</span><span class="ss">%) contain the specific question: "How would you help advance the President's Executive Orders and policy priorities in this role?"</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="ss">The agencies and positions that include this question in their assessment are shown in the tables above.</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary_text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p>This analysis examined <strong>805</strong> scraped federal job questionnaires and found that <strong>20</strong> (2.5%) contain the specific question: “How would you help advance the President’s Executive Orders and policy priorities in this role?”</p>
+<p>The agencies and positions that include this question in their assessment are shown in the tables above.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,290 @@
+---
+title: "Analysis of 'Advancing President's Executive Orders' Question in Federal Job Questionnaires"
+format: 
+  html:
+    code-fold: true
+    toc: true
+execute:
+  warning: false
+  message: false
+---
+
+```{python}
+import pandas as pd
+import os
+from pathlib import Path
+import re
+from collections import Counter
+
+# Define paths
+BASE_DIR = Path('../..')
+QUESTIONNAIRE_DIR = Path('..')
+DATA_DIR = BASE_DIR / 'data'
+```
+
+## Load and Process Data
+
+```{python}
+def load_questionnaire_links():
+    """Load the questionnaire links CSV"""
+    csv_path = QUESTIONNAIRE_DIR / 'questionnaire_links.csv'
+    if not csv_path.exists():
+        raise FileNotFoundError(f"questionnaire_links.csv not found at {csv_path}")
+    
+    df = pd.read_csv(csv_path)
+    print(f"Loaded {len(df):,} questionnaire links")
+    return df
+
+def check_executive_order_mentions(questionnaire_dir='../raw_questionnaires'):
+    """Check which questionnaires mention the specific executive order question"""
+    mentions = {}
+    # Look for the specific question about advancing President's Executive Orders
+    pattern = re.compile(r"How would you help advance the President's Executive Orders and policy priorities in this role\?", re.IGNORECASE)
+    
+    questionnaire_path = Path(questionnaire_dir)
+    if not questionnaire_path.exists():
+        print(f"Warning: {questionnaire_path} does not exist")
+        return mentions
+    
+    txt_files = list(questionnaire_path.glob('*.txt'))
+    print(f"Found {len(txt_files):,} scraped questionnaire files")
+    
+    for txt_file in txt_files:
+        try:
+            with open(txt_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            # Find all mentions of the specific question
+            eo_mentions = pattern.findall(content)
+            if eo_mentions:
+                # Extract questionnaire ID from filename
+                file_id = txt_file.stem.split('_')[1]
+                mentions[file_id] = len(eo_mentions)
+        except Exception as e:
+            print(f"Error reading {txt_file}: {e}")
+    
+    return mentions
+
+# Load questionnaire links
+links_df = load_questionnaire_links()
+
+# Check for the specific executive order question
+eo_mentions = check_executive_order_mentions()
+print(f"\nFound {len(eo_mentions):,} questionnaires with the 'advancing President's Executive Orders' question")
+```
+
+## Process Questionnaire Data
+
+```{python}
+# Create mapping of questionnaire URL to ID
+def extract_questionnaire_id(url):
+    """Extract questionnaire ID from URL"""
+    if pd.isna(url):
+        return None
+    match = re.search(r'/ViewQuestionnaire/(\d+)', url)
+    if match:
+        return match.group(1)
+    return None
+
+links_df['questionnaire_id'] = links_df['questionnaire_url'].apply(extract_questionnaire_id)
+
+# Add executive order flag
+links_df['has_executive_order'] = links_df['questionnaire_id'].isin(eo_mentions)
+links_df['eo_mention_count'] = links_df['questionnaire_id'].map(eo_mentions).fillna(0).astype(int)
+
+# Use links_df as enriched_df since it already has all the fields
+enriched_df = links_df.copy()
+
+print(f"\nDataset has {len(enriched_df):,} questionnaire records")
+print(f"Records with executive order mentions: {enriched_df['has_executive_order'].sum():,}")
+```
+
+## Executive Order Analysis
+
+### Overall Statistics
+
+```{python}
+# Only count scraped questionnaires
+scraped_ids = set(eo_mentions.keys()) | {extract_questionnaire_id(f"https://apply.usastaffing.gov/ViewQuestionnaire/{f.stem.split('_')[1]}") 
+                                         for f in Path('../raw_questionnaires').glob('*.txt')}
+scraped_df = links_df[links_df['questionnaire_id'].isin(scraped_ids)].copy()
+
+# Calculate overall statistics for scraped questionnaires only
+total_scraped = len(scraped_df)
+total_with_eo = scraped_df['has_executive_order'].sum()
+percentage_with_eo = (total_with_eo / total_scraped * 100) if total_scraped > 0 else 0
+
+print(f"Total scraped questionnaires: {total_scraped:,}")
+print(f"Questionnaires with the specific EO question: {total_with_eo:,}")
+print(f"Percentage with the EO question: {percentage_with_eo:.1f}%")
+```
+
+### By Agency (Scraped Only)
+
+```{python}
+# Filter enriched_df to only scraped questionnaires
+scraped_enriched = enriched_df[enriched_df['questionnaire_id'].isin(scraped_ids)].copy()
+
+# Analyze by agency - only scraped questionnaires
+agency_summary = scraped_enriched.groupby('hiring_agency').agg({
+    'questionnaire_id': 'count',
+    'has_executive_order': 'sum'
+}).reset_index()
+
+agency_summary.columns = ['Agency', 'Total_Scraped', 'Count_With_EO']
+agency_summary['Percent'] = (agency_summary['Count_With_EO'] / agency_summary['Total_Scraped'] * 100).round(1)
+
+# Sort by count with EO mentions
+agency_summary = agency_summary.sort_values('Count_With_EO', ascending=False)
+
+# Display agency table
+print("Agencies with the 'advancing President's Executive Orders' question:")
+agency_summary[['Agency', 'Total_Scraped', 'Count_With_EO', 'Percent']].head(20)
+```
+
+### By Occupation (Scraped Only)
+
+```{python}
+# Analyze by position title - only scraped questionnaires
+position_summary = scraped_enriched.groupby('position_title').agg({
+    'questionnaire_id': 'count',
+    'has_executive_order': 'sum'
+}).reset_index()
+
+position_summary.columns = ['Occupation', 'Total_Scraped', 'Count_With_EO']
+position_summary['Percent'] = (position_summary['Count_With_EO'] / position_summary['Total_Scraped'] * 100).round(1)
+
+# Sort by count with EO mentions
+position_summary = position_summary.sort_values('Count_With_EO', ascending=False)
+
+# Display occupation table
+print("Occupations with the 'advancing President's Executive Orders' question:")
+position_summary[['Occupation', 'Total_Scraped', 'Count_With_EO', 'Percent']].head(20)
+```
+
+### By Month Posted (Scraped Only)
+
+```{python}
+# Extract month from position_open_date (when the job was actually posted)
+scraped_enriched['posted_month'] = pd.to_datetime(scraped_enriched['position_open_date']).dt.to_period('M')
+
+# Remove any rows with missing dates
+scraped_with_dates = scraped_enriched.dropna(subset=['posted_month'])
+
+# Analyze by month posted
+month_summary = scraped_with_dates.groupby('posted_month').agg({
+    'questionnaire_id': 'count',
+    'has_executive_order': 'sum'
+}).reset_index()
+
+month_summary.columns = ['Month_Posted', 'Total_Scraped', 'Count_With_EO']
+month_summary['Percent'] = (month_summary['Count_With_EO'] / month_summary['Total_Scraped'] * 100).round(1)
+
+# Sort by month
+month_summary = month_summary.sort_values('Month_Posted')
+
+# Convert Period to string for display
+month_summary['Month_Posted'] = month_summary['Month_Posted'].astype(str)
+
+# Display month table
+print("\nJobs by month posted with the 'advancing President's Executive Orders' question:")
+print(f"(Based on {len(scraped_with_dates):,} scraped questionnaires with valid posting dates)")
+month_summary[['Month_Posted', 'Total_Scraped', 'Count_With_EO', 'Percent']]
+```
+
+### Job Postings with the Executive Order Question
+
+```{python}
+# Get all jobs with EO mentions
+eo_jobs = scraped_enriched[scraped_enriched['has_executive_order']].copy()
+
+# Function to extract context around executive order mentions
+def extract_eo_context(questionnaire_id, context_length=150):
+    """Extract context around the specific executive order question"""
+    txt_path = QUESTIONNAIRE_DIR / 'raw_questionnaires' / f'usastaffing_{questionnaire_id}.txt'
+    
+    if not txt_path.exists():
+        # Try other prefixes
+        for prefix in ['monster', 'other']:
+            alt_path = QUESTIONNAIRE_DIR / 'raw_questionnaires' / f'{prefix}_{questionnaire_id}.txt'
+            if alt_path.exists():
+                txt_path = alt_path
+                break
+        else:
+            return []
+    
+    contexts = []
+    try:
+        with open(txt_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Find the specific question with context
+        pattern = re.compile(r"(.{0," + str(context_length) + r"}How would you help advance the President's Executive Orders and policy priorities in this role\?.{0," + str(context_length) + r"})", re.IGNORECASE | re.DOTALL)
+        matches = pattern.findall(content)
+        
+        for match in matches:
+            # Clean up whitespace
+            context = ' '.join(match.split())
+            contexts.append(context)
+    except Exception as e:
+        print(f"Error reading {txt_path}: {e}")
+    
+    return contexts
+
+# Function to get excerpt
+def get_eo_excerpt(questionnaire_id):
+    """Get first executive order mention with context"""
+    contexts = extract_eo_context(questionnaire_id, context_length=150)
+    if contexts:
+        return contexts[0]
+    return ""
+
+# Build detailed table
+eo_jobs['excerpt'] = eo_jobs['questionnaire_id'].apply(get_eo_excerpt)
+eo_jobs['job_posting_url'] = 'https://www.usajobs.gov/job/' + eo_jobs['usajobs_control_number'].astype(str)
+
+# Make links clickable HTML
+eo_jobs['job_posting_link'] = eo_jobs['job_posting_url'].apply(lambda x: f'<a href="{x}" target="_blank">USAJobs Link</a>')
+eo_jobs['questionnaire_link'] = eo_jobs['questionnaire_url'].apply(lambda x: f'<a href="{x}" target="_blank">Questionnaire</a>')
+
+# Select and rename columns
+detail_table = eo_jobs[['position_title', 'hiring_agency', 'job_posting_link', 'questionnaire_link', 'excerpt']].copy()
+detail_table.columns = ['Occupation', 'Agency', 'Job_Posting_Link', 'Questionnaire_Link', 'Executive_Order_Excerpt']
+
+# Sort by occupation
+detail_table = detail_table.sort_values('Occupation')
+
+print(f"All {len(detail_table)} job postings with the 'advancing President's Executive Orders' question:")
+
+# Display with HTML rendering and text wrapping
+from IPython.display import HTML
+import pandas as pd
+
+# Set pandas display options for better text wrapping
+pd.set_option('display.max_colwidth', None)
+pd.set_option('display.max_rows', None)
+
+# Style the table for better display
+styled_table = detail_table.style.set_properties(**{
+    'text-align': 'left',
+    'white-space': 'pre-wrap',
+    'word-wrap': 'break-word'
+}).set_table_styles([
+    {'selector': 'td', 'props': [('max-width', '300px')]},
+    {'selector': 'td:nth-child(5)', 'props': [('max-width', '400px')]}  # Wider for excerpt column
+])
+
+HTML(styled_table.to_html(escape=False))
+```
+
+## Summary
+
+```{python}
+#| output: asis
+summary_text = f"""
+This analysis examined **{total_scraped:,}** scraped federal job questionnaires and found that **{total_with_eo:,}** ({percentage_with_eo:.1f}%) contain the specific question: "How would you help advance the President's Executive Orders and policy priorities in this role?"
+
+The agencies and positions that include this question in their assessment are shown in the tables above.
+"""
+print(summary_text)
+```

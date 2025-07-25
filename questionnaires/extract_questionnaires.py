@@ -272,7 +272,7 @@ def scrape_questionnaire_worker(args):
         return questionnaire, False
 
 
-def extract_all_links_to_csv(data_dir='../data'):
+def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-05-01'):
     """Extract all questionnaire links to CSV - fast operation"""
     csv_file = Path('./questionnaire_links.csv')
     
@@ -287,10 +287,12 @@ def extract_all_links_to_csv(data_dir='../data'):
     # Find all current job parquet files
     current_job_files = sorted(Path(data_dir).glob('current_jobs_*.parquet'))
     print(f"\nFound {len(current_job_files)} current job parquet files to check")
+    print(f"Filtering for jobs posted on or after {cutoff_date}")
     
     # Process all files and collect links
     all_new_links = []
     batch_size = 100  # Write to CSV every 100 new links
+    cutoff_dt = pd.to_datetime(cutoff_date)
     
     for parquet_file in current_job_files:
         file_size_mb = parquet_file.stat().st_size / (1024 * 1024)
@@ -299,7 +301,15 @@ def extract_all_links_to_csv(data_dir='../data'):
         # Read parquet file
         df = pd.read_parquet(parquet_file)
         total_jobs = len(df)
-        print(f"  {total_jobs} jobs in file")
+        
+        # Filter by date if positionOpenDate exists
+        if 'positionOpenDate' in df.columns:
+            df['positionOpenDate'] = pd.to_datetime(df['positionOpenDate'])
+            df_filtered = df[df['positionOpenDate'] >= cutoff_dt]
+            print(f"  {total_jobs} total jobs, {len(df_filtered)} after date filter")
+            df = df_filtered
+        else:
+            print(f"  {total_jobs} jobs in file (no date filtering - positionOpenDate not found)")
         
         jobs_with_links = 0
         new_links_in_file = 0
@@ -307,7 +317,7 @@ def extract_all_links_to_csv(data_dir='../data'):
         # Process each job
         for idx, row in df.iterrows():
             if idx % 1000 == 0:
-                print(f"  Processing job {idx}/{total_jobs} ({jobs_with_links} with links, {new_links_in_file} new)...", end='\r')
+                print(f"  Processing job {idx}/{len(df)} ({jobs_with_links} with links, {new_links_in_file} new)...", end='\r')
             
             # Extract links from this job
             links = extract_questionnaire_links_from_job(row)
@@ -321,13 +331,18 @@ def extract_all_links_to_csv(data_dir='../data'):
                         existing_urls.add(link)
                         new_links_in_file += 1
                         
-                        # Create record
+                        # Create record with all needed fields
                         link_record = {
                             'questionnaire_url': link,
                             'usajobs_control_number': row.get('usajobsControlNumber'),
                             'position_title': row.get('positionTitle'),
                             'announcement_number': row.get('announcementNumber'),
                             'hiring_agency': row.get('hiringAgencyName'),
+                            'position_open_date': row.get('positionOpenDate'),
+                            'position_close_date': row.get('positionCloseDate'),
+                            'position_location': row.get('positionLocation'),
+                            'grade_code': row.get('gradeCode'),
+                            'position_schedule': row.get('positionSchedule'),
                             'extracted_from_file': parquet_file.name,
                             'extracted_date': datetime.now().isoformat()
                         }
