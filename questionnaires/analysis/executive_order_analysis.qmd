@@ -119,20 +119,20 @@ print(f"Questionnaires with the specific EO question: {total_with_eo:,}")
 print(f"Percentage with the EO question: {percentage_with_eo:.1f}%")
 ```
 
-### By Agency (Scraped Only)
+### By Agency
 
 ```{python}
 # Filter enriched_df to only scraped questionnaires
 scraped_enriched = enriched_df[enriched_df['questionnaire_id'].isin(scraped_ids)].copy()
 
-# Analyze by agency - only scraped questionnaires
+# Analyze by agency
 agency_summary = scraped_enriched.groupby('hiring_agency').agg({
     'questionnaire_id': 'count',
     'has_executive_order': 'sum'
 }).reset_index()
 
 agency_summary.columns = ['Agency', 'Total_Scraped', 'Count_With_EO']
-agency_summary['Percent'] = (agency_summary['Count_With_EO'] / agency_summary['Total_Scraped'] * 100).round(1)
+agency_summary['Percent'] = (agency_summary['Count_With_EO'] / agency_summary['Total_Scraped'] * 100).round(0).astype(int)
 
 # Sort by count with EO mentions
 agency_summary = agency_summary.sort_values('Count_With_EO', ascending=False)
@@ -142,27 +142,27 @@ print("Agencies with the 'advancing President's Executive Orders' question:")
 agency_summary[['Agency', 'Total_Scraped', 'Count_With_EO', 'Percent']].head(20)
 ```
 
-### By Occupation (Scraped Only)
+### By Position Title
 
 ```{python}
-# Analyze by position title - only scraped questionnaires
+# Analyze by position title
 position_summary = scraped_enriched.groupby('position_title').agg({
     'questionnaire_id': 'count',
     'has_executive_order': 'sum'
 }).reset_index()
 
-position_summary.columns = ['Occupation', 'Total_Scraped', 'Count_With_EO']
-position_summary['Percent'] = (position_summary['Count_With_EO'] / position_summary['Total_Scraped'] * 100).round(1)
+position_summary.columns = ['Position_Title', 'Total_Scraped', 'Count_With_EO']
+position_summary['Percent'] = (position_summary['Count_With_EO'] / position_summary['Total_Scraped'] * 100).round(0).astype(int)
 
 # Sort by count with EO mentions
 position_summary = position_summary.sort_values('Count_With_EO', ascending=False)
 
-# Display occupation table
-print("Occupations with the 'advancing President's Executive Orders' question:")
-position_summary[['Occupation', 'Total_Scraped', 'Count_With_EO', 'Percent']].head(20)
+# Display position title table
+print("Position titles with the 'advancing President's Executive Orders' question:")
+position_summary[['Position_Title', 'Total_Scraped', 'Count_With_EO', 'Percent']].head(20)
 ```
 
-### By Month Posted (Scraped Only)
+### By Month Posted
 
 ```{python}
 # Extract month from position_open_date (when the job was actually posted)
@@ -178,7 +178,7 @@ month_summary = scraped_with_dates.groupby('posted_month').agg({
 }).reset_index()
 
 month_summary.columns = ['Month_Posted', 'Total_Scraped', 'Count_With_EO']
-month_summary['Percent'] = (month_summary['Count_With_EO'] / month_summary['Total_Scraped'] * 100).round(1)
+month_summary['Percent'] = (month_summary['Count_With_EO'] / month_summary['Total_Scraped'] * 100).round(0).astype(int)
 
 # Sort by month
 month_summary = month_summary.sort_values('Month_Posted')
@@ -198,49 +198,7 @@ month_summary[['Month_Posted', 'Total_Scraped', 'Count_With_EO', 'Percent']]
 # Get all jobs with EO mentions
 eo_jobs = scraped_enriched[scraped_enriched['has_executive_order']].copy()
 
-# Function to extract context around executive order mentions
-def extract_eo_context(questionnaire_id, context_length=150):
-    """Extract context around the specific executive order question"""
-    txt_path = QUESTIONNAIRE_DIR / 'raw_questionnaires' / f'usastaffing_{questionnaire_id}.txt'
-    
-    if not txt_path.exists():
-        # Try other prefixes
-        for prefix in ['monster', 'other']:
-            alt_path = QUESTIONNAIRE_DIR / 'raw_questionnaires' / f'{prefix}_{questionnaire_id}.txt'
-            if alt_path.exists():
-                txt_path = alt_path
-                break
-        else:
-            return []
-    
-    contexts = []
-    try:
-        with open(txt_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        # Find the specific question with context
-        pattern = re.compile(r"(.{0," + str(context_length) + r"}How would you help advance the President's Executive Orders and policy priorities in this role\?.{0," + str(context_length) + r"})", re.IGNORECASE | re.DOTALL)
-        matches = pattern.findall(content)
-        
-        for match in matches:
-            # Clean up whitespace
-            context = ' '.join(match.split())
-            contexts.append(context)
-    except Exception as e:
-        print(f"Error reading {txt_path}: {e}")
-    
-    return contexts
-
-# Function to get excerpt
-def get_eo_excerpt(questionnaire_id):
-    """Get first executive order mention with context"""
-    contexts = extract_eo_context(questionnaire_id, context_length=150)
-    if contexts:
-        return contexts[0]
-    return ""
-
 # Build detailed table
-eo_jobs['excerpt'] = eo_jobs['questionnaire_id'].apply(get_eo_excerpt)
 eo_jobs['job_posting_url'] = 'https://www.usajobs.gov/job/' + eo_jobs['usajobs_control_number'].astype(str)
 
 # Make links clickable HTML
@@ -248,11 +206,11 @@ eo_jobs['job_posting_link'] = eo_jobs['job_posting_url'].apply(lambda x: f'<a hr
 eo_jobs['questionnaire_link'] = eo_jobs['questionnaire_url'].apply(lambda x: f'<a href="{x}" target="_blank">Questionnaire</a>')
 
 # Select and rename columns
-detail_table = eo_jobs[['position_title', 'hiring_agency', 'job_posting_link', 'questionnaire_link', 'excerpt']].copy()
-detail_table.columns = ['Occupation', 'Agency', 'Job_Posting_Link', 'Questionnaire_Link', 'Executive_Order_Excerpt']
+detail_table = eo_jobs[['position_title', 'hiring_agency', 'job_posting_link', 'questionnaire_link']].copy()
+detail_table.columns = ['Position_Title', 'Agency', 'Job_Posting_Link', 'Questionnaire_Link']
 
-# Sort by occupation
-detail_table = detail_table.sort_values('Occupation')
+# Sort by position title
+detail_table = detail_table.sort_values('Position_Title')
 
 print(f"All {len(detail_table)} job postings with the 'advancing President's Executive Orders' question:")
 
@@ -270,8 +228,7 @@ styled_table = detail_table.style.set_properties(**{
     'white-space': 'pre-wrap',
     'word-wrap': 'break-word'
 }).set_table_styles([
-    {'selector': 'td', 'props': [('max-width', '300px')]},
-    {'selector': 'td:nth-child(5)', 'props': [('max-width', '400px')]}  # Wider for excerpt column
+    {'selector': 'td', 'props': [('max-width', '300px')]}
 ])
 
 HTML(styled_table.to_html(escape=False))

@@ -272,7 +272,7 @@ def scrape_questionnaire_worker(args):
         return questionnaire, False
 
 
-def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-05-01'):
+def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
     """Extract all questionnaire links to CSV - fast operation"""
     csv_file = Path('./questionnaire_links.csv')
     
