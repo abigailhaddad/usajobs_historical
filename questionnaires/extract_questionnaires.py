@@ -15,13 +15,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
 
 try:
-    from selenium import webdriver
-    from selenium.webdriver.chrome.options import Options
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.support.ui import WebDriverWait
-    from selenium.webdriver.support import expected_conditions as EC
+    from playwright.sync_api import sync_playwright
 except ImportError:
-    print("Selenium not installed. Install with: pip install selenium")
+    print("Playwright not installed. Install with: pip install playwright && playwright install chromium")
     exit(1)
 
 
@@ -80,15 +76,6 @@ def extract_questionnaire_links_from_job(job_row):
 def scrape_questionnaire(url, output_dir):
     """Scrape a single questionnaire and return the text content"""
     
-    # Check failed URLs file
-    failed_urls_file = Path('./failed_urls.txt')
-    if failed_urls_file.exists():
-        with open(failed_urls_file, 'r') as f:
-            failed_urls = set(line.strip() for line in f)
-        if url in failed_urls:
-            print(f"  Skipping previously failed URL: {url}")
-            return None
-    
     # Extract ID from URL for filename
     if 'usastaffing.gov' in url:
         match = re.search(r'ViewQuestionnaire/(\d+)', url)
@@ -113,75 +100,90 @@ def scrape_questionnaire(url, output_dir):
         with open(txt_path, 'r', encoding='utf-8') as f:
             return f.read()
     
-    chrome_options = Options()
-    chrome_options.add_argument('--headless')
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--disable-dev-shm-usage')
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_argument('--window-size=1920,1080')
-    chrome_options.add_argument('--disable-images')
-    chrome_options.add_argument('--disable-javascript-harmony')
-    chrome_options.add_argument('--disable-web-security')
-    chrome_options.add_argument('--disable-features=VizDisplayCompositor')
-    chrome_options.add_argument('--disable-extensions')
-    chrome_options.page_load_strategy = 'eager'
-    
-    try:
-        driver = webdriver.Chrome(options=chrome_options)
-        print(f"  Scraping {url}...")
+    with sync_playwright() as p:
+        browser = p.chromium.launch(
+            headless=True,
+            args=[
+                '--disable-blink-features=AutomationControlled',
+                '--disable-dev-shm-usage',
+                '--no-sandbox',
+                '--disable-web-security',
+                '--disable-features=IsolateOrigins,site-per-process'
+            ]
+        )
         
-        driver.get(url)
-        
-        # Wait for content to load  
-        wait = WebDriverWait(driver, 10)
-        
-        # Try common selectors for questionnaires
-        selectors = [
-            # USAStaffing selectors
-            "div.question-text",
-            "div.assessment-question",
-            "div#questionnaire",
-            ".questionText",
+        try:
+            # Create a new page with optimizations
+            context = browser.new_context(
+                viewport={'width': 1920, 'height': 1080},
+                ignore_https_errors=True,
+                java_script_enabled=True,
+                bypass_csp=True,
+                extra_http_headers={
+                    'Accept-Language': 'en-US,en;q=0.9'
+                }
+            )
             
-            # Monster selectors
-            "div[id*='question']",
-            "div[class*='question']",
-            "form[id*='questionnaire']",
-            "div[class*='assessment']",
+            page = context.new_page()
             
-            # Generic selectors
-            ".questionnaire-content",
-            "#assessment-questions",
-            "main",
-            "body"
-        ]
-        
-        for selector in selectors:
+            # Block images and other unnecessary resources
+            def route_handler(route):
+                if route.request.resource_type in ["image", "stylesheet", "media", "font"]:
+                    route.abort()
+                else:
+                    route.continue_()
+            
+            page.route("**/*", route_handler)
+            
+            print(f"  Scraping {url}...")
+            
+            # Navigate with timeout
+            page.goto(url, timeout=10000, wait_until='domcontentloaded')
+            
+            # Wait for questionnaire content
             try:
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, selector)))
-                break
+                # Try common selectors
+                selectors = [
+                    "div.question-text",
+                    "div.assessment-question", 
+                    "div#questionnaire",
+                    ".questionText",
+                    "div[id*='question']",
+                    "div[class*='question']",
+                    ".questionnaire-content",
+                    "#assessment-questions"
+                ]
+                
+                for selector in selectors:
+                    try:
+                        page.wait_for_selector(selector, timeout=5000)
+                        break
+                    except:
+                        continue
+                
+                # Additional wait for dynamic content
+                page.wait_for_timeout(1000)
+                
             except:
-                continue
-        
-        # Reduced wait for dynamic content
-        time.sleep(1)
-        
-        # Get text content
-        page_text = driver.find_element(By.TAG_NAME, "body").text
-        
-        # Save text file
-        with open(txt_path, 'w', encoding='utf-8') as f:
-            f.write(page_text)
-        
-        print(f"    Saved: {txt_path}")
-        driver.quit()
-        return page_text
-        
-    except Exception as e:
-        print(f"    Error scraping {url}: {e}")
-        if 'driver' in locals():
-            driver.quit()
-        return None
+                # If no specific selector found, just wait a bit
+                page.wait_for_timeout(2000)
+            
+            # Get text content
+            page_text = page.inner_text('body')
+            
+            # Save text file
+            with open(txt_path, 'w', encoding='utf-8') as f:
+                f.write(page_text)
+            
+            print(f"    Saved: {txt_path}")
+            
+            browser.close()
+            return page_text
+            
+        except Exception as e:
+            print(f"    Error scraping {url}: {e}")
+            browser.close()
+            return None
 
 
 def find_questionnaire_links(data_dir='../data', limit=None):
@@ -427,6 +429,13 @@ def main():
     
     # Read the CSV
     df = pd.read_csv(csv_file)
+    
+    # Sort by extracted_date descending (most recent first)
+    if 'extracted_date' in df.columns:
+        df['extracted_date'] = pd.to_datetime(df['extracted_date'])
+        df = df.sort_values('extracted_date', ascending=False)
+        print("Sorted questionnaires by date (most recent first)")
+    
     total_links = len(df)
     print(f"\nTotal questionnaire links in CSV: {total_links}")
     
@@ -437,10 +446,11 @@ def main():
     
     # Show first few examples
     if len(df) > 0:
-        print("\nFirst few questionnaire links:")
+        print("\nFirst few questionnaire links to process:")
         for i, (_, row) in enumerate(df.head().iterrows()):
             print(f"\n{i+1}. {row['position_title']}")
             print(f"   Agency: {row['hiring_agency']}")
+            print(f"   From: {row.get('extracted_from_file', 'Unknown')}")
             print(f"   URL: {row['questionnaire_url']}")
     
     # Create output directory
