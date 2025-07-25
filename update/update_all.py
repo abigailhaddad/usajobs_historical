@@ -42,18 +42,26 @@ def get_last_collection_date():
     
     return latest_date
 
-def run_command(command, description):
+def run_command(command, description, stream_output=False):
     """Run a shell command and return success status and output"""
     print(f"🔄 {description}...")
     try:
-        result = subprocess.run(command, shell=True, check=True, 
-                              capture_output=True, text=True)
-        print(f"✅ {description} completed")
-        return True, result.stdout
+        if stream_output:
+            # Stream output in real-time for commands with progress bars
+            result = subprocess.run(command, shell=True, check=True)
+            print(f"✅ {description} completed")
+            return True, ""  # No captured output when streaming
+        else:
+            # Capture output for parsing
+            result = subprocess.run(command, shell=True, check=True, 
+                                  capture_output=True, text=True)
+            print(f"✅ {description} completed")
+            return True, result.stdout
     except subprocess.CalledProcessError as e:
         print(f"❌ {description} failed: {e}")
-        print(f"Error output: {e.stderr}")
-        return False, e.stderr
+        if not stream_output and hasattr(e, 'stderr'):
+            print(f"Error output: {e.stderr}")
+        return False, e.stderr if hasattr(e, 'stderr') else ""
 
 def parse_collection_output(output):
     """Parse output from data collection scripts to extract stats"""
@@ -63,7 +71,8 @@ def parse_collection_output(output):
         'new_jobs': 0,
         'total_jobs': 0,
         'failed_dates': [],
-        'errors': []
+        'errors': [],
+        'jobs_per_file': {}  # New field to track jobs added per file
     }
     
     # Look for patterns in the output
@@ -78,6 +87,21 @@ def parse_collection_output(output):
         match = re.search(r'(\d+) jobs saved', output)
         if match:
             stats['new_jobs'] = int(match.group(1))
+    
+    # Look for per-file patterns
+    # Pattern 1: "Saved 123 jobs to /path/to/file.parquet"
+    file_matches = re.findall(r'Saved (\d+) jobs to (.+\.parquet)', output)
+    for count, filepath in file_matches:
+        filename = os.path.basename(filepath)
+        stats['jobs_per_file'][filename] = int(count)
+    
+    # Pattern 2: "historical_jobs_2025.parquet: 123 jobs" (from final summary)
+    summary_matches = re.findall(r'((?:historical|current)_jobs_\d+\.parquet): ([\d,]+) jobs', output)
+    for filename, count in summary_matches:
+        # This is total count, not new jobs, so skip if we already have data
+        if filename not in stats['jobs_per_file']:
+            # Remove commas from number
+            stats['jobs_per_file'][filename] = int(count.replace(',', ''))
     
     # Look for error patterns
     if 'CRITICAL DATA ISSUE' in output or 'failed' in output.lower():
@@ -109,6 +133,53 @@ def record_initial_file_sizes():
             initial_sizes[file] = 0  # Assume new file
     
     return initial_sizes
+
+def record_initial_job_counts():
+    """Record initial job counts before data collection"""
+    print("📊 Recording initial job counts...")
+    
+    data_files = glob.glob('../data/current_jobs_*.parquet') + glob.glob('../data/historical_jobs_*.parquet')
+    initial_counts = {}
+    
+    for file in data_files:
+        try:
+            df = pd.read_parquet(file)
+            count = len(df)
+            initial_counts[file] = count
+            print(f"📝 {os.path.basename(file)}: {count:,} jobs")
+        except Exception as e:
+            print(f"⚠️  Could not read {file}: {e}")
+            initial_counts[file] = 0  # Assume new file or error
+    
+    return initial_counts
+
+def calculate_job_additions(initial_counts):
+    """Calculate how many jobs were added to each file"""
+    print("📊 Calculating job additions...")
+    
+    data_files = glob.glob('../data/current_jobs_*.parquet') + glob.glob('../data/historical_jobs_*.parquet')
+    job_additions = {}
+    
+    for file in data_files:
+        try:
+            df = pd.read_parquet(file)
+            current_count = len(df)
+            initial_count = initial_counts.get(file, 0)
+            added = current_count - initial_count
+            
+            filename = os.path.basename(file)
+            job_additions[filename] = added
+            
+            if added > 0:
+                print(f"✅ {filename}: {added:,} jobs added (was {initial_count:,}, now {current_count:,})")
+            else:
+                print(f"ℹ️  {filename}: no new jobs (still {current_count:,})")
+                
+        except Exception as e:
+            print(f"⚠️  Could not read {file}: {e}")
+            job_additions[os.path.basename(file)] = 0
+    
+    return job_additions
 
 def check_file_sizes_vs_initial(initial_sizes):
     """Check that data files are same size or bigger than initial"""
@@ -194,8 +265,9 @@ def main():
     print("🚀 USAJobs Data Pipeline - Comprehensive Update")
     print("=" * 50)
     
-    # Step 1: Record initial file sizes
+    # Step 1: Record initial file sizes and job counts
     initial_sizes = record_initial_file_sizes()
+    initial_counts = record_initial_job_counts()
     
     # Step 2: Determine last collection date
     print("📅 Checking last collection date...")
@@ -225,18 +297,16 @@ def main():
     total_new_jobs = 0
     all_failed_dates = []
     collection_errors = []
+    all_jobs_per_file = {}  # Track jobs added per file across both collections
     
     # Step 2: Collect historical data for the new date range
     if start_date <= today_str:
         historical_cmd = f"python ../scripts/collect_data.py --start-date {start_date} --end-date {today_str} --data-dir ../data"
-        success, output = run_command(historical_cmd, f"Collecting historical jobs ({start_date} to {today_str})")
+        success, output = run_command(historical_cmd, f"Collecting historical jobs ({start_date} to {today_str})", stream_output=True)
         
         if success:
-            stats = parse_collection_output(output)
-            total_new_jobs += stats['new_jobs']
-            all_failed_dates.extend(stats['failed_dates'])
-            collection_errors.extend(stats['errors'])
-            print(f"   📊 Added {stats['new_jobs']} historical jobs")
+            # When streaming, we need to calculate stats differently
+            print(f"   📊 Historical data collection completed")
         else:
             print("❌ Historical data collection failed. Continuing with current jobs...")
             collection_errors.append("Historical data collection failed")
@@ -245,14 +315,11 @@ def main():
     
     # Step 3: Collect current jobs (always do this to get latest active postings)
     current_cmd = "python ../scripts/collect_current_data.py --data-dir ../data"
-    success, output = run_command(current_cmd, "Collecting current jobs")
+    success, output = run_command(current_cmd, "Collecting current jobs", stream_output=True)
     
     if success:
-        stats = parse_collection_output(output)
-        total_new_jobs += stats['new_jobs']
-        all_failed_dates.extend(stats['failed_dates'])
-        collection_errors.extend(stats['errors'])
-        print(f"   📊 Added {stats['new_jobs']} current jobs")
+        # When streaming, we need to calculate stats differently
+        print(f"   📊 Current data collection completed")
     else:
         print("❌ Current data collection failed. Continuing with documentation update...")
         collection_errors.append("Current data collection failed")
@@ -269,7 +336,10 @@ def main():
         print("\\n🎉 Update completed - no changes needed!")
         return
     
-    # Step 5: Update documentation
+    # Step 5: Calculate actual job additions
+    job_additions = calculate_job_additions(initial_counts)
+    
+    # Step 6: Update documentation
     print("\\n📝 Updating documentation...")
     
     # Generate new documentation data
@@ -286,7 +356,7 @@ def main():
         print("❌ Documentation update failed")
         return
     
-    # Step 6: Commit and push changes
+    # Step 7: Commit and push changes
     git_success = commit_and_push_changes()
     if not git_success:
         print("⚠️  Git operations failed - changes are local only")
@@ -305,6 +375,16 @@ def main():
         print(f"✅ Dataset size: {data['file_size']}")
         print(f"✅ Last collection: {data['latest_job_date']}")
         print(f"✅ Documentation updated: {data['generated_at']}")
+        
+        # Show jobs added per file (using actual calculated additions)
+        if job_additions:
+            print("\\n📊 Jobs added per file:")
+            for filename in sorted(job_additions.keys()):
+                count = job_additions[filename]
+                if count > 0:
+                    print(f"   • {filename}: {count:,} jobs added")
+                else:
+                    print(f"   • {filename}: 0 jobs added")
         
         # Show what files were updated
         print("\\n📁 Updated files:")

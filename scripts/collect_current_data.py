@@ -3,12 +3,13 @@
 USAJobs Current API Data Collector
 
 Fetches current job postings from the USAJobs Search API
-and saves them to DuckDB with field mapping to match the
-historical data schema.
+using occupational series to work around the 10,000 result limit.
+Gets ALL jobs by fetching each occupational series separately.
 
 Usage:
-    python collect_current_data.py --duckdb jobs.duckdb
-    python collect_current_data.py --duckdb jobs.duckdb --days-posted 7
+    python collect_current_data.py --data-dir data/
+    python collect_current_data.py --data-dir data/ --days-posted 7
+    python collect_current_data.py --data-dir data/ --test  # Only fetch first 5 series
 """
 
 import argparse
@@ -32,10 +33,11 @@ BASE_URL = "https://data.usajobs.gov/api/Search"
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Fetch current USAJobs data")
+    parser = argparse.ArgumentParser(description="Fetch ALL current USAJobs data by occupational series")
     parser.add_argument("--days-posted", type=int, help="Jobs posted within N days (optional)", default=None)
     parser.add_argument("--all", action="store_true", help="Fetch all current jobs (no date filter)")
     parser.add_argument("--data-dir", help="Directory for parquet files (defaults to data/)", default="data")
+    parser.add_argument("--test", action="store_true", help="Test mode - only fetch first 5 series")
     return parser.parse_args()
 
 
@@ -168,8 +170,54 @@ def fetch_jobs_page(params: Dict, headers: Dict, page: int = 1) -> Optional[Dict
         return None
 
 
-def fetch_all_jobs(params: Dict, headers: Dict) -> tuple[List[Dict], List[Dict]]:
-    """Fetch all jobs with pagination. Returns (raw_jobs, flattened_jobs)"""
+def fetch_occupational_series() -> List[Dict[str, str]]:
+    """Fetch list of all occupational series from the API"""
+    # According to docs, code list endpoints don't require authentication
+    url = "https://data.usajobs.gov/api/codelist/occupationalseries"
+    
+    try:
+        print(f"🔍 Fetching occupational series from: {url}")
+        response = requests.get(url, timeout=30)
+        print(f"   Status code: {response.status_code}")
+        response.raise_for_status()
+        data = response.json()
+        
+        # Extract occupational series codes
+        series_list = []
+        
+        if 'CodeList' in data:
+            code_list = data['CodeList']
+            print(f"   Found {len(code_list)} items in CodeList")
+            
+            for item in code_list:
+                if isinstance(item, dict) and 'ValidValue' in item:
+                    valid_values = item['ValidValue']
+                    print(f"   Found {len(valid_values)} occupational series")
+                    
+                    for value in valid_values:
+                        if isinstance(value, dict):
+                            code = value.get('Code')
+                            name = value.get('Value', '')
+                            is_disabled = value.get('IsDisabled', 'No')
+                            
+                            # Only include active series
+                            if code and is_disabled == 'No':
+                                series_list.append({
+                                    'code': code,
+                                    'name': name
+                                })
+        
+        print(f"   Extracted {len(series_list)} active occupational series")
+        return series_list
+    except Exception as e:
+        print(f"❌ Error fetching occupational series: {e}")
+        if 'response' in locals():
+            print(f"   Response text: {response.text[:500]}")
+        return []
+
+
+def fetch_all_jobs(params: Dict, headers: Dict, max_results: int = 10000) -> tuple[List[Dict], List[Dict]]:
+    """Fetch all jobs with pagination up to max_results. Returns (raw_jobs, flattened_jobs)"""
     raw_jobs = []
     flattened_jobs = []
     page = 1
@@ -204,9 +252,13 @@ def fetch_all_jobs(params: Dict, headers: Dict) -> tuple[List[Dict], List[Dict]]
             total_count = search_result.get("SearchResultCountAll", 0)
             progress_bar.write(f"Total jobs available: {total_count}")
         
-        # Check if we've reached the end
+        # Check if we've reached the end or hit max_results
         if total_count and len(raw_jobs) >= total_count:
             progress_bar.write(f"Reached total count ({total_count})")
+            break
+        
+        if len(raw_jobs) >= max_results:
+            progress_bar.write(f"Reached max results limit ({max_results})")
             break
             
         page += 1
@@ -309,41 +361,89 @@ def main():
         print(f"❌ {e}")
         return
     
-    # Build search parameters
-    params = {
+    print(f"🚀 Fetching ALL current jobs from USAJobs API (by occupational series)")
+    print("=" * 50)
+    
+    # Create data directory if it doesn't exist
+    os.makedirs(args.data_dir, exist_ok=True)
+    
+    # First, fetch all occupational series
+    print("📋 Fetching list of occupational series...")
+    series_list = fetch_occupational_series()
+    
+    if not series_list:
+        print("❌ No occupational series fetched")
+        return
+    
+    print(f"✅ Found {len(series_list)} occupational series")
+    
+    # Sort series by code for consistent ordering
+    series_list.sort(key=lambda x: x['code'])
+    
+    if args.test:
+        series_list = series_list[:5]
+        print(f"🧪 Test mode: Only processing first {len(series_list)} series")
+    
+    # Base search parameters
+    base_params = {
         "ResultsPerPage": 500,  # Max allowed by API
         "Fields": "full",
         "SortField": "DatePosted",
         "SortDirection": "desc"
     }
-    # Note: Removed "WhoMayApply": "public" to get ALL jobs, not just public ones
     
-    # Add date filter if specified (unless --all is used)
+    # Add date filter if specified
     if args.days_posted and not args.all:
-        params["DatePosted"] = args.days_posted
+        base_params["DatePosted"] = args.days_posted
+        print(f"📅 Filtering to jobs posted in last {args.days_posted} days")
     
-    print(f"🚀 Fetching current USAJobs data...")
-    if args.all:
-        print(f"📅 Fetching ALL current jobs (no date filter)")
-    elif args.days_posted:
-        print(f"📅 Filtering to jobs posted within {args.days_posted} days")
-    else:
-        print(f"📅 Using default API behavior (no date filter)")
-    print(f"💾 Saving to year-based parquet files in: {args.data_dir}/")
+    all_raw_jobs = []
+    all_flattened_jobs = []
+    job_ids = set()  # Track unique jobs to avoid duplicates
+    series_with_jobs = 0
     
-    # Create data directory if it doesn't exist
-    os.makedirs(args.data_dir, exist_ok=True)
+    # Fetch jobs for each occupational series
+    for i, series in enumerate(tqdm(series_list, desc="Processing occupational series", unit="series"), 1):
+        tqdm.write(f"\n[{i}/{len(series_list)}] 📊 Fetching jobs for {series['code']} - {series['name'][:50]}...")
+        
+        params = base_params.copy()
+        params['JobCategoryCode'] = series['code']
+        
+        try:
+            series_raw_jobs, series_flattened_jobs = fetch_all_jobs(params, headers)
+            
+            # Add only unique jobs (some jobs may have multiple series)
+            new_jobs = 0
+            for j, job in enumerate(series_flattened_jobs):
+                # Use usajobsControlNumber as unique identifier
+                control_number = job.get('usajobsControlNumber')
+                if control_number and control_number not in job_ids:
+                    job_ids.add(control_number)
+                    all_flattened_jobs.append(job)
+                    all_raw_jobs.append(series_raw_jobs[j])
+                    new_jobs += 1
+            
+            if new_jobs > 0:
+                series_with_jobs += 1
+                tqdm.write(f"   ✅ Added {new_jobs} new unique jobs (total unique: {len(all_flattened_jobs)})")
+            else:
+                tqdm.write(f"   ⏭️  No new unique jobs")
+            
+            # Be nice to the API
+            if i < len(series_list):
+                time.sleep(0.5)
+                
+        except Exception as e:
+            tqdm.write(f"   ❌ Error fetching jobs: {e}")
+            continue
     
-    # Fetch all jobs
-    raw_jobs, flattened_jobs = fetch_all_jobs(params, headers)
-    
-    if not flattened_jobs:
-        print("❌ No jobs fetched")
+    if not all_flattened_jobs:
+        print("\n❌ No jobs fetched")
         return
     
     # Group jobs by year based on positionOpenDate
-    print("📊 Grouping jobs by year based on position open date...")
-    jobs_by_year = group_jobs_by_year(flattened_jobs, raw_jobs)
+    print("\n📊 Grouping jobs by year based on position open date...")
+    jobs_by_year = group_jobs_by_year(all_flattened_jobs, all_raw_jobs)
     
     if not jobs_by_year:
         print("❌ No jobs with valid position open dates found")
@@ -395,8 +495,12 @@ def main():
             except Exception as e:
                 print(f"   ⚠️ Could not read stats from {parquet_path}: {e}")
     
+    print(f"\n📊 Summary:")
+    print(f"   Total series processed: {len(series_list)}")
+    print(f"   Series with jobs: {series_with_jobs}")
+    print(f"   Total unique jobs fetched: {len(all_flattened_jobs)}")
+    print(f"   New jobs added: {total_new_jobs}")
     print(f"\n🎉 All years completed!")
-    print(f"📊 Added {total_new_jobs:,} new jobs total across {len(jobs_by_year)} year(s)")
 
 
 if __name__ == "__main__":
