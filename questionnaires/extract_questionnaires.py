@@ -468,12 +468,16 @@ def main():
     # Scrape questionnaires concurrently
     print(f"\nScraping questionnaires using {max_workers} workers...")
     success_count = 0
+    failed_count = 0
+    start_time = time.time()
     
     # Prepare arguments for workers
     worker_args = [(q[0], output_dir, q[1], len(df)) for q in to_scrape]
     
     # Use ThreadPoolExecutor for concurrent scraping
     completed_questionnaires = []
+    completed_count = 0
+    
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # Submit all tasks
         future_to_questionnaire = {
@@ -488,15 +492,40 @@ def main():
                 completed_questionnaires.append(questionnaire)
                 if success:
                     success_count += 1
+                else:
+                    failed_count += 1
+                completed_count += 1
+                
+                # Progress and time estimate
+                elapsed = time.time() - start_time
+                rate = completed_count / elapsed
+                remaining = len(to_scrape) - completed_count
+                eta_seconds = remaining / rate if rate > 0 else 0
+                eta_minutes = eta_seconds / 60
+                
+                print(f"\nProgress: {completed_count}/{len(to_scrape)} "
+                      f"({completed_count/len(to_scrape)*100:.1f}%) | "
+                      f"Success: {success_count} | Failed: {failed_count} | "
+                      f"Rate: {rate:.1f}/sec | ETA: {eta_minutes:.1f} min")
+                
             except Exception as e:
                 print(f"Error in worker: {e}")
                 questionnaire = future_to_questionnaire[future]
                 questionnaire['questionnaire_text'] = None
                 questionnaire['scrape_status'] = 'failed'
                 completed_questionnaires.append(questionnaire)
+                failed_count += 1
+                completed_count += 1
     
-    print(f"\nCompleted: {success_count}/{len(to_scrape)} questionnaires scraped successfully")
+    total_time = time.time() - start_time
+    print(f"\n{'='*60}")
+    print(f"SCRAPING COMPLETE")
+    print(f"{'='*60}")
+    print(f"Completed: {success_count}/{len(to_scrape)} questionnaires scraped successfully")
+    print(f"Failed: {failed_count}")
     print(f"Total scraped files: {already_scraped + success_count}")
+    print(f"Total time: {total_time/60:.1f} minutes")
+    print(f"Average rate: {completed_count/total_time:.2f} questionnaires/second")
     
     print(f"\nRaw text files saved in: {output_dir}")
     
