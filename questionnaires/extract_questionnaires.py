@@ -8,6 +8,7 @@ import re
 import time
 import os
 import sys
+import subprocess
 from pathlib import Path
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -174,6 +175,14 @@ def find_questionnaire_links(data_dir='../data', limit=None):
     current_job_files = sorted(Path(data_dir).glob('current_jobs_*.parquet'))
     print(f"Found {len(current_job_files)} current job parquet files")
     
+    if not current_job_files:
+        print(f"No current_jobs_*.parquet files found in {data_dir}")
+        print(f"Looking for any parquet files...")
+        all_parquet_files = sorted(Path(data_dir).glob('*.parquet'))
+        if all_parquet_files:
+            print(f"Found these parquet files: {[f.name for f in all_parquet_files[:5]]}")
+        return []
+    
     all_questionnaire_data = []
     seen_urls = set()
     
@@ -246,53 +255,222 @@ def scrape_questionnaire_worker(args):
         return questionnaire, False
 
 
+def extract_all_links_to_csv(data_dir='../data'):
+    """Extract all questionnaire links to CSV - fast operation"""
+    csv_file = Path('./questionnaire_links.csv')
+    
+    # Check if we already have a CSV file
+    existing_urls = set()
+    if csv_file.exists():
+        print(f"Found existing {csv_file.name}")
+        existing_df = pd.read_csv(csv_file)
+        existing_urls = set(existing_df['questionnaire_url'].values)
+        print(f"  Contains {len(existing_urls)} unique URLs")
+    
+    # Find all current job parquet files
+    current_job_files = sorted(Path(data_dir).glob('current_jobs_*.parquet'))
+    print(f"\nFound {len(current_job_files)} current job parquet files to check")
+    
+    # Process all files and collect links
+    all_new_links = []
+    batch_size = 100  # Write to CSV every 100 new links
+    
+    for parquet_file in current_job_files:
+        file_size_mb = parquet_file.stat().st_size / (1024 * 1024)
+        print(f"\nProcessing {parquet_file.name} ({file_size_mb:.1f} MB)...")
+        
+        # Read parquet file
+        df = pd.read_parquet(parquet_file)
+        total_jobs = len(df)
+        print(f"  {total_jobs} jobs in file")
+        
+        jobs_with_links = 0
+        new_links_in_file = 0
+        
+        # Process each job
+        for idx, row in df.iterrows():
+            if idx % 1000 == 0:
+                print(f"  Processing job {idx}/{total_jobs} ({jobs_with_links} with links, {new_links_in_file} new)...", end='\r')
+            
+            # Extract links from this job
+            links = extract_questionnaire_links_from_job(row)
+            
+            if links:
+                jobs_with_links += 1
+                
+                for link in links:
+                    # Only add if we haven't seen this URL before
+                    if link not in existing_urls:
+                        existing_urls.add(link)
+                        new_links_in_file += 1
+                        
+                        # Create record
+                        link_record = {
+                            'questionnaire_url': link,
+                            'usajobs_control_number': row.get('usajobsControlNumber'),
+                            'position_title': row.get('positionTitle'),
+                            'announcement_number': row.get('announcementNumber'),
+                            'hiring_agency': row.get('hiringAgencyName'),
+                            'extracted_from_file': parquet_file.name,
+                            'extracted_date': datetime.now().isoformat()
+                        }
+                        all_new_links.append(link_record)
+                        
+                        # Write batch if we've collected enough
+                        if len(all_new_links) >= batch_size:
+                            batch_df = pd.DataFrame(all_new_links)
+                            if csv_file.exists():
+                                batch_df.to_csv(csv_file, mode='a', header=False, index=False)
+                            else:
+                                batch_df.to_csv(csv_file, index=False)
+                            print(f"\n  Wrote batch of {len(all_new_links)} links to CSV")
+                            all_new_links = []  # Clear the batch
+        
+        print(f"\n  Found {jobs_with_links} jobs with questionnaire links")
+        print(f"  {new_links_in_file} new unique URLs from this file")
+    
+    # Write any remaining links
+    if all_new_links:
+        print(f"\nWriting final batch of {len(all_new_links)} links")
+        final_df = pd.DataFrame(all_new_links)
+        if csv_file.exists():
+            final_df.to_csv(csv_file, mode='a', header=False, index=False)
+        else:
+            final_df.to_csv(csv_file, index=False)
+    
+    return csv_file
+
+
 def main():
     """Main function"""
     data_dir = '../data'  # Adjust path as needed
     output_dir = './raw_questionnaires'
     
+    # Start caffeinate to prevent sleep
+    caffeinate_process = None
+    if sys.platform == 'darwin':  # macOS
+        try:
+            caffeinate_process = subprocess.Popen(['caffeinate'])
+            print("Started caffeinate to prevent system sleep")
+        except:
+            print("Could not start caffeinate - system may sleep during long operations")
+    
     # Check for command-line arguments
     limit = None
     max_workers = 5  # Default number of concurrent scrapers
+    skip_extract = False
     
     if len(sys.argv) > 1:
-        try:
-            limit = int(sys.argv[1])
-            print(f"Limiting to {limit} questionnaires")
-        except ValueError:
-            print(f"Invalid limit argument: {sys.argv[1]}")
-            sys.exit(1)
+        if sys.argv[1] == '--skip-extract':
+            skip_extract = True
+            print("Skipping link extraction, using existing CSV")
+        else:
+            try:
+                limit = int(sys.argv[1])
+                print(f"Limiting to {limit} questionnaires")
+            except ValueError:
+                print(f"Invalid limit argument: {sys.argv[1]}")
+                sys.exit(1)
     
-    if len(sys.argv) > 2:
+    if len(sys.argv) > 2 and not skip_extract:
         try:
             max_workers = int(sys.argv[2])
             print(f"Using {max_workers} concurrent workers")
         except ValueError:
             print(f"Invalid workers argument: {sys.argv[2]}")
             sys.exit(1)
+    elif skip_extract and len(sys.argv) > 2:
+        try:
+            limit = int(sys.argv[2])
+            print(f"Limiting to {limit} questionnaires")
+        except ValueError:
+            pass
+        
+        if len(sys.argv) > 3:
+            try:
+                max_workers = int(sys.argv[3])
+                print(f"Using {max_workers} concurrent workers")
+            except ValueError:
+                pass
     
-    # Just find the links for now
-    print("Finding questionnaire links...")
-    questionnaire_data = find_questionnaire_links(data_dir, limit)
+    # Step 1: Extract all links to CSV (unless skipped)
+    if not skip_extract:
+        print("="*60)
+        print("STEP 1: Extracting questionnaire links from parquet files")
+        print("="*60)
+        csv_file = extract_all_links_to_csv(data_dir)
+    else:
+        csv_file = Path('./questionnaire_links.csv')
+        if not csv_file.exists():
+            print(f"Error: {csv_file} not found! Run without --skip-extract first")
+            sys.exit(1)
+    
+    # Step 2: Read CSV and scrape questionnaires
+    print("\n" + "="*60)
+    print("STEP 2: Scraping questionnaires from CSV")
+    print("="*60)
+    
+    # Read the CSV
+    df = pd.read_csv(csv_file)
+    total_links = len(df)
+    print(f"\nTotal questionnaire links in CSV: {total_links}")
+    
+    # Apply limit if specified
+    if limit:
+        df = df.iloc[:limit]
+        print(f"Limited to {len(df)} questionnaires")
     
     # Show first few examples
-    if questionnaire_data:
-        print("\nFirst few questionnaire links found:")
-        for i, q in enumerate(questionnaire_data[:5]):
-            print(f"\n{i+1}. {q['position_title']}")
-            print(f"   Agency: {q['hiring_agency']}")
-            print(f"   URL: {q['questionnaire_url']}")
+    if len(df) > 0:
+        print("\nFirst few questionnaire links:")
+        for i, (_, row) in enumerate(df.head().iterrows()):
+            print(f"\n{i+1}. {row['position_title']}")
+            print(f"   Agency: {row['hiring_agency']}")
+            print(f"   URL: {row['questionnaire_url']}")
     
     # Create output directory
     Path(output_dir).mkdir(parents=True, exist_ok=True)
+    
+    # Check how many already scraped
+    already_scraped = 0
+    to_scrape = []
+    
+    for idx, (_, row) in enumerate(df.iterrows()):
+        url = row['questionnaire_url']
+        # Check if file exists
+        if 'usastaffing.gov' in url:
+            match = re.search(r'ViewQuestionnaire/(\d+)', url)
+            file_id = match.group(1) if match else 'unknown'
+            prefix = 'usastaffing'
+        elif 'monstergovt.com' in url:
+            match = re.search(r'jnum=(\d+)', url)
+            if not match:
+                match = re.search(r'J=(\d+)', url)
+            file_id = match.group(1) if match else 'unknown'
+            prefix = 'monster'
+        else:
+            file_id = str(hash(url))[:8]
+            prefix = 'other'
+        
+        txt_path = os.path.join(output_dir, f'{prefix}_{file_id}.txt')
+        if os.path.exists(txt_path):
+            already_scraped += 1
+        else:
+            to_scrape.append((row.to_dict(), idx + 1))
+    
+    print(f"\n{already_scraped} questionnaires already scraped")
+    print(f"{len(to_scrape)} questionnaires to scrape")
+    
+    if not to_scrape:
+        print("\nNothing to scrape!")
+        return
     
     # Scrape questionnaires concurrently
     print(f"\nScraping questionnaires using {max_workers} workers...")
     success_count = 0
     
     # Prepare arguments for workers
-    worker_args = [(q, output_dir, i+1, len(questionnaire_data)) 
-                   for i, q in enumerate(questionnaire_data)]
+    worker_args = [(q[0], output_dir, q[1], len(df)) for q in to_scrape]
     
     # Use ThreadPoolExecutor for concurrent scraping
     completed_questionnaires = []
@@ -317,24 +495,15 @@ def main():
                 questionnaire['scrape_status'] = 'failed'
                 completed_questionnaires.append(questionnaire)
     
-    print(f"\nCompleted: {success_count}/{len(questionnaire_data)} questionnaires scraped successfully")
-    
-    # Create DataFrame with results
-    result_df = pd.DataFrame(completed_questionnaires)
-    
-    # Save as parquet
-    output_parquet = './questionnaires_data.parquet'
-    result_df.to_parquet(output_parquet, index=False)
-    print(f"\nSaved questionnaire data to: {output_parquet}")
-    
-    # Also save a summary CSV for easy viewing
-    summary_columns = ['questionnaire_url', 'position_title', 'hiring_agency', 'scrape_status']
-    summary_df = result_df[summary_columns]
-    summary_csv = './questionnaires_summary.csv'
-    summary_df.to_csv(summary_csv, index=False)
-    print(f"Saved summary to: {summary_csv}")
+    print(f"\nCompleted: {success_count}/{len(to_scrape)} questionnaires scraped successfully")
+    print(f"Total scraped files: {already_scraped + success_count}")
     
     print(f"\nRaw text files saved in: {output_dir}")
+    
+    # Clean up caffeinate
+    if caffeinate_process:
+        caffeinate_process.terminate()
+        print("\nStopped caffeinate")
 
 
 if __name__ == "__main__":
