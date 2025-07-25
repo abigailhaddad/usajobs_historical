@@ -80,6 +80,15 @@ def extract_questionnaire_links_from_job(job_row):
 def scrape_questionnaire(url, output_dir):
     """Scrape a single questionnaire and return the text content"""
     
+    # Check failed URLs file
+    failed_urls_file = Path('./failed_urls.txt')
+    if failed_urls_file.exists():
+        with open(failed_urls_file, 'r') as f:
+            failed_urls = set(line.strip() for line in f)
+        if url in failed_urls:
+            print(f"  Skipping previously failed URL: {url}")
+            return None
+    
     # Extract ID from URL for filename
     if 'usastaffing.gov' in url:
         match = re.search(r'ViewQuestionnaire/(\d+)', url)
@@ -110,6 +119,12 @@ def scrape_questionnaire(url, output_dir):
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--window-size=1920,1080')
+    chrome_options.add_argument('--disable-images')
+    chrome_options.add_argument('--disable-javascript-harmony')
+    chrome_options.add_argument('--disable-web-security')
+    chrome_options.add_argument('--disable-features=VizDisplayCompositor')
+    chrome_options.add_argument('--disable-extensions')
+    chrome_options.page_load_strategy = 'eager'
     
     try:
         driver = webdriver.Chrome(options=chrome_options)
@@ -117,8 +132,8 @@ def scrape_questionnaire(url, output_dir):
         
         driver.get(url)
         
-        # Wait for content to load
-        wait = WebDriverWait(driver, 30)
+        # Wait for content to load  
+        wait = WebDriverWait(driver, 10)
         
         # Try common selectors for questionnaires
         selectors = [
@@ -148,8 +163,8 @@ def scrape_questionnaire(url, output_dir):
             except:
                 continue
         
-        # Extra wait for dynamic content
-        time.sleep(2)
+        # Reduced wait for dynamic content
+        time.sleep(1)
         
         # Get text content
         page_text = driver.find_element(By.TAG_NAME, "body").text
