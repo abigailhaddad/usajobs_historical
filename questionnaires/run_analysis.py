@@ -18,15 +18,11 @@ if existing_csv.exists():
 
 # Run extraction and scraping
 print("\nExtracting and scraping questionnaires...")
+# Don't capture output so we see progress in real-time
 result = subprocess.run([
     sys.executable,
     'extract_questionnaires.py'
-], capture_output=True, text=True)
-
-# Print the output from extraction
-print(result.stdout)
-if result.stderr:
-    print(result.stderr)
+])
 
 # Check how many new questionnaires were found
 if existing_csv.exists():
@@ -53,8 +49,13 @@ os.chdir('..')
 
 print("\nDone! Open analysis/executive_order_analysis.html to view results.")
 
+# Check for untracked questionnaire files
+untracked_files = subprocess.run(['git', 'ls-files', '-o', 'raw_questionnaires/'], 
+                                capture_output=True, text=True).stdout.strip()
+has_untracked_questionnaires = bool(untracked_files)
+
 # Git operations
-if new_count > 0:
+if new_count > 0 or has_untracked_questionnaires:
     print("\n=== GIT OPERATIONS ===")
     print("Adding questionnaires folder to git...")
     
@@ -62,11 +63,36 @@ if new_count > 0:
     subprocess.run(['git', 'add', '.'])
     
     # Create commit message
-    commit_message = f"""Update questionnaires: {new_count:,} new links found
+    if new_count > 0 and has_untracked_questionnaires:
+        commit_message = f"""Update questionnaires: {new_count:,} new links found
 
 - Extracted {new_count:,} new questionnaire links
 - Total questionnaire links: {updated_count:,}
 - Total scraped files: {len(scraped_files):,}
+- New questionnaire files scraped
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"""
+    elif new_count > 0:
+        commit_message = f"""Update questionnaires: {new_count:,} new links found
+
+- Extracted {new_count:,} new questionnaire links
+- Total questionnaire links: {updated_count:,}
+- Total scraped files: {len(scraped_files):,}
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"""
+    else:
+        # Count new files
+        new_files_count = len(untracked_files.splitlines()) if untracked_files else 0
+        commit_message = f"""Update questionnaires: new scraped files added
+
+- No new questionnaire links found
+- Total questionnaire links: {updated_count:,}
+- Total scraped files: {len(scraped_files):,}
+- Added {new_files_count} new questionnaire files
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 

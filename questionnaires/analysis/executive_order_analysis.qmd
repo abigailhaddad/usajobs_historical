@@ -16,6 +16,7 @@ from pathlib import Path
 import re
 from collections import Counter
 from IPython.display import HTML, display
+from datetime import datetime
 
 # Define paths
 BASE_DIR = Path('../..')
@@ -26,6 +27,26 @@ RAW_QUESTIONNAIRES_DIR = QUESTIONNAIRE_DIR / 'raw_questionnaires'
 # Set pandas display options for better text wrapping
 pd.set_option('display.max_colwidth', None)
 pd.set_option('display.max_rows', None)
+```
+
+## Data Coverage
+
+```{python}
+# Load questionnaire links to get date range
+links_df_preview = pd.read_csv(QUESTIONNAIRE_DIR / 'questionnaire_links.csv')
+
+# Convert dates and get range
+if 'position_open_date' in links_df_preview.columns:
+    links_df_preview['position_open_date'] = pd.to_datetime(links_df_preview['position_open_date'])
+    
+    # Get date range of analyzed jobs
+    earliest_date = links_df_preview['position_open_date'].min()
+    latest_date = links_df_preview['position_open_date'].max()
+    
+    print(f"📅 Analyzing questionnaires from federal job postings")
+    print(f"   Date range: {earliest_date.strftime('%B %d, %Y')} to {latest_date.strftime('%B %d, %Y')}")
+else:
+    print("📅 Questionnaire analysis (date information not available)")
 ```
 
 ## Utility Functions
