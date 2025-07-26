@@ -44,10 +44,10 @@ if existing_csv.exists():
 # Render Quarto analysis
 print("\nRendering analysis...")
 os.chdir('analysis')
-subprocess.run(['quarto', 'render', 'executive_order_analysis.qmd'])
+subprocess.run(['quarto', 'render', 'executive_order_analysis.qmd', '-o', 'index.html'])
 os.chdir('..')
 
-print("\nDone! Open analysis/executive_order_analysis.html to view results.")
+print("\nDone! Open analysis/index.html to view results.")
 
 # Check for untracked questionnaire files
 untracked_files = subprocess.run(['git', 'ls-files', '-o', 'raw_questionnaires/'], 
