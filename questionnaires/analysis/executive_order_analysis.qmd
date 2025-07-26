@@ -38,7 +38,7 @@ links_df_preview = pd.read_csv(QUESTIONNAIRE_DIR / 'questionnaire_links.csv')
 
 # Convert dates and get range
 if 'position_open_date' in links_df_preview.columns:
-    links_df_preview['position_open_date'] = pd.to_datetime(links_df_preview['position_open_date'])
+    links_df_preview['position_open_date'] = pd.to_datetime(links_df_preview['position_open_date'], format='mixed')
     
     # Get date range of analyzed jobs
     earliest_date = links_df_preview['position_open_date'].min()
@@ -292,7 +292,7 @@ occupation_with_eo.set_index('Occupation')[['Total_Scraped', 'Count_With_EO', 'P
 
 ```{python}
 # Extract month from position_open_date (when the job was actually posted)
-scraped_df['posted_month'] = pd.to_datetime(scraped_df['position_open_date']).dt.to_period('M')
+scraped_df['posted_month'] = pd.to_datetime(scraped_df['position_open_date'], format='mixed').dt.to_period('M')
 
 # Remove any rows with missing dates
 scraped_with_dates = scraped_df.dropna(subset=['posted_month'])
