@@ -255,9 +255,10 @@ agency_summary['Percent'] = (agency_summary['Count_With_EO'] / agency_summary['T
 # Sort by count with EO mentions
 agency_summary = agency_summary.sort_values('Count_With_EO', ascending=False)
 
-# Display agency table
-print("Agencies with the 'advancing President's Executive Orders' question:")
-agency_summary[['Agency', 'Total_Scraped', 'Count_With_EO', 'Percent']].head(20)
+# Display agency table - only show agencies that have the question
+agency_with_eo = agency_summary[agency_summary['Count_With_EO'] > 0]
+print(f"Agencies using the 'advancing President's Executive Orders' question ({len(agency_with_eo)} agencies):")
+agency_with_eo.set_index('Agency')[['Total_Scraped', 'Count_With_EO', 'Percent']]
 ```
 
 ### By Occupation Series
@@ -281,9 +282,10 @@ occupation_summary['Percent'] = (occupation_summary['Count_With_EO'] / occupatio
 # Sort by count with EO mentions
 occupation_summary = occupation_summary.sort_values('Count_With_EO', ascending=False)
 
-# Display occupation series table
-print("Occupation series with the 'advancing President's Executive Orders' question:")
-occupation_summary[['Occupation', 'Total_Scraped', 'Count_With_EO', 'Percent']].head(20)
+# Display occupation series table - only show occupations that have the question
+occupation_with_eo = occupation_summary[occupation_summary['Count_With_EO'] > 0]
+print(f"Occupation series using the 'advancing President's Executive Orders' question ({len(occupation_with_eo)} occupations):")
+occupation_with_eo.set_index('Occupation')[['Total_Scraped', 'Count_With_EO', 'Percent']]
 ```
 
 ### By Month Posted
@@ -310,10 +312,11 @@ month_summary = month_summary.sort_values('Month_Posted')
 # Convert Period to string for display
 month_summary['Month_Posted'] = month_summary['Month_Posted'].astype(str)
 
-# Display month table
-print("\nJobs by month posted with the 'advancing President's Executive Orders' question:")
+# Display month table - only show months that have the question
+month_with_eo = month_summary[month_summary['Count_With_EO'] > 0]
+print(f"\nMonths with jobs using the 'advancing President's Executive Orders' question ({len(month_with_eo)} months):")
 print(f"(Based on {len(scraped_with_dates):,} scraped questionnaires with valid posting dates)")
-month_summary[['Month_Posted', 'Total_Scraped', 'Count_With_EO', 'Percent']]
+month_with_eo.set_index('Month_Posted')[['Total_Scraped', 'Count_With_EO', 'Percent']]
 ```
 
 ### Job Postings with the Executive Order Question
@@ -329,7 +332,7 @@ print(f"All {len(detail_table)} job postings with the 'advancing President's Exe
 
 # Display styled table
 styled_table = style_table(detail_table)
-HTML(styled_table.to_html(escape=False))
+HTML(styled_table.to_html(escape=False, index=False))
 ```
 
 ## Summary
@@ -365,7 +368,7 @@ if missing_questionnaires:
     
     # Display styled table
     styled_failed = style_table(failed_table)
-    display(HTML(styled_failed.to_html(escape=False)))
+    display(HTML(styled_failed.to_html(escape=False, index=False)))
 else:
     print("All questionnaires were successfully scraped!")
 ```
