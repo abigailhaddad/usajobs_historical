@@ -21,6 +21,9 @@ import glob
 import subprocess
 from datetime import datetime, timedelta
 
+# Global variable to store initial counts for diagnostics
+initial_counts = {}
+
 def get_last_collection_date():
     """Get the last date when data was collected"""
     latest_date = None
@@ -136,6 +139,7 @@ def record_initial_file_sizes():
 
 def record_initial_job_counts():
     """Record initial job counts before data collection"""
+    global initial_counts
     print("📊 Recording initial job counts...")
     
     data_files = glob.glob('../data/current_jobs_*.parquet') + glob.glob('../data/historical_jobs_*.parquet')
@@ -152,6 +156,85 @@ def record_initial_job_counts():
             initial_counts[file] = 0  # Assume new file or error
     
     return initial_counts
+
+def save_initial_snapshot(file_path):
+    """Save a snapshot of job IDs before collection for comparison"""
+    try:
+        df = pd.read_parquet(file_path)
+        if 'usajobs_control_number' in df.columns:
+            return set(df['usajobs_control_number'].dropna().astype(str))
+        elif 'usajobsControlNumber' in df.columns:
+            return set(df['usajobsControlNumber'].dropna().astype(str))
+        else:
+            return set()
+    except:
+        return set()
+
+def diagnose_shrinkage(file_path, initial_count):
+    """Diagnose why a file shrunk by comparing job IDs"""
+    print(f"\n📋 Diagnosing {os.path.basename(file_path)}:")
+    
+    try:
+        # Load current data
+        current_df = pd.read_parquet(file_path)
+        current_count = len(current_df)
+        
+        print(f"   Initial jobs: {initial_count:,}")
+        print(f"   Current jobs: {current_count:,}")
+        print(f"   Jobs lost: {initial_count - current_count:,}")
+        
+        # Try to load the previous version from git to compare
+        temp_file = file_path + '.temp'
+        result = subprocess.run(f'git show HEAD:{file_path[3:]} > {temp_file}', 
+                              shell=True, capture_output=True)
+        
+        if result.returncode == 0:
+            old_df = pd.read_parquet(temp_file)
+            os.remove(temp_file)
+            
+            # Get control numbers
+            if 'usajobs_control_number' in old_df.columns:
+                old_ids = set(old_df['usajobs_control_number'].dropna().astype(str))
+                current_ids = set(current_df['usajobs_control_number'].dropna().astype(str))
+            elif 'usajobsControlNumber' in old_df.columns:
+                old_ids = set(old_df['usajobsControlNumber'].dropna().astype(str))
+                current_ids = set(current_df['usajobsControlNumber'].dropna().astype(str))
+            else:
+                print("   ⚠️  No control number column found for comparison")
+                return
+            
+            # Find missing jobs
+            missing_ids = old_ids - current_ids
+            new_ids = current_ids - old_ids
+            
+            print(f"   Jobs removed: {len(missing_ids):,}")
+            print(f"   Jobs added: {len(new_ids):,}")
+            
+            if missing_ids and len(missing_ids) <= 10:
+                print("\n   Examples of removed jobs:")
+                sample_missing = list(missing_ids)[:10]
+                
+                # Get details of missing jobs
+                if 'usajobs_control_number' in old_df.columns:
+                    missing_jobs = old_df[old_df['usajobs_control_number'].isin(sample_missing)]
+                else:
+                    missing_jobs = old_df[old_df['usajobsControlNumber'].isin(sample_missing)]
+                
+                for _, job in missing_jobs.iterrows():
+                    control_num = job.get('usajobs_control_number', job.get('usajobsControlNumber'))
+                    title = job.get('positionTitle', 'Unknown')
+                    agency = job.get('hiringAgencyName', 'Unknown')
+                    open_date = job.get('positionOpenDate', 'Unknown')
+                    print(f"   - {control_num}: {title} ({agency}) - opened {open_date}")
+            elif missing_ids:
+                print(f"\n   Too many removed jobs to list ({len(missing_ids):,} total)")
+                print("   First 5 control numbers:", list(missing_ids)[:5])
+                
+        else:
+            print("   ⚠️  Could not load previous version from git for detailed comparison")
+            
+    except Exception as e:
+        print(f"   ❌ Error during diagnosis: {e}")
 
 def calculate_job_additions(initial_counts):
     """Calculate how many jobs were added to each file"""
@@ -188,6 +271,7 @@ def check_file_sizes_vs_initial(initial_sizes):
     data_files = glob.glob('../data/current_jobs_*.parquet') + glob.glob('../data/historical_jobs_*.parquet')
     size_checks = []
     files_changed = False
+    shrunken_files = []
     
     for file in data_files:
         try:
@@ -197,6 +281,7 @@ def check_file_sizes_vs_initial(initial_sizes):
             if current_size < initial_size:
                 print(f"❌ {file} SHRUNK: {initial_size:,} → {current_size:,} bytes")
                 size_checks.append(False)
+                shrunken_files.append(file)
             elif current_size == initial_size:
                 print(f"✅ {file}: {current_size:,} bytes (unchanged)")
                 size_checks.append(True)
@@ -208,6 +293,12 @@ def check_file_sizes_vs_initial(initial_sizes):
         except Exception as e:
             print(f"❌ Could not check size of {file}: {e}")
             size_checks.append(False)
+    
+    # If files shrunk, provide detailed diagnostics
+    if shrunken_files:
+        print("\n🔍 DIAGNOSTIC INFORMATION FOR SHRUNKEN FILES:")
+        for file in shrunken_files:
+            diagnose_shrinkage(file, initial_counts.get(file, 0))
     
     if not all(size_checks):
         print("⚠️  Some data files shrunk! Skipping git operations for safety.")
