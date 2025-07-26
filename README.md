@@ -125,6 +125,10 @@ Both APIs are rationalized to a common schema and stored in year-based Parquet f
 │   ├── update_all.py            # Comprehensive update: data + docs
 │   ├── generate_docs_data.py    # Generate documentation data
 │   └── update_docs.py           # Update README and index.html
+├── questionnaires/          # Job questionnaire analysis
+│   ├── extract_questionnaires.py # Scrape questionnaires from job postings
+│   ├── questionnaire_links.csv   # Links extracted from job data
+│   └── raw_questionnaires/       # Scraped questionnaire text files
 ├── data/                    # Data storage
 │   ├── historical_jobs_YEAR.parquet  # Historical jobs by year
 │   └── current_jobs_YEAR.parquet     # Current jobs by year
@@ -191,3 +195,19 @@ The pipeline uses a "keep everything + overlay" approach:
 ## Analysis
 
 See [`examples.py`](https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py) for usage examples.
+
+## Questionnaire Scraping (Example)
+
+The `questionnaires/` directory contains an example of extracting and analyzing job questionnaires:
+
+```bash
+cd questionnaires
+python extract_questionnaires.py    # Extract and scrape questionnaires from recent job postings
+```
+
+This example script:
+- Extracts questionnaire URLs from job postings (currently filtered to jobs after 2025-06-01)
+- Scrapes the questionnaire content using Playwright
+- Saves the raw text for analysis
+
+**Note**: This is provided as an example of extended functionality. Modify the date filters and analysis approach as needed for your use case.

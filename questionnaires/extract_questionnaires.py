@@ -28,11 +28,18 @@ def extract_questionnaire_links_from_job(job_row):
     # Convert the job row to string to search everywhere
     job_str = str(job_row.to_dict())
     
-    # Also search in MatchedObjectDescriptor if it exists
+    # Extract occupation series from MatchedObjectDescriptor
+    occupation_series = None
+    occupation_name = None
     if pd.notna(job_row.get('MatchedObjectDescriptor')):
         try:
             mod = json.loads(job_row['MatchedObjectDescriptor'])
             job_str += json.dumps(mod)
+            
+            # Get occupation series code and name
+            if 'JobCategory' in mod and isinstance(mod['JobCategory'], list) and len(mod['JobCategory']) > 0:
+                occupation_series = mod['JobCategory'][0].get('Code')
+                occupation_name = mod['JobCategory'][0].get('Name')
             
             # Specifically check known fields
             if 'UserArea' in mod and 'Details' in mod['UserArea']:
@@ -70,7 +77,7 @@ def extract_questionnaire_links_from_job(job_row):
             if match not in links:
                 links.append(match)
     
-    return links
+    return links, occupation_series, occupation_name
 
 
 def scrape_questionnaire(url, output_dir):
@@ -212,7 +219,7 @@ def find_questionnaire_links(data_dir='../data', limit=None):
         
         for idx, row in df.iterrows():
             # Extract questionnaire links
-            links = extract_questionnaire_links_from_job(row)
+            links, occupation_series, occupation_name = extract_questionnaire_links_from_job(row)
             
             if links:
                 jobs_with_questionnaires += 1
@@ -319,8 +326,8 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
             if idx % 1000 == 0:
                 print(f"  Processing job {idx}/{len(df)} ({jobs_with_links} with links, {new_links_in_file} new)...", end='\r')
             
-            # Extract links from this job
-            links = extract_questionnaire_links_from_job(row)
+            # Extract links and occupation series from this job
+            links, occupation_series, occupation_name = extract_questionnaire_links_from_job(row)
             
             if links:
                 jobs_with_links += 1
@@ -338,6 +345,8 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
                             'position_title': row.get('positionTitle'),
                             'announcement_number': row.get('announcementNumber'),
                             'hiring_agency': row.get('hiringAgencyName'),
+                            'occupation_series': occupation_series,
+                            'occupation_name': occupation_name,
                             'position_open_date': row.get('positionOpenDate'),
                             'position_close_date': row.get('positionCloseDate'),
                             'position_location': row.get('positionLocation'),
@@ -392,38 +401,31 @@ def main():
     max_workers = 5  # Default number of concurrent scrapers
     skip_extract = False
     
-    if len(sys.argv) > 1:
-        if sys.argv[1] == '--skip-extract':
+    # Simple argument parsing for --workers
+    args = sys.argv[1:]
+    i = 0
+    while i < len(args):
+        if args[i] == '--skip-extract':
             skip_extract = True
             print("Skipping link extraction, using existing CSV")
-        else:
+        elif args[i] == '--workers' and i + 1 < len(args):
             try:
-                limit = int(sys.argv[1])
+                max_workers = int(args[i + 1])
+                print(f"Using {max_workers} concurrent workers")
+                i += 1  # Skip next argument since we consumed it
+            except ValueError:
+                print(f"Invalid workers value: {args[i + 1]}")
+                sys.exit(1)
+        else:
+            # Try to parse as limit
+            try:
+                limit = int(args[i])
                 print(f"Limiting to {limit} questionnaires")
             except ValueError:
-                print(f"Invalid limit argument: {sys.argv[1]}")
+                print(f"Unknown argument: {args[i]}")
+                print("Usage: python extract_questionnaires.py [limit] [--skip-extract] [--workers N]")
                 sys.exit(1)
-    
-    if len(sys.argv) > 2 and not skip_extract:
-        try:
-            max_workers = int(sys.argv[2])
-            print(f"Using {max_workers} concurrent workers")
-        except ValueError:
-            print(f"Invalid workers argument: {sys.argv[2]}")
-            sys.exit(1)
-    elif skip_extract and len(sys.argv) > 2:
-        try:
-            limit = int(sys.argv[2])
-            print(f"Limiting to {limit} questionnaires")
-        except ValueError:
-            pass
-        
-        if len(sys.argv) > 3:
-            try:
-                max_workers = int(sys.argv[3])
-                print(f"Using {max_workers} concurrent workers")
-            except ValueError:
-                pass
+        i += 1
     
     # Step 1: Extract all links to CSV (unless skipped)
     if not skip_extract:
