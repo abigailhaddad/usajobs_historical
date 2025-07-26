@@ -181,14 +181,25 @@ def diagnose_shrinkage(file_path, initial_count):
         
         print(f"   Initial jobs: {initial_count:,}")
         print(f"   Current jobs: {current_count:,}")
-        print(f"   Jobs lost: {initial_count - current_count:,}")
+        job_difference = current_count - initial_count
+        if job_difference > 0:
+            print(f"   Jobs added: {job_difference:,}")
+        elif job_difference < 0:
+            print(f"   Jobs lost: {-job_difference:,}")
+        else:
+            print(f"   Jobs unchanged")
         
         # Try to load the previous version from git to compare
         temp_file = file_path + '.temp'
-        result = subprocess.run(f'git show HEAD:{file_path[3:]} > {temp_file}', 
-                              shell=True, capture_output=True)
+        # Use git show with proper path handling
+        git_path = os.path.relpath(file_path, start='..')  # Convert to relative path from repo root
+        result = subprocess.run(['git', 'show', f'HEAD:{git_path}'], 
+                              capture_output=True, cwd='..')
         
-        if result.returncode == 0:
+        if result.returncode == 0 and result.stdout:
+            # Write binary data properly
+            with open(temp_file, 'wb') as f:
+                f.write(result.stdout)
             old_df = pd.read_parquet(temp_file)
             os.remove(temp_file)
             
@@ -265,43 +276,55 @@ def calculate_job_additions(initial_counts):
     return job_additions
 
 def check_file_sizes_vs_initial(initial_sizes):
-    """Check that data files are same size or bigger than initial"""
-    print("🔍 Checking data file sizes vs initial...")
+    """Check that data files haven't lost any jobs"""
+    print("🔍 Checking data integrity (ensuring no job loss)...")
     
     data_files = glob.glob('../data/current_jobs_*.parquet') + glob.glob('../data/historical_jobs_*.parquet')
     size_checks = []
     files_changed = False
     shrunken_files = []
+    suspicious_files = []
     
     for file in data_files:
         try:
             current_size = os.path.getsize(file)
             initial_size = initial_sizes.get(file, 0)
             
-            if current_size < initial_size:
-                print(f"❌ {file} SHRUNK: {initial_size:,} → {current_size:,} bytes")
+            # Also check job counts
+            current_df = pd.read_parquet(file)
+            current_count = len(current_df)
+            initial_count = initial_counts.get(file, 0)
+            
+            # Only check job counts - file size doesn't matter
+            count_decreased = current_count < initial_count
+            jobs_change = current_count - initial_count
+            bytes_change = current_size - initial_size
+            
+            if count_decreased:
+                print(f"❌ {file} LOST JOBS: {initial_count:,} → {current_count:,} jobs ({jobs_change:,}), {initial_size:,} → {current_size:,} bytes")
                 size_checks.append(False)
                 shrunken_files.append(file)
-            elif current_size == initial_size:
-                print(f"✅ {file}: {current_size:,} bytes (unchanged)")
-                size_checks.append(True)
-            else:
-                print(f"✅ {file}: {initial_size:,} → {current_size:,} bytes (+{current_size-initial_size:,})")
+            elif jobs_change > 0:
+                print(f"✅ {file}: {initial_count:,} → {current_count:,} jobs (+{jobs_change:,}), {initial_size:,} → {current_size:,} bytes ({bytes_change:+,})")
                 size_checks.append(True)
                 files_changed = True
+            else:
+                print(f"✅ {file}: {current_count:,} jobs (unchanged), {current_size:,} bytes")
+                size_checks.append(True)
                 
         except Exception as e:
-            print(f"❌ Could not check size of {file}: {e}")
+            print(f"❌ Could not check {file}: {e}")
             size_checks.append(False)
     
     # If files shrunk, provide detailed diagnostics
     if shrunken_files:
-        print("\n🔍 DIAGNOSTIC INFORMATION FOR SHRUNKEN FILES:")
+        print("\n🔍 DIAGNOSTIC INFORMATION FOR FILES WITH DATA LOSS:")
         for file in shrunken_files:
             diagnose_shrinkage(file, initial_counts.get(file, 0))
     
     if not all(size_checks):
-        print("⚠️  Some data files shrunk! Skipping git operations for safety.")
+        print("⚠️  Some data files lost jobs! Skipping git operations for safety.")
+        print("⚠️  This should never happen - please investigate!")
         return False, False
     
     return True, files_changed
