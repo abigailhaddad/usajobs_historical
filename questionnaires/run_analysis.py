@@ -54,8 +54,34 @@ untracked_files = subprocess.run(['git', 'ls-files', '-o', 'raw_questionnaires/'
                                 capture_output=True, text=True).stdout.strip()
 has_untracked_questionnaires = bool(untracked_files)
 
+# Check if there are unscraped questionnaires in the CSV
+unscraped_count = 0
+if existing_csv.exists():
+    import re
+    for _, row in updated_df.iterrows():
+        url = row['questionnaire_url']
+        # Extract ID from URL for filename
+        if 'usastaffing.gov' in url:
+            match = re.search(r'ViewQuestionnaire/(\d+)', url)
+            file_id = match.group(1) if match else None
+            if file_id:
+                txt_path = f'raw_questionnaires/usastaffing_{file_id}.txt'
+                if not Path(txt_path).exists():
+                    unscraped_count += 1
+        elif 'monstergovt.com' in url:
+            match = re.search(r'jnum=(\d+)', url)
+            if not match:
+                match = re.search(r'J=(\d+)', url)
+            file_id = match.group(1) if match else None
+            if file_id:
+                txt_path = f'raw_questionnaires/monster_{file_id}.txt'
+                if not Path(txt_path).exists():
+                    unscraped_count += 1
+
+print(f"Unscraped questionnaires in CSV: {unscraped_count:,}")
+
 # Git operations
-if new_count > 0 or has_untracked_questionnaires:
+if new_count > 0 or has_untracked_questionnaires or unscraped_count > 0:
     print("\n=== GIT OPERATIONS ===")
     print("Adding questionnaires folder to git...")
     
@@ -63,13 +89,16 @@ if new_count > 0 or has_untracked_questionnaires:
     subprocess.run(['git', 'add', '.'])
     
     # Create commit message
-    if new_count > 0 and has_untracked_questionnaires:
-        commit_message = f"""Update questionnaires: {new_count:,} new links found
+    new_files_count = len(untracked_files.splitlines()) if untracked_files else 0
+    
+    if new_count > 0 and new_files_count > 0:
+        commit_message = f"""Update questionnaires: {new_count:,} new links found, {new_files_count} scraped
 
 - Extracted {new_count:,} new questionnaire links
+- Scraped {new_files_count} questionnaire files
 - Total questionnaire links: {updated_count:,}
 - Total scraped files: {len(scraped_files):,}
-- New questionnaire files scraped
+- Unscraped questionnaires remaining: {unscraped_count:,}
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -80,19 +109,30 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
 - Extracted {new_count:,} new questionnaire links
 - Total questionnaire links: {updated_count:,}
 - Total scraped files: {len(scraped_files):,}
+- Unscraped questionnaires remaining: {unscraped_count:,}
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"""
+    elif new_files_count > 0:
+        commit_message = f"""Update questionnaires: scraped {new_files_count} previously unscraped files
+
+- No new questionnaire links found
+- Scraped {new_files_count} previously unscraped questionnaires
+- Total questionnaire links: {updated_count:,}
+- Total scraped files: {len(scraped_files):,}
+- Unscraped questionnaires remaining: {unscraped_count:,}
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"""
     else:
-        # Count new files
-        new_files_count = len(untracked_files.splitlines()) if untracked_files else 0
-        commit_message = f"""Update questionnaires: new scraped files added
+        # This shouldn't happen now, but just in case
+        commit_message = f"""Update questionnaires: processing unscraped files
 
-- No new questionnaire links found
 - Total questionnaire links: {updated_count:,}
 - Total scraped files: {len(scraped_files):,}
-- Added {new_files_count} new questionnaire files
+- Unscraped questionnaires remaining: {unscraped_count:,}
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 

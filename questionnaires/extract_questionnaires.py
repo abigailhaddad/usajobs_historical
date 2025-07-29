@@ -521,9 +521,11 @@ def main():
     # Create output directory
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     
-    # Check how many already scraped
+    # Check how many already scraped - always process ALL unscraped questionnaires
     already_scraped = 0
     to_scrape = []
+    
+    print("Checking for unscraped questionnaires (will process ALL unscraped, not just new)...")
     
     for idx, (_, row) in enumerate(df.iterrows()):
         url = row['questionnaire_url']
