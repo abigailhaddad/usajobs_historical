@@ -55,11 +55,28 @@ jobs:
         git config --global user.email "actions@github.com"
 
     - name: Run questionnaire analysis
+      timeout-minutes: 150  # 2.5 hour timeout
       run: |
         cd questionnaires
-        # Remove the environment check - let it push normally
-        sed -i "s/os.environ.get('GITHUB_ACTIONS', 'false').lower() != 'true'/False/" run_analysis.py
+        # Modify run_analysis.py to add time limit arguments
+        sed -i 's/extract_questionnaires.py/extract_questionnaires.py --max-time 120 --workers 3/' run_analysis.py
         python run_analysis.py
+      continue-on-error: true  # Don't fail the workflow if scraping times out
+
+    - name: Commit any scraped files
+      if: always()  # Always run this step
+      run: |
+        cd questionnaires
+        # Check if there are any new files to commit
+        if [ -n "$(git status --porcelain raw_questionnaires/)" ]; then
+          git add raw_questionnaires/
+          git add questionnaire_links.csv
+          git commit -m "Add partially scraped questionnaires (workflow time limit reached)"
+          git push
+          echo "✅ Committed partial results"
+        else
+          echo "ℹ️  No new questionnaire files to commit"
+        fi
 
     - name: Upload analysis artifacts
       if: always()

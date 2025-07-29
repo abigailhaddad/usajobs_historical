@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Extract questionnaire links from USAJobs current job parquet files and fetch questionnaire text
+Robust version of extract_questionnaires.py with better error handling and timeouts
 """
 import pandas as pd
 import json
@@ -9,17 +9,34 @@ import time
 import os
 import sys
 import subprocess
+import signal
 from pathlib import Path
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from threading import Lock
+from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
+from threading import Lock, Event
+import threading
 
 try:
-    from playwright.sync_api import sync_playwright
+    from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 except ImportError:
     print("Playwright not installed. Install with: pip install playwright && playwright install chromium")
     exit(1)
 
+# Global shutdown event
+shutdown_event = Event()
+progress_lock = Lock()
+scraped_count = 0
+failed_count = 0
+
+def signal_handler(signum, frame):
+    """Handle interrupt signals gracefully"""
+    print("\n\n⚠️  Interrupt received! Shutting down gracefully...")
+    print("   (This may take a moment while active scrapers finish)")
+    shutdown_event.set()
+
+# Register signal handlers
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 def extract_questionnaire_links_from_job(job_row):
     """Extract all questionnaire links from a job record"""
@@ -65,7 +82,6 @@ def extract_questionnaire_links_from_job(job_row):
             links.append(match)
     
     # Look for Monster Government questionnaire links
-    # Note: The preview questionnaire links might not be in the data, but let's check
     monster_patterns = [
         r'https://jobs\.monstergovt\.com/[^/]+/vacancy/previewVacancyQuestions\.hms\?[^"\'\s<>]+',
         r'https://jobs\.monstergovt\.com/[^/]+/ros/rosDashboard\.hms\?[^"\'\s<>]+'
@@ -80,8 +96,8 @@ def extract_questionnaire_links_from_job(job_row):
     return links, occupation_series, occupation_name
 
 
-def scrape_questionnaire(url, output_dir):
-    """Scrape a single questionnaire and return the text content"""
+def scrape_questionnaire(url, output_dir, timeout_seconds=30):
+    """Scrape a single questionnaire with timeout and error handling"""
     
     # Extract ID from URL for filename
     if 'usastaffing.gov' in url:
@@ -89,7 +105,6 @@ def scrape_questionnaire(url, output_dir):
         file_id = match.group(1) if match else 'unknown'
         prefix = 'usastaffing'
     elif 'monstergovt.com' in url:
-        # Try different patterns for Monster IDs
         match = re.search(r'jnum=(\d+)', url)
         if not match:
             match = re.search(r'J=(\d+)', url)
@@ -107,175 +122,138 @@ def scrape_questionnaire(url, output_dir):
         with open(txt_path, 'r', encoding='utf-8') as f:
             return f.read()
     
-    with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=True,
-            args=[
-                '--disable-blink-features=AutomationControlled',
-                '--disable-dev-shm-usage',
-                '--no-sandbox',
-                '--disable-web-security',
-                '--disable-features=IsolateOrigins,site-per-process'
-            ]
-        )
-        
-        try:
-            # Create a new page with optimizations
-            context = browser.new_context(
-                viewport={'width': 1920, 'height': 1080},
-                ignore_https_errors=True,
-                java_script_enabled=True,
-                bypass_csp=True,
-                extra_http_headers={
-                    'Accept-Language': 'en-US,en;q=0.9'
-                }
+    start_time = time.time()
+    
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=[
+                    '--disable-blink-features=AutomationControlled',
+                    '--disable-dev-shm-usage',
+                    '--no-sandbox',
+                    '--disable-web-security',
+                    '--disable-features=IsolateOrigins,site-per-process'
+                ]
             )
             
-            page = context.new_page()
-            
-            # Block images and other unnecessary resources
-            def route_handler(route):
-                if route.request.resource_type in ["image", "stylesheet", "media", "font"]:
-                    route.abort()
-                else:
-                    route.continue_()
-            
-            page.route("**/*", route_handler)
-            
-            print(f"  Scraping {url}...")
-            
-            # Navigate with timeout
-            page.goto(url, timeout=10000, wait_until='domcontentloaded')
-            
-            # Wait for questionnaire content
             try:
-                # Try common selectors
-                selectors = [
-                    "div.question-text",
-                    "div.assessment-question", 
-                    "div#questionnaire",
-                    ".questionText",
-                    "div[id*='question']",
-                    "div[class*='question']",
-                    ".questionnaire-content",
-                    "#assessment-questions"
-                ]
+                # Create context with shorter default timeout
+                context = browser.new_context(
+                    viewport={'width': 1920, 'height': 1080},
+                    ignore_https_errors=True,
+                    java_script_enabled=True,
+                    bypass_csp=True,
+                    extra_http_headers={
+                        'Accept-Language': 'en-US,en;q=0.9'
+                    }
+                )
                 
-                for selector in selectors:
-                    try:
-                        page.wait_for_selector(selector, timeout=5000)
-                        break
-                    except:
-                        continue
+                # Set default timeout for all operations
+                context.set_default_timeout(timeout_seconds * 1000)
                 
-                # Additional wait for dynamic content
-                page.wait_for_timeout(1000)
+                page = context.new_page()
                 
-            except:
-                # If no specific selector found, just wait a bit
-                page.wait_for_timeout(2000)
-            
-            # Get text content
-            page_text = page.inner_text('body')
-            
-            # Save text file
-            with open(txt_path, 'w', encoding='utf-8') as f:
-                f.write(page_text)
-            
-            print(f"    Saved: {txt_path}")
-            
-            browser.close()
-            return page_text
-            
-        except Exception as e:
-            print(f"    Error scraping {url}: {e}")
-            browser.close()
-            return None
-
-
-def find_questionnaire_links(data_dir='../data', limit=None):
-    """Find all questionnaire links in current job parquet files"""
-    # Find all current job parquet files
-    current_job_files = sorted(Path(data_dir).glob('current_jobs_*.parquet'))
-    print(f"Found {len(current_job_files)} current job parquet files")
-    
-    if not current_job_files:
-        print(f"No current_jobs_*.parquet files found in {data_dir}")
-        print(f"Looking for any parquet files...")
-        all_parquet_files = sorted(Path(data_dir).glob('*.parquet'))
-        if all_parquet_files:
-            print(f"Found these parquet files: {[f.name for f in all_parquet_files[:5]]}")
-        return []
-    
-    all_questionnaire_data = []
-    seen_urls = set()
-    
-    for parquet_file in current_job_files:
-        print(f"\nProcessing {parquet_file.name}...")
-        df = pd.read_parquet(parquet_file)
-        print(f"  {len(df)} jobs in file")
-        
-        jobs_with_questionnaires = 0
-        
-        for idx, row in df.iterrows():
-            # Extract questionnaire links
-            links, occupation_series, occupation_name = extract_questionnaire_links_from_job(row)
-            
-            if links:
-                jobs_with_questionnaires += 1
+                # Block unnecessary resources
+                def route_handler(route):
+                    if route.request.resource_type in ["image", "stylesheet", "media", "font"]:
+                        route.abort()
+                    else:
+                        route.continue_()
                 
-                for link in links:
-                    if link not in seen_urls:
-                        seen_urls.add(link)
-                        
-                        # Create questionnaire record
-                        questionnaire_data = {
-                            'questionnaire_url': link,
-                            'usajobs_control_number': row.get('usajobsControlNumber'),
-                            'position_title': row.get('positionTitle'),
-                            'announcement_number': row.get('announcementNumber'),
-                            'hiring_agency': row.get('hiringAgencyName'),
-                            'extracted_from_file': parquet_file.name,
-                            'extracted_date': datetime.now().isoformat()
-                        }
-                        
-                        all_questionnaire_data.append(questionnaire_data)
-                        
-                        if limit and len(all_questionnaire_data) >= limit:
+                page.route("**/*", route_handler)
+                
+                print(f"  Scraping {url}...")
+                
+                # Navigate with timeout
+                page.goto(url, timeout=15000, wait_until='domcontentloaded')
+                
+                # Wait for questionnaire content (shorter timeout)
+                try:
+                    selectors = [
+                        "div.question-text",
+                        "div.assessment-question", 
+                        "div#questionnaire",
+                        ".questionText",
+                        "div[id*='question']",
+                        "div[class*='question']",
+                        ".questionnaire-content",
+                        "#assessment-questions"
+                    ]
+                    
+                    for selector in selectors:
+                        try:
+                            page.wait_for_selector(selector, timeout=3000)
                             break
-            
-            if limit and len(all_questionnaire_data) >= limit:
-                break
-        
-        print(f"  Found {jobs_with_questionnaires} jobs with questionnaire links")
-        
-        if limit and len(all_questionnaire_data) >= limit:
-            break
-    
-    print(f"\nTotal unique questionnaire URLs found: {len(all_questionnaire_data)}")
-    
-    # Count by type
-    usastaffing_count = sum(1 for q in all_questionnaire_data if 'usastaffing.gov' in q['questionnaire_url'])
-    monster_count = sum(1 for q in all_questionnaire_data if 'monstergovt.com' in q['questionnaire_url'])
-    print(f"Breakdown: {usastaffing_count} USAStaffing, {monster_count} Monster Government")
-    
-    return all_questionnaire_data
+                        except:
+                            continue
+                    
+                    # Brief wait for dynamic content
+                    page.wait_for_timeout(1000)
+                    
+                except:
+                    # If no selector found, just wait briefly
+                    page.wait_for_timeout(1500)
+                
+                # Get text content with timeout
+                page_text = page.inner_text('body', timeout=5000)
+                
+                # Save text file
+                with open(txt_path, 'w', encoding='utf-8') as f:
+                    f.write(page_text)
+                
+                elapsed = time.time() - start_time
+                print(f"    Saved: {txt_path} ({elapsed:.1f}s)")
+                
+                browser.close()
+                return page_text
+                
+            except PlaywrightTimeoutError:
+                elapsed = time.time() - start_time
+                print(f"    ⏱️  Timeout after {elapsed:.1f}s: {url}")
+                browser.close()
+                return None
+            except Exception as e:
+                elapsed = time.time() - start_time
+                print(f"    ❌ Error after {elapsed:.1f}s: {str(e)[:80]}")
+                browser.close()
+                return None
+                
+    except Exception as e:
+        print(f"    ❌ Failed to launch browser: {e}")
+        return None
 
 
 def scrape_questionnaire_worker(args):
-    """Worker function for concurrent scraping"""
-    questionnaire, output_dir, index, total = args
-    print(f"\n[{index}/{total}] {questionnaire['position_title']}")
+    """Worker function for concurrent scraping with shutdown check"""
+    global scraped_count, failed_count
     
-    questionnaire_text = scrape_questionnaire(questionnaire['questionnaire_url'], output_dir)
+    questionnaire, output_dir, index, total = args
+    
+    # Check if shutdown requested
+    if shutdown_event.is_set():
+        return questionnaire, False
+    
+    with progress_lock:
+        print(f"\n[{index}/{total}] {questionnaire['position_title']}")
+    
+    questionnaire_text = scrape_questionnaire(
+        questionnaire['questionnaire_url'], 
+        output_dir,
+        timeout_seconds=30  # 30 second timeout per questionnaire
+    )
     
     if questionnaire_text:
         questionnaire['questionnaire_text'] = questionnaire_text
         questionnaire['scrape_status'] = 'success'
+        with progress_lock:
+            scraped_count += 1
         return questionnaire, True
     else:
         questionnaire['questionnaire_text'] = None
         questionnaire['scrape_status'] = 'failed'
+        with progress_lock:
+            failed_count += 1
         return questionnaire, False
 
 
@@ -382,9 +360,41 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
     return csv_file
 
 
+def save_progress_and_exit(completed_questionnaires, start_time):
+    """Save progress and exit gracefully"""
+    print("\n" + "="*60)
+    print("GRACEFUL SHUTDOWN - SAVING PROGRESS")
+    print("="*60)
+    
+    # Save completed questionnaires to a progress file
+    if completed_questionnaires:
+        progress_file = f"questionnaire_progress_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        with open(progress_file, 'w') as f:
+            json.dump({
+                'completed_count': len(completed_questionnaires),
+                'completed_urls': [q['questionnaire_url'] for q in completed_questionnaires],
+                'timestamp': datetime.now().isoformat()
+            }, f, indent=2)
+        print(f"✅ Saved progress to {progress_file}")
+    
+    total_time = time.time() - start_time
+    print(f"\n📊 Session Summary:")
+    print(f"   Scraped: {scraped_count} questionnaires")
+    print(f"   Failed: {failed_count}")
+    print(f"   Total time: {total_time/60:.1f} minutes")
+    print(f"   Files saved in: ./raw_questionnaires/")
+    
+    print("\n⚠️  Note: Run the script again to continue from where you left off.")
+    print("   Already scraped files will be skipped automatically.")
+    
+    sys.exit(0)
+
+
 def main():
-    """Main function"""
-    data_dir = '../data'  # Adjust path as needed
+    """Main function with robust error handling"""
+    global scraped_count, failed_count
+    
+    data_dir = '../data'
     output_dir = './raw_questionnaires'
     
     # Start caffeinate to prevent sleep
@@ -398,10 +408,11 @@ def main():
     
     # Check for command-line arguments
     limit = None
-    max_workers = 5  # Default number of concurrent scrapers
+    max_workers = 3  # Reduced default for stability
     skip_extract = False
+    max_scrape_time = 180  # Maximum minutes to spend scraping
     
-    # Simple argument parsing for --workers
+    # Simple argument parsing
     args = sys.argv[1:]
     i = 0
     while i < len(args):
@@ -412,22 +423,29 @@ def main():
             try:
                 max_workers = int(args[i + 1])
                 print(f"Using {max_workers} concurrent workers")
-                i += 1  # Skip next argument since we consumed it
+                i += 1
             except ValueError:
                 print(f"Invalid workers value: {args[i + 1]}")
                 sys.exit(1)
+        elif args[i] == '--max-time' and i + 1 < len(args):
+            try:
+                max_scrape_time = int(args[i + 1])
+                print(f"Maximum scraping time: {max_scrape_time} minutes")
+                i += 1
+            except ValueError:
+                print(f"Invalid max-time value: {args[i + 1]}")
+                sys.exit(1)
         else:
-            # Try to parse as limit
             try:
                 limit = int(args[i])
                 print(f"Limiting to {limit} questionnaires")
             except ValueError:
                 print(f"Unknown argument: {args[i]}")
-                print("Usage: python extract_questionnaires.py [limit] [--skip-extract] [--workers N]")
+                print("Usage: python extract_questionnaires_robust.py [limit] [--skip-extract] [--workers N] [--max-time MINUTES]")
                 sys.exit(1)
         i += 1
     
-    # Step 1: Extract all links to CSV (unless skipped)
+    # Step 1: Extract all links to CSV
     if not skip_extract:
         print("="*60)
         print("STEP 1: Extracting questionnaire links from parquet files")
@@ -460,15 +478,6 @@ def main():
     if limit:
         df = df.iloc[:limit]
         print(f"Limited to {len(df)} questionnaires")
-    
-    # Show first few examples
-    if len(df) > 0:
-        print("\nFirst few questionnaire links to process:")
-        for i, (_, row) in enumerate(df.head().iterrows()):
-            print(f"\n{i+1}. {row['position_title']}")
-            print(f"   Agency: {row['hiring_agency']}")
-            print(f"   From: {row.get('extracted_from_file', 'Unknown')}")
-            print(f"   URL: {row['questionnaire_url']}")
     
     # Create output directory
     Path(output_dir).mkdir(parents=True, exist_ok=True)
@@ -507,65 +516,86 @@ def main():
         print("\nNothing to scrape!")
         return
     
-    # Scrape questionnaires concurrently
+    # Scrape questionnaires with timeout
     print(f"\nScraping questionnaires using {max_workers} workers...")
-    success_count = 0
-    failed_count = 0
+    print(f"Maximum time limit: {max_scrape_time} minutes")
+    print("Press Ctrl+C to stop gracefully and save progress\n")
+    
     start_time = time.time()
+    max_seconds = max_scrape_time * 60
     
     # Prepare arguments for workers
     worker_args = [(q[0], output_dir, q[1], len(df)) for q in to_scrape]
     
-    # Use ThreadPoolExecutor for concurrent scraping
     completed_questionnaires = []
     completed_count = 0
     
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        # Submit all tasks
-        future_to_questionnaire = {
-            executor.submit(scrape_questionnaire_worker, args): args[0] 
-            for args in worker_args
-        }
-        
-        # Process completed futures
-        for future in as_completed(future_to_questionnaire):
-            try:
-                questionnaire, success = future.result()
-                completed_questionnaires.append(questionnaire)
-                if success:
-                    success_count += 1
-                else:
+    try:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all tasks
+            future_to_questionnaire = {
+                executor.submit(scrape_questionnaire_worker, args): args[0] 
+                for args in worker_args
+            }
+            
+            # Process completed futures with timeout check
+            for future in as_completed(future_to_questionnaire):
+                try:
+                    # Check if we've exceeded time limit
+                    elapsed = time.time() - start_time
+                    if elapsed > max_seconds:
+                        print(f"\n⏰ Time limit reached ({max_scrape_time} minutes)")
+                        shutdown_event.set()
+                        save_progress_and_exit(completed_questionnaires, start_time)
+                    
+                    # Check if shutdown requested
+                    if shutdown_event.is_set():
+                        save_progress_and_exit(completed_questionnaires, start_time)
+                    
+                    # Get result with timeout
+                    questionnaire, success = future.result(timeout=60)  # 60 second timeout per future
+                    completed_questionnaires.append(questionnaire)
+                    completed_count += 1
+                    
+                    # Progress and time estimate
+                    rate = completed_count / elapsed if elapsed > 0 else 0
+                    remaining = len(to_scrape) - completed_count
+                    eta_seconds = remaining / rate if rate > 0 else 0
+                    eta_minutes = eta_seconds / 60
+                    
+                    with progress_lock:
+                        print(f"\nProgress: {completed_count}/{len(to_scrape)} "
+                              f"({completed_count/len(to_scrape)*100:.1f}%) | "
+                              f"Success: {scraped_count} | Failed: {failed_count} | "
+                              f"Rate: {rate:.1f}/sec | ETA: {eta_minutes:.1f} min | "
+                              f"Elapsed: {elapsed/60:.1f} min")
+                    
+                except FuturesTimeoutError:
+                    print(f"\n⚠️  Future timed out after 60 seconds")
                     failed_count += 1
-                completed_count += 1
-                
-                # Progress and time estimate
-                elapsed = time.time() - start_time
-                rate = completed_count / elapsed
-                remaining = len(to_scrape) - completed_count
-                eta_seconds = remaining / rate if rate > 0 else 0
-                eta_minutes = eta_seconds / 60
-                
-                print(f"\nProgress: {completed_count}/{len(to_scrape)} "
-                      f"({completed_count/len(to_scrape)*100:.1f}%) | "
-                      f"Success: {success_count} | Failed: {failed_count} | "
-                      f"Rate: {rate:.1f}/sec | ETA: {eta_minutes:.1f} min")
-                
-            except Exception as e:
-                print(f"Error in worker: {e}")
-                questionnaire = future_to_questionnaire[future]
-                questionnaire['questionnaire_text'] = None
-                questionnaire['scrape_status'] = 'failed'
-                completed_questionnaires.append(questionnaire)
-                failed_count += 1
-                completed_count += 1
+                    completed_count += 1
+                except Exception as e:
+                    print(f"\n❌ Error in worker: {e}")
+                    questionnaire = future_to_questionnaire[future]
+                    questionnaire['questionnaire_text'] = None
+                    questionnaire['scrape_status'] = 'failed'
+                    completed_questionnaires.append(questionnaire)
+                    failed_count += 1
+                    completed_count += 1
+                    
+    except KeyboardInterrupt:
+        print("\n\n⚠️  Keyboard interrupt received!")
+        shutdown_event.set()
+        save_progress_and_exit(completed_questionnaires, start_time)
     
+    # Normal completion
     total_time = time.time() - start_time
     print(f"\n{'='*60}")
     print(f"SCRAPING COMPLETE")
     print(f"{'='*60}")
-    print(f"Completed: {success_count}/{len(to_scrape)} questionnaires scraped successfully")
+    print(f"Completed: {scraped_count}/{len(to_scrape)} questionnaires scraped successfully")
     print(f"Failed: {failed_count}")
-    print(f"Total scraped files: {already_scraped + success_count}")
+    print(f"Total scraped files: {already_scraped + scraped_count}")
     print(f"Total time: {total_time/60:.1f} minutes")
     print(f"Average rate: {completed_count/total_time:.2f} questionnaires/second")
     
