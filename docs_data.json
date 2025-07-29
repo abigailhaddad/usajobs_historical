@@ -1,8 +1,8 @@
 {
-  "generated_at": "2025-07-28T00:34:56.740856",
-  "total_jobs": 2993343,
+  "generated_at": "2025-07-28T20:18:41.052062",
+  "total_jobs": 2993854,
   "total_fields": 42,
-  "file_size": "516MB",
+  "file_size": "519MB",
   "latest_job_date": "2025-07-28",
   "data_coverage": [
     {
@@ -91,9 +91,9 @@
     },
     {
       "year": 2025,
-      "total_jobs": 114081,
-      "jobs_opened": 114081,
-      "jobs_closed": 112734,
+      "total_jobs": 114592,
+      "jobs_opened": 114592,
+      "jobs_closed": 113236,
       "coverage": "Current through July 28, 2025"
     }
   ],
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0850\"}, {\"series\": \"0810\"}], [{\"series\": \"5423\"}], [{\"series\": \"4701\"}], [{\"series\": \"0810\"}, {\"series\": \"0808\"}, {\"series\": \"0020\"}, {\"series\": \"0801\"}] (3060 unique)",
+      "examples": "[{\"series\": \"1560\"}, {\"series\": \"1515\"}, {\"series\": \"0801\"}], [{\"series\": \"0201\"}, {\"series\": \"0203\"}], [{\"series\": \"1520\"}, {\"series\": \"1310\"}, {\"series\": \"1550\"}, {\"series\": \"1515\"}, {\"series\": \"0801\"}], [{\"series\": \"0510\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Air Force\\Air Education and Training Command, Department of the Army\\U.S. Army Central, Department of Transportation\\Maritime Administration, Department of Health and Human Services\\Office of the Secretary of Health and Human Services (542 unique)",
+      "examples": "U.S. International Trade Commission, Department of Labor\\Office of the Secretary of Labor, Department of Defense\\Defense Information Systems Agency, Department of the Treasury\\Office of Inspector General (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "24-12481152K-TSB-2010-5T9, SE-1628-TIMU-25-12580978-DE, 24-12491821P-SBN-0344-6, 24-12263563C-CIN-0343-13 (363801 unique)",
+      "examples": "764652-MCB-12416198-CORE, 5V-ARTE-12432906-431896-TW, MCGT244832610750, EPA-T4-MPI-2025-0006 (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "ICTAP Only, Temporary, Term, Telework (15 unique)",
+      "examples": "Telework, Temporary Promotion, Summer, Detail (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "VAAE, OS00, ARXK, GU00 (528 unique)",
+      "examples": "DO00, QQ00, AG22, VAAD (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Office of Career, Technical, and Adult Education, Air Force Review Boards Agency, Office of the Chief of Staff of the Army, George C. Marshall Space Flight Center (502 unique)",
+      "examples": "U.S. Army Joint Munitions Command, U.S. Census Bureau, Air National Guard Units, Armstrong Flight Research Center (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "HU, GJ, IF, GQ (122 unique)",
+      "examples": "JL, RR, OM, LD (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of the Interior, Department of Commerce, Department of Energy, Department of Education (26 unique)",
+      "examples": "Department of Housing and Urban Development, Department of Education, Department of Veterans Affairs, Department of the Army (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "NRCS NORTH DAKOTA, Colorado River Storage Project, Power Marketing, Energy Management and Marketing, Merchant (L6520), National Energy Technology Laboratory (NETL), Science & Technology Strategic Plans & Programs, Pharmacy (59973 unique)",
+      "examples": "National Weather Service (NWS), River Forecast Centers (RFC), AHR, Office of Labor and Employee Relations, National LER Systems & Programs Division (AHL-400), ENTERPRISE SOLUTIONS AND STANDARDS (JJADAD), Office of Security, Personnel Security Division (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T14:08:18.560935, 2025-07-05T15:22:10.649251, 2025-07-05T13:47:41.937553, 2025-07-05T13:08:00.684795 (367177 unique)",
+      "examples": "2025-07-05T14:12:28.495154, 2025-07-05T13:50:17.159952, 2025-07-05T12:59:13.274305, 2025-07-05T13:50:17.184972 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "G, HH, 61, JK (127 unique)",
+      "examples": "04, 36, AG, DJ (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "07, L, DJ, JH (125 unique)",
+      "examples": "K, 06, 28, 25 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "UA, PT, PB, DC (191 unique)",
+      "examples": "AD, AC, LL, KS (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-03-20, 2025-10-22, 2025-02-18, 2024-09-14 (672 unique)",
+      "examples": "2025-06-06, 2024-01-20, 2024-01-28, 2025-07-17 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-07-27, 2024-06-18, 2024-01-15, 2025-01-09 (550 unique)",
+      "examples": "2024-06-26, 2024-08-03, 2024-02-05, 2024-05-25 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-12-11, 2024-06-04, 2024-11-29, 2024-04-26 (365 unique)",
+      "examples": "2024-09-30, 2024-11-01, 2024-06-25, 2024-04-06 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Materials Examiner and Identifier (Forklift Operator/Motor Vehicle Operator), Nurse Practitioner - Program Manager, ESL SPECIALIST, Lead GPC Program Specialist (77986 unique)",
+      "examples": "Tournament and Pro Shop Supervisor, Audio Visual Specialist, SAC CYP Assistant RPT, SUPERVISORY PROJECT SUPERINTENDENT (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "None, GS13, E, 60 (115 unique)",
+      "examples": "13, PB5, 31, 3 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "128, 800, 216, 08 (157 unique)",
+      "examples": "03, 49, 82, 55 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
