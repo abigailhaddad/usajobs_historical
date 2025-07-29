@@ -71,6 +71,8 @@ This dataset combines data from **two USAJobs APIs** with the following processi
 
 **Note**: In our analysis, we've found that Current API jobs generally also appear in the Historical API data, but we collect from both APIs to ensure complete coverage.
 
+**Important**: The `current_jobs_*.parquet` files contain cumulative data - they include all jobs that have appeared in the Current API since we started collecting, not just jobs that are currently active. Once a job is added to these files, it remains there even after the position closes or is removed from the Current API. This provides a historical record of all jobs that were once "current."
+
 ### Data Processing
 - **Field Rationalization**: Current API fields mapped to historical naming conventions for consistent querying
 - **Data Preservation**: All original fields from both APIs retained alongside rationalized overlay fields
