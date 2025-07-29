@@ -108,14 +108,18 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         if result.stderr:
             print(f"Commit error: {result.stderr}")
     
-    # Push
-    print("\nPushing to remote...")
-    result = subprocess.run(['git', 'push'], capture_output=True, text=True)
-    if result.returncode == 0:
-        print("Successfully pushed to remote repository")
+    # Push only if NOT in GitHub Actions
+    # GitHub Actions will handle pushing after both jobs complete
+    if os.environ.get('GITHUB_ACTIONS', 'false').lower() != 'true':
+        print("\nPushing to remote...")
+        result = subprocess.run(['git', 'push'], capture_output=True, text=True)
+        if result.returncode == 0:
+            print("Successfully pushed to remote repository")
+        else:
+            print(f"Push output: {result.stdout}")
+            if result.stderr:
+                print(f"Push error: {result.stderr}")
     else:
-        print(f"Push output: {result.stdout}")
-        if result.stderr:
-            print(f"Push error: {result.stderr}")
+        print("\n✅ Changes committed (GitHub Actions will handle push)")
 else:
     print("\nNo new questionnaires found, skipping git operations")
