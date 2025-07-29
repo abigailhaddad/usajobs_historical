@@ -191,11 +191,16 @@ def prepare_job_table_data(df):
         lambda x: create_html_link(x, "Questionnaire")
     )
     
+    # Format dates - handle mixed formats
+    table_df['open_date'] = pd.to_datetime(table_df['position_open_date'], format='mixed').dt.strftime('%m/%d/%Y')
+    table_df['close_date'] = pd.to_datetime(table_df['position_close_date'], format='mixed').dt.strftime('%m/%d/%Y')
+    
     # Select and rename columns
     result = table_df[['position_title', 'occupation_display', 'hiring_agency', 
+                       'position_location', 'grade_code', 'service_type', 'open_date', 'close_date',
                        'job_posting_link', 'questionnaire_link']].copy()
-    result.columns = ['Position_Title', 'Occupation', 'Agency', 
-                      'Job_Posting_Link', 'Questionnaire_Link']
+    result.columns = ['Position_Title', 'Occupation', 'Agency', 'Location', 
+                      'Grade', 'Service', 'Open', 'Close', 'Job_Posting', 'Questionnaire']
     
     return result.sort_values('Position_Title')
 ```
@@ -205,6 +210,16 @@ def prepare_job_table_data(df):
 ```{python}
 # Load questionnaire links
 links_df = load_questionnaire_links()
+
+# Load service type data from current jobs parquet
+print("Loading service type data from parquet files...")
+current_jobs_2025 = pd.read_parquet(DATA_DIR / 'current_jobs_2025.parquet')
+
+# Create a lookup for service type by control number
+service_lookup = current_jobs_2025.set_index('usajobsControlNumber')['serviceType'].to_dict()
+
+# Add service type to links_df
+links_df['service_type'] = links_df['usajobs_control_number'].astype(str).map(service_lookup)
 
 # Check for the specific executive order question
 eo_mentions = check_executive_order_mentions()
@@ -238,6 +253,36 @@ percentage_with_eo = (total_with_eo / total_scraped * 100) if total_scraped > 0 
 print(f"Total scraped questionnaires: {total_scraped:,}")
 print(f"Questionnaires with the specific EO question: {total_with_eo:,}")
 print(f"Percentage with the EO question: {percentage_with_eo:.1f}%")
+```
+
+### By Service Type
+
+```{python}
+# Analyze by service type for jobs with EO question
+eo_jobs = scraped_df[scraped_df['has_executive_order']].copy()
+
+if 'service_type' in eo_jobs.columns:
+    service_summary = eo_jobs['service_type'].value_counts()
+    print("Service types for jobs with the EO question:")
+    for service, count in service_summary.items():
+        print(f"  {service}: {count} ({count/len(eo_jobs)*100:.1f}%)")
+else:
+    print("Service type information not available")
+```
+
+### By Grade Level
+
+```{python}
+# Analyze by grade level for jobs with EO question
+if 'grade_code' in eo_jobs.columns:
+    # Clean and standardize grade codes
+    eo_jobs['grade_clean'] = eo_jobs['grade_code'].fillna('Not Specified')
+    grade_summary = eo_jobs['grade_clean'].value_counts().head(20)
+    print(f"Top 20 grade levels for jobs with the EO question:")
+    for grade, count in grade_summary.items():
+        print(f"  {grade}: {count}")
+else:
+    print("Grade level information not available")
 ```
 
 ### By Agency

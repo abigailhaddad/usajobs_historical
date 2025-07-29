@@ -45,9 +45,14 @@ def extract_questionnaire_links_from_job(job_row):
     # Convert the job row to string to search everywhere
     job_str = str(job_row.to_dict())
     
-    # Extract occupation series from MatchedObjectDescriptor
+    # Extract fields from MatchedObjectDescriptor
     occupation_series = None
     occupation_name = None
+    position_location = None
+    grade_code = None
+    position_schedule = None
+    service_type = None
+    
     if pd.notna(job_row.get('MatchedObjectDescriptor')):
         try:
             mod = json.loads(job_row['MatchedObjectDescriptor'])
@@ -58,9 +63,37 @@ def extract_questionnaire_links_from_job(job_row):
                 occupation_series = mod['JobCategory'][0].get('Code')
                 occupation_name = mod['JobCategory'][0].get('Name')
             
+            # Get location
+            if 'PositionLocation' in mod and isinstance(mod['PositionLocation'], list) and len(mod['PositionLocation']) > 0:
+                # Take first location
+                loc = mod['PositionLocation'][0]
+                location_parts = []
+                if 'CityName' in loc:
+                    location_parts.append(loc['CityName'])
+                if 'CountrySubDivisionCode' in loc:
+                    location_parts.append(loc['CountrySubDivisionCode'])
+                position_location = ', '.join(location_parts) if location_parts else None
+            
+            # Get grade code - for current jobs API, use top-level min/max grades
+            # These will be available from the row, not from MatchedObjectDescriptor
+            
+            # Get position schedule
+            if 'PositionSchedule' in mod and isinstance(mod['PositionSchedule'], list) and len(mod['PositionSchedule']) > 0:
+                position_schedule = mod['PositionSchedule'][0].get('Name')
+            
             # Specifically check known fields
             if 'UserArea' in mod and 'Details' in mod['UserArea']:
                 details = mod['UserArea']['Details']
+                
+                # Get service type from UserArea.Details.ServiceType
+                service_type_code = details.get('ServiceType')
+                if service_type_code:
+                    service_type_map = {
+                        '01': 'Competitive',
+                        '02': 'Excepted', 
+                        '03': 'Senior Executive'
+                    }
+                    service_type = service_type_map.get(service_type_code, service_type_code)
                 
                 # Check Evaluations field for USAStaffing links
                 evaluations = details.get('Evaluations', '')
@@ -93,7 +126,7 @@ def extract_questionnaire_links_from_job(job_row):
             if match not in links:
                 links.append(match)
     
-    return links, occupation_series, occupation_name
+    return links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type
 
 
 def scrape_questionnaire(url, output_dir, timeout_seconds=60):
@@ -343,8 +376,8 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
             if idx % 1000 == 0:
                 print(f"  Processing job {idx}/{len(df)} ({jobs_with_links} with links, {new_links_in_file} new)...", end='\r')
             
-            # Extract links and occupation series from this job
-            links, occupation_series, occupation_name = extract_questionnaire_links_from_job(row)
+            # Extract links and other fields from this job
+            links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type = extract_questionnaire_links_from_job(row)
             
             if links:
                 jobs_with_links += 1
@@ -354,6 +387,16 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
                     if link not in existing_urls:
                         existing_urls.add(link)
                         new_links_in_file += 1
+                        
+                        # Get grade from top-level fields
+                        min_grade = row.get('minimumGrade', '')
+                        max_grade = row.get('maximumGrade', '')
+                        if min_grade and max_grade and min_grade == max_grade:
+                            grade_code = min_grade
+                        elif min_grade and max_grade:
+                            grade_code = f"{min_grade}-{max_grade}"
+                        else:
+                            grade_code = min_grade or max_grade or None
                         
                         # Create record with all needed fields
                         link_record = {
@@ -366,9 +409,10 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
                             'occupation_name': occupation_name,
                             'position_open_date': row.get('positionOpenDate'),
                             'position_close_date': row.get('positionCloseDate'),
-                            'position_location': row.get('positionLocation'),
-                            'grade_code': row.get('gradeCode'),
-                            'position_schedule': row.get('positionSchedule'),
+                            'position_location': position_location,  # From MatchedObjectDescriptor
+                            'grade_code': grade_code,  # From top-level min/max grades
+                            'position_schedule': position_schedule,  # From MatchedObjectDescriptor
+                            'service_type': service_type,  # From MatchedObjectDescriptor
                             'extracted_from_file': parquet_file.name,
                             'extracted_date': datetime.now().isoformat()
                         }
