@@ -366,17 +366,13 @@ def commit_and_push_changes():
         print("ℹ️  No changes to commit or commit failed")
         return False
     
-    # Push to remote only if NOT in GitHub Actions
-    # GitHub Actions will handle pushing after both jobs complete
-    if os.environ.get('GITHUB_ACTIONS', 'false').lower() != 'true':
-        success, _ = run_command("git push", "Pushing to remote repository")
-        if not success:
-            print("❌ Failed to push to remote repository")
-            return False
-        print("✅ Successfully committed and pushed changes")
-    else:
-        print("✅ Changes committed (GitHub Actions will handle push)")
+    # Push to remote
+    success, _ = run_command("git push", "Pushing to remote repository")
+    if not success:
+        print("❌ Failed to push to remote repository")
+        return False
     
+    print("✅ Successfully committed and pushed changes")
     return True
 
 def main():

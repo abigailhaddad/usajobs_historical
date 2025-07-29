@@ -40,9 +40,12 @@ Then create a Pull Request and merge to main.
 
 ## 📅 Schedule
 
-The pipeline runs automatically:
-- **Time**: Daily at 2 AM EST (7 AM UTC)
-- **Duration**: ~40-60 minutes for data update + additional time for questionnaires
+The workflows run automatically:
+- **Data Update**: Daily at 2 AM EST (7 AM UTC)
+- **Questionnaire Analysis**: Daily at 4 AM EST (9 AM UTC)
+- **Duration**: ~40-60 minutes for data update, ~30+ minutes for questionnaires
+
+Two separate workflows ensure the questionnaire analysis always works with the latest data.
 
 ## 🔍 Monitoring
 
