@@ -2,6 +2,10 @@
 
 This guide helps you deploy the USAJobs data pipeline to GitHub Actions.
 
+## ⚠️ Important: Git LFS Required
+
+This repository uses Git Large File Storage (LFS) for parquet data files. The GitHub Actions workflow is configured to handle this automatically.
+
 ## 🚀 Quick Setup
 
 ### 1. Add Your USAJobs API Token

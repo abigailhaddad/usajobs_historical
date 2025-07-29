@@ -22,6 +22,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0  # Need full history for git operations
+        lfs: true  # Pull Git LFS files
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -38,6 +39,12 @@ jobs:
       run: |
         git config --global user.name "GitHub Actions Bot"
         git config --global user.email "actions@github.com"
+
+    - name: Pull Git LFS files
+      run: |
+        git lfs pull
+        echo "Checking data files:"
+        ls -lh data/*.parquet | head -5
 
     - name: Run daily data update
       env:
@@ -58,10 +65,14 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
         ref: main  # Pull latest changes from update-data job
+        lfs: true  # Pull Git LFS files
 
-    - name: Pull latest changes
+    - name: Pull latest changes and LFS files
       run: |
         git pull origin main
+        git lfs pull
+        echo "Verifying data files:"
+        ls -lh data/*.parquet | head -5
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -81,8 +92,6 @@ jobs:
 
     - name: Install Quarto
       uses: quarto-dev/quarto-actions/setup@v2
-      with:
-        version: 'latest'
 
     - name: Configure git
       run: |
@@ -115,10 +124,12 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
         ref: main
+        lfs: true
 
     - name: Pull latest changes
       run: |
         git pull origin main
+        git lfs pull
 
     - name: Push all changes
       run: |
