@@ -211,15 +211,8 @@ def prepare_job_table_data(df):
 # Load questionnaire links
 links_df = load_questionnaire_links()
 
-# Load service type data from current jobs parquet
-print("Loading service type data from parquet files...")
-current_jobs_2025 = pd.read_parquet(DATA_DIR / 'current_jobs_2025.parquet')
-
-# Create a lookup for service type by control number
-service_lookup = current_jobs_2025.set_index('usajobsControlNumber')['serviceType'].to_dict()
-
-# Add service type to links_df
-links_df['service_type'] = links_df['usajobs_control_number'].astype(str).map(service_lookup)
+# Service type is now already in the CSV from extraction
+print(f"Service type already loaded from CSV")
 
 # Check for the specific executive order question
 eo_mentions = check_executive_order_mentions()
