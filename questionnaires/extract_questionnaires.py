@@ -445,11 +445,14 @@ def main():
         except:
             print("Could not start caffeinate - system may sleep during long operations")
     
+    # Check if running in GitHub Actions
+    is_github_actions = os.environ.get('GITHUB_ACTIONS', 'false').lower() == 'true'
+    
     # Check for command-line arguments
     limit = None
     max_workers = 3  # Reduced default for stability
     skip_extract = False
-    max_scrape_time = 180  # Maximum minutes to spend scraping
+    max_scrape_time = 180 if is_github_actions else None  # No time limit when running locally
     
     # Simple argument parsing
     args = sys.argv[1:]
@@ -490,6 +493,10 @@ def main():
         print("STEP 1: Extracting questionnaire links from parquet files")
         print("="*60)
         csv_file = extract_all_links_to_csv(data_dir)
+        
+        # If running in GitHub Actions, ensure CSV is saved
+        if is_github_actions:
+            print("\nRunning in GitHub Actions - ensuring CSV is saved...")
     else:
         csv_file = Path('./questionnaire_links.csv')
         if not csv_file.exists():
@@ -559,11 +566,14 @@ def main():
     
     # Scrape questionnaires with timeout
     print(f"\nScraping questionnaires using {max_workers} workers...")
-    print(f"Maximum time limit: {max_scrape_time} minutes")
+    if max_scrape_time:
+        print(f"Maximum time limit: {max_scrape_time} minutes")
+    else:
+        print("No time limit (running locally)")
     print("Press Ctrl+C to stop gracefully and save progress\n")
     
     start_time = time.time()
-    max_seconds = max_scrape_time * 60
+    max_seconds = max_scrape_time * 60 if max_scrape_time else float('inf')
     
     # Prepare arguments for workers
     worker_args = [(q[0], output_dir, q[1], len(df)) for q in to_scrape]
@@ -582,9 +592,9 @@ def main():
             # Process completed futures with timeout check
             for future in as_completed(future_to_questionnaire):
                 try:
-                    # Check if we've exceeded time limit
+                    # Check if we've exceeded time limit (only if max_scrape_time is set)
                     elapsed = time.time() - start_time
-                    if elapsed > max_seconds:
+                    if max_scrape_time and elapsed > max_seconds:
                         print(f"\n⏰ Time limit reached ({max_scrape_time} minutes)")
                         shutdown_event.set()
                         save_progress_and_exit(completed_questionnaires, start_time)

@@ -24,11 +24,29 @@ result = subprocess.run([
     'extract_questionnaires.py'
 ])
 
-# Check how many new questionnaires were found
+# Always check for CSV updates, even if the script failed
 if existing_csv.exists():
     updated_df = pd.read_csv(existing_csv)
     updated_count = len(updated_df)
     new_count = updated_count - existing_count
+    
+    # If we found new links but the script failed (likely timeout), commit the CSV
+    if new_count > 0 and result.returncode != 0:
+        print(f"\n⚠️  Script exited with code {result.returncode} but found {new_count} new links")
+        print("Committing CSV changes before exit...")
+        subprocess.run(['git', 'add', 'questionnaire_links.csv'])
+        commit_msg = f"""Save {new_count:,} new questionnaire links (scraping interrupted)
+
+- Extracted {new_count:,} new questionnaire links before timeout
+- Total questionnaire links: {updated_count:,}
+- Scraping was interrupted - will continue in next run
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"""
+        subprocess.run(['git', 'commit', '-m', commit_msg])
+        subprocess.run(['git', 'push'])
+        print("✅ CSV changes saved for next run")
     
     print(f"\n=== QUESTIONNAIRE EXTRACTION SUMMARY ===")
     print(f"Previous total: {existing_count:,}")
