@@ -1,8 +1,8 @@
 {
-  "generated_at": "2025-07-29T15:08:15.804393",
-  "total_jobs": 2994818,
+  "generated_at": "2025-07-29T14:47:45.618520",
+  "total_jobs": 2994998,
   "total_fields": 42,
-  "file_size": "523MB",
+  "file_size": "524MB",
   "latest_job_date": "2025-07-29",
   "data_coverage": [
     {
@@ -91,9 +91,9 @@
     },
     {
       "year": 2025,
-      "total_jobs": 115556,
-      "jobs_opened": 115556,
-      "jobs_closed": 114196,
+      "total_jobs": 115736,
+      "jobs_opened": 115736,
+      "jobs_closed": 114373,
       "coverage": "Current through July 29, 2025"
     }
   ],
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"2218\"}, {\"series\": \"2217\"}], [{\"series\": \"0801\"}, {\"series\": \"0401\"}], [{\"series\": \"0401\"}, {\"series\": \"1560\"}, {\"series\": \"1301\"}, {\"series\": \"0819\"}], [{\"series\": \"0807\"}, {\"series\": \"0110\"}, {\"series\": \"0810\"}, {\"series\": \"1301\"}, {\"series\": \"0819\"}, {\"series\": \"0401\"}, {\"series\": \"0408\"}, {\"series\": \"0020\"}, {\"series\": \"0193\"}] (3060 unique)",
+      "examples": "[{\"series\": \"1501\"}, {\"series\": \"0101\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"0401\"}], [{\"series\": \"0101\"}, {\"series\": \"1301\"}, {\"series\": \"0401\"}, {\"series\": \"1501\"}], [{\"series\": \"0401\"}, {\"series\": \"1350\"}, {\"series\": \"1301\"}, {\"series\": \"0819\"}], [{\"series\": \"0401\"}, {\"series\": \"0193\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"0819\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Army\\U.S. Army Communications Electronics Command, Executive Office of the President\\Office of the National Cyber Director, Department of the Treasury\\Bureau of Engraving and Printing, Department of Health and Human Services\\Administration for Community Living (542 unique)",
+      "examples": "National Science Foundation, Department of the Air Force\\Space Force Elements, Department of the Air Force\\National Air and Space Intelligence Center, Department of the Air Force\\Air Force Legal Operations Agency (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "24-8TFSVL572617, KY-12543996-AR-24-303, AFMC-12614148-649154-9R-SLM, NIH-OD-MP-24-12354170 (363801 unique)",
+      "examples": "MCFU244614023983, MCGM242942973143, 24-12321620, CBST-12264490-24-JA (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Seasonal, Detail, Permanent, Temporary (15 unique)",
+      "examples": "Detail, Recent graduates, ICTAP Only, Summer (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "AG38, GS03, TD01, NV41 (528 unique)",
+      "examples": "LF00, NV72, GS33, AG13 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "National Reconnaissance Office, Civil Rights Cold Case Review Board (CRCCRB), Office of the Secretary of Health and Human Services, Customs and Border Protection (502 unique)",
+      "examples": "Defense Threat Reduction Agency, U.S. Tax Court, Office of National Drug Control Policy, U.S. Army North (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "PO, ZV, SZ, VA (122 unique)",
+      "examples": "ZG, CE, AB, NL (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of the Air Force, General Services Administration, Department of Education, Department of Homeland Security (26 unique)",
+      "examples": "Other Agencies and Independent Organizations, Department of the Air Force, Department of the Interior, Department of the Treasury (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Perry Point VA Medical Center, USAG WHITE SANDS MISSILE RANGE,  DIRECTORATE OF PUBLIC WORKS, CNRH Pacific Missile Range Facility Barking Sands N922; Outdoor Movie Theater, OHIO (59973 unique)",
+      "examples": "VISN 21 Sierra Pacific Network System, TRADOC, Deputy Chief of Staff, G-3/5/7, Directorate of Human Resources, Military Personnel Division, Personnel Automation Branch, Savannah Construction Division, Fort Eisenhower Resident Office (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T14:12:28.494922, 2025-07-05T15:03:07.335922, 2025-07-05T14:18:59.535795, 2025-07-05T15:34:27.960615 (367177 unique)",
+      "examples": "2025-07-05T15:17:17.065122, 2025-07-05T15:12:56.607517, 2025-07-05T14:06:16.859392, 2025-07-05T15:08:10.744178 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "35, 17, SL, JK (127 unique)",
+      "examples": "04, 30, 41, 02 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "II, 21, 7, KL (125 unique)",
+      "examples": "LH, JH, AQ, D (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "WT, NM, NX, WE (191 unique)",
+      "examples": "DC, KB, CT, NY (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-07-07, 2024-08-06, 2024-03-31, 2024-01-20 (672 unique)",
+      "examples": "2025-04-27, 2025-04-17, 2024-10-23, 2024-11-25 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2023-03-06, 2025-07-03, 2024-12-24, 2024-06-13 (550 unique)",
+      "examples": "2024-04-11, 2023-09-20, 2024-03-02, 2023-10-26 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-12-25, 2024-11-21, 2024-03-17, 2024-04-07 (365 unique)",
+      "examples": "2024-12-27, 2024-06-17, 2024-01-08, 2024-10-09 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Director (Gender and Social Inclusion),  MC-301-3a, BOWLING CENTER ASSISTANT, Pharmacy Technician - Chemotherapy, Student Trainee (Management Analyst) (77986 unique)",
+      "examples": "Program Support Assistant (Caregiver Support), Laborer (Golf), SUPV HR SPECIALIST (RECRUITMENT & PLACEMENT/ CLASSIFICATION), GMH Clinical Director (LPMHC) (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "None, DISES, ES, J (115 unique)",
+      "examples": "12, CM, 5, Varies (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "94, MANY, 225, 37 (157 unique)",
+      "examples": "225, 207, Few, 75 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
