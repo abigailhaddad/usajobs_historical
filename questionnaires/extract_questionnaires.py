@@ -96,7 +96,7 @@ def extract_questionnaire_links_from_job(job_row):
     return links, occupation_series, occupation_name
 
 
-def scrape_questionnaire(url, output_dir, timeout_seconds=30):
+def scrape_questionnaire(url, output_dir, timeout_seconds=60):
     """Scrape a single questionnaire with timeout and error handling"""
     
     # Extract ID from URL for filename
@@ -166,10 +166,13 @@ def scrape_questionnaire(url, output_dir, timeout_seconds=30):
                 print(f"  Scraping {url}...")
                 
                 # Navigate with timeout
+                print(f"    [DEBUG] Starting page.goto at {time.strftime('%H:%M:%S')}")
                 page.goto(url, timeout=15000, wait_until='domcontentloaded')
+                print(f"    [DEBUG] page.goto completed at {time.strftime('%H:%M:%S')}")
                 
                 # Wait for questionnaire content (shorter timeout)
                 try:
+                    print(f"    [DEBUG] Waiting for selectors at {time.strftime('%H:%M:%S')}")
                     selectors = [
                         "div.question-text",
                         "div.assessment-question", 
@@ -184,19 +187,24 @@ def scrape_questionnaire(url, output_dir, timeout_seconds=30):
                     for selector in selectors:
                         try:
                             page.wait_for_selector(selector, timeout=3000)
+                            print(f"    [DEBUG] Found selector: {selector}")
                             break
                         except:
                             continue
                     
                     # Brief wait for dynamic content
+                    print(f"    [DEBUG] Waiting 1s for dynamic content...")
                     page.wait_for_timeout(1000)
                     
                 except:
                     # If no selector found, just wait briefly
+                    print(f"    [DEBUG] No selector found, waiting 1.5s...")
                     page.wait_for_timeout(1500)
                 
                 # Get text content with timeout
+                print(f"    [DEBUG] Getting page text at {time.strftime('%H:%M:%S')}")
                 page_text = page.inner_text('body', timeout=5000)
+                print(f"    [DEBUG] Got {len(page_text)} characters at {time.strftime('%H:%M:%S')}")
                 
                 # Save text file
                 with open(txt_path, 'w', encoding='utf-8') as f:
@@ -237,11 +245,42 @@ def scrape_questionnaire_worker(args):
     with progress_lock:
         print(f"\n[{index}/{total}] {questionnaire['position_title']}")
     
-    questionnaire_text = scrape_questionnaire(
-        questionnaire['questionnaire_url'], 
-        output_dir,
-        timeout_seconds=30  # 30 second timeout per questionnaire
-    )
+    # Use a hard timeout via threading
+    result = [None]
+    exception = [None]
+    
+    def scrape_with_timeout():
+        try:
+            result[0] = scrape_questionnaire(
+                questionnaire['questionnaire_url'], 
+                output_dir,
+                timeout_seconds=60  # 60 second timeout per questionnaire
+            )
+        except Exception as e:
+            exception[0] = e
+    
+    thread = threading.Thread(target=scrape_with_timeout)
+    thread.daemon = True
+    thread.start()
+    thread.join(timeout=90)  # 90 second hard timeout
+    
+    if thread.is_alive():
+        print(f"    ⚠️  HARD TIMEOUT: Thread still running after 90 seconds!")
+        questionnaire['questionnaire_text'] = None
+        questionnaire['scrape_status'] = 'timeout'
+        with progress_lock:
+            failed_count += 1
+        return questionnaire, False
+    
+    if exception[0]:
+        print(f"    ❌ Thread exception: {str(exception[0])[:80]}")
+        questionnaire['questionnaire_text'] = None
+        questionnaire['scrape_status'] = 'error'
+        with progress_lock:
+            failed_count += 1
+        return questionnaire, False
+    
+    questionnaire_text = result[0]
     
     if questionnaire_text:
         questionnaire['questionnaire_text'] = questionnaire_text
