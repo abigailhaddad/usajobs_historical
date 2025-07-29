@@ -52,6 +52,8 @@ def extract_questionnaire_links_from_job(job_row):
     grade_code = None
     position_schedule = None
     service_type = None
+    low_grade = None
+    high_grade = None
     
     if pd.notna(job_row.get('MatchedObjectDescriptor')):
         try:
@@ -95,6 +97,11 @@ def extract_questionnaire_links_from_job(job_row):
                     }
                     service_type = service_type_map.get(service_type_code, service_type_code)
                 
+                # Get numeric grade levels from UserArea.Details
+                low_grade = details.get('LowGrade')
+                high_grade = details.get('HighGrade')
+                pay_plan = details.get('PayPlan')
+                
                 # Check Evaluations field for USAStaffing links
                 evaluations = details.get('Evaluations', '')
                 if evaluations:
@@ -126,7 +133,7 @@ def extract_questionnaire_links_from_job(job_row):
             if match not in links:
                 links.append(match)
     
-    return links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type
+    return links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type, low_grade, high_grade
 
 
 def scrape_questionnaire(url, output_dir, timeout_seconds=60):
@@ -377,7 +384,7 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
                 print(f"  Processing job {idx}/{len(df)} ({jobs_with_links} with links, {new_links_in_file} new)...", end='\r')
             
             # Extract links and other fields from this job
-            links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type = extract_questionnaire_links_from_job(row)
+            links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type, low_grade, high_grade = extract_questionnaire_links_from_job(row)
             
             if links:
                 jobs_with_links += 1
@@ -388,15 +395,21 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
                         existing_urls.add(link)
                         new_links_in_file += 1
                         
-                        # Get grade from top-level fields
-                        min_grade = row.get('minimumGrade', '')
-                        max_grade = row.get('maximumGrade', '')
-                        if min_grade and max_grade and min_grade == max_grade:
-                            grade_code = min_grade
-                        elif min_grade and max_grade:
-                            grade_code = f"{min_grade}-{max_grade}"
+                        # Construct grade code from pay plan and numeric grades
+                        # First get the pay plan from top level (e.g., GS, WG)
+                        pay_scale = row.get('minimumGrade', '')
+                        
+                        # Use numeric grades from extraction if available
+                        if pay_scale and low_grade and high_grade:
+                            if low_grade == high_grade:
+                                grade_code = f"{pay_scale}-{low_grade}"
+                            else:
+                                grade_code = f"{pay_scale}-{low_grade}/{high_grade}"
+                        elif pay_scale:
+                            # Fallback to just pay scale if no numeric grades
+                            grade_code = pay_scale
                         else:
-                            grade_code = min_grade or max_grade or None
+                            grade_code = None
                         
                         # Create record with all needed fields
                         link_record = {
