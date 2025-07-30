@@ -9,6 +9,7 @@ format:
     highlight-style: github
     df-print: paged
     embed-resources: true
+    html-table-processing: none
 execute:
   warning: false
   message: false
@@ -164,6 +165,7 @@ if 'service_type' in scraped_df.columns:
         GT(service_stats)
         .tab_header(title="Service Type Analysis")
         .tab_options(row_striping_include_table_body=False)
+        .opt_row_striping(row_striping=False)
         .fmt_number(columns=['Has EO Question', 'Total Scraped'], decimals=0)
         .fmt_number(columns=['% With EO Question'], decimals=1)
         .data_color(
@@ -186,6 +188,7 @@ if 'grade_code' in scraped_df.columns:
         GT(grade_stats)
         .tab_header(title="Grade Level Analysis (Most Frequent Grades)")
         .tab_options(row_striping_include_table_body=False)
+        .opt_row_striping(row_striping=False)
         .fmt_number(columns=['Has EO Question', 'Total Scraped'], decimals=0)
         .fmt_number(columns=['% With EO Question'], decimals=1)
         .data_color(
@@ -207,6 +210,7 @@ if 'position_location' in scraped_df.columns:
         GT(location_stats)
         .tab_header(title="Geographic Analysis (Top 10 Locations)")
         .tab_options(row_striping_include_table_body=False)
+        .opt_row_striping(row_striping=False)
         .fmt_number(columns=['Has EO Question', 'Total Scraped'], decimals=0)
         .fmt_number(columns=['% With EO Question'], decimals=1)
         .data_color(
@@ -229,6 +233,7 @@ gt_agency = (
     GT(agency_stats)
     .tab_header(title="Agency Analysis (Top 20)")
     .tab_options(row_striping_include_table_body=False)
+    .opt_row_striping(row_striping=False)
     .fmt_number(columns=['Has EO Question', 'Total Scraped'], decimals=0)
     .fmt_number(columns=['% With EO Question'], decimals=1)
     .data_color(
@@ -252,6 +257,7 @@ gt_occupation = (
     GT(occupation_stats)
     .tab_header(title="Occupation Series Analysis (Top 20)")
     .tab_options(row_striping_include_table_body=False)
+    .opt_row_striping(row_striping=False)
     .fmt_number(columns=['Has EO Question', 'Total Scraped'], decimals=0)
     .fmt_number(columns=['% With EO Question'], decimals=1)
     .data_color(
@@ -354,6 +360,7 @@ if 'open_date' in scraped_df.columns:
             title="Executive Order Question Usage by Job Opening Date",
             subtitle="Weekly and monthly percentages of jobs posted with the EO question"
         )
+        .opt_row_striping(row_striping=False)
         .fmt_number(
             columns=['Total Jobs', 'With EO'],
             decimals=0
@@ -400,6 +407,7 @@ gt_detail = (
     GT(detail_table)
     .tab_header(title=f"All {len(detail_table)} Job Postings with Executive Order Question")
     .tab_options(row_striping_include_table_body=False)
+    .opt_row_striping(row_striping=False)
     .sub_missing(missing_text="N/A")
 )
 gt_detail.show()
@@ -452,6 +460,7 @@ if total_not_scraped > 0 and total_not_scraped < 50:  # Only show if reasonable 
                 GT(failed_table)
                 .tab_header(title=f"Sample of Unscraped Questionnaires (showing up to 20)")
                 .tab_options(row_striping_include_table_body=False)
+        .opt_row_striping(row_striping=False)
                 .sub_missing(missing_text="N/A")
             )
             gt_failed.show()
