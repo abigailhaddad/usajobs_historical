@@ -114,7 +114,7 @@
             </ul>
         </div>
         <div class="stats">
-            <strong>Dataset:</strong> 2,995,364 total job postings | <strong>Coverage:</strong> | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
+            <strong>Dataset:</strong> 2,995,622 total job postings | <strong>Coverage:</strong> | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
         </div>
 
         <h2>Table of Contents</h2>
@@ -148,7 +148,7 @@
                 <tr><td>2022</td><td>441,604</td><td>419,295</td><td>✅ Complete year</td></tr>
                 <tr><td>2023</td><td>454,652</td><td>434,527</td><td>✅ Complete year</td></tr>
                 <tr><td>2024</td><td>367,751</td><td>352,296</td><td>✅ Complete year</td></tr>
-                <tr><td>2025</td><td>116,101</td><td>114,731</td><td>Current through July 30, 2025</td></tr>
+                <tr><td>2025</td><td>116,359</td><td>114,988</td><td>Current through July 30, 2025</td></tr>
             </tbody>
         </table>
 
@@ -173,7 +173,7 @@
                 <tr>
                     <td><code class="field-name">JobCategories</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"series": "0801"}, {"series": "0840"}], [{"series": "0180"}, {"series": "0185"}, {"series": "0101"}], [{"series": "0801"}, {"series": "0803"}], [{"series": "0401"}, {"series": "0819"}] (3060 unique)</td>
+                    <td class="examples">[{"series": "0343"}, {"series": "0301"}, {"series": "1560"}, {"series": "1550"}, {"series": "2210"}], [{"series": "0810"}, {"series": "1560"}, {"series": "1370"}, {"series": "0150"}, {"series": "1373"}], [{"series": "0401"}, {"series": "0440"}, {"series": "0482"}, {"series": "0487"}], [{"series": "1301"}, {"series": "0808"}, {"series": "0401"}, {"series": "0193"}] (3060 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -191,7 +191,7 @@
                 <tr>
                     <td><code class="field-name">agencyLevelSort</code></td>
                     <td>String</td>
-                    <td class="examples">Department of Agriculture\Food and Nutrition Service, Armed Forces Retirement Home, Department of the Navy\Chief of Naval Education and Training, Department of Justice\Offices, Boards and Divisions (542 unique)</td>
+                    <td class="examples">Department of Labor\Wage and Hour Division, Department of Housing and Urban Development\Office of General Counsel, Department of Agriculture\Office of Budget and Program Analysis, Federal Retirement Thrift Investment Board (542 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -209,13 +209,13 @@
                 <tr>
                     <td><code class="field-name">announcementNumber</code></td>
                     <td>String</td>
-                    <td class="examples">CBST-12464820-24-SC, NC7X240200483651, WTEW248531959379HW, 24-HUD-1679 (363801 unique)</td>
+                    <td class="examples">12404787-MFR-PT, PW-12561466 -24-CRCL, CBSX-12387552-24-JW, CO-2025-0144 (363801 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">appointmentType</code></td>
                     <td>String</td>
-                    <td class="examples">Presidential Management Fellows, Agency Employees Only, Term, Temporary (15 unique)</td>
+                    <td class="examples">Telework, Permanent, Term, Recent graduates (15 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -233,43 +233,43 @@
                 <tr>
                     <td><code class="field-name">hiringAgencyCode</code></td>
                     <td>String</td>
-                    <td class="examples">AF13, FRBG, DD26, TR93 (528 unique)</td>
+                    <td class="examples">ARAE, HUMM, IN29, TD05 (528 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringAgencyName</code></td>
                     <td>String</td>
-                    <td class="examples">Naval Supply Systems Command, Bureau of Labor Statistics, Council of the Inspectors General on Integrity and Efficiency, Commission on Civil Rights (502 unique)</td>
+                    <td class="examples">Civilian Board of Contract Appeals, Immediate Office of the Assistant Secretary for Congressional and Legislative Affairs, Assistant Secretary for Policy Development and Research, Risk Management Agency (502 unique)</td>
                     <td class="completeness good">99%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringDepartmentCode</code></td>
                     <td>String</td>
-                    <td class="examples">FD, AM, SE, IG (122 unique)</td>
+                    <td class="examples">LP, WK, VA, GS (122 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringDepartmentName</code></td>
                     <td>String</td>
-                    <td class="examples">Department of Defense, Department of State, Department of Homeland Security, Court Services and Offender Supervision Agency for DC (26 unique)</td>
+                    <td class="examples">Department of Commerce, Department of Justice, Department of Defense, Department of the Air Force (26 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringSubelementName</code></td>
                     <td>String</td>
-                    <td class="examples">Office of Financial Management/Financial Statements and Reporting Division, G4 Operations Section, Army Health Clinic Kenner, Multiple Facilities, NCEZID-DFWED-ENTERIC DISEASES LABORATORY BRANCH (59973 unique)</td>
+                    <td class="examples">MWR Library Services SGT Yano Library, Schofield Barracks, Hawaii, VA Mid Atlantic Healthcare Network-VISN 6- Hampton- Battlefield CBOC, Schofield Barracks Bowling Center - Schofield Barracks, Hawaii- (Oahu), US Army Aviation Center of Excellence / 1st Aviation Brigade (59973 unique)</td>
                     <td class="completeness poor">62%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">inserted_at</code></td>
                     <td>String</td>
-                    <td class="examples">2025-07-05T13:02:09.566101, 2025-07-05T13:02:09.574408, 2025-07-05T13:52:56.659609, 2025-07-05T15:31:46.136608 (367177 unique)</td>
+                    <td class="examples">2025-07-05T15:22:10.641696, 2025-07-05T14:23:06.593829, 2025-07-05T14:06:16.850380, 2025-07-05T12:56:52.028256 (367177 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">maximumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">JJ, L, 9, 7 (127 unique)</td>
+                    <td class="examples">45, JJ, HI, 52 (127 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -281,7 +281,7 @@
                 <tr>
                     <td><code class="field-name">minimumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">D, 2, 9, LI (125 unique)</td>
+                    <td class="examples">F, 43, 7, 25 (125 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -293,25 +293,25 @@
                 <tr>
                     <td><code class="field-name">payScale</code></td>
                     <td>String</td>
-                    <td class="examples">EL, BL, DU, KX (191 unique)</td>
+                    <td class="examples">AC, EL, BN, VM (191 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionCloseDate</code></td>
                     <td>String</td>
-                    <td class="examples">2024-06-05, 2024-06-09, 2024-12-20, 2024-12-12 (672 unique)</td>
+                    <td class="examples">2025-09-04, 2024-10-21, 2025-07-21, 2024-06-27 (672 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionExpireDate</code></td>
                     <td>String</td>
-                    <td class="examples">2024-09-14, 2024-08-20, 2024-10-06, 2017-12-07 (550 unique)</td>
+                    <td class="examples">2025-04-25, 2024-04-20, 2025-01-14, 2024-10-20 (550 unique)</td>
                     <td class="completeness poor">9%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionOpenDate</code></td>
                     <td>String</td>
-                    <td class="examples">2024-01-27, 2024-12-23, 2024-04-23, 2024-10-18 (365 unique)</td>
+                    <td class="examples">2024-04-11, 2024-08-03, 2024-02-13, 2024-04-07 (365 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -323,13 +323,13 @@
                 <tr>
                     <td><code class="field-name">positionTitle</code></td>
                     <td>String</td>
-                    <td class="examples">Nurse (Forensic Clinical Care Coordinator), Physician-Urologist-EDRP Authorized - Recruitment/Relocation Incentive, Nurse (Patient Safety), Food Service Worker (Bowling) - FLEX (77986 unique)</td>
+                    <td class="examples">Associate Administrator, Bureau of Health Workforce, Wildland Firefighter (Fire Management Planning) (Fire Management Program Specialist), Social Worker (Program Coordinator)- Mental Health Residential Rehab Treatment Program, Professional Development Program Coordinator - ADL (77986 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">promotionPotential</code></td>
                     <td>String</td>
-                    <td class="examples">FE, PB1, 90090, 71 (115 unique)</td>
+                    <td class="examples">96, J, 07, 28 (115 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -377,7 +377,7 @@
                 <tr>
                     <td><code class="field-name">totalOpenings</code></td>
                     <td>String</td>
-                    <td class="examples">275, 82, 54, 47 (157 unique)</td>
+                    <td class="examples">441, 36, 0, 200 (157 unique)</td>
                     <td class="completeness warning">90%</td>
                 </tr>
                 <tr>
