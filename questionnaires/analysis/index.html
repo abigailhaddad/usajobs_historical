@@ -33,6 +33,12 @@
             padding: 3px;
             box-sizing: border-box;
         }
+        .search-row th {
+            padding: 4px !important;
+        }
+        .search-row input {
+            font-weight: normal;
+        }
     </style>
 </head>
 <body>
@@ -208,6 +214,18 @@
                                     <th>Close</th>
                                     <th>USAJobs</th>
                                     <th>Questions</th>
+                                </tr>
+                                <tr class="search-row">
+                                    <th><input type="text" class="form-control form-control-sm" placeholder="Search title..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm" placeholder="Search occupation..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm" placeholder="Search agency..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm" placeholder="Search location..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm" placeholder="Search grade..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm" placeholder="Search service..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm" placeholder="Search date..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm" placeholder="Search date..." /></th>
+                                    <th></th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -421,10 +439,31 @@
                 scrollX: false,
                 searching: true,
                 dom: 'lfrtip',
+                orderCellsTop: true,
+                fixedHeader: true,
                 drawCallback: function() {
                     // Update shown count when page changes
                     const info = this.api().page.info();
                     document.getElementById('jobsShown').textContent = info.end;
+                },
+                initComplete: function() {
+                    // Setup column search
+                    const api = this.api();
+                    
+                    // Apply the search on each column input
+                    $('.search-row input', api.table().header()).on('keyup change clear', function() {
+                        const colIdx = $(this).parent().index();
+                        if (colIdx < 8) { // Only search on the first 8 columns
+                            api.column(colIdx)
+                                .search(this.value)
+                                .draw();
+                        }
+                    });
+                    
+                    // Prevent sorting when clicking on search inputs
+                    $('.search-row input').on('click', function(e) {
+                        e.stopPropagation();
+                    });
                 }
             });
         }
