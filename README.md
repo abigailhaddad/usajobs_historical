@@ -198,18 +198,14 @@ The pipeline uses a "keep everything + overlay" approach:
 
 See [`examples.py`](https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py) for usage examples.
 
-## Questionnaire Scraping (Example)
+## Questionnaire Analysis
 
-The `questionnaires/` directory contains an example of extracting and analyzing job questionnaires:
+The `questionnaires/` directory monitors federal job questionnaires for new essay questions.
 
-```bash
-cd questionnaires
-python extract_questionnaires.py    # Extract and scrape questionnaires from recent job postings
-```
+**Dashboard (updated daily)**: https://federalhiringessays.netlify.app/
 
-This example script:
-- Extracts questionnaire URLs from job postings (currently filtered to jobs after 2025-06-01)
-- Scrapes the questionnaire content using Playwright
-- Saves the raw text for analysis
-
-**Note**: This is provided as an example of extended functionality. Modify the date filters and analysis approach as needed for your use case.
+The system:
+- Daily scrapes questionnaires from USAStaffing and Monster Government
+- Identifies jobs asking "How would you help advance the President's Executive Orders and policy priorities in this role?"
+- Shows trends by agency, location, grade level, and time
+- Updates automatically via GitHub Actions
