@@ -1,21 +1,21 @@
 {
   "overview": {
-    "total_scraped": 14442,
-    "total_with_eo": "300",
+    "total_scraped": 14679,
+    "total_with_eo": "310",
     "percentage_with_eo": 2.1,
-    "data_coverage": "Analyzing questionnaires from federal job postings from June 01, 2025 to July 29, 2025"
+    "data_coverage": "Analyzing questionnaires from federal job postings from June 01, 2025 to July 30, 2025"
   },
   "service_analysis": [
     {
       "service_type": "Competitive",
-      "Has EO Question": 292,
-      "Total Scraped": 8605,
+      "Has EO Question": 302,
+      "Total Scraped": 8780,
       "% With EO Question": 3.4
     },
     {
       "service_type": "Excepted",
       "Has EO Question": 6,
-      "Total Scraped": 5826,
+      "Total Scraped": 5888,
       "% With EO Question": 0.1
     },
     {
@@ -28,71 +28,77 @@
   "grade_analysis": [
     {
       "grade_clean": "GS-12",
-      "Has EO Question": 20,
-      "Total Scraped": 1155,
-      "% With EO Question": 1.7
+      "Has EO Question": 22,
+      "Total Scraped": 1178,
+      "% With EO Question": 1.9
     },
     {
       "grade_clean": "VN-00",
       "Has EO Question": 0,
-      "Total Scraped": 1082,
+      "Total Scraped": 1100,
       "% With EO Question": 0.0
     },
     {
       "grade_clean": "GS-13",
-      "Has EO Question": 30,
-      "Total Scraped": 938,
-      "% With EO Question": 3.2
+      "Has EO Question": 34,
+      "Total Scraped": 967,
+      "% With EO Question": 3.5
     },
     {
       "grade_clean": "GS-11",
       "Has EO Question": 25,
-      "Total Scraped": 755,
-      "% With EO Question": 3.3
+      "Total Scraped": 770,
+      "% With EO Question": 3.2
     },
     {
       "grade_clean": "GS-9",
-      "Has EO Question": 21,
-      "Total Scraped": 652,
-      "% With EO Question": 3.2
+      "Has EO Question": 22,
+      "Total Scraped": 665,
+      "% With EO Question": 3.3
     },
     {
       "grade_clean": "GS-6",
       "Has EO Question": 9,
-      "Total Scraped": 544,
-      "% With EO Question": 1.7
+      "Total Scraped": 547,
+      "% With EO Question": 1.6
     },
     {
       "grade_clean": "GS-7",
       "Has EO Question": 13,
-      "Total Scraped": 512,
+      "Total Scraped": 520,
       "% With EO Question": 2.5
     },
     {
       "grade_clean": "GS-14",
       "Has EO Question": 24,
-      "Total Scraped": 434,
-      "% With EO Question": 5.5
+      "Total Scraped": 443,
+      "% With EO Question": 5.4
     },
     {
       "grade_clean": "GS-9/11",
       "Has EO Question": 3,
-      "Total Scraped": 416,
+      "Total Scraped": 419,
       "% With EO Question": 0.7
     },
     {
       "grade_clean": "GS-5",
       "Has EO Question": 20,
-      "Total Scraped": 368,
+      "Total Scraped": 369,
       "% With EO Question": 5.4
     }
   ],
   "location_analysis": [
     {
       "position_location": "Washington, District of Columbia",
-      "Has EO Question": 29,
-      "Total Scraped": 535,
-      "% With EO Question": 5.4
+      "Has EO Question": 31,
+      "Total Scraped": 550,
+      "% With EO Question": 5.6
+    },
+    {
+      "position_location": "Indianapolis, Indiana",
+      "Has EO Question": 0,
+      "Total Scraped": 118,
+      "% With EO Question": 0.0
     },
     {
       "position_location": "Battle Creek, Michigan",
@@ -101,16 +107,16 @@
       "% With EO Question": 0.0
     },
     {
-      "position_location": "Indianapolis, Indiana",
-      "Has EO Question": 0,
-      "Total Scraped": 116,
-      "% With EO Question": 0.0
-    },
-    {
       "position_location": "Salt Lake City, Utah",
       "Has EO Question": 3,
-      "Total Scraped": 114,
+      "Total Scraped": 117,
       "% With EO Question": 2.6
+    },
+    {
+      "position_location": "San Diego, California",
+      "Has EO Question": 0,
+      "Total Scraped": 107,
+      "% With EO Question": 0.0
     },
     {
       "position_location": "Albuquerque, New Mexico",
@@ -125,12 +131,6 @@
       "% With EO Question": 4.9
     },
     {
-      "position_location": "San Diego, California",
-      "Has EO Question": 0,
-      "Total Scraped": 102,
-      "% With EO Question": 0.0
-    },
-    {
       "position_location": "Aurora, Colorado",
       "Has EO Question": 1,
       "Total Scraped": 90,
@@ -139,7 +139,7 @@
     {
       "position_location": "Atlanta, Georgia",
       "Has EO Question": 1,
-      "Total Scraped": 88,
+      "Total Scraped": 89,
       "% With EO Question": 1.1
     },
     {
@@ -153,62 +153,62 @@
     {
       "hiring_agency": "Department of Veterans Affairs",
       "Has EO Question": 0,
-      "Total Scraped": 6087,
+      "Total Scraped": 6147,
       "% With EO Question": 0.0
     },
     {
       "hiring_agency": "Department of the Air Force",
-      "Has EO Question": 73,
-      "Total Scraped": 1726,
-      "% With EO Question": 4.2
+      "Has EO Question": 75,
+      "Total Scraped": 1745,
+      "% With EO Question": 4.3
     },
     {
       "hiring_agency": "Department of Defense",
       "Has EO Question": 21,
-      "Total Scraped": 1497,
+      "Total Scraped": 1527,
       "% With EO Question": 1.4
     },
     {
       "hiring_agency": "Department of the Army",
       "Has EO Question": 1,
-      "Total Scraped": 1292,
+      "Total Scraped": 1315,
       "% With EO Question": 0.1
     },
     {
       "hiring_agency": "Department of the Navy",
       "Has EO Question": 1,
-      "Total Scraped": 1207,
+      "Total Scraped": 1251,
       "% With EO Question": 0.1
     },
     {
       "hiring_agency": "Department of Justice",
-      "Has EO Question": 6,
-      "Total Scraped": 828,
-      "% With EO Question": 0.7
+      "Has EO Question": 7,
+      "Total Scraped": 831,
+      "% With EO Question": 0.8
     },
     {
       "hiring_agency": "Department of Homeland Security",
       "Has EO Question": 1,
-      "Total Scraped": 624,
+      "Total Scraped": 648,
       "% With EO Question": 0.2
     },
     {
       "hiring_agency": "Department of the Interior",
-      "Has EO Question": 66,
-      "Total Scraped": 279,
-      "% With EO Question": 23.7
+      "Has EO Question": 68,
+      "Total Scraped": 286,
+      "% With EO Question": 23.8
     },
     {
       "hiring_agency": "Department of Health and Human Services",
       "Has EO Question": 2,
-      "Total Scraped": 184,
-      "% With EO Question": 1.1
+      "Total Scraped": 193,
+      "% With EO Question": 1.0
     },
     {
       "hiring_agency": "Other Agencies and Independent Organizations",
       "Has EO Question": 16,
-      "Total Scraped": 176,
-      "% With EO Question": 9.1
+      "Total Scraped": 183,
+      "% With EO Question": 8.7
     },
     {
       "hiring_agency": "Legislative Branch",
@@ -218,9 +218,9 @@
     },
     {
       "hiring_agency": "Department of Agriculture",
-      "Has EO Question": 76,
-      "Total Scraped": 165,
-      "% With EO Question": 46.1
+      "Has EO Question": 81,
+      "Total Scraped": 170,
+      "% With EO Question": 47.6
     },
     {
       "hiring_agency": "Department of Commerce",
@@ -231,7 +231,7 @@
     {
       "hiring_agency": "Department of Transportation",
       "Has EO Question": 0,
-      "Total Scraped": 44,
+      "Total Scraped": 50,
       "% With EO Question": 0.0
     },
     {
@@ -275,98 +275,98 @@
     {
       "occupation_display": "610 - Nurse",
       "Has EO Question": 1,
-      "Total Scraped": 1256,
+      "Total Scraped": 1281,
       "% With EO Question": 0.1
     },
     {
       "occupation_display": "185 - Social Work",
       "Has EO Question": 3,
-      "Total Scraped": 646,
+      "Total Scraped": 650,
       "% With EO Question": 0.5
     },
     {
       "occupation_display": "301 - Miscellaneous Administration And Program",
-      "Has EO Question": 29,
-      "Total Scraped": 479,
+      "Has EO Question": 30,
+      "Total Scraped": 492,
       "% With EO Question": 6.1
     },
     {
       "occupation_display": "1702 - Education And Training Technician",
       "Has EO Question": 1,
-      "Total Scraped": 441,
+      "Total Scraped": 447,
       "% With EO Question": 0.2
     },
     {
       "occupation_display": "679 - Medical Support Assistance",
       "Has EO Question": 0,
-      "Total Scraped": 421,
+      "Total Scraped": 424,
       "% With EO Question": 0.0
     },
     {
       "occupation_display": "620 - Practical Nurse",
       "Has EO Question": 2,
-      "Total Scraped": 370,
+      "Total Scraped": 371,
       "% With EO Question": 0.5
     },
     {
       "occupation_display": "189 - Recreation Aid And Assistant",
       "Has EO Question": 0,
-      "Total Scraped": 351,
+      "Total Scraped": 353,
       "% With EO Question": 0.0
     },
     {
       "occupation_display": "303 - Miscellaneous Clerk And Assistant",
       "Has EO Question": 2,
-      "Total Scraped": 316,
+      "Total Scraped": 321,
       "% With EO Question": 0.6
     },
     {
       "occupation_display": "180 - Psychology",
       "Has EO Question": 0,
-      "Total Scraped": 305,
+      "Total Scraped": 313,
       "% With EO Question": 0.0
     },
     {
       "occupation_display": "640 - Health Aid And Technician",
       "Has EO Question": 0,
-      "Total Scraped": 272,
+      "Total Scraped": 273,
       "% With EO Question": 0.0
+    },
+    {
+      "occupation_display": "2210 - Information Technology Management",
+      "Has EO Question": 2,
+      "Total Scraped": 263,
+      "% With EO Question": 0.8
     },
     {
       "occupation_display": "1101 - General Business And Industry",
       "Has EO Question": 12,
-      "Total Scraped": 259,
+      "Total Scraped": 261,
       "% With EO Question": 4.6
     },
     {
       "occupation_display": "3566 - Custodial Working",
       "Has EO Question": 2,
-      "Total Scraped": 255,
-      "% With EO Question": 0.8
-    },
-    {
-      "occupation_display": "2210 - Information Technology Management",
-      "Has EO Question": 2,
-      "Total Scraped": 253,
+      "Total Scraped": 257,
       "% With EO Question": 0.8
     },
     {
       "occupation_display": "621 - Nursing Assistant",
       "Has EO Question": 0,
-      "Total Scraped": 212,
+      "Total Scraped": 213,
       "% With EO Question": 0.0
+    },
+    {
+      "occupation_display": "343 - Management And Program Analysis",
+      "Has EO Question": 4,
+      "Total Scraped": 208,
+      "% With EO Question": 1.9
     },
     {
       "occupation_display": "7408 - Food Service Working",
       "Has EO Question": 0,
       "Total Scraped": 205,
       "% With EO Question": 0.0
-    },
-    {
-      "occupation_display": "343 - Management And Program Analysis",
-      "Has EO Question": 4,
-      "Total Scraped": 199,
-      "% With EO Question": 2.0
     },
     {
       "occupation_display": "7404 - Cooking",
@@ -383,13 +383,13 @@
     {
       "occupation_display": "801 - General Engineering",
       "Has EO Question": 0,
-      "Total Scraped": 150,
+      "Total Scraped": 157,
       "% With EO Question": 0.0
     },
     {
-      "occupation_display": "675 - Medical Records Technician",
+      "occupation_display": "660 - Pharmacist",
       "Has EO Question": 0,
-      "Total Scraped": 148,
+      "Total Scraped": 149,
       "% With EO Question": 0.0
     }
   ],
@@ -411,10 +411,10 @@
       "Week 2": 1.1,
       "Week 3": 2.3,
       "Week 4": 4.2,
-      "Week 5": 5.1,
+      "Week 5": 4.9,
       "Month %": 2.4,
-      "Total Jobs": 11282,
-      "With EO": 270
+      "Total Jobs": 11519,
+      "With EO": 280
     }
   ],
   "job_postings": [
@@ -4017,6 +4017,126 @@
       "close_date": "08/13/2025",
       "usajobs_link": 841940000,
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12772160"
+    },
+    {
+      "position_title": "Safety and Occupational Health Manager",
+      "occupation": "18 - Safety and Occupational Health Management",
+      "agency": "Department of the Interior",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-12",
+      "service": "Competitive",
+      "open_date": "07/30/2025",
+      "close_date": "08/13/2025",
+      "usajobs_link": 841006300,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12761497"
+    },
+    {
+      "position_title": "Senior Staff Ranger",
+      "occupation": "25 - Park Ranger",
+      "agency": "Department of the Interior",
+      "location": "Grand Canyon, Arizona",
+      "grade": "GS-13",
+      "service": "Competitive",
+      "open_date": "07/30/2025",
+      "close_date": "08/12/2025",
+      "usajobs_link": 841876400,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12769035"
+    },
+    {
+      "position_title": "UNIT DEPLOYMENT MANAGER",
+      "occupation": "301 - Miscellaneous Administration And Program",
+      "agency": "Department of the Air Force",
+      "location": "Mildenhall, United Kingdom",
+      "grade": "GS-9",
+      "service": "Competitive",
+      "open_date": "07/30/2025",
+      "close_date": "08/05/2025",
+      "usajobs_link": 841950400,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12773388"
+    },
+    {
+      "position_title": "Administrative Officer",
+      "occupation": "341 - Administrative Officer",
+      "agency": "Department of Justice",
+      "location": "Nashville, Tennessee",
+      "grade": "GS-13",
+      "service": "Competitive",
+      "open_date": "07/30/2025",
+      "close_date": "08/06/2025",
+      "usajobs_link": 841970600,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12766306"
+    },
+    {
+      "position_title": "SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST",
+      "occupation": "346 - Logistics Management",
+      "agency": "Department of the Air Force",
+      "location": "Yokota Air Base, Japan",
+      "grade": "GS-12",
+      "service": "Competitive",
+      "open_date": "07/30/2025",
+      "close_date": "08/05/2025",
+      "usajobs_link": 841943600,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12772941"
+    },
+    {
+      "position_title": "Biological Science Technician (Wildlife)",
+      "occupation": "404 - Biological Science Technician",
+      "agency": "Department of Agriculture",
+      "location": "Hilo, Hawaii",
+      "grade": "GS-6/7",
+      "service": "Competitive",
+      "open_date": "07/30/2025",
+      "close_date": "08/05/2025",
+      "usajobs_link": 841947900,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12772100"
+    },
+    {
+      "position_title": "Wildlife Biologist",
+      "occupation": "486 - Wildlife Biology",
+      "agency": "Department of Agriculture",
+      "location": "Concord, New Hampshire",
+      "grade": "GS-7/9",
+      "service": "Competitive",
+      "open_date": "07/30/2025",
+      "close_date": "08/05/2025",
+      "usajobs_link": 841873200,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12772009"
+    },
+    {
+      "position_title": "Lead Contract Specialist",
+      "occupation": "1102 - Contracting",
+      "agency": "Department of Agriculture",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-13",
+      "service": "Competitive",
+      "open_date": "07/30/2025",
+      "close_date": "08/05/2025",
+      "usajobs_link": 841771700,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12771218"
+    },
+    {
+      "position_title": "Supervisory Aviation Safety Inspector",
+      "occupation": "1825 - Aviation Safety",
+      "agency": "Department of Agriculture",
+      "location": "Oklahoma City, Oklahoma",
+      "grade": "GS-13",
+      "service": "Competitive",
+      "open_date": "07/30/2025",
+      "close_date": "08/05/2025",
+      "usajobs_link": 841824900,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12771871"
+    },
+    {
+      "position_title": "Agricultural Commodity Grader (Grain)",
+      "occupation": "1980 - Agricultural Commodity Grading",
+      "agency": "Department of Agriculture",
+      "location": "Belle Chasse, Louisiana",
+      "grade": "GS-5/9",
+      "service": "Competitive",
+      "open_date": "07/30/2025",
+      "close_date": "08/05/2025",
+      "usajobs_link": 841964600,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12772639"
     }
   ]
 }
