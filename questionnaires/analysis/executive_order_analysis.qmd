@@ -5,6 +5,10 @@ format:
   html:
     code-fold: true
     toc: true
+    theme: cosmo
+    highlight-style: github
+    df-print: paged
+    embed-resources: true
 execute:
   warning: false
   message: false
@@ -16,8 +20,8 @@ import os
 from pathlib import Path
 import re
 from collections import Counter
-from IPython.display import HTML, display
 from datetime import datetime
+from great_tables import GT
 
 # Define paths
 BASE_DIR = Path('../..')
@@ -50,95 +54,26 @@ else:
     print("📅 Questionnaire analysis (date information not available)")
 ```
 
-## Utility Functions
+## Core Functions
 
 ```{python}
-def extract_file_id_from_url(url):
-    """Extract questionnaire file ID and prefix from URL"""
-    if pd.isna(url):
-        return None, None
-        
-    if 'usastaffing.gov' in url:
-        match = re.search(r'ViewQuestionnaire/(\d+)', url)
-        file_id = match.group(1) if match else 'unknown'
-        prefix = 'usastaffing'
-    elif 'monstergovt.com' in url:
-        match = re.search(r'jnum=(\d+)', url)
-        if not match:
-            match = re.search(r'J=(\d+)', url)
-        file_id = match.group(1) if match else 'unknown'
-        prefix = 'monster'
-    else:
-        file_id = str(hash(url))[:8]
-        prefix = 'other'
+def calculate_eo_stats(df, group_column, top_n=None):
+    """Calculate EO question statistics for any grouping column"""
+    stats = df.groupby(group_column).agg({
+        'has_executive_order': ['sum', 'count']
+    }).reset_index()
     
-    return file_id, prefix
-
-def extract_questionnaire_id(url):
-    """Extract questionnaire ID from URL (for USAStaffing URLs only)"""
-    if pd.isna(url):
-        return None
-    match = re.search(r'/ViewQuestionnaire/(\d+)', url)
-    if match:
-        return match.group(1)
-    return None
-
-def get_questionnaire_filepath(url):
-    """Get the expected filepath for a questionnaire URL"""
-    file_id, prefix = extract_file_id_from_url(url)
-    if file_id and prefix:
-        return RAW_QUESTIONNAIRES_DIR / f'{prefix}_{file_id}.txt'
-    return None
-
-def check_questionnaire_exists(url):
-    """Check if a questionnaire file exists for the given URL"""
-    filepath = get_questionnaire_filepath(url)
-    return filepath and filepath.exists()
-
-def build_usajobs_url(control_number):
-    """Build USAJobs URL from control number"""
-    if pd.notna(control_number):
-        return f"https://www.usajobs.gov/job/{control_number}"
-    return None
-
-def create_html_link(url, text="Link"):
-    """Create HTML link from URL"""
-    if url and url != "N/A":
-        return f'<a href="{url}" target="_blank">{text}</a>'
-    return "N/A"
-
-def format_occupation(series, name):
-    """Format occupation series and name"""
-    if pd.notna(series) and pd.notna(name):
-        return f"{series} - {name}"
-    elif pd.notna(series):
-        return str(series)
-    return "Unknown"
-
-def style_table(df):
-    """Apply consistent styling to dataframe for HTML display"""
-    return df.style.set_properties(**{
-        'text-align': 'left',
-        'white-space': 'pre-wrap',
-        'word-wrap': 'break-word'
-    }).set_table_styles([
-        {'selector': 'td', 'props': [('max-width', '300px')]}
-    ])
-
-def load_questionnaire_links():
-    """Load the questionnaire links CSV"""
-    csv_path = QUESTIONNAIRE_DIR / 'questionnaire_links.csv'
-    if not csv_path.exists():
-        raise FileNotFoundError(f"questionnaire_links.csv not found at {csv_path}")
+    stats.columns = [group_column, 'Has EO Question', 'Total Scraped']
+    stats['% With EO Question'] = (stats['Has EO Question'] / stats['Total Scraped'] * 100).round(1)
     
-    df = pd.read_csv(csv_path)
-    print(f"Loaded {len(df):,} questionnaire links")
-    return df
+    if top_n:
+        stats = stats.nlargest(top_n, 'Total Scraped')
+    
+    return stats.sort_values('Total Scraped', ascending=False).reset_index(drop=True)
 
 def check_executive_order_mentions(questionnaire_dir=RAW_QUESTIONNAIRES_DIR):
     """Check which questionnaires mention the specific executive order question"""
     mentions = {}
-    # Look for the specific question about advancing President's Executive Orders
     pattern = re.compile(r"How would you help advance the President's Executive Orders and policy priorities in this role\?", re.IGNORECASE)
     
     if not questionnaire_dir.exists():
@@ -153,78 +88,48 @@ def check_executive_order_mentions(questionnaire_dir=RAW_QUESTIONNAIRES_DIR):
             with open(txt_file, 'r', encoding='utf-8') as f:
                 content = f.read()
                 
-            # Find all mentions of the specific question
-            eo_mentions = pattern.findall(content)
-            if eo_mentions:
-                # Extract questionnaire ID from filename
+            if pattern.search(content):
                 file_id = txt_file.stem.split('_')[1]
-                mentions[file_id] = len(eo_mentions)
+                mentions[file_id] = 1
         except Exception as e:
             print(f"Error reading {txt_file}: {e}")
     
     return mentions
-
-def get_scraped_questionnaire_ids():
-    """Get set of all scraped questionnaire IDs"""
-    scraped_ids = set()
-    
-    for txt_file in RAW_QUESTIONNAIRES_DIR.glob('*.txt'):
-        file_id = txt_file.stem.split('_')[1]
-        scraped_ids.add(file_id)
-    
-    return scraped_ids
-
-def prepare_job_table_data(df):
-    """Prepare dataframe for job listing table display"""
-    table_df = df.copy()
-    
-    # Create display columns
-    table_df['occupation_display'] = table_df.apply(
-        lambda x: format_occupation(x.get('occupation_series'), x.get('occupation_name')), 
-        axis=1
-    )
-    
-    # Create clickable links
-    job_urls = table_df['usajobs_control_number'].apply(build_usajobs_url)
-    table_df['job_posting_link'] = job_urls.apply(lambda x: create_html_link(x, "USAJobs Link"))
-    table_df['questionnaire_link'] = table_df['questionnaire_url'].apply(
-        lambda x: create_html_link(x, "Questionnaire")
-    )
-    
-    # Format dates - handle mixed formats
-    table_df['open_date'] = pd.to_datetime(table_df['position_open_date'], format='mixed').dt.strftime('%m/%d/%Y')
-    table_df['close_date'] = pd.to_datetime(table_df['position_close_date'], format='mixed').dt.strftime('%m/%d/%Y')
-    
-    # Select and rename columns
-    result = table_df[['position_title', 'occupation_display', 'hiring_agency', 
-                       'position_location', 'grade_code', 'service_type', 'open_date', 'close_date',
-                       'job_posting_link', 'questionnaire_link']].copy()
-    result.columns = ['Position_Title', 'Occupation', 'Agency', 'Location', 
-                      'Grade', 'Service', 'Open', 'Close', 'Job_Posting', 'Questionnaire']
-    
-    return result.sort_values('Position_Title')
 ```
 
 ## Load and Process Data
 
 ```{python}
 # Load questionnaire links
-links_df = load_questionnaire_links()
-
-# Service type is now already in the CSV from extraction
-print(f"Service type already loaded from CSV")
+links_df = pd.read_csv(QUESTIONNAIRE_DIR / 'questionnaire_links.csv')
+print(f"Loaded {len(links_df):,} questionnaire links")
 
 # Check for the specific executive order question
 eo_mentions = check_executive_order_mentions()
 print(f"\nFound {len(eo_mentions):,} questionnaires with the 'advancing President's Executive Orders' question")
 
 # Get all scraped IDs
-scraped_ids = get_scraped_questionnaire_ids()
+scraped_ids = set()
+for txt_file in RAW_QUESTIONNAIRES_DIR.glob('*.txt'):
+    file_id = txt_file.stem.split('_')[1]
+    scraped_ids.add(file_id)
 
 # Add questionnaire ID and executive order flags
+# Extract ID from both USAStaffing and Monster URLs
+def extract_questionnaire_id(url):
+    """Extract questionnaire ID from either USAStaffing or Monster URLs"""
+    if 'usastaffing.gov' in url:
+        match = re.search(r'/ViewQuestionnaire/(\d+)', url)
+        return match.group(1) if match else None
+    elif 'monstergovt.com' in url:
+        match = re.search(r'jnum=(\d+)', url)
+        if not match:
+            match = re.search(r'J=(\d+)', url)
+        return match.group(1) if match else None
+    return None
+
 links_df['questionnaire_id'] = links_df['questionnaire_url'].apply(extract_questionnaire_id)
 links_df['has_executive_order'] = links_df['questionnaire_id'].isin(eo_mentions)
-links_df['eo_mention_count'] = links_df['questionnaire_id'].map(eo_mentions).fillna(0).astype(int)
 
 # Filter to only scraped questionnaires
 scraped_df = links_df[links_df['questionnaire_id'].isin(scraped_ids)].copy()
@@ -248,113 +153,224 @@ print(f"Questionnaires with the specific EO question: {total_with_eo:,}")
 print(f"Percentage with the EO question: {percentage_with_eo:.1f}%")
 ```
 
-### By Service Type
+### Service Type Analysis
 
 ```{python}
-# Analyze by service type for jobs with EO question
-eo_jobs = scraped_df[scraped_df['has_executive_order']].copy()
-
-if 'service_type' in eo_jobs.columns:
-    service_summary = eo_jobs['service_type'].value_counts()
-    print("Service types for jobs with the EO question:")
-    for service, count in service_summary.items():
-        print(f"  {service}: {count} ({count/len(eo_jobs)*100:.1f}%)")
-else:
-    print("Service type information not available")
+# Analyze EO question usage by service type
+if 'service_type' in scraped_df.columns:
+    service_stats = calculate_eo_stats(scraped_df, 'service_type')
+    
+    gt_service = (
+        GT(service_stats)
+        .tab_header(title="Service Type Analysis")
+        .tab_options(row_striping_include_table_body=False)
+        .fmt_number(columns=['Has EO Question', 'Total Scraped'], decimals=0)
+        .fmt_number(columns=['% With EO Question'], decimals=1)
+        .data_color(
+            columns=['% With EO Question'],
+            palette="Blues"
+        )
+    )
+    gt_service.show()
 ```
 
-### By Grade Level
+### Grade Level Analysis (Most Frequent Grades)
 
 ```{python}
-# Analyze by grade level for jobs with EO question
-if 'grade_code' in eo_jobs.columns:
-    # Clean and standardize grade codes
-    eo_jobs['grade_clean'] = eo_jobs['grade_code'].fillna('Not Specified')
-    grade_summary = eo_jobs['grade_clean'].value_counts().head(20)
-    print(f"Top 20 grade levels for jobs with the EO question:")
-    for grade, count in grade_summary.items():
-        print(f"  {grade}: {count}")
-else:
-    print("Grade level information not available")
+# Analyze EO question usage by grade level - top 10
+if 'grade_code' in scraped_df.columns:
+    scraped_df['grade_clean'] = scraped_df['grade_code'].fillna('Not Specified')
+    grade_stats = calculate_eo_stats(scraped_df, 'grade_clean', top_n=10)
+    
+    gt_grade = (
+        GT(grade_stats)
+        .tab_header(title="Grade Level Analysis (Most Frequent Grades)")
+        .tab_options(row_striping_include_table_body=False)
+        .fmt_number(columns=['Has EO Question', 'Total Scraped'], decimals=0)
+        .fmt_number(columns=['% With EO Question'], decimals=1)
+        .data_color(
+            columns=['% With EO Question'],
+            palette="Blues"
+        )
+    )
+    gt_grade.show()
 ```
 
-### By Agency
+### Geographic Analysis (Top 10 Locations)
 
 ```{python}
-# Analyze by agency
-agency_summary = scraped_df.groupby('hiring_agency').agg({
-    'questionnaire_id': 'count',
-    'has_executive_order': 'sum'
-}).reset_index()
-
-agency_summary.columns = ['Agency', 'Total_Scraped', 'Count_With_EO']
-agency_summary['Percent'] = (agency_summary['Count_With_EO'] / agency_summary['Total_Scraped'] * 100).round(0).astype(int)
-
-# Sort by count with EO mentions
-agency_summary = agency_summary.sort_values('Count_With_EO', ascending=False)
-
-# Display agency table - only show agencies that have the question
-agency_with_eo = agency_summary[agency_summary['Count_With_EO'] > 0]
-print(f"Agencies using the 'advancing President's Executive Orders' question ({len(agency_with_eo)} agencies):")
-agency_with_eo.set_index('Agency')[['Total_Scraped', 'Count_With_EO', 'Percent']]
+# Analyze by full location names - top 10
+if 'position_location' in scraped_df.columns:
+    location_stats = calculate_eo_stats(scraped_df, 'position_location', top_n=10)
+    
+    gt_location = (
+        GT(location_stats)
+        .tab_header(title="Geographic Analysis (Top 10 Locations)")
+        .tab_options(row_striping_include_table_body=False)
+        .fmt_number(columns=['Has EO Question', 'Total Scraped'], decimals=0)
+        .fmt_number(columns=['% With EO Question'], decimals=1)
+        .data_color(
+            columns=['% With EO Question'],
+            palette="Blues"
+        )
+    )
+    gt_location.show()
 ```
 
-### By Occupation Series
+
+
+### Agency Analysis
 
 ```{python}
-# Create occupation display for grouping
-scraped_df['occupation_display'] = scraped_df.apply(
-    lambda x: format_occupation(x['occupation_series'], x['occupation_name']), 
-    axis=1
+# Analyze by agency - top 20
+agency_stats = calculate_eo_stats(scraped_df, 'hiring_agency', top_n=20)
+
+gt_agency = (
+    GT(agency_stats)
+    .tab_header(title="Agency Analysis (Top 20)")
+    .tab_options(row_striping_include_table_body=False)
+    .fmt_number(columns=['Has EO Question', 'Total Scraped'], decimals=0)
+    .fmt_number(columns=['% With EO Question'], decimals=1)
+    .data_color(
+        columns=['% With EO Question'],
+        palette="Blues"
+    )
 )
-
-# Analyze by occupation series
-occupation_summary = scraped_df.groupby('occupation_display').agg({
-    'questionnaire_id': 'count',
-    'has_executive_order': 'sum'
-}).reset_index()
-
-occupation_summary.columns = ['Occupation', 'Total_Scraped', 'Count_With_EO']
-occupation_summary['Percent'] = (occupation_summary['Count_With_EO'] / occupation_summary['Total_Scraped'] * 100).round(0).astype(int)
-
-# Sort by count with EO mentions
-occupation_summary = occupation_summary.sort_values('Count_With_EO', ascending=False)
-
-# Display occupation series table - only show occupations that have the question
-occupation_with_eo = occupation_summary[occupation_summary['Count_With_EO'] > 0]
-print(f"Occupation series using the 'advancing President's Executive Orders' question ({len(occupation_with_eo)} occupations):")
-occupation_with_eo.set_index('Occupation')[['Total_Scraped', 'Count_With_EO', 'Percent']]
+gt_agency.show()
 ```
 
-### By Month Posted
+### Occupation Series Analysis
 
 ```{python}
-# Extract month from position_open_date (when the job was actually posted)
-scraped_df['posted_month'] = pd.to_datetime(scraped_df['position_open_date'], format='mixed').dt.to_period('M')
+# Create occupation display
+scraped_df['occupation_display'] = scraped_df['occupation_series'].astype(str) + ' - ' + scraped_df['occupation_name'].fillna('Unknown')
 
-# Remove any rows with missing dates
-scraped_with_dates = scraped_df.dropna(subset=['posted_month'])
+# Analyze by occupation - top 20
+occupation_stats = calculate_eo_stats(scraped_df, 'occupation_display', top_n=20)
 
-# Analyze by month posted
-month_summary = scraped_with_dates.groupby('posted_month').agg({
-    'questionnaire_id': 'count',
-    'has_executive_order': 'sum'
-}).reset_index()
+gt_occupation = (
+    GT(occupation_stats)
+    .tab_header(title="Occupation Series Analysis (Top 20)")
+    .tab_options(row_striping_include_table_body=False)
+    .fmt_number(columns=['Has EO Question', 'Total Scraped'], decimals=0)
+    .fmt_number(columns=['% With EO Question'], decimals=1)
+    .data_color(
+        columns=['% With EO Question'],
+        palette="Blues"
+    )
+)
+gt_occupation.show()
+```
 
-month_summary.columns = ['Month_Posted', 'Total_Scraped', 'Count_With_EO']
-month_summary['Percent'] = (month_summary['Count_With_EO'] / month_summary['Total_Scraped'] * 100).round(0).astype(int)
+### Executive Order Question Usage by Job Opening Date
 
-# Sort by month
-month_summary = month_summary.sort_values('Month_Posted')
+```{python}
+# Convert dates if not already done
+if 'position_open_date' in scraped_df.columns and 'open_date' not in scraped_df.columns:
+    scraped_df['open_date'] = pd.to_datetime(scraped_df['position_open_date'], format='mixed', errors='coerce')
+if 'position_close_date' in scraped_df.columns and 'close_date' not in scraped_df.columns:
+    scraped_df['close_date'] = pd.to_datetime(scraped_df['position_close_date'], format='mixed', errors='coerce')
 
-# Convert Period to string for display
-month_summary['Month_Posted'] = month_summary['Month_Posted'].astype(str)
-
-# Display month table - only show months that have the question
-month_with_eo = month_summary[month_summary['Count_With_EO'] > 0]
-print(f"\nMonths with jobs using the 'advancing President's Executive Orders' question ({len(month_with_eo)} months):")
-print(f"(Based on {len(scraped_with_dates):,} scraped questionnaires with valid posting dates)")
-month_with_eo.set_index('Month_Posted')[['Total_Scraped', 'Count_With_EO', 'Percent']]
+# Create weekly percentage heatmap
+if 'open_date' in scraped_df.columns:
+    # Get jobs with valid open dates
+    jobs_with_dates = scraped_df[scraped_df['open_date'].notna()].copy()
+    
+    # Extract date components
+    jobs_with_dates['year'] = jobs_with_dates['open_date'].dt.year
+    jobs_with_dates['month'] = jobs_with_dates['open_date'].dt.month
+    jobs_with_dates['month_name'] = jobs_with_dates['open_date'].dt.strftime('%B %Y')
+    jobs_with_dates['week_of_month'] = jobs_with_dates['open_date'].dt.day.apply(lambda d: (d-1)//7 + 1)
+    
+    # Group by month and week to calculate percentages
+    weekly_stats = jobs_with_dates.groupby(['year', 'month', 'month_name', 'week_of_month']).agg({
+        'questionnaire_id': 'count',
+        'has_executive_order': 'sum'
+    }).reset_index()
+    
+    # Only calculate percentage where there are jobs (avoid 0.0 for empty weeks)
+    weekly_stats['percentage'] = weekly_stats.apply(
+        lambda row: round(row['has_executive_order'] / row['questionnaire_id'] * 100, 1) if row['questionnaire_id'] > 0 else None,
+        axis=1
+    )
+    
+    # Pivot to create heatmap format - don't fill missing values
+    heatmap_data = weekly_stats.pivot_table(
+        index=['year', 'month', 'month_name'],
+        columns='week_of_month',
+        values='percentage',
+        aggfunc='first'  # Just take the value, don't aggregate
+    ).reset_index()
+    
+    # Sort by year and month
+    heatmap_data = heatmap_data.sort_values(['year', 'month'])
+    
+    # Rename columns
+    heatmap_data.columns.name = None
+    column_mapping = {1: 'Week 1', 2: 'Week 2', 3: 'Week 3', 4: 'Week 4', 5: 'Week 5'}
+    heatmap_data = heatmap_data.rename(columns=column_mapping)
+    
+    # Calculate monthly totals
+    monthly_totals = weekly_stats.groupby(['year', 'month', 'month_name']).agg({
+        'questionnaire_id': 'sum',
+        'has_executive_order': 'sum'
+    }).reset_index()
+    monthly_totals['monthly_percentage'] = (monthly_totals['has_executive_order'] / monthly_totals['questionnaire_id'] * 100).round(1)
+    
+    # Keep only month name for display
+    display_data = heatmap_data[['month_name', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5']].copy()
+    
+    # Merge with monthly totals
+    display_data = display_data.merge(
+        monthly_totals[['month_name', 'questionnaire_id', 'has_executive_order', 'monthly_percentage']],
+        on='month_name',
+        how='left'
+    )
+    
+    # Rename columns
+    display_data = display_data.rename(columns={
+        'month_name': 'Month',
+        'questionnaire_id': 'Total Jobs',
+        'has_executive_order': 'With EO',
+        'monthly_percentage': 'Month %'
+    })
+    
+    # Reorder columns to put Month % after Week 5
+    display_data = display_data[['Month', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Month %', 'Total Jobs', 'With EO']]
+    
+    # Handle missing weeks - ensure all week columns exist
+    for week in ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5']:
+        if week not in display_data.columns:
+            display_data[week] = None
+    
+    # Find max percentage across all percentage columns for consistent scaling
+    percentage_cols = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Month %']
+    max_percentage = display_data[percentage_cols].max().max()
+    
+    # Create GT table
+    gt_table = (
+        GT(display_data)
+        .tab_header(
+            title="Executive Order Question Usage by Job Opening Date",
+            subtitle="Weekly and monthly percentages of jobs posted with the EO question"
+        )
+        .fmt_number(
+            columns=['Total Jobs', 'With EO'],
+            decimals=0
+        )
+        .fmt_number(
+            columns=['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Month %'],
+            decimals=1
+        )
+        .sub_missing(missing_text="—")
+        .data_color(
+            columns=['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Month %'],
+            palette="Blues",
+            domain=[0, max_percentage]
+        )
+    )
+    
+    gt_table.show()
 ```
 
 ### Job Postings with the Executive Order Question
@@ -363,14 +379,30 @@ month_with_eo.set_index('Month_Posted')[['Total_Scraped', 'Count_With_EO', 'Perc
 # Get all jobs with EO mentions
 eo_jobs = scraped_df[scraped_df['has_executive_order']].copy()
 
-# Prepare the table
-detail_table = prepare_job_table_data(eo_jobs)
+# Format dates
+eo_jobs['open_date'] = pd.to_datetime(eo_jobs['position_open_date'], format='mixed').dt.strftime('%m/%d/%Y')
+eo_jobs['close_date'] = pd.to_datetime(eo_jobs['position_close_date'], format='mixed').dt.strftime('%m/%d/%Y')
+
+# Create occupation display
+eo_jobs['occupation'] = eo_jobs['occupation_series'].astype(str) + ' - ' + eo_jobs['occupation_name'].fillna('Unknown')
+
+# Select columns to display
+display_cols = ['position_title', 'occupation', 'hiring_agency', 'position_location', 
+                'grade_code', 'service_type', 'open_date', 'close_date']
+detail_table = eo_jobs[display_cols].copy()
+detail_table.columns = ['Position Title', 'Occupation', 'Agency', 'Location', 
+                       'Grade', 'Service', 'Open', 'Close']
 
 print(f"All {len(detail_table)} job postings with the 'advancing President's Executive Orders' question:")
 
-# Display styled table
-styled_table = style_table(detail_table)
-HTML(styled_table.to_html(escape=False, index=False))
+# Display table
+gt_detail = (
+    GT(detail_table)
+    .tab_header(title=f"All {len(detail_table)} Job Postings with Executive Order Question")
+    .tab_options(row_striping_include_table_body=False)
+    .sub_missing(missing_text="N/A")
+)
+gt_detail.show()
 ```
 
 ## Summary
@@ -388,26 +420,40 @@ print(summary_text)
 ## Failed Questionnaire Scrapes
 
 ```{python}
-# Find questionnaires that failed to scrape
-missing_questionnaires = []
+# Check if there are any scraping failures by looking for error files or logs
+# Since we only analyze successfully scraped files, we'll report on coverage
 
-for idx, row in links_df.iterrows():
-    if not check_questionnaire_exists(row['questionnaire_url']):
-        missing_questionnaires.append(row)
+total_links = len(links_df)
+total_scraped = len(scraped_df)
+total_not_scraped = total_links - total_scraped
 
-if missing_questionnaires:
-    # Convert to dataframe
-    failed_df = pd.DataFrame(missing_questionnaires)
+print(f"Scraping Coverage:")
+print(f"  Total questionnaire links found: {total_links:,}")
+print(f"  Successfully scraped and analyzed: {total_scraped:,}")
+print(f"  Not scraped or failed: {total_not_scraped:,}")
+print(f"  Coverage rate: {(total_scraped/total_links*100):.1f}%")
+
+# If we want to see which ones weren't scraped (optional - can be large)
+if total_not_scraped > 0 and total_not_scraped < 50:  # Only show if reasonable number
+    # Find questionnaires that weren't scraped
+    not_scraped_df = links_df[~links_df['questionnaire_id'].isin(scraped_ids)].copy()
     
-    # Prepare the table
-    failed_table = prepare_job_table_data(failed_df)
-    
-    print(f"Found {len(failed_table)} questionnaires that failed to scrape:")
-    
-    # Display styled table
-    styled_failed = style_table(failed_table)
-    display(HTML(styled_failed.to_html(escape=False, index=False)))
-else:
-    print("All questionnaires were successfully scraped!")
+    if len(not_scraped_df) > 0:
+        print(f"\nShowing {len(not_scraped_df)} unscraped questionnaires:")
+        
+        # Create display table
+        display_cols = ['position_title', 'hiring_agency', 'position_location', 'grade_code']
+        if all(col in not_scraped_df.columns for col in display_cols):
+            failed_table = not_scraped_df[display_cols].head(20).copy()  # Show max 20
+            failed_table.columns = ['Position Title', 'Agency', 'Location', 'Grade']
+            
+            # Create GT table without heatmap
+            gt_failed = (
+                GT(failed_table)
+                .tab_header(title=f"Sample of Unscraped Questionnaires (showing up to 20)")
+                .tab_options(row_striping_include_table_body=False)
+                .sub_missing(missing_text="N/A")
+            )
+            gt_failed.show()
 ```
 

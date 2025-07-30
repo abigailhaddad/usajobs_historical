@@ -69,12 +69,23 @@ def extract_questionnaire_links_from_job(job_row):
             if 'PositionLocation' in mod and isinstance(mod['PositionLocation'], list) and len(mod['PositionLocation']) > 0:
                 # Take first location
                 loc = mod['PositionLocation'][0]
-                location_parts = []
-                if 'CityName' in loc:
-                    location_parts.append(loc['CityName'])
-                if 'CountrySubDivisionCode' in loc:
-                    location_parts.append(loc['CountrySubDivisionCode'])
-                position_location = ', '.join(location_parts) if location_parts else None
+                city = loc.get('CityName', '')
+                state = loc.get('CountrySubDivisionCode', '')
+                
+                # Handle DC special case where city already includes state
+                if city and state:
+                    if state.lower() in city.lower():
+                        # State is already in city name, just use city
+                        position_location = city
+                    else:
+                        # Normal case: combine city and state
+                        position_location = f"{city}, {state}"
+                elif city:
+                    position_location = city
+                elif state:
+                    position_location = state
+                else:
+                    position_location = None
             
             # Get grade code - for current jobs API, use top-level min/max grades
             # These will be available from the row, not from MatchedObjectDescriptor
