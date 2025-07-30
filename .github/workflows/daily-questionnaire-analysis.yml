@@ -60,8 +60,6 @@ jobs:
       timeout-minutes: 150  # 2.5 hour timeout
       run: |
         cd questionnaires
-        # Modify run_analysis.py to add time limit arguments
-        sed -i "s/extract_questionnaires.py/extract_questionnaires.py --max-time 120 --workers 3/" run_analysis.py
         python run_analysis.py
       continue-on-error: true  # Don't fail the workflow if scraping times out
 
