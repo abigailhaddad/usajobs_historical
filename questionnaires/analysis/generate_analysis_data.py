@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate JSON data for the Executive Order analysis web interface
+Generate JSON data for the Essay Question analysis web interface
 """
 import pandas as pd
 import json
@@ -24,8 +24,8 @@ def calculate_eo_stats(df, group_column, top_n=None, column_name=None):
     # Use provided column name or default to the group column name
     display_name = column_name if column_name else group_column
     
-    stats.columns = [display_name, 'Jobs with EO Question', 'Total Jobs Analyzed']
-    stats['Percentage with EO Question'] = (stats['Jobs with EO Question'] / stats['Total Jobs Analyzed'] * 100).round(1)
+    stats.columns = [display_name, 'Jobs with Essay Question', 'Total Jobs Analyzed']
+    stats['Percentage with Essay Question'] = (stats['Jobs with Essay Question'] / stats['Total Jobs Analyzed'] * 100).round(1)
     
     if top_n:
         stats = stats.nlargest(top_n, 'Total Jobs Analyzed')
@@ -76,7 +76,7 @@ def main():
     
     # Check for the specific executive order question
     eo_mentions = check_executive_order_mentions()
-    print(f"\nFound {len(eo_mentions):,} questionnaires with the 'advancing President's Executive Orders' question")
+    print(f"\nFound {len(eo_mentions):,} questionnaires with the essay question")
     
     # Get all scraped IDs
     scraped_ids = set()
@@ -201,7 +201,7 @@ def main():
                 'Week 5': row.get(5),
                 'Monthly Percentage': month_totals['monthly_percentage'],
                 'Total Jobs Posted': int(month_totals['questionnaire_id']),
-                'Jobs with EO Question': int(month_totals['has_executive_order'])
+                'Jobs with Essay Question': int(month_totals['has_executive_order'])
             }
             timeline_data.append(timeline_entry)
         

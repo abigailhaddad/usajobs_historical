@@ -110,7 +110,7 @@
                             <div class="col-md-4">
                                 <div class="card stats-card">
                                     <div class="card-body">
-                                        <h5 class="card-title">With EO Question</h5>
+                                        <h5 class="card-title">With Essay Question</h5>
                                         <h2 class="text-success" id="totalWithEO">-</h2>
                                     </div>
                                 </div>
@@ -208,15 +208,15 @@
                     
                     <!-- Timeline Tab -->
                     <div class="tab-pane fade" id="timeline" role="tabpanel">
-                        <h3>Executive Order Question Usage by Job Opening Date</h3>
-                        <p>Weekly and monthly percentages of jobs posted with the EO question</p>
+                        <h3>Essay Question Usage by Job Opening Date</h3>
+                        <p>Weekly and monthly percentages of jobs posted with the essay question</p>
                         <div id="timelineTable"></div>
                     </div>
                     
                     <!-- Jobs Tab -->
                     <div class="tab-pane fade" id="jobs" role="tabpanel">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h3>All Job Postings with Executive Order Question</h3>
+                            <h3>Job Listings with New Essay Question</h3>
                             <button id="downloadCSV" class="btn btn-primary">Download All as CSV</button>
                         </div>
                         <div class="mb-3">
@@ -403,7 +403,7 @@
             // Create header
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
-            ['Month', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Monthly Percentage', 'Total Jobs Posted', 'Jobs with EO Question'].forEach(header => {
+            ['Month', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Monthly Percentage', 'Total Jobs Posted', 'Jobs with Essay Question'].forEach(header => {
                 const th = document.createElement('th');
                 th.textContent = header;
                 headerRow.appendChild(th);
