@@ -21,7 +21,7 @@ print("\nExtracting and scraping questionnaires...")
 # Don't capture output so we see progress in real-time
 result = subprocess.run([
     sys.executable,
-    'extract_questionnaires.py --max-time 120 --workers 3'
+    'extract_questionnaires.py --max-time 120 --workers 3 --max-time 120 --workers 3'
 ])
 
 # Always check for CSV updates, even if the script failed
