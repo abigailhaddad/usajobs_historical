@@ -363,17 +363,25 @@
                 const tr = document.createElement('tr');
                 Object.values(row).forEach((value, index) => {
                     const td = document.createElement('td');
-                    td.textContent = value;
-                    // Color code percentage columns
-                    if (Object.keys(row)[index].includes('Percentage')) {
+                    const columnKey = Object.keys(row)[index];
+                    
+                    // Add % sign to percentage columns
+                    if (columnKey.includes('Percentage')) {
+                        td.textContent = value + '%';
                         td.style.textAlign = 'center';
                         const percent = parseFloat(value);
                         // Scale to max percent in this table
                         const intensity = maxPercent > 0 ? percent / maxPercent : 0;
                         td.style.backgroundColor = `rgba(13, 110, 253, ${intensity})`;
                         td.style.color = intensity > 0.5 ? 'white' : 'black';
-                    } else if (typeof value === 'number') {
-                        td.style.textAlign = 'center';
+                    } else {
+                        // Format numbers with commas
+                        if (typeof value === 'number' && !columnKey.includes('Percentage')) {
+                            td.textContent = value.toLocaleString();
+                            td.style.textAlign = 'center';
+                        } else {
+                            td.textContent = value;
+                        }
                     }
                     tr.appendChild(td);
                 });
@@ -430,7 +438,12 @@
                             td.style.backgroundColor = '#f0f0f0';
                         }
                     } else {
-                        td.textContent = value;
+                        // Format numbers with commas
+                        if (typeof value === 'number') {
+                            td.textContent = value.toLocaleString();
+                        } else {
+                            td.textContent = value;
+                        }
                     }
                     tr.appendChild(td);
                 });
