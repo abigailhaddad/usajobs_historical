@@ -9,6 +9,8 @@ on:
 # Needed for pushing changes back to repo
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   analyze-questionnaires:
@@ -46,9 +48,6 @@ jobs:
         playwright install chromium
         playwright install-deps
 
-    - name: Install Quarto
-      uses: quarto-dev/quarto-actions/setup@v2
-
     - name: Configure git
       run: |
         git config --global user.name "GitHub Actions Bot"
@@ -59,33 +58,34 @@ jobs:
       run: |
         cd questionnaires
         # Modify run_analysis.py to add time limit arguments
-        sed -i 's/extract_questionnaires.py/extract_questionnaires.py --max-time 120 --workers 3/' run_analysis.py
+        sed -i "s/extract_questionnaires.py/extract_questionnaires.py --max-time 120 --workers 3/" run_analysis.py
         python run_analysis.py
       continue-on-error: true  # Don't fail the workflow if scraping times out
 
-    - name: Commit any scraped files
+    - name: Commit any remaining changes
       if: always()  # Always run this step
       run: |
-        cd questionnaires
-        # Check if there are any new files to commit
-        if [ -n "$(git status --porcelain raw_questionnaires/)" ]; then
-          git add raw_questionnaires/
-          git add questionnaire_links.csv
-          git commit -m "Add partially scraped questionnaires (workflow time limit reached)"
+        # run_analysis.py handles most commits, but check for any remaining
+        if [ -n "$(git status --porcelain)" ]; then
+          git add .
+          git commit -m "Update remaining questionnaire analysis files"
           git push
-          echo "✅ Committed partial results"
+          echo "✅ Committed remaining changes"
         else
-          echo "ℹ️  No new questionnaire files to commit"
+          echo "ℹ️  No additional changes to commit"
         fi
 
-    - name: Upload analysis artifacts
-      if: always()
-      uses: actions/upload-artifact@v4
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
       with:
-        name: questionnaire-analysis
-        path: |
-          questionnaires/analysis/index.html
-          questionnaires/questionnaire_links.csv
+        path: 'questionnaires/analysis'
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
 
     - name: Check for failures
       if: failure()

@@ -59,10 +59,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         scraped_files = list(raw_dir.glob('*.txt'))
         print(f"Total scraped questionnaire files: {len(scraped_files):,}")
 
-# Render Quarto analysis
-print("\nRendering analysis...")
+# Generate analysis data
+print("\nGenerating analysis data...")
 os.chdir('analysis')
-subprocess.run(['quarto', 'render', 'executive_order_analysis.qmd', '-o', 'index.html'])
+subprocess.run([sys.executable, 'generate_analysis_data.py'])
 os.chdir('..')
 
 print("\nDone! Open analysis/index.html to view results.")

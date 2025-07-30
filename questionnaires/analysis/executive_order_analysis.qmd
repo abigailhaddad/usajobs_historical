@@ -8,6 +8,7 @@ format:
     theme: cosmo
     highlight-style: github
     df-print: paged
+    page-layout: full
     embed-resources: true
     html-table-processing: none
 execute:
@@ -393,24 +394,61 @@ eo_jobs['close_date'] = pd.to_datetime(eo_jobs['position_close_date'], format='m
 # Create occupation display
 eo_jobs['occupation'] = eo_jobs['occupation_series'].astype(str) + ' - ' + eo_jobs['occupation_name'].fillna('Unknown')
 
+# Create clickable links
+eo_jobs['USAJobs Link'] = eo_jobs.apply(lambda row: f'<a href="https://www.usajobs.gov/job/{row["usajobs_control_number"]}" target="_blank">View Job</a>' if pd.notna(row['usajobs_control_number']) else '', axis=1)
+eo_jobs['Questionnaire Link'] = eo_jobs.apply(lambda row: f'<a href="{row["questionnaire_url"]}" target="_blank">View Questions</a>' if pd.notna(row['questionnaire_url']) else '', axis=1)
+
 # Select columns to display
 display_cols = ['position_title', 'occupation', 'hiring_agency', 'position_location', 
-                'grade_code', 'service_type', 'open_date', 'close_date']
+                'grade_code', 'service_type', 'open_date', 'close_date', 'USAJobs Link', 'Questionnaire Link']
 detail_table = eo_jobs[display_cols].copy()
 detail_table.columns = ['Position Title', 'Occupation', 'Agency', 'Location', 
-                       'Grade', 'Service', 'Open', 'Close']
+                       'Grade', 'Service', 'Open', 'Close', 'USAJobs', 'Questions']
 
 print(f"All {len(detail_table)} job postings with the 'advancing President's Executive Orders' question:")
 
-# Display table
-gt_detail = (
-    GT(detail_table)
-    .tab_header(title=f"All {len(detail_table)} Job Postings with Executive Order Question")
-    .tab_options(row_striping_include_table_body=False)
-    .opt_row_striping(row_striping=False)
-    .sub_missing(missing_text="N/A")
-)
-gt_detail.show()
+# Use itables for interactive functionality
+import itables
+from itables import show
+
+# Configure itables options
+itables.options.lengthMenu = [10, 25, 50, 100]
+itables.options.pageLength = 50
+
+# Shorten some text for better display
+detail_table_display = detail_table.copy()
+detail_table_display['Position Title'] = detail_table_display['Position Title'].str[:80] + '...'
+detail_table_display['Agency'] = detail_table_display['Agency'].str[:40] + '...'
+
+# Display interactive table with column filters using itables
+show(detail_table_display, 
+     caption="Interactive table: Type in search boxes under column headers to filter specific columns",
+     scrollX=True,
+     paging=True,
+     searching=True,  # Keep searching enabled for column filters to work
+     ordering=True,
+     info=True,
+     showIndex=False,  # Hide row index numbers
+     columnDefs=[
+         {"width": "20%", "targets": 0},  # Position Title
+         {"width": "12%", "targets": 1},  # Occupation  
+         {"width": "12%", "targets": 2},  # Agency
+         {"width": "12%", "targets": 3},  # Location
+         {"width": "6%", "targets": 4},   # Grade
+         {"width": "8%", "targets": 5},   # Service
+         {"width": "6%", "targets": 6},   # Open
+         {"width": "6%", "targets": 7},   # Close
+         {"width": "9%", "targets": 8},   # USAJobs
+         {"width": "9%", "targets": 9}    # Questions
+     ],
+     # Enable column search with search boxes under each column
+     dom='<"top"l>rt<"bottom"ip>',  # Removed 'f' to hide global search box
+     # Use the column search feature at the header
+     column_filters="header",
+     # Render HTML content (for links)
+     classes="display",
+     # Make links clickable
+     escape=False)
 ```
 
 ## Summary
