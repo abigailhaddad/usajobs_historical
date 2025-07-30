@@ -15,19 +15,22 @@ QUESTIONNAIRE_DIR = Path('..')
 DATA_DIR = BASE_DIR / 'data'
 RAW_QUESTIONNAIRES_DIR = QUESTIONNAIRE_DIR / 'raw_questionnaires'
 
-def calculate_eo_stats(df, group_column, top_n=None):
+def calculate_eo_stats(df, group_column, top_n=None, column_name=None):
     """Calculate EO question statistics for any grouping column"""
     stats = df.groupby(group_column).agg({
         'has_executive_order': ['sum', 'count']
     }).reset_index()
     
-    stats.columns = [group_column, 'Has EO Question', 'Total Scraped']
-    stats['% With EO Question'] = (stats['Has EO Question'] / stats['Total Scraped'] * 100).round(1)
+    # Use provided column name or default to the group column name
+    display_name = column_name if column_name else group_column
+    
+    stats.columns = [display_name, 'Jobs with EO Question', 'Total Jobs Analyzed']
+    stats['Percentage with EO Question'] = (stats['Jobs with EO Question'] / stats['Total Jobs Analyzed'] * 100).round(1)
     
     if top_n:
-        stats = stats.nlargest(top_n, 'Total Scraped')
+        stats = stats.nlargest(top_n, 'Total Jobs Analyzed')
     
-    return stats.sort_values('Total Scraped', ascending=False).reset_index(drop=True)
+    return stats.sort_values('Total Jobs Analyzed', ascending=False).reset_index(drop=True)
 
 def check_executive_order_mentions(questionnaire_dir=RAW_QUESTIONNAIRES_DIR):
     """Check which questionnaires mention the specific executive order question"""
@@ -117,33 +120,33 @@ def main():
     
     # Service Type Analysis
     if 'service_type' in scraped_df.columns:
-        service_stats = calculate_eo_stats(scraped_df, 'service_type')
+        service_stats = calculate_eo_stats(scraped_df, 'service_type', column_name='Service Type')
         analysis_data['service_analysis'] = service_stats.to_dict('records')
     else:
         analysis_data['service_analysis'] = []
     
     # Grade Level Analysis
     if 'grade_code' in scraped_df.columns:
-        scraped_df['grade_clean'] = scraped_df['grade_code'].fillna('Not Specified')
-        grade_stats = calculate_eo_stats(scraped_df, 'grade_clean', top_n=10)
+        scraped_df['grade_level'] = scraped_df['grade_code'].fillna('Not Specified')
+        grade_stats = calculate_eo_stats(scraped_df, 'grade_level', top_n=10, column_name='Grade Level')
         analysis_data['grade_analysis'] = grade_stats.to_dict('records')
     else:
         analysis_data['grade_analysis'] = []
     
     # Location Analysis
     if 'position_location' in scraped_df.columns:
-        location_stats = calculate_eo_stats(scraped_df, 'position_location', top_n=10)
+        location_stats = calculate_eo_stats(scraped_df, 'position_location', top_n=10, column_name='Location')
         analysis_data['location_analysis'] = location_stats.to_dict('records')
     else:
         analysis_data['location_analysis'] = []
     
     # Agency Analysis
-    agency_stats = calculate_eo_stats(scraped_df, 'hiring_agency', top_n=20)
+    agency_stats = calculate_eo_stats(scraped_df, 'hiring_agency', top_n=20, column_name='Agency')
     analysis_data['agency_analysis'] = agency_stats.to_dict('records')
     
     # Occupation Analysis
-    scraped_df['occupation_display'] = scraped_df['occupation_series'].astype(str) + ' - ' + scraped_df['occupation_name'].fillna('Unknown')
-    occupation_stats = calculate_eo_stats(scraped_df, 'occupation_display', top_n=20)
+    scraped_df['occupation_full'] = scraped_df['occupation_series'].astype(str) + ' - ' + scraped_df['occupation_name'].fillna('Unknown')
+    occupation_stats = calculate_eo_stats(scraped_df, 'occupation_full', top_n=20, column_name='Occupation Series')
     analysis_data['occupation_analysis'] = occupation_stats.to_dict('records')
     
     # Timeline Analysis
@@ -196,9 +199,9 @@ def main():
                 'Week 3': row.get(3),
                 'Week 4': row.get(4),
                 'Week 5': row.get(5),
-                'Month %': month_totals['monthly_percentage'],
-                'Total Jobs': int(month_totals['questionnaire_id']),
-                'With EO': int(month_totals['has_executive_order'])
+                'Monthly Percentage': month_totals['monthly_percentage'],
+                'Total Jobs Posted': int(month_totals['questionnaire_id']),
+                'Jobs with EO Question': int(month_totals['has_executive_order'])
             }
             timeline_data.append(timeline_entry)
         
