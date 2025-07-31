@@ -73,44 +73,47 @@ untracked_files = subprocess.run(['git', 'ls-files', '-o', 'raw_questionnaires/'
 has_untracked_questionnaires = bool(untracked_files)
 
 # Check if there are unscraped questionnaires in the CSV
-unscraped_count = 0
+unique_questionnaires_needed = set()
 newly_found_scraped = 0
+
 if existing_csv.exists():
     import re
     
-    # Get existing questionnaire IDs from before this run
-    existing_ids = set()
+    # Get existing questionnaire URLs from before this run
+    existing_urls = set()
     if existing_count > 0:
         for _, row in existing_df.iterrows():
-            existing_ids.add(row['questionnaire_url'])
+            existing_urls.add(row['questionnaire_url'])
     
+    # Track which unique questionnaires we need
     for _, row in updated_df.iterrows():
         url = row['questionnaire_url']
-        is_new = url not in existing_ids
+        is_new = url not in existing_urls
         
         # Extract ID from URL for filename
         if 'usastaffing.gov' in url:
             match = re.search(r'ViewQuestionnaire/(\d+)', url)
-            file_id = match.group(1) if match else None
-            if file_id:
+            if match:
+                file_id = match.group(1)
                 txt_path = f'raw_questionnaires/usastaffing_{file_id}.txt'
-                if not Path(txt_path).exists():
-                    unscraped_count += 1
-                elif is_new:
+                unique_questionnaires_needed.add(txt_path)
+                if is_new and Path(txt_path).exists():
                     newly_found_scraped += 1
         elif 'monstergovt.com' in url:
             match = re.search(r'jnum=(\d+)', url)
             if not match:
                 match = re.search(r'J=(\d+)', url)
-            file_id = match.group(1) if match else None
-            if file_id:
+            if match:
+                file_id = match.group(1)
                 txt_path = f'raw_questionnaires/monster_{file_id}.txt'
-                if not Path(txt_path).exists():
-                    unscraped_count += 1
-                elif is_new:
+                unique_questionnaires_needed.add(txt_path)
+                if is_new and Path(txt_path).exists():
                     newly_found_scraped += 1
+    
+    # Count how many unique questionnaires we're missing
+    unscraped_count = sum(1 for path in unique_questionnaires_needed if not Path(path).exists())
 
-print(f"Unscraped questionnaires in CSV: {unscraped_count:,}")
+print(f"Unique questionnaires still needed: {unscraped_count:,}")
 print(f"Newly found links that were scraped: {newly_found_scraped:,}")
 
 # Git operations
@@ -131,7 +134,7 @@ if new_count > 0 or has_untracked_questionnaires or unscraped_count > 0:
 - Scraped {newly_found_scraped:,} questionnaire files  
 - Total questionnaire links: {updated_count:,}
 - Total scraped files: {len(scraped_files):,}
-- Unscraped questionnaires remaining: {unscraped_count:,}
+- Unique questionnaires still needed: {unscraped_count:,}
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -143,7 +146,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
 - Scraped {new_files_count} previously unscraped questionnaires
 - Total questionnaire links: {updated_count:,}
 - Total scraped files: {len(scraped_files):,}
-- Unscraped questionnaires remaining: {unscraped_count:,}
+- Unique questionnaires still needed: {unscraped_count:,}
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -154,7 +157,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
 
 - Total questionnaire links: {updated_count:,}
 - Total scraped files: {len(scraped_files):,}
-- Unscraped questionnaires remaining: {unscraped_count:,}
+- Unique questionnaires still needed: {unscraped_count:,}
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
