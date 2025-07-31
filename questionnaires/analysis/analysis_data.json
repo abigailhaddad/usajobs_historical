@@ -1,21 +1,21 @@
 {
   "overview": {
-    "total_scraped": 15349,
-    "total_with_eo": "323",
+    "total_scraped": 15357,
+    "total_with_eo": "324",
     "percentage_with_eo": 2.1,
     "data_coverage": "Analyzing questionnaires from federal job postings from June 01, 2025 to July 31, 2025"
   },
   "service_analysis": [
     {
       "Service Type": "Competitive",
-      "Jobs with Essay Question": 314,
-      "Total Jobs Analyzed": 9160,
+      "Jobs with Essay Question": 315,
+      "Total Jobs Analyzed": 9165,
       "Percentage with Essay Question": 3.4
     },
     {
       "Service Type": "Excepted",
       "Jobs with Essay Question": 7,
-      "Total Jobs Analyzed": 6178,
+      "Total Jobs Analyzed": 6181,
       "Percentage with Essay Question": 0.1
     },
     {
@@ -41,7 +41,7 @@
     {
       "Grade Level": "GS-13",
       "Jobs with Essay Question": 35,
-      "Total Jobs Analyzed": 1032,
+      "Total Jobs Analyzed": 1033,
       "Percentage with Essay Question": 3.4
     },
     {
@@ -65,7 +65,7 @@
     {
       "Grade Level": "GS-7",
       "Jobs with Essay Question": 13,
-      "Total Jobs Analyzed": 548,
+      "Total Jobs Analyzed": 550,
       "Percentage with Essay Question": 2.4
     },
     {
@@ -82,16 +82,16 @@
     },
     {
       "Grade Level": "GS-5",
-      "Jobs with Essay Question": 21,
-      "Total Jobs Analyzed": 384,
-      "Percentage with Essay Question": 5.5
+      "Jobs with Essay Question": 22,
+      "Total Jobs Analyzed": 385,
+      "Percentage with Essay Question": 5.7
     }
   ],
   "location_analysis": [
     {
       "Location": "Washington, District of Columbia",
       "Jobs with Essay Question": 32,
-      "Total Jobs Analyzed": 573,
+      "Total Jobs Analyzed": 574,
       "Percentage with Essay Question": 5.6
     },
     {
@@ -153,19 +153,19 @@
     {
       "Agency": "Department of Veterans Affairs",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 6425,
+      "Total Jobs Analyzed": 6428,
       "Percentage with Essay Question": 0.0
     },
     {
       "Agency": "Department of the Air Force",
       "Jobs with Essay Question": 77,
-      "Total Jobs Analyzed": 1816,
+      "Total Jobs Analyzed": 1818,
       "Percentage with Essay Question": 4.2
     },
     {
       "Agency": "Department of Defense",
-      "Jobs with Essay Question": 25,
-      "Total Jobs Analyzed": 1603,
+      "Jobs with Essay Question": 26,
+      "Total Jobs Analyzed": 1606,
       "Percentage with Essay Question": 1.6
     },
     {
@@ -311,7 +311,7 @@
     {
       "Occupation Series": "189 - Recreation Aid And Assistant",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 363,
+      "Total Jobs Analyzed": 364,
       "Percentage with Essay Question": 0.0
     },
     {
@@ -328,9 +328,9 @@
     },
     {
       "Occupation Series": "1101 - General Business And Industry",
-      "Jobs with Essay Question": 14,
-      "Total Jobs Analyzed": 289,
-      "Percentage with Essay Question": 4.8
+      "Jobs with Essay Question": 15,
+      "Total Jobs Analyzed": 290,
+      "Percentage with Essay Question": 5.2
     },
     {
       "Occupation Series": "640 - Health Aid And Technician",
@@ -353,7 +353,7 @@
     {
       "Occupation Series": "621 - Nursing Assistant",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 224,
+      "Total Jobs Analyzed": 225,
       "Percentage with Essay Question": 0.0
     },
     {
@@ -377,7 +377,7 @@
     {
       "Occupation Series": "675 - Medical Records Technician",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 173,
+      "Total Jobs Analyzed": 175,
       "Percentage with Essay Question": 0.0
     },
     {
@@ -411,10 +411,10 @@
       "Week 2": 1.1,
       "Week 3": 2.3,
       "Week 4": 4.2,
-      "Week 5": 3.6,
+      "Week 5": 3.7,
       "Monthly Percentage": 2.4,
-      "Total Jobs Posted": 12186,
-      "Jobs with Essay Question": 293
+      "Total Jobs Posted": 12194,
+      "Jobs with Essay Question": 294
     }
   ],
   "job_postings": [
@@ -4293,6 +4293,18 @@
       "close_date": "08/11/2025",
       "usajobs_link": 842019800,
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774130"
+    },
+    {
+      "position_title": "Computer Assisted Ordering Technician",
+      "occupation": "1101 - General Business And Industry",
+      "agency": "Department of Defense",
+      "location": "New London, Connecticut",
+      "grade": "GS-5",
+      "service": "Competitive",
+      "open_date": "07/31/2025",
+      "close_date": "08/04/2025",
+      "usajobs_link": 842103100,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774430"
     }
   ]
 }
