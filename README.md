@@ -9,7 +9,7 @@
 - [Field documentation](https://abigailhaddad.github.io/usajobs_historical/) - Guide to data fields and statistics
 - [USAJobs API documentation](https://developer.usajobs.gov/) - Official U.S. government developer documentation for USAJOBS APIs
 
-**Job dataset with 2,996,700 job announcements from Historical + Current APIs**
+**Job dataset with 2,996,709 job announcements from Historical + Current APIs**
 
 This repository provides USAJobs data combining both Historical and Current APIs, with deduplication and field rationalization. Data is available in two ways:
 1. **📁 Ready-to-use Parquet files** - Download and analyze immediately
@@ -54,7 +54,7 @@ Data collection last run: 2025-07-31. Early years are incomplete, mostly consist
 | 2022 | 441,604 | 419,295 |
 | 2023 | 454,652 | 434,527 |
 | 2024 | 367,751 | 352,296 |
-| 2025 | 117,437 | 116,055 |
+| 2025 | 117,446 | 116,064 |
 
 Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,633 closed that year). 2017 starts with limited data in January-February, then ramps up significantly from March onward. 
 

@@ -1,6 +1,6 @@
 {
-  "generated_at": "2025-07-31T07:18:40.533995",
-  "total_jobs": 2996700,
+  "generated_at": "2025-07-31T11:31:52.107033",
+  "total_jobs": 2996709,
   "total_fields": 42,
   "file_size": "533MB",
   "latest_job_date": "2025-07-31",
@@ -91,9 +91,9 @@
     },
     {
       "year": 2025,
-      "total_jobs": 117437,
-      "jobs_opened": 117437,
-      "jobs_closed": 116055,
+      "total_jobs": 117446,
+      "jobs_opened": 117446,
+      "jobs_closed": 116064,
       "coverage": "Current through July 31, 2025"
     }
   ],
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0808\"}, {\"series\": \"0193\"}, {\"series\": \"0807\"}, {\"series\": \"0170\"}], [{\"series\": \"1520\"}, {\"series\": \"1550\"}, {\"series\": \"1530\"}, {\"series\": \"0110\"}, {\"series\": \"1529\"}], [{\"series\": \"0408\"}, {\"series\": \"0020\"}, {\"series\": \"0150\"}, {\"series\": \"0101\"}, {\"series\": \"1301\"}, {\"series\": \"0819\"}, {\"series\": \"0110\"}, {\"series\": \"0810\"}, {\"series\": \"0808\"}, {\"series\": \"0401\"}], [{\"series\": \"2218\"}] (3060 unique)",
+      "examples": "[{\"series\": \"0193\"}, {\"series\": \"0850\"}, {\"series\": \"0810\"}, {\"series\": \"0808\"}, {\"series\": \"0401\"}, {\"series\": \"0830\"}, {\"series\": \"1301\"}, {\"series\": \"0819\"}], [{\"series\": \"0830\"}, {\"series\": \"0801\"}, {\"series\": \"0810\"}], [{\"series\": \"0850\"}, {\"series\": \"0830\"}, {\"series\": \"0896\"}, {\"series\": \"0871\"}], [{\"series\": \"0801\"}, {\"series\": \"1320\"}, {\"series\": \"1520\"}, {\"series\": \"1310\"}, {\"series\": \"1550\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Interior\\Interior, Bureau of Indian Affairs, Department of Defense\\National Security Agency/Central Security Service, Department of Agriculture\\Foreign Agricultural Service, Millennium Challenge Corporation (542 unique)",
+      "examples": "Department of the Army\\US ARMY HUMAN RESOURCES COMMAND (DRU), Department of Agriculture\\Agricultural Marketing Service, Legislative Branch\\United States-China Economic and Security Review Commission, Department of Health and Human Services\\Office of the Assistant Secretary for Health (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "24-FO-12337147-SA-JR, CBSS-12542451-24-VAS, 24-IN-12500418-SH, CBTB-12563398-24-LP (363801 unique)",
+      "examples": "SH-12611038, 24-12317016, 24-TEMP4-R5-5169-4DH, SA12463338-24-137 (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Summer, Temporary Promotion, Internships, Permanent (15 unique)",
+      "examples": "ICTAP Only, Recent graduates, Presidential Management Fellows, Summer (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "AF12, NV39, AF40, EDED (528 unique)",
+      "examples": "TC00, HUFF, NM00, HUKK (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Agency for Healthcare Research and Quality, DHS Headquarters, United States Army Europe and Africa, Federal Permitting Improvement Steering Council (502 unique)",
+      "examples": "Office of Communications, U.S. Army Reserve Command, Defense Acquisition University, Office of Naval Research (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "CM, FJ, PO, IF (122 unique)",
+      "examples": "RH, FC, GE, DL (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Justice, Department of Energy, Department of the Army, Legislative Branch (26 unique)",
+      "examples": "Other Agencies and Independent Organizations, Legislative Branch, Department of Defense, Department of Veterans Affairs (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Mission Support Services, Quality Control Group, Operational Evaluations South AJV-E140, West Virginia State Operations, Office of the Assistant Secretary - Policy, Management, and Budget, US ARMY GARRISON, RED CLOUD/CASEY (59973 unique)",
+      "examples": "U.S. Army Garrison, Fort Belvoir, Directorate of Resource Management, West Palm Beach VAMC, Facilities Management Service, USAG Ft Leonard Wood, Directorate of Public Works, Ops & Maint Di, CDC I and CDC II (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T15:24:20.026002, 2025-07-05T14:56:14.990457, 2025-07-05T15:29:17.259811, 2025-07-05T14:35:46.951348 (367177 unique)",
+      "examples": "2025-07-05T15:17:17.108367, 2025-07-05T14:01:38.970679, 2025-07-05T14:12:28.459031, 2025-07-05T13:05:06.371970 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "25, 22, ES, 13 (127 unique)",
+      "examples": "GI, CM, 25, L (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "60, IL, 8, 5 (125 unique)",
+      "examples": "C, 23, M, 24 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "EV, NL, DU, CG (191 unique)",
+      "examples": "PG, DX, NX, GP (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-06-05, 2024-03-21, 2025-09-22, 2024-09-23 (672 unique)",
+      "examples": "2025-11-06, 2024-12-25, 2024-04-02, 2025-06-14 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-05-05, 2023-04-04, 2024-10-27, 2025-01-30 (550 unique)",
+      "examples": "2024-04-07, 2024-10-31, 2024-03-18, 2024-08-01 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-03-30, 2024-08-26, 2024-03-31, 2024-09-26 (365 unique)",
+      "examples": "2024-05-24, 2024-01-01, 2024-06-12, 2024-09-02 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Park Manger, Administrative Officer (Field), HR SPEC (CLASSIFICATION)-Title 5, CUSTODIAL WORKER SUPERVISOR S03 (77986 unique)",
+      "examples": "SENIOR CULTURAL RESOURCES PROFESSIONAL, Government Info Specialist, Environmental Protection Specialist (Air), RSAM Specialist (Shared Loss Agreements), GGL CG-1101-14 (Appointment NTE 2 Years) (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "Varies, Yes, 97, 45 (115 unique)",
+      "examples": "FE, 06, DISES, 01 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "2, 60, 200, 10 (157 unique)",
+      "examples": "65, 147, 318, 44 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
