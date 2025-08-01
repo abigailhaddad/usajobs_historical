@@ -65,7 +65,6 @@ function updateSummaryStats() {
     document.getElementById('totalJobs').textContent = summary.total_jobs.toLocaleString();
     document.getElementById('cancelledJobs').textContent = summary.cancelled_jobs_count.toLocaleString();
     document.getElementById('cancellationRate').textContent = `${summary.cancellation_rate}% cancellation rate`;
-    document.getElementById('totalAgencies').textContent = jobData.agency_stats.length;
     
     const startDate = new Date(summary.date_range.start).toLocaleDateString();
     const endDate = new Date(summary.date_range.end).toLocaleDateString();

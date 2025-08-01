@@ -40,7 +40,7 @@ optimized_data = {
     'summary': data['summary'],
     'cancelled_jobs': optimized_cancelled,
     'monthly_status': data['monthly_status'],
-    'agency_stats': data['agency_stats'][:50]  # Top 50 agencies only
+    'agency_stats': data['agency_stats']  # Include all agencies
 }
 
 # Save optimized version
