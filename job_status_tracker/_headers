@@ -1,0 +1,9 @@
+# Cache static assets
+/*.json
+  Cache-Control: public, max-age=3600
+
+/*.js
+  Cache-Control: public, max-age=86400
+
+/*.html
+  Cache-Control: public, max-age=300

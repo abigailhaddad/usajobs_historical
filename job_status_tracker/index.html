@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USAJobs Status Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f7fafc;
+        }
+        h1 {
+            color: #1a202c;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        h2 {
+            color: #2d3748;
+            font-weight: 600;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .stat-number {
+            font-size: 2.25em;
+            font-weight: 700;
+            color: #4E79A7;
+            margin: 12px 0 8px 0;
+        }
+        .stat-label {
+            color: #718096;
+            font-size: 0.875em;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .chart-container {
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            height: 420px;
+            border: 1px solid #e2e8f0;
+        }
+        .table-container {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4a5568;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        tbody tr {
+            transition: background-color 0.15s;
+        }
+        tbody tr:hover {
+            background-color: #f7fafc;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #fafbfc;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+        }
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+        .filter-group {
+            display: inline-block;
+            margin-right: 20px;
+        }
+        label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        select, input[type="text"] {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .column-filter {
+            width: 90%;
+            font-size: 12px;
+            padding: 3px 5px;
+            margin-top: 5px;
+        }
+        .filter-row th {
+            padding: 8px !important;
+            background-color: #2d3748 !important;
+        }
+        .openings-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .openings-many { 
+            background-color: #fee2e2; 
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .openings-few { 
+            background-color: #fef3c7; 
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        .openings-number { 
+            background-color: #dbeafe; 
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+        #lastUpdated {
+            text-align: right;
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        button:not(:disabled):hover {
+            background-color: #f0f0f0 !important;
+            cursor: pointer;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none;
+        }
+        .date-picker-popup {
+            position: absolute;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            display: none;
+        }
+        .date-picker-popup input[type="date"] {
+            margin: 4px 0;
+            padding: 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            width: 150px;
+            display: block;
+        }
+        th {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div style="background-color: #FED7D7; border: 1px solid #FC8181; border-radius: 8px; padding: 16px; margin-bottom: 20px; text-align: center;">
+        <p style="color: #C53030; font-weight: 600; margin: 0; font-size: 1.1em;">
+            ⚠️ This dashboard is still in development. Use at your own peril.
+        </p>
+    </div>
+    
+    <h1>USAJobs Status Tracker - Jobs Opened in 2025</h1>
+    <p style="color: #718096; font-size: 1.1em; margin-top: -5px; margin-bottom: 15px;">
+        Tracking the current status of all federal job postings that opened in 2025
+    </p>
+    <div id="lastUpdated"></div>
+    
+    <div id="loading" class="loading">Loading job status data...</div>
+    
+    <div id="content" style="display: none;">
+        <div class="summary-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Jobs</div>
+                <div class="stat-number" id="totalJobs">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cancelled Jobs</div>
+                <div class="stat-number" id="cancelledJobs">-</div>
+                <div class="stat-label" id="cancellationRate">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Agencies</div>
+                <div class="stat-number" id="totalAgencies">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Date Range</div>
+                <div class="stat-number" id="dateRange" style="font-size: 1.2em;">-</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2>Monthly Status Distribution - Jobs Opened in 2025</h2>
+            <canvas id="statusChart"></canvas>
+        </div>
+
+
+        <div class="table-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">Cancelled Jobs Detail</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button id="downloadCSV" style="padding: 8px 16px; border: 1px solid #e2e8f0; background: white; cursor: pointer; border-radius: 6px; font-weight: 500; color: #4a5568; transition: all 0.15s;">
+                        Download CSV
+                    </button>
+                    <button id="clearFilters" style="padding: 8px 16px; border: 1px solid #e2e8f0; background: white; cursor: pointer; border-radius: 6px; font-weight: 500; color: #4a5568; transition: all 0.15s;">
+                        Clear All Filters
+                    </button>
+                </div>
+            </div>
+            <table id="cancelledJobsTable">
+                <thead>
+                    <tr>
+                        <th>Control #</th>
+                        <th>Position Title</th>
+                        <th>Agency</th>
+                        <th>Location</th>
+                        <th>Open Date</th>
+                        <th>Close Date</th>
+                        <th>Days Open</th>
+                        <th>Grade</th>
+                        <th>Salary Range</th>
+                        <th>Openings</th>
+                        <th>Service Type</th>
+                    </tr>
+                    <tr class="filter-row">
+                        <th><input type="text" class="column-filter" data-column="control_number" placeholder="Search..."></th>
+                        <th><input type="text" class="column-filter" data-column="position_title" placeholder="Search..."></th>
+                        <th><select class="column-filter" data-column="hiring_agency"><option value="">All</option></select></th>
+                        <th><select class="column-filter" data-column="location"><option value="">All</option></select></th>
+                        <th>
+                            <input type="text" class="column-filter date-range" data-column="open_date" placeholder="Select date range" readonly style="cursor: pointer; background: white;">
+                            <input type="date" class="column-filter date-from hidden" data-column="open_date">
+                            <input type="date" class="column-filter date-to hidden" data-column="open_date">
+                        </th>
+                        <th>
+                            <input type="text" class="column-filter date-range" data-column="close_date" placeholder="Select date range" readonly style="cursor: pointer; background: white;">
+                            <input type="date" class="column-filter date-from hidden" data-column="close_date">
+                            <input type="date" class="column-filter date-to hidden" data-column="close_date">
+                        </th>
+                        <th><input type="text" class="column-filter" data-column="days_open" placeholder="e.g. >30"></th>
+                        <th><select class="column-filter" data-column="grade"><option value="">All</option></select></th>
+                        <th><input type="text" class="column-filter" data-column="salary" placeholder="e.g. >50000"></th>
+                        <th><select class="column-filter" data-column="total_openings"><option value="">All</option></select></th>
+                        <th><select class="column-filter" data-column="service_type"><option value="">All</option></select></th>
+                    </tr>
+                </thead>
+                <tbody id="cancelledJobsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

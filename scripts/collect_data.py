@@ -433,13 +433,18 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
         # Process jobs for this date
         daily_jobs = []
         new_jobs = 0
+        updated_jobs = 0
         for job in jobs:
             usajobs_control_number = job.get("usajobsControlNumber")
-            if usajobs_control_number and str(usajobs_control_number) not in seen_control_numbers:
-                seen_control_numbers.add(str(usajobs_control_number))
+            if usajobs_control_number:
+                if str(usajobs_control_number) not in seen_control_numbers:
+                    seen_control_numbers.add(str(usajobs_control_number))
+                    new_jobs += 1
+                else:
+                    updated_jobs += 1
+                # Always add the job - save_jobs_to_parquet will handle replacing old data
                 daily_jobs.append(job)
                 all_jobs.append(job)
-                new_jobs += 1
         
         # Add daily jobs to weekly batch
         weekly_batch.extend(daily_jobs)
@@ -450,8 +455,8 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
             logger.warning(f"⚠️  SUSPICIOUS: Found 0 jobs for {date_str} - may be legitimate weekend/holiday or API issue")
             progress_bar.write(f"  {date_str}: Found 0 jobs (⚠️  suspicious - check if legitimate)")
         else:
-            logger.info(f"✅ SUCCESS: {date_str} - {len(jobs)} jobs ({new_jobs} new)")
-            progress_bar.write(f"  {date_str}: Found {len(jobs)} jobs ({new_jobs} new)")
+            logger.info(f"✅ SUCCESS: {date_str} - {len(jobs)} jobs ({new_jobs} new, {updated_jobs} updated)")
+            progress_bar.write(f"  {date_str}: Found {len(jobs)} jobs ({new_jobs} new, {updated_jobs} updated)")
         days_processed += 1
         
         # Save to Parquet weekly (every 7 days) or at the end
