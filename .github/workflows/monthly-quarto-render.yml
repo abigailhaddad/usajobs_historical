@@ -1,0 +1,57 @@
+name: Monthly Quarto Render
+
+on:
+  schedule:
+    # Run on the 3rd of every month at 10:00 AM UTC
+    # This ensures the previous month's data is complete (we consider it complete on the 2nd)
+    - cron: '0 10 3 * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  render-quarto:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Set up Quarto
+      uses: quarto-dev/quarto-actions/setup@v2
+      with:
+        version: 'latest'
+
+    - name: Render National Park Service Analysis
+      run: |
+        cd analysis/national_park_service
+        quarto render national_park_service_analysis.qmd
+      
+    - name: Render Product Manager Analysis
+      run: |
+        cd analysis/product_manager
+        quarto render product_manager_analysis.qmd
+
+    - name: Commit and push rendered files
+      run: |
+        git config --local user.email "actions@github.com"
+        git config --local user.name "GitHub Actions Bot"
+        git add -A
+        git diff --staged --quiet || git commit -m "Monthly Quarto render - $(date +'%B %Y')"
+        git push

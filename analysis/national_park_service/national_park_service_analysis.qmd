@@ -20,7 +20,7 @@ execute:
 jupyter: python3
 ---
 
-This analysis examines federal job posting trends for the National Park Service from 2018 through June 2025.
+This analysis examines federal job posting trends for the National Park Service from 2018 through the last complete month of available data.
 
 **Resources:** [GitHub Repository](https://github.com/abigailhaddad/usajobs_historical) | [Field Documentation](https://abigailhaddad.github.io/usajobs_historical/) | [USAJobs API](https://developer.usajobs.gov/)
 
@@ -30,6 +30,7 @@ This analysis examines federal job posting trends for the National Park Service 
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import calendar
 import json
 
 from great_tables import GT, md
@@ -135,11 +136,30 @@ def load_nps_data():
     combined_df['year'] = combined_df['positionOpenDate'].dt.year
     combined_df['month'] = combined_df['positionOpenDate'].dt.month
     
-    # Filter to only include data through June 2025
+    # Dynamically determine the last complete month
+    # If we're on the 2nd of the month or later, consider the previous month complete
+    today = datetime.now()
+    if today.day >= 2:
+        last_complete_year = today.year
+        last_complete_month = today.month - 1
+        if last_complete_month == 0:
+            last_complete_month = 12
+            last_complete_year = today.year - 1
+    else:
+        # If it's the 1st, use two months ago as the last complete month
+        last_complete_year = today.year
+        last_complete_month = today.month - 2
+        if last_complete_month <= 0:
+            last_complete_month = 12 + last_complete_month
+            last_complete_year = today.year - 1
+    
+    # Filter to only include data through the last complete month
     combined_df = combined_df[
-        (combined_df['year'] < 2025) | 
-        ((combined_df['year'] == 2025) & (combined_df['month'] <= 6))
+        (combined_df['year'] < last_complete_year) | 
+        ((combined_df['year'] == last_complete_year) & (combined_df['month'] <= last_complete_month))
     ].copy()
+    
+    print(f"Data includes postings through {calendar.month_name[last_complete_month]} {last_complete_year}")
     
     # Filter for National Park Service
     nps_df = combined_df[combined_df['hiringAgencyName'] == 'National Park Service'].copy()
@@ -154,7 +174,7 @@ def load_nps_data():
         'Value': [
             f"{len(combined_df):,}",
             f"{len(nps_df):,}",
-            f"{len(year_counts)} years (2018-June 2025)"
+            f"{len(year_counts)} years (2018-{calendar.month_name[last_complete_month]} {last_complete_year})"
         ]
     })
     
@@ -163,10 +183,17 @@ def load_nps_data():
 # Load data
 nps_df, loading_summary, loading_stats = load_nps_data()
 
-# Create January-June filtered datasets for consistent analysis
-nps_jan_jun = nps_df[nps_df['month'].between(1, 6)].copy()
-nps_2025_jan_jun = nps_jan_jun[nps_jan_jun['year'] == 2025]
-nps_historical_jan_jun = nps_jan_jun[nps_jan_jun['year'].between(2018, 2024)]
+# Create filtered datasets for year-over-year comparison
+# For 2025, use all available months; for historical, use the same months
+max_2025_month = nps_df[nps_df['year'] == 2025]['month'].max() if len(nps_df[nps_df['year'] == 2025]) > 0 else 12
+comparison_months = list(range(1, max_2025_month + 1))
+month_names = [calendar.month_name[m][:3] for m in comparison_months]
+comparison_period = f"{month_names[0]}-{month_names[-1]}"
+
+# Filter datasets to same months for fair comparison
+nps_comparison_months = nps_df[nps_df['month'].isin(comparison_months)].copy()
+nps_2025_comparison = nps_comparison_months[nps_comparison_months['year'] == 2025]
+nps_historical_comparison = nps_comparison_months[nps_comparison_months['year'].between(2018, 2024)]
 
 # Display data loading summary as Great Table
 gt_loading_stats = (
@@ -221,12 +248,16 @@ dt_info = get_current_datetime()
 current_year = dt_info['year']
 current_month = dt_info['month']
 
-# Filter out future months - only show data through June 2025
+# Get the last complete month from our data (calculated during loading)
+# This will be used to filter out future months in visualizations
+last_complete_info = nps_df['year'].max(), nps_df[nps_df['year'] == nps_df['year'].max()]['month'].max()
+
 def should_show_month(year, month):
-    if year < 2025:
+    last_year, last_month = last_complete_info
+    if year < last_year:
         return True
-    elif year == 2025:
-        return month <= 6  # Only show through June 2025
+    elif year == last_year:
+        return month <= last_month
     else:
         return False
 
@@ -335,28 +366,28 @@ def analyze_occupation_changes():
     
     # Create summary table first
     # Calculate average for historical period
-    historical_avg = len(nps_historical_jan_jun) / 7  # 7 years (2018-2024)
-    pct_change = ((len(nps_2025_jan_jun) - historical_avg) / historical_avg) * 100
+    historical_avg = len(nps_historical_comparison) / 7  # 7 years (2018-2024)
+    pct_change = ((len(nps_2025_comparison) - historical_avg) / historical_avg) * 100
     summary_data = pd.DataFrame({
-        'Period': ['2025 Jan-Jun jobs', 'Historical Jan-Jun average (2018-2024)', 'Change'],
-        'Count': [f"{len(nps_2025_jan_jun):,}", f"{historical_avg:,.0f}", f"{pct_change:.0f}%"]
+        'Period': [f'2025 {comparison_period} jobs', f'Historical {comparison_period} average (2018-2024)', 'Change'],
+        'Count': [f"{len(nps_2025_comparison):,}", f"{historical_avg:,.0f}", f"{pct_change:.0f}%"]
     })
     
     gt_scope = create_standard_gt_table(
         data=summary_data,
         title="Analysis Scope",
-        subtitle="January-June Comparison Only",
+        subtitle=f"{comparison_period} Comparison Only",
         align_left_cols=["Period"],
         align_center_cols=["Count"],
         col_widths={"Period": "70%", "Count": "30%"}
     )
     gt_scope.show()
     
-    # Get 2025 Jan-Jun counts by occupational series
-    occ_2025 = nps_2025_jan_jun['occupational_series'].value_counts()
+    # Get 2025 counts by occupational series for comparison period
+    occ_2025 = nps_2025_comparison['occupational_series'].value_counts()
     
-    # Get historical Jan-Jun average by occupational series
-    occ_historical = nps_historical_jan_jun.groupby(['year', 'occupational_series']).size().reset_index(name='count')
+    # Get historical average by occupational series for comparison period
+    occ_historical = nps_historical_comparison.groupby(['year', 'occupational_series']).size().reset_index(name='count')
     occ_historical_avg = occ_historical.groupby('occupational_series')['count'].mean()
     
     # Compare and find biggest changes
@@ -399,7 +430,7 @@ gt_table_top10 = (
     GT(gt_df_top10.reset_index(drop=True))
     .tab_header(
         title="National Park Service: Top 10 Occupations by Biggest Changes",
-        subtitle="Jan-June 2018-2024 vs Jan-June 2025 | USAJobs Historical Data"
+        subtitle=f"{comparison_period} 2018-2024 vs {comparison_period} 2025 | USAJobs Historical Data"
     )
     .tab_source_note(md("*Source: github.com/abigailhaddad/usajobs_historical*"))
     .cols_align(align="left", columns=["Occupation"])
@@ -447,7 +478,7 @@ if len(changes_df) > 10:
         GT(gt_df_all.reset_index(drop=True))
         .tab_header(
             title="National Park Service: All Occupational Changes",
-            subtitle="Jan-June 2018-2024 vs Jan-June 2025 | USAJobs Historical Data"
+            subtitle=f"{comparison_period} 2018-2024 vs {comparison_period} 2025 | USAJobs Historical Data"
         )
         .tab_source_note(md("*Source: github.com/abigailhaddad/usajobs_historical*"))
         .cols_align(align="left", columns=["Occupation"])
@@ -490,10 +521,10 @@ def categorize_openings(opening_val):
             return 'Other'
 
 def analyze_opening_types():
-    """Analyze opening types comparison between Jan-June 2018-2024 and Jan-June 2025"""
-    # Use pre-filtered January-June datasets and filter for jobs with opening data
-    openings_2025 = nps_2025_jan_jun[nps_2025_jan_jun['totalOpenings'].notna()].copy()
-    openings_historical = nps_historical_jan_jun[nps_historical_jan_jun['totalOpenings'].notna()].copy()
+    f"""Analyze opening types comparison between {comparison_period} 2018-2024 and {comparison_period} 2025"""
+    # Use pre-filtered comparison period datasets and filter for jobs with opening data
+    openings_2025 = nps_2025_comparison[nps_2025_comparison['totalOpenings'].notna()].copy()
+    openings_historical = nps_historical_comparison[nps_historical_comparison['totalOpenings'].notna()].copy()
     
     # Apply categorization
     openings_2025.loc[:, 'opening_category'] = openings_2025['totalOpenings'].apply(categorize_openings)
@@ -532,7 +563,7 @@ def analyze_opening_types():
         create_standard_gt_table(
             data=gt_openings_df,
             title="National Park Service: Top 10 Total Openings Comparison",
-            subtitle="Jan-June 2018-2024 vs Jan-June 2025",
+            subtitle=f"{comparison_period} 2018-2024 vs {comparison_period} 2025",
             align_left_cols=["Total Openings"],
             align_center_cols=["Historical\n%", "2025\n%", "Change"],
             col_widths={
