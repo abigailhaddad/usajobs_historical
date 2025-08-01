@@ -194,11 +194,11 @@ def main():
             
             timeline_entry = {
                 'Month': month_name,
-                'Week 1': row.get(1),
-                'Week 2': row.get(2),
-                'Week 3': row.get(3),
-                'Week 4': row.get(4),
-                'Week 5': row.get(5),
+                'Week 1': row.get(1) if pd.notna(row.get(1)) else None,
+                'Week 2': row.get(2) if pd.notna(row.get(2)) else None,
+                'Week 3': row.get(3) if pd.notna(row.get(3)) else None,
+                'Week 4': row.get(4) if pd.notna(row.get(4)) else None,
+                'Week 5': row.get(5) if pd.notna(row.get(5)) else None,
                 'Monthly Percentage': month_totals['monthly_percentage'],
                 'Total Jobs Posted': int(month_totals['questionnaire_id']),
                 'Jobs with Essay Question': int(month_totals['has_executive_order'])
