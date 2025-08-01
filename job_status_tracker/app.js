@@ -224,7 +224,7 @@ function populateCancelledJobsTable(filteredJobs = null, page = 1) {
         row.className = 'cancelled-row';
         
         const grade = job.min_grade && job.max_grade ? 
-            `GS-${job.min_grade}-${job.max_grade}` : 
+            (job.min_grade === job.max_grade ? `GS-${job.min_grade}` : `GS-${job.min_grade}-${job.max_grade}`) : 
             job.min_grade ? `GS-${job.min_grade}` : 
             job.max_grade ? `GS-${job.max_grade}` : 'N/A';
         
@@ -287,7 +287,7 @@ function setupColumnFilters() {
         'location': [...new Set(jobData.cancelled_jobs.map(j => j.location || 'N/A'))].sort(),
         'grade': [...new Set(jobData.cancelled_jobs.map(j => {
             const grade = j.min_grade && j.max_grade ? 
-                `GS-${j.min_grade}-${j.max_grade}` : 
+                (j.min_grade === j.max_grade ? `GS-${j.min_grade}` : `GS-${j.min_grade}-${j.max_grade}`) : 
                 j.min_grade ? `GS-${j.min_grade}` : 
                 j.max_grade ? `GS-${j.max_grade}` : 'N/A';
             return grade;
@@ -385,7 +385,7 @@ function applyColumnFilters() {
             // Handle special cases
             if (column === 'grade') {
                 jobValue = job.min_grade && job.max_grade ? 
-                    `GS-${job.min_grade}-${job.max_grade}` : 
+                    (job.min_grade === job.max_grade ? `GS-${job.min_grade}` : `GS-${job.min_grade}-${job.max_grade}`) : 
                     job.min_grade ? `GS-${job.min_grade}` : 
                     job.max_grade ? `GS-${job.max_grade}` : 'N/A';
             } else if (column === 'salary') {
@@ -668,7 +668,7 @@ function downloadFilteredCSV() {
                 // Apply same filtering logic as in applyColumnFilters
                 if (column === 'grade') {
                     jobValue = job.min_grade && job.max_grade ? 
-                        `GS-${job.min_grade}-${job.max_grade}` : 
+                        (job.min_grade === job.max_grade ? `GS-${job.min_grade}` : `GS-${job.min_grade}-${job.max_grade}`) : 
                         job.min_grade ? `GS-${job.min_grade}` : 
                         job.max_grade ? `GS-${job.max_grade}` : 'N/A';
                 } else if (column === 'salary') {
@@ -756,7 +756,7 @@ function downloadFilteredCSV() {
     
     dataToExport.forEach(job => {
         const grade = job.min_grade && job.max_grade ? 
-            `GS-${job.min_grade}-${job.max_grade}` : 
+            (job.min_grade === job.max_grade ? `GS-${job.min_grade}` : `GS-${job.min_grade}-${job.max_grade}`) : 
             job.min_grade ? `GS-${job.min_grade}` : 
             job.max_grade ? `GS-${job.max_grade}` : 'N/A';
         
