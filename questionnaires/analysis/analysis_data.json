@@ -1,21 +1,21 @@
 {
   "overview": {
-    "total_scraped": 16013,
-    "total_with_eo": "352",
-    "percentage_with_eo": 2.2,
-    "data_coverage": "Analyzing questionnaires from federal job postings from June 01, 2025 to August 01, 2025"
+    "total_scraped": 16586,
+    "total_with_eo": "380",
+    "percentage_with_eo": 2.3,
+    "data_coverage": "Analyzing questionnaires from federal job postings from June 01, 2025 to August 02, 2025"
   },
   "service_analysis": [
     {
       "Service Type": "Competitive",
-      "Jobs with Essay Question": 343,
-      "Total Jobs Analyzed": 9577,
-      "Percentage with Essay Question": 3.6
+      "Jobs with Essay Question": 370,
+      "Total Jobs Analyzed": 9933,
+      "Percentage with Essay Question": 3.7
     },
     {
       "Service Type": "Excepted",
-      "Jobs with Essay Question": 7,
-      "Total Jobs Analyzed": 6425,
+      "Jobs with Essay Question": 8,
+      "Total Jobs Analyzed": 6642,
       "Percentage with Essay Question": 0.1
     },
     {
@@ -29,70 +29,76 @@
     {
       "Grade Level": "GS-12",
       "Jobs with Essay Question": 26,
-      "Total Jobs Analyzed": 1293,
-      "Percentage with Essay Question": 2.0
+      "Total Jobs Analyzed": 1342,
+      "Percentage with Essay Question": 1.9
     },
     {
       "Grade Level": "VN-00",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 1196,
+      "Total Jobs Analyzed": 1236,
       "Percentage with Essay Question": 0.0
     },
     {
       "Grade Level": "GS-13",
-      "Jobs with Essay Question": 37,
-      "Total Jobs Analyzed": 1085,
-      "Percentage with Essay Question": 3.4
+      "Jobs with Essay Question": 39,
+      "Total Jobs Analyzed": 1119,
+      "Percentage with Essay Question": 3.5
     },
     {
       "Grade Level": "GS-11",
-      "Jobs with Essay Question": 27,
-      "Total Jobs Analyzed": 838,
+      "Jobs with Essay Question": 28,
+      "Total Jobs Analyzed": 863,
       "Percentage with Essay Question": 3.2
     },
     {
       "Grade Level": "GS-9",
-      "Jobs with Essay Question": 22,
-      "Total Jobs Analyzed": 722,
-      "Percentage with Essay Question": 3.0
+      "Jobs with Essay Question": 24,
+      "Total Jobs Analyzed": 746,
+      "Percentage with Essay Question": 3.2
     },
     {
       "Grade Level": "GS-6",
-      "Jobs with Essay Question": 13,
-      "Total Jobs Analyzed": 588,
-      "Percentage with Essay Question": 2.2
+      "Jobs with Essay Question": 16,
+      "Total Jobs Analyzed": 604,
+      "Percentage with Essay Question": 2.6
     },
     {
       "Grade Level": "GS-7",
       "Jobs with Essay Question": 16,
-      "Total Jobs Analyzed": 575,
-      "Percentage with Essay Question": 2.8
+      "Total Jobs Analyzed": 592,
+      "Percentage with Essay Question": 2.7
     },
     {
       "Grade Level": "GS-14",
-      "Jobs with Essay Question": 26,
-      "Total Jobs Analyzed": 476,
-      "Percentage with Essay Question": 5.5
+      "Jobs with Essay Question": 30,
+      "Total Jobs Analyzed": 498,
+      "Percentage with Essay Question": 6.0
     },
     {
       "Grade Level": "GS-9/11",
-      "Jobs with Essay Question": 5,
-      "Total Jobs Analyzed": 472,
-      "Percentage with Essay Question": 1.1
+      "Jobs with Essay Question": 6,
+      "Total Jobs Analyzed": 487,
+      "Percentage with Essay Question": 1.2
     },
     {
       "Grade Level": "GS-5",
-      "Jobs with Essay Question": 22,
-      "Total Jobs Analyzed": 397,
-      "Percentage with Essay Question": 5.5
+      "Jobs with Essay Question": 24,
+      "Total Jobs Analyzed": 411,
+      "Percentage with Essay Question": 5.8
     }
   ],
   "location_analysis": [
     {
       "Location": "Washington, District of Columbia",
-      "Jobs with Essay Question": 34,
-      "Total Jobs Analyzed": 613,
-      "Percentage with Essay Question": 5.5
+      "Jobs with Essay Question": 37,
+      "Total Jobs Analyzed": 630,
+      "Percentage with Essay Question": 5.9
+    },
+    {
+      "Location": "Battle Creek, Michigan",
+      "Jobs with Essay Question": 0,
+      "Total Jobs Analyzed": 127,
+      "Percentage with Essay Question": 0.0
     },
     {
       "Location": "Indianapolis, Indiana",
@@ -101,22 +107,22 @@
       "Percentage with Essay Question": 0.0
     },
     {
-      "Location": "Battle Creek, Michigan",
-      "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 123,
-      "Percentage with Essay Question": 0.0
-    },
-    {
       "Location": "Salt Lake City, Utah",
       "Jobs with Essay Question": 3,
-      "Total Jobs Analyzed": 122,
-      "Percentage with Essay Question": 2.5
+      "Total Jobs Analyzed": 126,
+      "Percentage with Essay Question": 2.4
     },
     {
       "Location": "San Diego, California",
-      "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 114,
-      "Percentage with Essay Question": 0.0
+      "Jobs with Essay Question": 2,
+      "Total Jobs Analyzed": 117,
+      "Percentage with Essay Question": 1.7
+    },
+    {
+      "Location": "Phoenix, Arizona",
+      "Jobs with Essay Question": 5,
+      "Total Jobs Analyzed": 116,
+      "Percentage with Essay Question": 4.3
     },
     {
       "Location": "Albuquerque, New Mexico",
@@ -125,27 +131,21 @@
       "Percentage with Essay Question": 1.8
     },
     {
-      "Location": "Phoenix, Arizona",
-      "Jobs with Essay Question": 5,
-      "Total Jobs Analyzed": 104,
-      "Percentage with Essay Question": 4.8
-    },
-    {
       "Location": "Aurora, Colorado",
       "Jobs with Essay Question": 1,
-      "Total Jobs Analyzed": 103,
+      "Total Jobs Analyzed": 105,
       "Percentage with Essay Question": 1.0
     },
     {
       "Location": "Atlanta, Georgia",
       "Jobs with Essay Question": 1,
-      "Total Jobs Analyzed": 98,
+      "Total Jobs Analyzed": 100,
       "Percentage with Essay Question": 1.0
     },
     {
-      "Location": "Los Angeles, California",
+      "Location": "Fort Bragg, North Carolina",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 96,
+      "Total Jobs Analyzed": 100,
       "Percentage with Essay Question": 0.0
     }
   ],
@@ -153,85 +153,85 @@
     {
       "Agency": "Department of Veterans Affairs",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 6670,
+      "Total Jobs Analyzed": 6883,
       "Percentage with Essay Question": 0.0
     },
     {
       "Agency": "Department of the Air Force",
-      "Jobs with Essay Question": 80,
-      "Total Jobs Analyzed": 1879,
-      "Percentage with Essay Question": 4.3
+      "Jobs with Essay Question": 82,
+      "Total Jobs Analyzed": 1938,
+      "Percentage with Essay Question": 4.2
     },
     {
       "Agency": "Department of Defense",
-      "Jobs with Essay Question": 27,
-      "Total Jobs Analyzed": 1663,
-      "Percentage with Essay Question": 1.6
+      "Jobs with Essay Question": 37,
+      "Total Jobs Analyzed": 1744,
+      "Percentage with Essay Question": 2.1
     },
     {
       "Agency": "Department of the Army",
       "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 1424,
+      "Total Jobs Analyzed": 1481,
       "Percentage with Essay Question": 0.1
     },
     {
       "Agency": "Department of the Navy",
       "Jobs with Essay Question": 1,
-      "Total Jobs Analyzed": 1352,
+      "Total Jobs Analyzed": 1379,
       "Percentage with Essay Question": 0.1
     },
     {
       "Agency": "Department of Justice",
       "Jobs with Essay Question": 8,
-      "Total Jobs Analyzed": 910,
-      "Percentage with Essay Question": 0.9
+      "Total Jobs Analyzed": 948,
+      "Percentage with Essay Question": 0.8
     },
     {
       "Agency": "Department of Homeland Security",
       "Jobs with Essay Question": 1,
-      "Total Jobs Analyzed": 704,
+      "Total Jobs Analyzed": 720,
       "Percentage with Essay Question": 0.1
     },
     {
       "Agency": "Department of the Interior",
-      "Jobs with Essay Question": 79,
-      "Total Jobs Analyzed": 309,
-      "Percentage with Essay Question": 25.6
+      "Jobs with Essay Question": 83,
+      "Total Jobs Analyzed": 319,
+      "Percentage with Essay Question": 26.0
     },
     {
       "Agency": "Department of Health and Human Services",
       "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 273,
-      "Percentage with Essay Question": 0.7
+      "Total Jobs Analyzed": 313,
+      "Percentage with Essay Question": 0.6
     },
     {
       "Agency": "Other Agencies and Independent Organizations",
       "Jobs with Essay Question": 16,
-      "Total Jobs Analyzed": 215,
-      "Percentage with Essay Question": 7.4
+      "Total Jobs Analyzed": 218,
+      "Percentage with Essay Question": 7.3
     },
     {
       "Agency": "Department of Agriculture",
-      "Jobs with Essay Question": 92,
-      "Total Jobs Analyzed": 191,
-      "Percentage with Essay Question": 48.2
+      "Jobs with Essay Question": 93,
+      "Total Jobs Analyzed": 194,
+      "Percentage with Essay Question": 47.9
     },
     {
       "Agency": "Legislative Branch",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 184,
+      "Total Jobs Analyzed": 192,
       "Percentage with Essay Question": 0.0
     },
     {
       "Agency": "Department of Commerce",
-      "Jobs with Essay Question": 29,
-      "Total Jobs Analyzed": 86,
-      "Percentage with Essay Question": 33.7
+      "Jobs with Essay Question": 40,
+      "Total Jobs Analyzed": 98,
+      "Percentage with Essay Question": 40.8
     },
     {
       "Agency": "Department of Transportation",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 60,
+      "Total Jobs Analyzed": 66,
       "Percentage with Essay Question": 0.0
     },
     {
@@ -275,122 +275,122 @@
     {
       "Occupation Series": "610 - Nurse",
       "Jobs with Essay Question": 1,
-      "Total Jobs Analyzed": 1415,
+      "Total Jobs Analyzed": 1456,
       "Percentage with Essay Question": 0.1
     },
     {
       "Occupation Series": "185 - Social Work",
       "Jobs with Essay Question": 3,
-      "Total Jobs Analyzed": 707,
+      "Total Jobs Analyzed": 730,
       "Percentage with Essay Question": 0.4
     },
     {
       "Occupation Series": "301 - Miscellaneous Administration And Program",
-      "Jobs with Essay Question": 34,
-      "Total Jobs Analyzed": 537,
-      "Percentage with Essay Question": 6.3
+      "Jobs with Essay Question": 37,
+      "Total Jobs Analyzed": 553,
+      "Percentage with Essay Question": 6.7
     },
     {
       "Occupation Series": "1702 - Education And Training Technician",
       "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 481,
+      "Total Jobs Analyzed": 494,
       "Percentage with Essay Question": 0.4
     },
     {
       "Occupation Series": "679 - Medical Support Assistance",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 467,
+      "Total Jobs Analyzed": 484,
       "Percentage with Essay Question": 0.0
     },
     {
       "Occupation Series": "620 - Practical Nurse",
       "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 391,
+      "Total Jobs Analyzed": 409,
       "Percentage with Essay Question": 0.5
     },
     {
       "Occupation Series": "189 - Recreation Aid And Assistant",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 375,
+      "Total Jobs Analyzed": 383,
       "Percentage with Essay Question": 0.0
     },
     {
       "Occupation Series": "180 - Psychology",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 354,
+      "Total Jobs Analyzed": 364,
       "Percentage with Essay Question": 0.0
     },
     {
       "Occupation Series": "303 - Miscellaneous Clerk And Assistant",
-      "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 340,
-      "Percentage with Essay Question": 0.6
+      "Jobs with Essay Question": 3,
+      "Total Jobs Analyzed": 351,
+      "Percentage with Essay Question": 0.9
     },
     {
       "Occupation Series": "1101 - General Business And Industry",
-      "Jobs with Essay Question": 16,
-      "Total Jobs Analyzed": 302,
-      "Percentage with Essay Question": 5.3
+      "Jobs with Essay Question": 20,
+      "Total Jobs Analyzed": 321,
+      "Percentage with Essay Question": 6.2
     },
     {
       "Occupation Series": "640 - Health Aid And Technician",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 294,
+      "Total Jobs Analyzed": 304,
       "Percentage with Essay Question": 0.0
     },
     {
       "Occupation Series": "2210 - Information Technology Management",
       "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 283,
+      "Total Jobs Analyzed": 292,
       "Percentage with Essay Question": 0.7
     },
     {
       "Occupation Series": "3566 - Custodial Working",
       "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 278,
+      "Total Jobs Analyzed": 291,
       "Percentage with Essay Question": 0.7
     },
     {
       "Occupation Series": "343 - Management And Program Analysis",
       "Jobs with Essay Question": 6,
-      "Total Jobs Analyzed": 231,
-      "Percentage with Essay Question": 2.6
+      "Total Jobs Analyzed": 243,
+      "Percentage with Essay Question": 2.5
     },
     {
       "Occupation Series": "621 - Nursing Assistant",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 230,
+      "Total Jobs Analyzed": 236,
       "Percentage with Essay Question": 0.0
     },
     {
       "Occupation Series": "7408 - Food Service Working",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 212,
+      "Total Jobs Analyzed": 218,
       "Percentage with Essay Question": 0.0
     },
     {
       "Occupation Series": "7404 - Cooking",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 199,
+      "Total Jobs Analyzed": 209,
       "Percentage with Essay Question": 0.0
     },
     {
       "Occupation Series": "675 - Medical Records Technician",
+      "Jobs with Essay Question": 0,
+      "Total Jobs Analyzed": 189,
+      "Percentage with Essay Question": 0.0
+    },
+    {
+      "Occupation Series": "201 - Human Resources Management",
       "Jobs with Essay Question": 0,
       "Total Jobs Analyzed": 183,
       "Percentage with Essay Question": 0.0
     },
     {
       "Occupation Series": "801 - General Engineering",
-      "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 175,
-      "Percentage with Essay Question": 1.1
-    },
-    {
-      "Occupation Series": "201 - Human Resources Management",
-      "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 174,
-      "Percentage with Essay Question": 0.0
+      "Jobs with Essay Question": 5,
+      "Total Jobs Analyzed": 178,
+      "Percentage with Essay Question": 2.8
     }
   ],
   "timeline_analysis": [
@@ -402,7 +402,7 @@
       "Week 4": 0.8,
       "Week 5": 3.0,
       "Monthly Percentage": 0.9,
-      "Total Jobs Posted": 3163,
+      "Total Jobs Posted": 3164,
       "Jobs with Essay Question": 30
     },
     {
@@ -413,19 +413,19 @@
       "Week 4": 4.2,
       "Week 5": 3.7,
       "Monthly Percentage": 2.5,
-      "Total Jobs Posted": 12611,
-      "Jobs with Essay Question": 309
+      "Total Jobs Posted": 12631,
+      "Jobs with Essay Question": 310
     },
     {
       "Month": "August 2025",
-      "Week 1": 5.4,
+      "Week 1": 5.1,
       "Week 2": null,
       "Week 3": null,
       "Week 4": null,
       "Week 5": null,
-      "Monthly Percentage": 5.4,
-      "Total Jobs Posted": 239,
-      "Jobs with Essay Question": 13
+      "Monthly Percentage": 5.1,
+      "Total Jobs Posted": 791,
+      "Jobs with Essay Question": 40
     }
   ],
   "job_postings": [
@@ -4652,6 +4652,342 @@
       "close_date": "08/15/2025",
       "usajobs_link": 842182400,
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12705384"
+    },
+    {
+      "position_title": "WING REFUELING DOCUMENT CONTROL OFFICER",
+      "occupation": "301 - Miscellaneous Administration And Program",
+      "agency": "Department of the Air Force",
+      "location": "Charleston AFB, South Carolina",
+      "grade": "GS-9",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/08/2025",
+      "usajobs_link": 842250300,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776665"
+    },
+    {
+      "position_title": "Project Manager - National Wildlfire Coordinating Group (NWCG) Writer/Editor",
+      "occupation": "301 - Miscellaneous Administration And Program",
+      "agency": "Department of the Interior",
+      "location": "Boise, Idaho",
+      "grade": "GS-9",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/14/2025",
+      "usajobs_link": 842264500,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12770013"
+    },
+    {
+      "position_title": "SUPERVISORY OPERATIONS AND PLANS SPECIALIST",
+      "occupation": "301 - Miscellaneous Administration And Program",
+      "agency": "Department of the Air Force",
+      "location": "Mildenhall, United Kingdom",
+      "grade": "GS-14",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/08/2025",
+      "usajobs_link": 842283100,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774553"
+    },
+    {
+      "position_title": "Field Supervisor",
+      "occupation": "303 - Miscellaneous Clerk And Assistant",
+      "agency": "Department of Commerce",
+      "location": "Colusa County, California",
+      "grade": "GG-6",
+      "service": "Excepted",
+      "open_date": "07/31/2025",
+      "close_date": "09/30/2025",
+      "usajobs_link": 842226800,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12768085"
+    },
+    {
+      "position_title": "Secretary (Office Automation)",
+      "occupation": "318 - Secretary",
+      "agency": "Department of Defense",
+      "location": "San Diego, California",
+      "grade": "GS-6",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/11/2025",
+      "usajobs_link": 842277400,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774896"
+    },
+    {
+      "position_title": "Plant Pathologist (Mycology)",
+      "occupation": "434 - Plant Pathology",
+      "agency": "Department of Agriculture",
+      "location": "South San Francisco, California",
+      "grade": "GS-9/11",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/07/2025",
+      "usajobs_link": 842272100,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776770"
+    },
+    {
+      "position_title": "Wildland Firefighter (Aviation Manager) - Direct Hire Authority",
+      "occupation": "456 - Wildland Fire Management",
+      "agency": "Department of the Interior",
+      "location": "Whiteriver, Arizona",
+      "grade": "GS-11",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/25/2025",
+      "usajobs_link": 842255700,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774347"
+    },
+    {
+      "position_title": "Wildland Firefighter (Aviation Specialist) - Direct Hire Authority",
+      "occupation": "456 - Wildland Fire Management",
+      "agency": "Department of the Interior",
+      "location": "Boise, Idaho",
+      "grade": "GW-12",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/14/2025",
+      "usajobs_link": 842289700,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774459"
+    },
+    {
+      "position_title": "RESOURCES ANALYST",
+      "occupation": "501 - Financial Administration And Program",
+      "agency": "Department of Defense",
+      "location": "Fort Lee, Virginia",
+      "grade": "GS-13",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/08/2025",
+      "usajobs_link": 842229300,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12773365"
+    },
+    {
+      "position_title": "Commissary Contractor Monitor",
+      "occupation": "1101 - General Business And Industry",
+      "agency": "Department of Defense",
+      "location": "Kirtland AFB, New Mexico",
+      "grade": "GS-6",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/11/2025",
+      "usajobs_link": 842235700,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774565"
+    },
+    {
+      "position_title": "Supervisory Patent Examiner - TC2100",
+      "occupation": "1224 - Patent Examining",
+      "agency": "Department of Commerce",
+      "location": "Alexandria, Virginia",
+      "grade": "GS-15",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/15/2025",
+      "usajobs_link": 842282900,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776383"
+    },
+    {
+      "position_title": "Supervisory Patent Examiner - TC2600",
+      "occupation": "1224 - Patent Examining",
+      "agency": "Department of Commerce",
+      "location": "Alexandria, Virginia",
+      "grade": "GS-15",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/15/2025",
+      "usajobs_link": 842283400,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776443"
+    },
+    {
+      "position_title": "Supervisory Patent Examiner - TC3700",
+      "occupation": "1224 - Patent Examining",
+      "agency": "Department of Commerce",
+      "location": "Alexandria, Virginia",
+      "grade": "GS-15",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/15/2025",
+      "usajobs_link": 842285300,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776553"
+    },
+    {
+      "position_title": "Criminal Investigator",
+      "occupation": "1811 - Criminal Investigation",
+      "agency": "Department of Commerce",
+      "location": "Manassas, Virginia",
+      "grade": "GS-13/14",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/07/2025",
+      "usajobs_link": 842231900,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12773541"
+    },
+    {
+      "position_title": "STORE WORKER (FORK LIFT OPERATOR)",
+      "occupation": "6914 - Store Working",
+      "agency": "Department of Defense",
+      "location": "Fort McCoy, Wisconsin",
+      "grade": "WG-5",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/08/2025",
+      "usajobs_link": 842239400,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774898"
+    },
+    {
+      "position_title": "Meatcutting Worker",
+      "occupation": "7407 - Meatcutting",
+      "agency": "Department of Defense",
+      "location": "Imperial Beach, California",
+      "grade": "WG-5",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/25/2025",
+      "usajobs_link": 842234900,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774061"
+    },
+    {
+      "position_title": "Meatcutting Worker",
+      "occupation": "7407 - Meatcutting",
+      "agency": "Department of Defense",
+      "location": "San Diego, California",
+      "grade": "WG-5",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/11/2025",
+      "usajobs_link": 842293200,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776056"
+    },
+    {
+      "position_title": "Safety & Occupational Health Specialist",
+      "occupation": "18 - Safety and Occupational Health Management",
+      "agency": "Department of the Interior",
+      "location": "Fairbanks, Alaska",
+      "grade": "GS-7/11",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/08/2025",
+      "usajobs_link": 842325600,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12748318"
+    },
+    {
+      "position_title": "Supervisory General Engineer",
+      "occupation": "801 - General Engineering",
+      "agency": "Department of Commerce",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-15",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/08/2025",
+      "usajobs_link": 842326700,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12773225"
+    },
+    {
+      "position_title": "General Engineer",
+      "occupation": "801 - General Engineering",
+      "agency": "Department of Commerce",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-13",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/08/2025",
+      "usajobs_link": 842327300,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12769330"
+    },
+    {
+      "position_title": "General Engineer",
+      "occupation": "801 - General Engineering",
+      "agency": "Department of Commerce",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-14",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/08/2025",
+      "usajobs_link": 842328100,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776292"
+    },
+    {
+      "position_title": "Computer Assisted Ordering Technician",
+      "occupation": "1101 - General Business And Industry",
+      "agency": "Department of Defense",
+      "location": "Moody AFB, Georgia",
+      "grade": "GS-5",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/18/2025",
+      "usajobs_link": 842321400,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776761"
+    },
+    {
+      "position_title": "Commissary Contractor Monitor",
+      "occupation": "1101 - General Business And Industry",
+      "agency": "Department of Defense",
+      "location": "Nellis AFB, Nevada",
+      "grade": "GS-6",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/18/2025",
+      "usajobs_link": 842327400,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12777080"
+    },
+    {
+      "position_title": "Computer Assisted Ordering Technician",
+      "occupation": "1101 - General Business And Industry",
+      "agency": "Department of Defense",
+      "location": "Moody AFB, Georgia",
+      "grade": "GS-5",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/18/2025",
+      "usajobs_link": 842329900,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776762"
+    },
+    {
+      "position_title": "Physical Scientist",
+      "occupation": "1301 - General Physical Science",
+      "agency": "Department of Commerce",
+      "location": "Boulder, Colorado",
+      "grade": "GS-11/13",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/15/2025",
+      "usajobs_link": 842330500,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12773966"
+    },
+    {
+      "position_title": "Lead Physical Scientist",
+      "occupation": "1301 - General Physical Science",
+      "agency": "Department of Commerce",
+      "location": "Boulder, Colorado",
+      "grade": "GS-14",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/15/2025",
+      "usajobs_link": 842331500,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12773986"
+    },
+    {
+      "position_title": "Physical Scientist",
+      "occupation": "1301 - General Physical Science",
+      "agency": "Department of Commerce",
+      "location": "Boulder, Colorado",
+      "grade": "GS-14",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/15/2025",
+      "usajobs_link": 842332500,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774015"
+    },
+    {
+      "position_title": "Store Worker (Fork Lift Operator)",
+      "occupation": "6914 - Store Working",
+      "agency": "Department of Defense",
+      "location": "Fort Benning, Georgia",
+      "grade": "WG-5",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/06/2025",
+      "usajobs_link": 842340200,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12777142"
     }
   ]
 }
