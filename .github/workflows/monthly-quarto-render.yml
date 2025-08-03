@@ -36,7 +36,7 @@ jobs:
     - name: Set up Quarto
       uses: quarto-dev/quarto-actions/setup@v2
       with:
-        version: 'latest'
+        version: '1.4.551'
 
     - name: Render National Park Service Analysis
       run: |
