@@ -34,9 +34,10 @@ jobs:
         pip install -r requirements.txt
 
     - name: Set up Quarto
-      uses: quarto-dev/quarto-actions/setup@v2
-      with:
-        version: '1.4.551'
+      run: |
+        wget https://github.com/quarto-dev/quarto-cli/releases/download/v1.4.551/quarto-1.4.551-linux-amd64.deb
+        sudo dpkg -i quarto-1.4.551-linux-amd64.deb
+        rm quarto-1.4.551-linux-amd64.deb
 
     - name: Render National Park Service Analysis
       run: |
