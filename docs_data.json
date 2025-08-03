@@ -1,8 +1,8 @@
 {
-  "generated_at": "2025-08-03T07:15:57.605998",
-  "total_jobs": 3000984,
+  "generated_at": "2025-08-03T17:03:21.526048",
+  "total_jobs": 3001434,
   "total_fields": 42,
-  "file_size": "543MB",
+  "file_size": "535MB",
   "latest_job_date": "2025-08-03",
   "data_coverage": [
     {
@@ -91,9 +91,9 @@
     },
     {
       "year": 2025,
-      "total_jobs": 121720,
-      "jobs_opened": 121720,
-      "jobs_closed": 120296,
+      "total_jobs": 122170,
+      "jobs_opened": 122170,
+      "jobs_closed": 120740,
       "coverage": "Current through August 03, 2025"
     }
   ],
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0434\"}, {\"series\": \"0440\"}], [{\"series\": \"0181\"}], [{\"series\": \"0904\"}], [{\"series\": \"1320\"}, {\"series\": \"0401\"}, {\"series\": \"1350\"}, {\"series\": \"1301\"}, {\"series\": \"0893\"}, {\"series\": \"0801\"}, {\"series\": \"0819\"}] (3060 unique)",
+      "examples": "[{\"series\": \"0810\"}, {\"series\": \"0819\"}], [{\"series\": \"1315\"}, {\"series\": \"0810\"}, {\"series\": \"0890\"}], [{\"series\": \"9921\"}], [{\"series\": \"0482\"}, {\"series\": \"0408\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Navy\\Commander, Naval Information Warfare Systems Command (NAVWARSYSCOM), Department of the Army\\Miscellaneous Field Operating Agencies, Department of Defense\\Defense Acquisition University, Department of Labor\\Women's Bureau (542 unique)",
+      "examples": "Department of the Air Force\\Air Force Special Operations Command, Department of the Air Force\\Air Force Operational Test and Evaluation Center, Department of the Army\\US Army Financial Management Command, Department of Commerce\\U.S. Census Bureau (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "2024-EM-PJN-0153, OST.SES-2024-0004, CERH244841651467, 24-12317992-DNI/NCTC (363801 unique)",
+      "examples": "AFMC-12438706-428883-9R-DAB, CBTC-12429624-24-MEM, DE-12564738-25-NRP, CBSV-12599058-25-GEJ (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Internships, Agency Employees Only, Temporary Promotion, ICTAP Only (15 unique)",
+      "examples": "Summer, Telework, Permanent, ICTAP Only (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "DLBL, LC00, TD06, ARXQ (528 unique)",
+      "examples": "VAKA, TN00, CM61, HUPP (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Office of the Secretary of Defense, Space Force Elements, Miscellaneous Field Operating Agencies, Office of the Solicitor (502 unique)",
+      "examples": "Defense Media Activity, Office of Postsecondary Education, Office for Civil Rights, Agriculture, Office of the Chief Financial Officer (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "MA, TV, NU, BT (122 unique)",
+      "examples": "IB, SM, FT, GU (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of the Interior, Judicial Branch, General Services Administration, Department of Defense (26 unique)",
+      "examples": "Department of Health and Human Services, Department of the Army, Judicial Branch, Executive Office of the President (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Public Health Command (PHC) - Kirtland AFB Veterinary Treatment Facility, Orlando VA Medical Center - Lake Nona, San Francisco Health Care System , Office of  the Deputy Director, Integrity, and Compliance Service, DHA - NCR Market, Walter Reed National Military Medical Center, Director for Surgery (59973 unique)",
+      "examples": "Office of Inspector General (OIG), Office of Workforce Performance and Development (OWPD), Position is located at Air Force Research Laboratory (AFRL), CIRCUIT - WICHITA, KS, 412 CIVIL ENGINEER SQ/CEOFE, May be used for like vacancies at Edwards AFB (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T14:01:38.954263, 2025-07-05T15:00:31.512510, 2025-07-05T15:14:56.208302, 2025-07-05T15:19:45.168027 (367177 unique)",
+      "examples": "2025-07-05T15:08:10.714002, 2025-07-05T14:40:05.742801, 2025-07-05T15:08:10.756625, 2025-07-05T14:15:57.565943 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "39, EK, KH, J (127 unique)",
+      "examples": "FI, SL, 08, M (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "98, 38, D, G (125 unique)",
+      "examples": "E, 52, 37, IJ (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "EX, WG, FV, ES (191 unique)",
+      "examples": "NX, CG, HS, RF (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-05-07, 2025-12-18, 2025-07-18, 2025-08-28 (672 unique)",
+      "examples": "2025-10-20, 2025-12-22, 2024-11-12, 2024-09-03 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-03-05, 2024-08-28, 2024-03-08, 2024-12-06 (550 unique)",
+      "examples": "2024-08-15, 2025-05-14, 2024-07-17, 2025-04-09 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-12-01, 2024-10-27, 2024-07-22, 2024-05-12 (365 unique)",
+      "examples": "2024-08-02, 2024-08-04, 2024-07-02, 2024-07-23 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Nursing Assistant - Perioperative, Advanced Practice Registered Nurse (NP/CNS), IT Cybersecurity Specialist (Network Services), Geneticist (77986 unique)",
+      "examples": "Marine Information Specialist, Management and Program Analyst (NTE 1 year, MBE up to 5 years, MBMP), ELECTRONICS ENGINEER/COMPUTER SCIENTIST, Supervisory Tax Examining Technician (Group/Unit Manager) Temp NTE 1 Year, MBE 5 Years (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "FG07, 22, G, 42 (115 unique)",
+      "examples": "40, 1, K, 7 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "575, 34, 44, 1806 (157 unique)",
+      "examples": "27, 136, 51, 04 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
