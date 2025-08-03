@@ -51,11 +51,6 @@ jobs:
       run: |
         cd analysis/national_park_service
         quarto render national_park_service_analysis.qmd
-      
-    - name: Render Product Manager Analysis
-      run: |
-        cd analysis/product_manager
-        quarto render product_manager_analysis.qmd
 
     - name: Commit and push rendered files
       run: |
