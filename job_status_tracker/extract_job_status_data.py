@@ -129,6 +129,7 @@ def extract_cancelled_jobs(df):
             'location': location,
             'open_date': pd.to_datetime(job.get('positionOpenDate')).strftime('%Y-%m-%d') if pd.notna(job.get('positionOpenDate')) else '',
             'close_date': pd.to_datetime(job.get('positionCloseDate')).strftime('%Y-%m-%d') if pd.notna(job.get('positionCloseDate')) else '',
+            'pay_scale': job.get('payScale', ''),  # Add pay scale
             'min_grade': job.get('minimumGrade', ''),
             'max_grade': job.get('maximumGrade', ''),
             'min_salary': job.get('minimumSalary', 0),
@@ -265,14 +266,9 @@ def main():
         'agency_stats': agency_stats
     }
     
-    # Write to JSON file
-    output_path = OUTPUT_DIR / 'job_status_data.json'
+    # Write minified JSON file (smaller file size for web)
+    output_path = OUTPUT_DIR / 'job_status_data.min.json'
     with open(output_path, 'w') as f:
-        json.dump(output_data, f, indent=2)
-    
-    # Also write a minified version for production
-    minified_path = OUTPUT_DIR / 'job_status_data.min.json'
-    with open(minified_path, 'w') as f:
         json.dump(output_data, f, separators=(',', ':'))
     
     print(f"\nData saved to {output_path}")

@@ -29,10 +29,8 @@ async function loadData() {
         // Show loading with size info
         document.getElementById('loading').innerHTML = 'Loading job status data...<br><span style="font-size: 0.9em; color: #a0aec0;">This may take a moment on first load</span>';
         
-        // Try optimized version first, then minified, then regular
-        let response = await fetch('job_status_data_optimized.json')
-            .catch(() => fetch('job_status_data.min.json'))
-            .catch(() => fetch('job_status_data.json'));
+        // Load the minified JSON data
+        let response = await fetch('job_status_data.min.json');
         jobData = await response.json();
         
         console.log('Data loaded successfully:', jobData);
@@ -223,10 +221,12 @@ function populateCancelledJobsTable(filteredJobs = null, page = 1) {
         const row = document.createElement('tr');
         row.className = 'cancelled-row';
         
-        const grade = job.min_grade && job.max_grade ? 
-            (job.min_grade === job.max_grade ? `GS-${job.min_grade}` : `GS-${job.min_grade}-${job.max_grade}`) : 
-            job.min_grade ? `GS-${job.min_grade}` : 
-            job.max_grade ? `GS-${job.max_grade}` : 'N/A';
+        // Use pay scale if available, otherwise don't show prefix
+        const payScale = job.pay_scale || '';
+        const grade = (job.min_grade !== undefined && job.min_grade !== '' && job.max_grade !== undefined && job.max_grade !== '') ? 
+            (job.min_grade === job.max_grade ? `${payScale}${payScale ? '-' : ''}${job.min_grade}` : `${payScale}${payScale ? '-' : ''}${job.min_grade}-${job.max_grade}`) : 
+            (job.min_grade !== undefined && job.min_grade !== '') ? `${payScale}${payScale ? '-' : ''}${job.min_grade}` : 
+            (job.max_grade !== undefined && job.max_grade !== '') ? `${payScale}${payScale ? '-' : ''}${job.max_grade}` : 'N/A';
         
         row.innerHTML = `
             <td><a href="${job.usajobs_url}" target="_blank">${job.control_number}</a></td>
@@ -286,10 +286,11 @@ function setupColumnFilters() {
         'hiring_agency': [...new Set(jobData.cancelled_jobs.map(j => j.hiring_agency))].sort(),
         'location': [...new Set(jobData.cancelled_jobs.map(j => j.location || 'N/A'))].sort(),
         'grade': [...new Set(jobData.cancelled_jobs.map(j => {
+            const payScale = j.pay_scale || '';
             const grade = j.min_grade && j.max_grade ? 
-                (j.min_grade === j.max_grade ? `GS-${j.min_grade}` : `GS-${j.min_grade}-${j.max_grade}`) : 
-                j.min_grade ? `GS-${j.min_grade}` : 
-                j.max_grade ? `GS-${j.max_grade}` : 'N/A';
+                (j.min_grade === j.max_grade ? `${payScale}${payScale ? '-' : ''}${j.min_grade}` : `${payScale}${payScale ? '-' : ''}${j.min_grade}-${j.max_grade}`) : 
+                j.min_grade ? `${payScale}${payScale ? '-' : ''}${j.min_grade}` : 
+                j.max_grade ? `${payScale}${payScale ? '-' : ''}${j.max_grade}` : 'N/A';
             return grade;
         }))].sort(),
         'total_openings': [...new Set(jobData.cancelled_jobs.map(j => j.total_openings))].sort((a, b) => {
@@ -384,10 +385,11 @@ function applyColumnFilters() {
             
             // Handle special cases
             if (column === 'grade') {
+                const payScale = job.pay_scale || '';
                 jobValue = job.min_grade && job.max_grade ? 
-                    (job.min_grade === job.max_grade ? `GS-${job.min_grade}` : `GS-${job.min_grade}-${job.max_grade}`) : 
-                    job.min_grade ? `GS-${job.min_grade}` : 
-                    job.max_grade ? `GS-${job.max_grade}` : 'N/A';
+                    (job.min_grade === job.max_grade ? `${payScale}${payScale ? '-' : ''}${job.min_grade}` : `${payScale}${payScale ? '-' : ''}${job.min_grade}-${job.max_grade}`) : 
+                    job.min_grade ? `${payScale}${payScale ? '-' : ''}${job.min_grade}` : 
+                    job.max_grade ? `${payScale}${payScale ? '-' : ''}${job.max_grade}` : 'N/A';
             } else if (column === 'salary') {
                 // Handle salary range filtering (e.g., ">50000")
                 const minSalary = job.min_salary || 0;
@@ -667,10 +669,11 @@ function downloadFilteredCSV() {
                 
                 // Apply same filtering logic as in applyColumnFilters
                 if (column === 'grade') {
+                    const payScale = job.pay_scale || '';
                     jobValue = job.min_grade && job.max_grade ? 
-                        (job.min_grade === job.max_grade ? `GS-${job.min_grade}` : `GS-${job.min_grade}-${job.max_grade}`) : 
-                        job.min_grade ? `GS-${job.min_grade}` : 
-                        job.max_grade ? `GS-${job.max_grade}` : 'N/A';
+                        (job.min_grade === job.max_grade ? `${payScale}${payScale ? '-' : ''}${job.min_grade}` : `${payScale}${payScale ? '-' : ''}${job.min_grade}-${job.max_grade}`) : 
+                        job.min_grade ? `${payScale}${payScale ? '-' : ''}${job.min_grade}` : 
+                        job.max_grade ? `${payScale}${payScale ? '-' : ''}${job.max_grade}` : 'N/A';
                 } else if (column === 'salary') {
                     const minSalary = job.min_salary || 0;
                     const maxSalary = job.max_salary || 0;
@@ -755,10 +758,12 @@ function downloadFilteredCSV() {
     let csvContent = headers.join(',') + '\n';
     
     dataToExport.forEach(job => {
-        const grade = job.min_grade && job.max_grade ? 
-            (job.min_grade === job.max_grade ? `GS-${job.min_grade}` : `GS-${job.min_grade}-${job.max_grade}`) : 
-            job.min_grade ? `GS-${job.min_grade}` : 
-            job.max_grade ? `GS-${job.max_grade}` : 'N/A';
+        // Use pay scale if available, otherwise don't show prefix
+        const payScale = job.pay_scale || '';
+        const grade = (job.min_grade !== undefined && job.min_grade !== '' && job.max_grade !== undefined && job.max_grade !== '') ? 
+            (job.min_grade === job.max_grade ? `${payScale}${payScale ? '-' : ''}${job.min_grade}` : `${payScale}${payScale ? '-' : ''}${job.min_grade}-${job.max_grade}`) : 
+            (job.min_grade !== undefined && job.min_grade !== '') ? `${payScale}${payScale ? '-' : ''}${job.min_grade}` : 
+            (job.max_grade !== undefined && job.max_grade !== '') ? `${payScale}${payScale ? '-' : ''}${job.max_grade}` : 'N/A';
         
         const row = [
             job.control_number,
