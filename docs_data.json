@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-08-04T07:24:05.118579",
-  "total_jobs": 3001884,
+  "generated_at": "2025-08-05T07:19:36.498987",
+  "total_jobs": 3002733,
   "total_fields": 42,
-  "file_size": "537MB",
-  "latest_job_date": "2025-08-04",
+  "file_size": "542MB",
+  "latest_job_date": "2025-08-05",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 122620,
-      "jobs_opened": 122620,
-      "jobs_closed": 121190,
-      "coverage": "Current through August 04, 2025"
+      "total_jobs": 123469,
+      "jobs_opened": 123469,
+      "jobs_closed": 122035,
+      "coverage": "Current through August 05, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0854\"}, {\"series\": \"0801\"}, {\"series\": \"0850\"}, {\"series\": \"1515\"}, {\"series\": \"0855\"}], [{\"series\": \"1530\"}, {\"series\": \"0482\"}], [{\"series\": \"0007\"}], [{\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"1515\"}, {\"series\": \"0855\"}, {\"series\": \"1550\"}] (3060 unique)",
+      "examples": "[{\"series\": \"2504\"}], [{\"series\": \"0640\"}], [{\"series\": \"5784\"}], [{\"series\": \"0987\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of Health and Human Services\\Office of the Assistant Secretary for Health, Department of the Army\\U.S. Army, Pacific, Department of Housing and Urban Development\\Office of the Chief Human Capital Officer, Presidio Trust (542 unique)",
+      "examples": "Department of the Air Force\\United States Space Force Components, Department of the Treasury\\Bureau of the Fiscal Service, Small Business Administration, General Services Administration\\Office of the Customer Experience (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "CBTD-12580188-25-TL, IN-12315480-AR-24-098, 24-12300863C-CIM-0340-01, JOA-FL-12258328-AR-24-215 (363801 unique)",
+      "examples": "ACT-AFN-24-APM430-89927, DE-12650297-24-CS, DE-12411149-24-TY, IBC-24-DE-12332080JR (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Presidential Management Fellows, Term, ICTAP Only, Recent graduates (15 unique)",
+      "examples": "Agency Employees Only, Internships, Summer, Term (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "ARCP, DLCA, AF2H, PO00 (528 unique)",
+      "examples": "TD04, AG11, VAAJ, DLBL (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "United States Army Medical Logistics Command, Forest Service, Patent and Trademark Office, National Reconnaissance Office (502 unique)",
+      "examples": "Office of General Counsel, Agricultural Marketing Service, Office of the Chief of Staff of the Army, Food and Nutrition Service (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "KS, CM, DL, NP (122 unique)",
+      "examples": "NQ, FL, MI, WU (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Transportation, Department of State, Department of Housing and Urban Development, Department of Defense (26 unique)",
+      "examples": "Legislative Branch, Department of Defense, Department of Health and Human Services, Department of Housing and Urban Development (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Community Recreation Division - Schofield Barracks Health and Fitness Center, Wahiawa, Hawaii, ATO - Central Service Area - Great Lakes Region - Chicago District - Chicago ENV SSC (WCN12-C90), AHR, Office of Compensation. Benefits. & Worklife, Workers 'Compensation Program Division, AHB-300, G8 - Deputy Chief of Staff for Resource Management; Transportation Working Capital Funds Division (59973 unique)",
+      "examples": "Joseph Maxwell Cleland Atlanta VA Medical Center, Directorate of Family & Morale, Welfare & Recreation - Army Community Services Division, US Army Engineer Division - Transatlantic Middle East District - Services Branch, 20TH (CBRNE) COMMAND G3 OPERATIONS (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T15:19:45.153382, 2025-07-05T15:08:10.745621, 2025-07-05T13:59:26.139665, 2025-07-05T13:05:06.393939 (367177 unique)",
+      "examples": "2025-07-05T15:27:19.816386, 2025-07-05T15:00:31.542959, 2025-07-05T14:35:46.890465, 2025-07-05T15:12:56.608959 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "M, 27, HS5, 11 (127 unique)",
+      "examples": "DJ, 70, 7, 20 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "LK, NA, 53, H (125 unique)",
+      "examples": "00, 9, J, KL (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "NO, FB, XB, IE (191 unique)",
+      "examples": "NH, XE, NV, FS (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-06-04, 2025-07-22, 2024-02-07, 2024-11-02 (672 unique)",
+      "examples": "2024-06-06, 2025-05-31, 2025-06-24, 2025-12-31 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-06-26, 2024-08-03, 2025-01-11, 2024-08-28 (550 unique)",
+      "examples": "2024-10-25, 2024-08-03, 2023-04-04, 2024-08-08 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-03-06, 2024-02-29, 2024-02-07, 2024-09-12 (365 unique)",
+      "examples": "2024-06-10, 2024-07-26, 2024-08-14, 2024-06-21 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Pharmacy Technician -Float Inpatient-Outpatient, DETAILED INSPECTOR GENERAL - TITLE 5, ELECTRICAL SYSTEMS INSEPCTOR (SHIPS) LEADER, Security Specialist (Operations) (77986 unique)",
+      "examples": "Program Specialst, Electrical Engineer - DIRECT HIRE, Aviation Safety Inspector (General Aviation-Maintenance), Railroad Safety Training Operations Director (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "F, 17, I, 44 (115 unique)",
+      "examples": "44, FE, 19, NA (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "221, 54, many, 8 (157 unique)",
+      "examples": "103, 04, 54, 2 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
