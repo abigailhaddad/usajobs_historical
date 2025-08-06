@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-08-05T07:19:36.498987",
-  "total_jobs": 3002733,
+  "generated_at": "2025-08-06T07:21:37.049242",
+  "total_jobs": 3003840,
   "total_fields": 42,
-  "file_size": "542MB",
-  "latest_job_date": "2025-08-05",
+  "file_size": "547MB",
+  "latest_job_date": "2025-08-06",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 123469,
-      "jobs_opened": 123469,
-      "jobs_closed": 122035,
-      "coverage": "Current through August 05, 2025"
+      "total_jobs": 124576,
+      "jobs_opened": 124576,
+      "jobs_closed": 123139,
+      "coverage": "Current through August 06, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"2504\"}], [{\"series\": \"0640\"}], [{\"series\": \"5784\"}], [{\"series\": \"0987\"}] (3060 unique)",
+      "examples": "[{\"series\": \"0401\"}, {\"series\": \"0830\"}, {\"series\": \"0101\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"0850\"}, {\"series\": \"0810\"}, {\"series\": \"0808\"}], [{\"series\": \"0850\"}, {\"series\": \"0807\"}, {\"series\": \"0810\"}, {\"series\": \"0020\"}, {\"series\": \"0830\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"0808\"}], [{\"series\": \"0830\"}, {\"series\": \"0896\"}, {\"series\": \"0801\"}, {\"series\": \"0861\"}], [{\"series\": \"8840\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Air Force\\United States Space Force Components, Department of the Treasury\\Bureau of the Fiscal Service, Small Business Administration, General Services Administration\\Office of the Customer Experience (542 unique)",
+      "examples": "Department of Agriculture\\Foreign Agricultural Service, Department of Veterans Affairs\\Deputy Assistant Secretary for Public Affairs, Department of Commerce\\National Technical Information Service, Department of Veterans Affairs\\Immediate Office of the Assistant Secretary for Management (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "ACT-AFN-24-APM430-89927, DE-12650297-24-CS, DE-12411149-24-TY, IBC-24-DE-12332080JR (363801 unique)",
+      "examples": "MCFU247819473812, H-DEA-24-12344204-MP-CG, 12463971-DE-STS-24, CBSU-12559914-24-DS (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Agency Employees Only, Internships, Summer, Term (15 unique)",
+      "examples": "Term, Intermittent, Summer, ICTAP Only (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "TD04, AG11, VAAJ, DLBL (528 unique)",
+      "examples": "ARCH, DJ01, ARAT, HUNN (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Office of General Counsel, Agricultural Marketing Service, Office of the Chief of Staff of the Army, Food and Nutrition Service (502 unique)",
+      "examples": "Office of the Director of National Intelligence, Immediate Office of the Assistant Secretary for Operations, Security, and Preparedness, US ARMY HUMAN RESOURCES COMMAND (DRU), Legal Services Corporation (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "NQ, FL, MI, WU (122 unique)",
+      "examples": "HS, MA, AH, BO (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Legislative Branch, Department of Defense, Department of Health and Human Services, Department of Housing and Urban Development (26 unique)",
+      "examples": "Department of Transportation, Executive Office of the President, Department of Energy, Department of the Air Force (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Joseph Maxwell Cleland Atlanta VA Medical Center, Directorate of Family & Morale, Welfare & Recreation - Army Community Services Division, US Army Engineer Division - Transatlantic Middle East District - Services Branch, 20TH (CBRNE) COMMAND G3 OPERATIONS (59973 unique)",
+      "examples": "Cleveland VA Regional Office (VARO), National Call Center (NCC)., National War College & Eisenhower School, US ARMY ORDNANCE SCHOOL, TRACK/METAL WORK/SVC RECOVERY TNG DEPT., Fort Moore - Family & Morale, Welfare and Recreation - 1918 Club (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T15:27:19.816386, 2025-07-05T15:00:31.542959, 2025-07-05T14:35:46.890465, 2025-07-05T15:12:56.608959 (367177 unique)",
+      "examples": "2025-07-05T13:02:09.516505, 2025-07-05T13:50:17.146158, 2025-07-05T14:08:18.568669, 2025-07-05T14:25:17.436127 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "DJ, 70, 7, 20 (127 unique)",
+      "examples": "0, 12, 44, 51 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "00, 9, J, KL (125 unique)",
+      "examples": "08, KI, 02, SL (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "NH, XE, NV, FS (191 unique)",
+      "examples": "ZT, NT, PZ, MA (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-06-06, 2025-05-31, 2025-06-24, 2025-12-31 (672 unique)",
+      "examples": "2025-09-04, 2024-09-14, 2024-10-20, 2025-07-02 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-10-25, 2024-08-03, 2023-04-04, 2024-08-08 (550 unique)",
+      "examples": "2024-04-20, 2024-01-03, 2024-01-14, 2024-01-20 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-06-10, 2024-07-26, 2024-08-14, 2024-06-21 (365 unique)",
+      "examples": "2024-03-09, 2024-12-19, 2024-11-26, 2024-02-28 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Program Specialst, Electrical Engineer - DIRECT HIRE, Aviation Safety Inspector (General Aviation-Maintenance), Railroad Safety Training Operations Director (77986 unique)",
+      "examples": "Small Craft Operator (Assistant), Nurse (Electronic Health Record Modernization), Human Resources Officer - HR Development (Employee Development Manager), Management and Program Analyst / Technical Analyst (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "44, FE, 19, NA (115 unique)",
+      "examples": "FE, 70, J, Contigent (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "103, 04, 54, 2 (157 unique)",
+      "examples": "47, 2501, 01, 8 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
