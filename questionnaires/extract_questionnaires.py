@@ -10,6 +10,7 @@ import os
 import sys
 import subprocess
 import signal
+import hashlib
 from pathlib import Path
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
@@ -41,6 +42,7 @@ signal.signal(signal.SIGTERM, signal_handler)
 def extract_questionnaire_links_from_job(job_row):
     """Extract all questionnaire links from a job record"""
     links = []
+    has_monster_link = False
     
     # Convert the job row to string to search everywhere
     job_str = str(job_row.to_dict())
@@ -132,7 +134,7 @@ def extract_questionnaire_links_from_job(job_row):
         if match not in links:
             links.append(match)
     
-    # Look for Monster Government questionnaire links
+    # Check for Monster Government questionnaire links (but don't add them)
     monster_patterns = [
         r'https://jobs\.monstergovt\.com/[^/]+/vacancy/previewVacancyQuestions\.hms\?[^"\'\s<>]+',
         r'https://jobs\.monstergovt\.com/[^/]+/ros/rosDashboard\.hms\?[^"\'\s<>]+'
@@ -140,27 +142,26 @@ def extract_questionnaire_links_from_job(job_row):
     
     for pattern in monster_patterns:
         monster_matches = re.findall(pattern, job_str)
-        for match in monster_matches:
-            if match not in links:
-                links.append(match)
+        if monster_matches:
+            has_monster_link = True
+            break
     
-    return links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type, low_grade, high_grade
+    return links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type, low_grade, high_grade, has_monster_link
 
 
-def scrape_questionnaire(url, output_dir, timeout_seconds=60):
+def scrape_questionnaire(url, output_dir, timeout_seconds=60, headless=True, session_file=None):
     """Scrape a single questionnaire with timeout and error handling"""
+    
+    # Only process USAStaffing links
+    if 'monstergovt.com' in url:
+        print(f"  Skipping Monster link: {url}")
+        return None
     
     # Extract ID from URL for filename
     if 'usastaffing.gov' in url:
         match = re.search(r'ViewQuestionnaire/(\d+)', url)
         file_id = match.group(1) if match else 'unknown'
         prefix = 'usastaffing'
-    elif 'monstergovt.com' in url:
-        match = re.search(r'jnum=(\d+)', url)
-        if not match:
-            match = re.search(r'J=(\d+)', url)
-        file_id = match.group(1) if match else 'unknown'
-        prefix = 'monster'
     else:
         file_id = str(hash(url))[:8]
         prefix = 'other'
@@ -177,28 +178,68 @@ def scrape_questionnaire(url, output_dir, timeout_seconds=60):
     
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,
-                args=[
-                    '--disable-blink-features=AutomationControlled',
-                    '--disable-dev-shm-usage',
-                    '--no-sandbox',
-                    '--disable-web-security',
-                    '--disable-features=IsolateOrigins,site-per-process'
-                ]
-            )
+            # Connect to existing browser if running in non-headless mode
+            if not headless:
+                try:
+                    # Try to connect to existing Chrome instance
+                    browser = p.chromium.connect_over_cdp("http://localhost:9222")
+                    print(f"    Connected to existing Chrome browser")
+                except Exception as e:
+                    print(f"    Could not connect to existing Chrome. Make sure Chrome is running with:")
+                    print(f"    /Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome --remote-debugging-port=9222")
+                    print(f"    Falling back to launching new browser...")
+                    browser = p.chromium.launch(
+                        headless=False,
+                        args=[
+                            '--disable-blink-features=AutomationControlled',
+                            '--disable-dev-shm-usage',
+                            '--no-sandbox',
+                            '--disable-web-security',
+                            '--disable-features=IsolateOrigins,site-per-process'
+                        ]
+                    )
+            else:
+                browser = p.chromium.launch(
+                    headless=True,
+                    args=[
+                        '--disable-blink-features=AutomationControlled',
+                        '--disable-dev-shm-usage',
+                        '--no-sandbox',
+                        '--disable-web-security',
+                        '--disable-features=IsolateOrigins,site-per-process'
+                    ]
+                )
             
             try:
-                # Create context with shorter default timeout
-                context = browser.new_context(
-                    viewport={'width': 1920, 'height': 1080},
-                    ignore_https_errors=True,
-                    java_script_enabled=True,
-                    bypass_csp=True,
-                    extra_http_headers={
-                        'Accept-Language': 'en-US,en;q=0.9'
+                # When connecting to existing browser, use existing context
+                if not headless and 'connect_over_cdp' in str(type(browser)):
+                    # Get existing browser contexts
+                    contexts = browser.contexts
+                    if contexts:
+                        # Use the first existing context (your logged-in session)
+                        context = contexts[0]
+                        print(f"    Using existing browser context with {len(context.pages)} open pages")
+                    else:
+                        # Create new context if none exist
+                        context = browser.new_context()
+                else:
+                    # Create new context for headless or new browser
+                    context_options = {
+                        'viewport': {'width': 1920, 'height': 1080},
+                        'ignore_https_errors': True,
+                        'java_script_enabled': True,
+                        'bypass_csp': True,
+                        'extra_http_headers': {
+                            'Accept-Language': 'en-US,en;q=0.9'
+                        }
                     }
-                )
+                    
+                    # Use saved session if provided
+                    if session_file and os.path.exists(session_file):
+                        context_options['storage_state'] = session_file
+                        print(f"    Using saved session from {session_file}")
+                    
+                    context = browser.new_context(**context_options)
                 
                 # Set default timeout for all operations
                 context.set_default_timeout(timeout_seconds * 1000)
@@ -257,6 +298,15 @@ def scrape_questionnaire(url, output_dir, timeout_seconds=60):
                 page_text = page.inner_text('body', timeout=5000)
                 print(f"    [DEBUG] Got {len(page_text)} characters at {time.strftime('%H:%M:%S')}")
                 
+                # Check if we got the login/authentication page by content
+                content_hash = hashlib.md5(page_text.encode('utf-8')).hexdigest()
+                
+                # Known bad hash for the login/terms page
+                if content_hash == 'e3b45ca2cbef98b3604cb4ab6a536c56' or "An official website of the United States government Here's how you know" in page_text:
+                    print(f"    ❌ Detected login/authentication page (MD5: {content_hash})")
+                    browser.close()
+                    return None
+                
                 # Save text file
                 with open(txt_path, 'w', encoding='utf-8') as f:
                     f.write(page_text)
@@ -287,7 +337,7 @@ def scrape_questionnaire_worker(args):
     """Worker function for concurrent scraping with shutdown check"""
     global scraped_count, failed_count
     
-    questionnaire, output_dir, index, total = args
+    questionnaire, output_dir, index, total, headless, session_file = args
     
     # Check if shutdown requested
     if shutdown_event.is_set():
@@ -305,7 +355,9 @@ def scrape_questionnaire_worker(args):
             result[0] = scrape_questionnaire(
                 questionnaire['questionnaire_url'], 
                 output_dir,
-                timeout_seconds=60  # 60 second timeout per questionnaire
+                timeout_seconds=60,  # 60 second timeout per questionnaire
+                headless=headless,
+                session_file=session_file
             )
         except Exception as e:
             exception[0] = e
@@ -369,6 +421,10 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
     batch_size = 100  # Write to CSV every 100 new links
     cutoff_dt = pd.to_datetime(cutoff_date)
     
+    # Track Monster statistics
+    total_jobs_processed = 0
+    jobs_with_monster_links = 0
+    
     for parquet_file in current_job_files:
         file_size_mb = parquet_file.stat().st_size / (1024 * 1024)
         print(f"\nProcessing {parquet_file.name} ({file_size_mb:.1f} MB)...")
@@ -395,7 +451,11 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
                 print(f"  Processing job {idx}/{len(df)} ({jobs_with_links} with links, {new_links_in_file} new)...", end='\r')
             
             # Extract links and other fields from this job
-            links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type, low_grade, high_grade = extract_questionnaire_links_from_job(row)
+            links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type, low_grade, high_grade, has_monster_link = extract_questionnaire_links_from_job(row)
+            
+            # Track Monster links
+            if has_monster_link:
+                jobs_with_monster_links += 1
             
             if links:
                 jobs_with_links += 1
@@ -454,6 +514,8 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
         
         print(f"\n  Found {jobs_with_links} jobs with questionnaire links")
         print(f"  {new_links_in_file} new unique URLs from this file")
+        
+        total_jobs_processed += len(df)
     
     # Write any remaining links
     if all_new_links:
@@ -463,6 +525,22 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
             final_df.to_csv(csv_file, mode='a', header=False, index=False)
         else:
             final_df.to_csv(csv_file, index=False)
+    
+    # Save Monster statistics to a separate file
+    monster_stats = {
+        'total_jobs_processed': total_jobs_processed,
+        'jobs_with_monster_links': jobs_with_monster_links,
+        'percentage_with_monster': (jobs_with_monster_links / total_jobs_processed * 100) if total_jobs_processed > 0 else 0,
+        'extraction_date': datetime.now().isoformat()
+    }
+    
+    with open('monster_stats.json', 'w') as f:
+        json.dump(monster_stats, f, indent=2)
+    
+    print(f"\n\nMonster Link Statistics:")
+    print(f"  Total jobs processed: {total_jobs_processed:,}")
+    print(f"  Jobs with Monster links: {jobs_with_monster_links:,}")
+    print(f"  Percentage with Monster links: {monster_stats['percentage_with_monster']:.2f}%")
     
     return csv_file
 
@@ -523,12 +601,21 @@ def main():
     max_scrape_time = 180 if is_github_actions else None  # No time limit when running locally
     
     # Simple argument parsing
+    headless = True
+    session_file = "usajobs_session.json" if os.path.exists("usajobs_session.json") else None
+    if session_file:
+        print(f"Found saved session file: {session_file}")
     args = sys.argv[1:]
     i = 0
     while i < len(args):
         if args[i] == '--skip-extract':
             skip_extract = True
             print("Skipping link extraction, using existing CSV")
+        elif args[i] == '--no-headless':
+            headless = False
+            max_workers = 1  # Force single worker for manual login
+            print("Running in visible browser mode (for manual login)")
+            print("Forcing single worker mode for manual login")
         elif args[i] == '--workers' and i + 1 < len(args):
             try:
                 max_workers = int(args[i + 1])
@@ -551,7 +638,7 @@ def main():
                 print(f"Limiting to {limit} questionnaires")
             except ValueError:
                 print(f"Unknown argument: {args[i]}")
-                print("Usage: python extract_questionnaires_robust.py [limit] [--skip-extract] [--workers N] [--max-time MINUTES]")
+                print("Usage: python extract_questionnaires.py [limit] [--skip-extract] [--no-headless] [--workers N] [--max-time MINUTES]")
                 sys.exit(1)
         i += 1
     
@@ -604,17 +691,15 @@ def main():
     
     for idx, (_, row) in enumerate(df.iterrows()):
         url = row['questionnaire_url']
+        # Skip Monster URLs entirely
+        if 'monstergovt.com' in url:
+            continue
+            
         # Check if file exists
         if 'usastaffing.gov' in url:
             match = re.search(r'ViewQuestionnaire/(\d+)', url)
             file_id = match.group(1) if match else 'unknown'
             prefix = 'usastaffing'
-        elif 'monstergovt.com' in url:
-            match = re.search(r'jnum=(\d+)', url)
-            if not match:
-                match = re.search(r'J=(\d+)', url)
-            file_id = match.group(1) if match else 'unknown'
-            prefix = 'monster'
         else:
             file_id = str(hash(url))[:8]
             prefix = 'other'
@@ -644,7 +729,7 @@ def main():
     max_seconds = max_scrape_time * 60 if max_scrape_time else float('inf')
     
     # Prepare arguments for workers
-    worker_args = [(q[0], output_dir, q[1], len(df)) for q in to_scrape]
+    worker_args = [(q[0], output_dir, q[1], len(df), headless, session_file) for q in to_scrape]
     
     completed_questionnaires = []
     completed_count = 0

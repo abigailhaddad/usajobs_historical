@@ -43,3 +43,10 @@ logs/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Session files - NEVER commit these!
+usajobs_session.json
+*_session.json
+questionnaires/usajobs_session.json
+session_base64.txt
+questionnaires/session_base64.txt
