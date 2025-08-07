@@ -1,36 +1,36 @@
 {
   "overview": {
-    "total_scraped": 18722,
+    "total_scraped": 17303,
     "total_with_eo": "454",
-    "percentage_with_eo": 2.4,
+    "percentage_with_eo": 2.6,
     "data_coverage": "Analyzing questionnaires from federal job postings from June 01, 2025 to August 07, 2025"
   },
   "service_analysis": [
     {
       "Service Type": "Competitive",
       "Jobs with Essay Question": 443,
-      "Total Jobs Analyzed": 11336,
-      "Percentage with Essay Question": 3.9
+      "Total Jobs Analyzed": 10149,
+      "Percentage with Essay Question": 4.4
     },
     {
       "Service Type": "Excepted",
       "Jobs with Essay Question": 9,
-      "Total Jobs Analyzed": 7373,
+      "Total Jobs Analyzed": 7145,
       "Percentage with Essay Question": 0.1
     },
     {
       "Service Type": "Senior Executive",
       "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 13,
-      "Percentage with Essay Question": 15.4
+      "Total Jobs Analyzed": 9,
+      "Percentage with Essay Question": 22.2
     }
   ],
   "grade_analysis": [
     {
       "Grade Level": "GS-12",
       "Jobs with Essay Question": 28,
-      "Total Jobs Analyzed": 1525,
-      "Percentage with Essay Question": 1.8
+      "Total Jobs Analyzed": 1459,
+      "Percentage with Essay Question": 1.9
     },
     {
       "Grade Level": "VN-00",
@@ -41,20 +41,20 @@
     {
       "Grade Level": "GS-13",
       "Jobs with Essay Question": 43,
-      "Total Jobs Analyzed": 1289,
-      "Percentage with Essay Question": 3.3
-    },
-    {
-      "Grade Level": "GS-11",
-      "Jobs with Essay Question": 32,
-      "Total Jobs Analyzed": 961,
-      "Percentage with Essay Question": 3.3
+      "Total Jobs Analyzed": 1207,
+      "Percentage with Essay Question": 3.6
     },
     {
       "Grade Level": "GS-9",
       "Jobs with Essay Question": 29,
       "Total Jobs Analyzed": 844,
       "Percentage with Essay Question": 3.4
+    },
+    {
+      "Grade Level": "GS-11",
+      "Jobs with Essay Question": 32,
+      "Total Jobs Analyzed": 817,
+      "Percentage with Essay Question": 3.9
     },
     {
       "Grade Level": "GS-7",
@@ -69,16 +69,16 @@
       "Percentage with Essay Question": 2.8
     },
     {
-      "Grade Level": "GS-14",
-      "Jobs with Essay Question": 36,
-      "Total Jobs Analyzed": 564,
-      "Percentage with Essay Question": 6.4
-    },
-    {
       "Grade Level": "GS-9/11",
       "Jobs with Essay Question": 7,
       "Total Jobs Analyzed": 555,
       "Percentage with Essay Question": 1.3
+    },
+    {
+      "Grade Level": "GS-14",
+      "Jobs with Essay Question": 36,
+      "Total Jobs Analyzed": 505,
+      "Percentage with Essay Question": 7.1
     },
     {
       "Grade Level": "GS-5",
@@ -91,8 +91,8 @@
     {
       "Location": "Washington, District of Columbia",
       "Jobs with Essay Question": 39,
-      "Total Jobs Analyzed": 731,
-      "Percentage with Essay Question": 5.3
+      "Total Jobs Analyzed": 342,
+      "Percentage with Essay Question": 11.4
     },
     {
       "Location": "Battle Creek, Michigan",
@@ -109,26 +109,14 @@
     {
       "Location": "Salt Lake City, Utah",
       "Jobs with Essay Question": 4,
-      "Total Jobs Analyzed": 134,
+      "Total Jobs Analyzed": 132,
       "Percentage with Essay Question": 3.0
     },
     {
       "Location": "San Diego, California",
       "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 132,
-      "Percentage with Essay Question": 1.5
-    },
-    {
-      "Location": "Phoenix, Arizona",
-      "Jobs with Essay Question": 5,
-      "Total Jobs Analyzed": 127,
-      "Percentage with Essay Question": 3.9
-    },
-    {
-      "Location": "Atlanta, Georgia",
-      "Jobs with Essay Question": 1,
-      "Total Jobs Analyzed": 121,
-      "Percentage with Essay Question": 0.8
+      "Total Jobs Analyzed": 122,
+      "Percentage with Essay Question": 1.6
     },
     {
       "Location": "Albuquerque, New Mexico",
@@ -143,9 +131,21 @@
       "Percentage with Essay Question": 0.9
     },
     {
+      "Location": "Phoenix, Arizona",
+      "Jobs with Essay Question": 5,
+      "Total Jobs Analyzed": 115,
+      "Percentage with Essay Question": 4.3
+    },
+    {
       "Location": "Fort Bragg, North Carolina",
       "Jobs with Essay Question": 0,
       "Total Jobs Analyzed": 113,
+      "Percentage with Essay Question": 0.0
+    },
+    {
+      "Location": "San Antonio, Texas",
+      "Jobs with Essay Question": 0,
+      "Total Jobs Analyzed": 109,
       "Percentage with Essay Question": 0.0
     }
   ],
@@ -181,12 +181,6 @@
       "Percentage with Essay Question": 0.1
     },
     {
-      "Agency": "Department of Justice",
-      "Jobs with Essay Question": 9,
-      "Total Jobs Analyzed": 1075,
-      "Percentage with Essay Question": 0.8
-    },
-    {
       "Agency": "Department of Homeland Security",
       "Jobs with Essay Question": 14,
       "Total Jobs Analyzed": 836,
@@ -205,22 +199,16 @@
       "Percentage with Essay Question": 27.8
     },
     {
-      "Agency": "Other Agencies and Independent Organizations",
-      "Jobs with Essay Question": 16,
-      "Total Jobs Analyzed": 265,
-      "Percentage with Essay Question": 6.0
-    },
-    {
       "Agency": "Department of Agriculture",
       "Jobs with Essay Question": 99,
       "Total Jobs Analyzed": 210,
       "Percentage with Essay Question": 47.1
     },
     {
-      "Agency": "Legislative Branch",
-      "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 206,
-      "Percentage with Essay Question": 0.0
+      "Agency": "Department of Justice",
+      "Jobs with Essay Question": 9,
+      "Total Jobs Analyzed": 147,
+      "Percentage with Essay Question": 6.1
     },
     {
       "Agency": "Department of Commerce",
@@ -229,22 +217,22 @@
       "Percentage with Essay Question": 40.8
     },
     {
-      "Agency": "Department of Transportation",
-      "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 74,
-      "Percentage with Essay Question": 0.0
-    },
-    {
-      "Agency": "Department of State",
-      "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 41,
-      "Percentage with Essay Question": 0.0
+      "Agency": "Other Agencies and Independent Organizations",
+      "Jobs with Essay Question": 16,
+      "Total Jobs Analyzed": 75,
+      "Percentage with Essay Question": 21.3
     },
     {
       "Agency": "Department of the Treasury",
       "Jobs with Essay Question": 5,
       "Total Jobs Analyzed": 30,
       "Percentage with Essay Question": 16.7
+    },
+    {
+      "Agency": "Legislative Branch",
+      "Jobs with Essay Question": 0,
+      "Total Jobs Analyzed": 20,
+      "Percentage with Essay Question": 0.0
     },
     {
       "Agency": "Judicial Branch",
@@ -269,26 +257,32 @@
       "Jobs with Essay Question": 2,
       "Total Jobs Analyzed": 2,
       "Percentage with Essay Question": 100.0
+    },
+    {
+      "Agency": "Department of Labor",
+      "Jobs with Essay Question": 1,
+      "Total Jobs Analyzed": 1,
+      "Percentage with Essay Question": 100.0
     }
   ],
   "occupation_analysis": [
     {
       "Occupation Series": "610 - Nurse",
       "Jobs with Essay Question": 1,
-      "Total Jobs Analyzed": 1647,
+      "Total Jobs Analyzed": 1617,
       "Percentage with Essay Question": 0.1
     },
     {
       "Occupation Series": "185 - Social Work",
       "Jobs with Essay Question": 3,
-      "Total Jobs Analyzed": 817,
+      "Total Jobs Analyzed": 809,
       "Percentage with Essay Question": 0.4
     },
     {
       "Occupation Series": "301 - Miscellaneous Administration And Program",
       "Jobs with Essay Question": 41,
-      "Total Jobs Analyzed": 638,
-      "Percentage with Essay Question": 6.4
+      "Total Jobs Analyzed": 566,
+      "Percentage with Essay Question": 7.2
     },
     {
       "Occupation Series": "679 - Medical Support Assistance",
@@ -299,14 +293,8 @@
     {
       "Occupation Series": "1702 - Education And Training Technician",
       "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 530,
+      "Total Jobs Analyzed": 522,
       "Percentage with Essay Question": 0.4
-    },
-    {
-      "Occupation Series": "620 - Practical Nurse",
-      "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 443,
-      "Percentage with Essay Question": 0.5
     },
     {
       "Occupation Series": "189 - Recreation Aid And Assistant",
@@ -315,52 +303,58 @@
       "Percentage with Essay Question": 0.0
     },
     {
-      "Occupation Series": "303 - Miscellaneous Clerk And Assistant",
-      "Jobs with Essay Question": 3,
-      "Total Jobs Analyzed": 400,
-      "Percentage with Essay Question": 0.8
+      "Occupation Series": "620 - Practical Nurse",
+      "Jobs with Essay Question": 2,
+      "Total Jobs Analyzed": 435,
+      "Percentage with Essay Question": 0.5
     },
     {
-      "Occupation Series": "180 - Psychology",
-      "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 396,
-      "Percentage with Essay Question": 0.0
+      "Occupation Series": "303 - Miscellaneous Clerk And Assistant",
+      "Jobs with Essay Question": 3,
+      "Total Jobs Analyzed": 368,
+      "Percentage with Essay Question": 0.8
     },
     {
       "Occupation Series": "1101 - General Business And Industry",
       "Jobs with Essay Question": 39,
-      "Total Jobs Analyzed": 376,
-      "Percentage with Essay Question": 10.4
+      "Total Jobs Analyzed": 364,
+      "Percentage with Essay Question": 10.7
     },
     {
       "Occupation Series": "2210 - Information Technology Management",
       "Jobs with Essay Question": 3,
-      "Total Jobs Analyzed": 367,
-      "Percentage with Essay Question": 0.8
+      "Total Jobs Analyzed": 337,
+      "Percentage with Essay Question": 0.9
     },
     {
       "Occupation Series": "640 - Health Aid And Technician",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 350,
+      "Total Jobs Analyzed": 318,
+      "Percentage with Essay Question": 0.0
+    },
+    {
+      "Occupation Series": "180 - Psychology",
+      "Jobs with Essay Question": 0,
+      "Total Jobs Analyzed": 318,
       "Percentage with Essay Question": 0.0
     },
     {
       "Occupation Series": "3566 - Custodial Working",
       "Jobs with Essay Question": 2,
-      "Total Jobs Analyzed": 321,
+      "Total Jobs Analyzed": 315,
       "Percentage with Essay Question": 0.6
-    },
-    {
-      "Occupation Series": "343 - Management And Program Analysis",
-      "Jobs with Essay Question": 11,
-      "Total Jobs Analyzed": 283,
-      "Percentage with Essay Question": 3.9
     },
     {
       "Occupation Series": "621 - Nursing Assistant",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 268,
+      "Total Jobs Analyzed": 264,
       "Percentage with Essay Question": 0.0
+    },
+    {
+      "Occupation Series": "343 - Management And Program Analysis",
+      "Jobs with Essay Question": 11,
+      "Total Jobs Analyzed": 261,
+      "Percentage with Essay Question": 4.2
     },
     {
       "Occupation Series": "7408 - Food Service Working",
@@ -369,62 +363,62 @@
       "Percentage with Essay Question": 0.0
     },
     {
+      "Occupation Series": "675 - Medical Records Technician",
+      "Jobs with Essay Question": 0,
+      "Total Jobs Analyzed": 194,
+      "Percentage with Essay Question": 0.0
+    },
+    {
+      "Occupation Series": "801 - General Engineering",
+      "Jobs with Essay Question": 5,
+      "Total Jobs Analyzed": 184,
+      "Percentage with Essay Question": 2.7
+    },
+    {
       "Occupation Series": "7404 - Cooking",
       "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 230,
+      "Total Jobs Analyzed": 180,
       "Percentage with Essay Question": 0.0
     },
     {
       "Occupation Series": "201 - Human Resources Management",
       "Jobs with Essay Question": 1,
-      "Total Jobs Analyzed": 214,
-      "Percentage with Essay Question": 0.5
-    },
-    {
-      "Occupation Series": "801 - General Engineering",
-      "Jobs with Essay Question": 5,
-      "Total Jobs Analyzed": 212,
-      "Percentage with Essay Question": 2.4
-    },
-    {
-      "Occupation Series": "675 - Medical Records Technician",
-      "Jobs with Essay Question": 0,
-      "Total Jobs Analyzed": 208,
-      "Percentage with Essay Question": 0.0
+      "Total Jobs Analyzed": 174,
+      "Percentage with Essay Question": 0.6
     }
   ],
   "timeline_analysis": [
     {
       "Month": "June 2025",
       "Week 1": 0.0,
-      "Week 2": 0.3,
+      "Week 2": 0.4,
       "Week 3": 0.0,
-      "Week 4": 0.8,
-      "Week 5": 3.0,
-      "Monthly Percentage": 0.9,
-      "Total Jobs Posted": 3165,
+      "Week 4": 0.9,
+      "Week 5": 3.2,
+      "Monthly Percentage": 1.0,
+      "Total Jobs Posted": 2927,
       "Jobs with Essay Question": 30
     },
     {
       "Month": "July 2025",
       "Week 1": 0.5,
-      "Week 2": 1.1,
-      "Week 3": 2.3,
-      "Week 4": 4.2,
-      "Week 5": 3.7,
-      "Monthly Percentage": 2.5,
-      "Total Jobs Posted": 12648,
+      "Week 2": 1.2,
+      "Week 3": 2.6,
+      "Week 4": 4.6,
+      "Week 5": 4.0,
+      "Monthly Percentage": 2.7,
+      "Total Jobs Posted": 11673,
       "Jobs with Essay Question": 311
     },
     {
       "Month": "August 2025",
-      "Week 1": 3.9,
+      "Week 1": 4.2,
       "Week 2": null,
       "Week 3": null,
       "Week 4": null,
       "Week 5": null,
-      "Monthly Percentage": 3.9,
-      "Total Jobs Posted": 2909,
+      "Monthly Percentage": 4.2,
+      "Total Jobs Posted": 2703,
       "Jobs with Essay Question": 113
     }
   ],
