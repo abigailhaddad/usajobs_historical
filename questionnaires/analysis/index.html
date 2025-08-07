@@ -140,6 +140,13 @@
                                 <div id="monsterNote" class="alert alert-warning" style="display: none;">
                                     <strong>Note:</strong> <span id="monsterPercentage"></span>% of job postings had questionnaire links from Monster Government Solutions (monstergovt.com) that could not be scraped due to authentication requirements. These jobs are not included in the analysis above.
                                 </div>
+                                <div class="alert alert-info mt-3">
+                                    <strong>Understanding the Statistics:</strong><br>
+                                    • <strong>Total Jobs with Questionnaires:</strong> All job postings that included questionnaire links<br>
+                                    • <strong>Scraped Questionnaires:</strong> Questionnaires we successfully downloaded and analyzed<br>
+                                    • <strong>Jobs with Essay Question:</strong> Jobs containing the specific executive order question<br>
+                                    • <strong>% of Scraped:</strong> Percentage of successfully scraped questionnaires containing the essay question
+                                </div>
                             </div>
                         </div>
                         <div class="row mt-4">
@@ -213,6 +220,9 @@
                     <div class="tab-pane fade" id="timeline" role="tabpanel">
                         <h3>Essay Question Usage by Job Opening Date</h3>
                         <p>Weekly and monthly percentages of jobs posted with the essay question</p>
+                        <div class="alert alert-info">
+                            <strong>Note:</strong> Percentages shown represent the portion of <em>scraped questionnaires</em> that contain the essay question for each time period. The "Total Jobs Posted" column shows the number of questionnaires we analyzed.
+                        </div>
                         <div id="timelineTable"></div>
                     </div>
                     
@@ -355,7 +365,7 @@
             let maxPercent = 0;
             data.forEach(row => {
                 Object.entries(row).forEach(([key, value]) => {
-                    if (key.includes('Percentage')) {
+                    if (key.includes('% of Scraped')) {
                         const percent = parseFloat(value);
                         if (percent > maxPercent) maxPercent = percent;
                     }
@@ -382,7 +392,7 @@
                     const columnKey = Object.keys(row)[index];
                     
                     // Add % sign to percentage columns
-                    if (columnKey.includes('Percentage')) {
+                    if (columnKey.includes('% of Scraped')) {
                         td.textContent = value + '%';
                         td.style.textAlign = 'center';
                         const percent = parseFloat(value);
@@ -392,7 +402,7 @@
                         td.style.color = intensity > 0.5 ? 'white' : 'black';
                     } else {
                         // Format numbers with commas
-                        if (typeof value === 'number' && !columnKey.includes('Percentage')) {
+                        if (typeof value === 'number' && !columnKey.includes('% of Scraped')) {
                             td.textContent = value.toLocaleString();
                             td.style.textAlign = 'center';
                         } else {

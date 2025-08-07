@@ -15,22 +15,40 @@ QUESTIONNAIRE_DIR = Path('..')
 DATA_DIR = BASE_DIR / 'data'
 RAW_QUESTIONNAIRES_DIR = QUESTIONNAIRE_DIR / 'raw_questionnaires'
 
-def calculate_eo_stats(df, group_column, top_n=None, column_name=None):
+def calculate_eo_stats(all_df, scraped_df, group_column, top_n=None, column_name=None):
     """Calculate EO question statistics for any grouping column"""
-    stats = df.groupby(group_column).agg({
+    # Get total counts from all questionnaire links
+    total_stats = all_df.groupby(group_column).size().reset_index(name='Total Jobs with Questionnaires')
+    
+    # Get scraped counts and essay question counts
+    scraped_stats = scraped_df.groupby(group_column).agg({
         'has_executive_order': ['sum', 'count']
     }).reset_index()
+    scraped_stats.columns = [group_column, 'Jobs with Essay Question', 'Scraped Questionnaires']
+    
+    # Merge the stats
+    stats = pd.merge(total_stats, scraped_stats, on=group_column, how='left')
+    stats = stats.fillna(0)
     
     # Use provided column name or default to the group column name
     display_name = column_name if column_name else group_column
+    stats.rename(columns={group_column: display_name}, inplace=True)
     
-    stats.columns = [display_name, 'Jobs with Essay Question', 'Total Jobs Analyzed']
-    stats['Percentage with Essay Question'] = (stats['Jobs with Essay Question'] / stats['Total Jobs Analyzed'] * 100).round(1)
+    # Calculate percentage (of scraped questionnaires that have essay question)
+    stats['% of Scraped with Essay Question'] = stats.apply(
+        lambda row: round(row['Jobs with Essay Question'] / row['Scraped Questionnaires'] * 100, 1) 
+        if row['Scraped Questionnaires'] > 0 else 0, axis=1
+    )
+    
+    # Convert to int for cleaner display
+    stats['Total Jobs with Questionnaires'] = stats['Total Jobs with Questionnaires'].astype(int)
+    stats['Scraped Questionnaires'] = stats['Scraped Questionnaires'].astype(int)
+    stats['Jobs with Essay Question'] = stats['Jobs with Essay Question'].astype(int)
     
     if top_n:
-        stats = stats.nlargest(top_n, 'Total Jobs Analyzed')
+        stats = stats.nlargest(top_n, 'Total Jobs with Questionnaires')
     
-    return stats.sort_values('Total Jobs Analyzed', ascending=False).reset_index(drop=True)
+    return stats.sort_values('Total Jobs with Questionnaires', ascending=False).reset_index(drop=True)
 
 def check_executive_order_mentions(questionnaire_dir=RAW_QUESTIONNAIRES_DIR):
     """Check which questionnaires mention the specific executive order question"""
@@ -118,35 +136,42 @@ def main():
         }
     }
     
+    # Add grade_level column to both dataframes
+    if 'grade_code' in links_df.columns:
+        links_df['grade_level'] = links_df['grade_code'].fillna('Not Specified')
+        scraped_df['grade_level'] = scraped_df['grade_code'].fillna('Not Specified')
+    
+    # Add occupation_full column to both dataframes
+    links_df['occupation_full'] = links_df['occupation_series'].astype(str) + ' - ' + links_df['occupation_name'].fillna('Unknown')
+    scraped_df['occupation_full'] = scraped_df['occupation_series'].astype(str) + ' - ' + scraped_df['occupation_name'].fillna('Unknown')
+    
     # Service Type Analysis
     if 'service_type' in scraped_df.columns:
-        service_stats = calculate_eo_stats(scraped_df, 'service_type', column_name='Service Type')
+        service_stats = calculate_eo_stats(links_df, scraped_df, 'service_type', column_name='Service Type')
         analysis_data['service_analysis'] = service_stats.to_dict('records')
     else:
         analysis_data['service_analysis'] = []
     
     # Grade Level Analysis
-    if 'grade_code' in scraped_df.columns:
-        scraped_df['grade_level'] = scraped_df['grade_code'].fillna('Not Specified')
-        grade_stats = calculate_eo_stats(scraped_df, 'grade_level', top_n=10, column_name='Grade Level')
+    if 'grade_level' in scraped_df.columns:
+        grade_stats = calculate_eo_stats(links_df, scraped_df, 'grade_level', top_n=10, column_name='Grade Level')
         analysis_data['grade_analysis'] = grade_stats.to_dict('records')
     else:
         analysis_data['grade_analysis'] = []
     
     # Location Analysis
     if 'position_location' in scraped_df.columns:
-        location_stats = calculate_eo_stats(scraped_df, 'position_location', top_n=10, column_name='Location')
+        location_stats = calculate_eo_stats(links_df, scraped_df, 'position_location', top_n=10, column_name='Location')
         analysis_data['location_analysis'] = location_stats.to_dict('records')
     else:
         analysis_data['location_analysis'] = []
     
     # Agency Analysis
-    agency_stats = calculate_eo_stats(scraped_df, 'hiring_agency', top_n=20, column_name='Agency')
+    agency_stats = calculate_eo_stats(links_df, scraped_df, 'hiring_agency', top_n=20, column_name='Agency')
     analysis_data['agency_analysis'] = agency_stats.to_dict('records')
     
     # Occupation Analysis
-    scraped_df['occupation_full'] = scraped_df['occupation_series'].astype(str) + ' - ' + scraped_df['occupation_name'].fillna('Unknown')
-    occupation_stats = calculate_eo_stats(scraped_df, 'occupation_full', top_n=20, column_name='Occupation Series')
+    occupation_stats = calculate_eo_stats(links_df, scraped_df, 'occupation_full', top_n=20, column_name='Occupation Series')
     analysis_data['occupation_analysis'] = occupation_stats.to_dict('records')
     
     # Timeline Analysis
