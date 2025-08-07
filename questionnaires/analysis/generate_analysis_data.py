@@ -15,10 +15,10 @@ QUESTIONNAIRE_DIR = Path('..')
 DATA_DIR = BASE_DIR / 'data'
 RAW_QUESTIONNAIRES_DIR = QUESTIONNAIRE_DIR / 'raw_questionnaires'
 
-def calculate_eo_stats(all_df, scraped_df, group_column, top_n=None, column_name=None):
+def calculate_eo_stats(all_jobs_df, scraped_df, group_column, top_n=None, column_name=None):
     """Calculate EO question statistics for any grouping column"""
-    # Get total counts from all questionnaire links
-    total_stats = all_df.groupby(group_column).size().reset_index(name='Total Jobs with Questionnaires')
+    # Get total job counts from the full dataset
+    total_stats = all_jobs_df.groupby(group_column).size().reset_index(name='Total Jobs')
     
     # Get scraped counts and essay question counts
     scraped_stats = scraped_df.groupby(group_column).agg({
@@ -41,14 +41,18 @@ def calculate_eo_stats(all_df, scraped_df, group_column, top_n=None, column_name
     )
     
     # Convert to int for cleaner display
-    stats['Total Jobs with Questionnaires'] = stats['Total Jobs with Questionnaires'].astype(int)
+    stats['Total Jobs'] = stats['Total Jobs'].astype(int)
     stats['Scraped Questionnaires'] = stats['Scraped Questionnaires'].astype(int)
     stats['Jobs with Essay Question'] = stats['Jobs with Essay Question'].astype(int)
     
-    if top_n:
-        stats = stats.nlargest(top_n, 'Total Jobs with Questionnaires')
+    # Reorder columns to match desired order
+    stats = stats[[display_name, 'Total Jobs', 'Scraped Questionnaires', 
+                   'Jobs with Essay Question', '% of Scraped with Essay Question']]
     
-    return stats.sort_values('Total Jobs with Questionnaires', ascending=False).reset_index(drop=True)
+    if top_n:
+        stats = stats.nlargest(top_n, 'Total Jobs')
+    
+    return stats.sort_values('Total Jobs', ascending=False).reset_index(drop=True)
 
 def check_executive_order_mentions(questionnaire_dir=RAW_QUESTIONNAIRES_DIR):
     """Check which questionnaires mention the specific executive order question"""
@@ -88,9 +92,76 @@ def extract_questionnaire_id(url):
     return None
 
 def main():
+    # Load ALL jobs from parquet files for total job counts
+    all_jobs_dfs = []
+    parquet_files = sorted(DATA_DIR.glob('current_jobs_*.parquet'))
+    cutoff_date = pd.to_datetime('2025-06-01')
+    
+    print("Loading all job data for total counts...")
+    for parquet_file in parquet_files:
+        df = pd.read_parquet(parquet_file)
+        if 'positionOpenDate' in df.columns:
+            df['positionOpenDate'] = pd.to_datetime(df['positionOpenDate'])
+            df = df[df['positionOpenDate'] >= cutoff_date]
+        all_jobs_dfs.append(df)
+    
+    all_jobs_df = pd.concat(all_jobs_dfs, ignore_index=True)
+    print(f"Total jobs loaded: {len(all_jobs_df):,}")
+    
+    # Extract fields we need for grouping from all jobs
+    for idx, row in all_jobs_df.iterrows():
+        if pd.notna(row.get('MatchedObjectDescriptor')):
+            try:
+                mod = json.loads(row['MatchedObjectDescriptor'])
+                
+                # Extract service type
+                if 'UserArea' in mod and 'Details' in mod['UserArea']:
+                    service_type_code = mod['UserArea']['Details'].get('ServiceType')
+                    if service_type_code:
+                        service_type_map = {
+                            '01': 'Competitive',
+                            '02': 'Excepted', 
+                            '03': 'Senior Executive'
+                        }
+                        all_jobs_df.at[idx, 'service_type'] = service_type_map.get(service_type_code, service_type_code)
+                
+                # Extract location
+                if 'PositionLocation' in mod and isinstance(mod['PositionLocation'], list) and len(mod['PositionLocation']) > 0:
+                    loc = mod['PositionLocation'][0]
+                    city = loc.get('CityName', '')
+                    state = loc.get('CountrySubDivisionCode', '')
+                    if city and state:
+                        if state.lower() in city.lower():
+                            all_jobs_df.at[idx, 'position_location'] = city
+                        else:
+                            all_jobs_df.at[idx, 'position_location'] = f"{city}, {state}"
+                    elif city:
+                        all_jobs_df.at[idx, 'position_location'] = city
+                    elif state:
+                        all_jobs_df.at[idx, 'position_location'] = state
+                        
+                # Extract occupation
+                if 'JobCategory' in mod and isinstance(mod['JobCategory'], list) and len(mod['JobCategory']) > 0:
+                    all_jobs_df.at[idx, 'occupation_series'] = mod['JobCategory'][0].get('Code')
+                    all_jobs_df.at[idx, 'occupation_name'] = mod['JobCategory'][0].get('Name')
+            except:
+                pass
+    
+    # Add grade level from minimumGrade
+    if 'minimumGrade' in all_jobs_df.columns:
+        all_jobs_df['grade_level'] = all_jobs_df['minimumGrade'].fillna('Not Specified')
+    else:
+        all_jobs_df['grade_level'] = 'Not Specified'
+    
+    # Add occupation_full
+    all_jobs_df['occupation_full'] = all_jobs_df['occupation_series'].astype(str) + ' - ' + all_jobs_df['occupation_name'].fillna('Unknown')
+    
+    # Rename columns for consistency
+    all_jobs_df.rename(columns={'hiringAgencyName': 'hiring_agency'}, inplace=True)
+    
     # Load questionnaire links
     links_df = pd.read_csv(QUESTIONNAIRE_DIR / 'questionnaire_links.csv')
-    print(f"Loaded {len(links_df):,} questionnaire links")
+    print(f"\nLoaded {len(links_df):,} questionnaire links")
     
     # Check for the specific executive order question
     eo_mentions = check_executive_order_mentions()
@@ -146,33 +217,39 @@ def main():
     scraped_df['occupation_full'] = scraped_df['occupation_series'].astype(str) + ' - ' + scraped_df['occupation_name'].fillna('Unknown')
     
     # Service Type Analysis
-    if 'service_type' in scraped_df.columns:
-        service_stats = calculate_eo_stats(links_df, scraped_df, 'service_type', column_name='Service Type')
+    if 'service_type' in scraped_df.columns and 'service_type' in all_jobs_df.columns:
+        service_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'service_type', column_name='Service Type')
         analysis_data['service_analysis'] = service_stats.to_dict('records')
     else:
         analysis_data['service_analysis'] = []
     
     # Grade Level Analysis
-    if 'grade_level' in scraped_df.columns:
-        grade_stats = calculate_eo_stats(links_df, scraped_df, 'grade_level', top_n=10, column_name='Grade Level')
+    if 'grade_level' in scraped_df.columns and 'grade_level' in all_jobs_df.columns:
+        grade_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'grade_level', top_n=10, column_name='Grade Level')
         analysis_data['grade_analysis'] = grade_stats.to_dict('records')
     else:
         analysis_data['grade_analysis'] = []
     
     # Location Analysis
-    if 'position_location' in scraped_df.columns:
-        location_stats = calculate_eo_stats(links_df, scraped_df, 'position_location', top_n=10, column_name='Location')
+    if 'position_location' in scraped_df.columns and 'position_location' in all_jobs_df.columns:
+        location_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'position_location', top_n=10, column_name='Location')
         analysis_data['location_analysis'] = location_stats.to_dict('records')
     else:
         analysis_data['location_analysis'] = []
     
     # Agency Analysis
-    agency_stats = calculate_eo_stats(links_df, scraped_df, 'hiring_agency', top_n=20, column_name='Agency')
-    analysis_data['agency_analysis'] = agency_stats.to_dict('records')
+    if 'hiring_agency' in all_jobs_df.columns:
+        agency_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'hiring_agency', top_n=20, column_name='Agency')
+        analysis_data['agency_analysis'] = agency_stats.to_dict('records')
+    else:
+        analysis_data['agency_analysis'] = []
     
     # Occupation Analysis
-    occupation_stats = calculate_eo_stats(links_df, scraped_df, 'occupation_full', top_n=20, column_name='Occupation Series')
-    analysis_data['occupation_analysis'] = occupation_stats.to_dict('records')
+    if 'occupation_full' in all_jobs_df.columns:
+        occupation_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'occupation_full', top_n=20, column_name='Occupation Series')
+        analysis_data['occupation_analysis'] = occupation_stats.to_dict('records')
+    else:
+        analysis_data['occupation_analysis'] = []
     
     # Timeline Analysis
     if 'position_open_date' in scraped_df.columns:
