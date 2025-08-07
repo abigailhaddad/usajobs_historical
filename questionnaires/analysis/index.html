@@ -316,7 +316,7 @@
                 document.getElementById('dataCoverage').textContent = data.overview.data_coverage;
                 
                 // Load and display Monster statistics if available
-                fetch('../monster_stats.json')
+                fetch('../../monster_stats.json')
                     .then(response => response.json())
                     .then(monsterData => {
                         if (monsterData.percentage_with_monster > 0) {
