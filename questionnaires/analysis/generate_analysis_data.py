@@ -91,6 +91,24 @@ def extract_questionnaire_id(url):
         return match.group(1) if match else None
     return None
 
+
+def transform_monster_url(url):
+    """Transform Monster dashboard URLs to preview format"""
+    if pd.isna(url) or not url:
+        return url
+    
+    # Only transform Monster dashboard URLs
+    if 'monstergovt.com' in url and '/ros/rosDashboard.hms' in url:
+        match = re.search(r'https://jobs\.monstergovt\.com/([^/]+)/ros/rosDashboard\.hms\?O=(\d+)&J=(\d+)', url)
+        if match:
+            subdomain = match.group(1)
+            org_id = match.group(2)
+            job_num = match.group(3)
+            return f'https://jobs.monstergovt.com/{subdomain}/vacancy/previewVacancyQuestions.hms?orgId={org_id}&jnum={job_num}'
+    
+    # Return URL unchanged if not a Monster dashboard URL
+    return url
+
 def main():
     # First generate the clean all jobs data if it doesn't exist
     if not Path('all_jobs_clean.csv').exists():
@@ -278,7 +296,7 @@ def main():
                 'open_date': job['open_date'] if pd.notna(job['open_date']) else '',
                 'close_date': job['close_date'] if pd.notna(job['close_date']) else '',
                 'usajobs_link': job['usajobs_control_number'] if pd.notna(job['usajobs_control_number']) else '',
-                'questionnaire_link': job['questionnaire_url'] if pd.notna(job['questionnaire_url']) else ''
+                'questionnaire_link': transform_monster_url(job['questionnaire_url']) if pd.notna(job['questionnaire_url']) else ''
             }
             job_postings.append(posting)
         
