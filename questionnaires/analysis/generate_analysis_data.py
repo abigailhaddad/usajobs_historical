@@ -155,9 +155,9 @@ def main():
         links_df['grade_level'] = links_df['grade_code'].fillna('Not Specified')
         scraped_df['grade_level'] = scraped_df['grade_code'].fillna('Not Specified')
     
-    # Add occupation_full column to both dataframes
-    links_df['occupation_full'] = links_df['occupation_series'].astype(str) + ' - ' + links_df['occupation_name'].fillna('Unknown')
-    scraped_df['occupation_full'] = scraped_df['occupation_series'].astype(str) + ' - ' + scraped_df['occupation_name'].fillna('Unknown')
+    # Add occupation_full column to both dataframes - pad occupation series to 4 digits
+    links_df['occupation_full'] = links_df['occupation_series'].astype(str).str.zfill(4) + ' - ' + links_df['occupation_name'].fillna('Unknown')
+    scraped_df['occupation_full'] = scraped_df['occupation_series'].astype(str).str.zfill(4) + ' - ' + scraped_df['occupation_name'].fillna('Unknown')
     
     # Service Type Analysis
     if 'service_type' in scraped_df.columns and 'service_type' in all_jobs_df.columns:
@@ -262,8 +262,8 @@ def main():
         eo_jobs['open_date'] = pd.to_datetime(eo_jobs['position_open_date'], format='mixed').dt.strftime('%m/%d/%Y')
         eo_jobs['close_date'] = pd.to_datetime(eo_jobs['position_close_date'], format='mixed').dt.strftime('%m/%d/%Y')
         
-        # Create occupation display
-        eo_jobs['occupation'] = eo_jobs['occupation_series'].astype(str) + ' - ' + eo_jobs['occupation_name'].fillna('Unknown')
+        # Create occupation display - pad occupation series to 4 digits
+        eo_jobs['occupation'] = eo_jobs['occupation_series'].astype(str).str.zfill(4) + ' - ' + eo_jobs['occupation_name'].fillna('Unknown')
         
         # Prepare job postings data
         job_postings = []

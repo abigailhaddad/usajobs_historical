@@ -318,30 +318,30 @@
     {
       "Occupation Series": "0610 - Nurse",
       "Total Jobs": 1648,
-      "Scraped Questionnaires": 0,
-      "Jobs with Essay Question": 0,
-      "% of Scraped with Essay Question": 0.0
+      "Scraped Questionnaires": 1617,
+      "Jobs with Essay Question": 1,
+      "% of Scraped with Essay Question": 0.1
     },
     {
       "Occupation Series": "0602 - Medical Officer",
       "Total Jobs": 832,
-      "Scraped Questionnaires": 0,
+      "Scraped Questionnaires": 95,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Occupation Series": "0185 - Social Work",
       "Total Jobs": 824,
-      "Scraped Questionnaires": 0,
-      "Jobs with Essay Question": 0,
-      "% of Scraped with Essay Question": 0.0
+      "Scraped Questionnaires": 809,
+      "Jobs with Essay Question": 3,
+      "% of Scraped with Essay Question": 0.4
     },
     {
       "Occupation Series": "0301 - Miscellaneous Administration And Program",
       "Total Jobs": 719,
-      "Scraped Questionnaires": 0,
-      "Jobs with Essay Question": 0,
-      "% of Scraped with Essay Question": 0.0
+      "Scraped Questionnaires": 566,
+      "Jobs with Essay Question": 41,
+      "% of Scraped with Essay Question": 7.2
     },
     {
       "Occupation Series": "1702 - Education And Training Technician",
@@ -353,14 +353,14 @@
     {
       "Occupation Series": "0189 - Recreation Aid And Assistant",
       "Total Jobs": 570,
-      "Scraped Questionnaires": 0,
+      "Scraped Questionnaires": 436,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Occupation Series": "0679 - Medical Support Assistance",
       "Total Jobs": 566,
-      "Scraped Questionnaires": 0,
+      "Scraped Questionnaires": 553,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
@@ -374,16 +374,16 @@
     {
       "Occupation Series": "0303 - Miscellaneous Clerk And Assistant",
       "Total Jobs": 449,
-      "Scraped Questionnaires": 0,
-      "Jobs with Essay Question": 0,
-      "% of Scraped with Essay Question": 0.0
+      "Scraped Questionnaires": 368,
+      "Jobs with Essay Question": 3,
+      "% of Scraped with Essay Question": 0.8
     },
     {
       "Occupation Series": "0620 - Practical Nurse",
       "Total Jobs": 447,
-      "Scraped Questionnaires": 0,
-      "Jobs with Essay Question": 0,
-      "% of Scraped with Essay Question": 0.0
+      "Scraped Questionnaires": 435,
+      "Jobs with Essay Question": 2,
+      "% of Scraped with Essay Question": 0.5
     },
     {
       "Occupation Series": "2210 - Information Technology Management",
@@ -395,7 +395,7 @@
     {
       "Occupation Series": "0180 - Psychology",
       "Total Jobs": 368,
-      "Scraped Questionnaires": 0,
+      "Scraped Questionnaires": 318,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
@@ -409,16 +409,16 @@
     {
       "Occupation Series": "0640 - Health Aid And Technician",
       "Total Jobs": 340,
-      "Scraped Questionnaires": 0,
+      "Scraped Questionnaires": 318,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Occupation Series": "0343 - Management And Program Analysis",
       "Total Jobs": 318,
-      "Scraped Questionnaires": 0,
-      "Jobs with Essay Question": 0,
-      "% of Scraped with Essay Question": 0.0
+      "Scraped Questionnaires": 261,
+      "Jobs with Essay Question": 11,
+      "% of Scraped with Essay Question": 4.2
     },
     {
       "Occupation Series": "7408 - Food Service Working",
@@ -430,23 +430,23 @@
     {
       "Occupation Series": "0621 - Nursing Assistant",
       "Total Jobs": 268,
-      "Scraped Questionnaires": 0,
+      "Scraped Questionnaires": 264,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Occupation Series": "0201 - Human Resources Management",
       "Total Jobs": 241,
-      "Scraped Questionnaires": 0,
-      "Jobs with Essay Question": 0,
-      "% of Scraped with Essay Question": 0.0
+      "Scraped Questionnaires": 174,
+      "Jobs with Essay Question": 1,
+      "% of Scraped with Essay Question": 0.6
     },
     {
       "Occupation Series": "0801 - General Engineering",
       "Total Jobs": 232,
-      "Scraped Questionnaires": 0,
-      "Jobs with Essay Question": 0,
-      "% of Scraped with Essay Question": 0.0
+      "Scraped Questionnaires": 184,
+      "Jobs with Essay Question": 5,
+      "% of Scraped with Essay Question": 2.7
     },
     {
       "Occupation Series": "7404 - Cooking",
@@ -494,7 +494,7 @@
   "job_postings": [
     {
       "position_title": "General Attorney - Cybersecurity and Information Technology Law",
-      "occupation": "905 - Attorney",
+      "occupation": "0905 - Attorney",
       "agency": "Department of Commerce",
       "location": "Alexandria, Virginia",
       "grade": "GS-15",
@@ -518,7 +518,7 @@
     },
     {
       "position_title": "Wildlife Biologist",
-      "occupation": "486 - Wildlife Biology",
+      "occupation": "0486 - Wildlife Biology",
       "agency": "Department of Agriculture",
       "location": "Aurora, Colorado",
       "grade": "GS-7",
@@ -638,7 +638,7 @@
     },
     {
       "position_title": "Physical Security Specialist",
-      "occupation": "80 - Security Administration",
+      "occupation": "0080 - Security Administration",
       "agency": "Executive Office of the President",
       "location": "Washington, District of Columbia",
       "grade": "GS-9/12",
@@ -674,7 +674,7 @@
     },
     {
       "position_title": "Biologist (Computations)",
-      "occupation": "401 - General Natural Resources Management And Bio",
+      "occupation": "0401 - General Natural Resources Management And Bi",
       "agency": "Department of Agriculture",
       "location": "Fort Collins, Colorado",
       "grade": "GS-11",
@@ -686,7 +686,7 @@
     },
     {
       "position_title": "Wildlife Biologist",
-      "occupation": "486 - Wildlife Biology",
+      "occupation": "0486 - Wildlife Biology",
       "agency": "Department of Agriculture",
       "location": "Cook County, Illinois",
       "grade": "GS-7/9",
@@ -698,7 +698,7 @@
     },
     {
       "position_title": "Wildlife Biologist",
-      "occupation": "486 - Wildlife Biology",
+      "occupation": "0486 - Wildlife Biology",
       "agency": "Department of Agriculture",
       "location": "Fort Collins, Colorado",
       "grade": "GS-7/9",
@@ -710,7 +710,7 @@
     },
     {
       "position_title": "Wildlife Biologist",
-      "occupation": "486 - Wildlife Biology",
+      "occupation": "0486 - Wildlife Biology",
       "agency": "Department of Agriculture",
       "location": "Birmingham, Alabama",
       "grade": "GS-7/9",
@@ -722,7 +722,7 @@
     },
     {
       "position_title": "Wildlife Biologist",
-      "occupation": "486 - Wildlife Biology",
+      "occupation": "0486 - Wildlife Biology",
       "agency": "Department of Agriculture",
       "location": "Phoenix, Arizona",
       "grade": "GS-7/9",
@@ -746,7 +746,7 @@
     },
     {
       "position_title": "Wildlife Biologist",
-      "occupation": "486 - Wildlife Biology",
+      "occupation": "0486 - Wildlife Biology",
       "agency": "Department of Agriculture",
       "location": "Georgetown, Kentucky",
       "grade": "GS-7",
@@ -758,7 +758,7 @@
     },
     {
       "position_title": "Biological Science Technician (Wildlife)",
-      "occupation": "404 - Biological Science Technician",
+      "occupation": "0404 - Biological Science Technician",
       "agency": "Department of Agriculture",
       "location": "Cincinnati, Ohio",
       "grade": "GS-5/6",
@@ -770,7 +770,7 @@
     },
     {
       "position_title": "Security Assistant",
-      "occupation": "86 - Security Clerical and Assistance",
+      "occupation": "0086 - Security Clerical and Assistance",
       "agency": "Executive Office of the President",
       "location": "Washington, District of Columbia",
       "grade": "GS-7/8",
@@ -782,7 +782,7 @@
     },
     {
       "position_title": "Research Biologist",
-      "occupation": "401 - General Natural Resources Management And Bio",
+      "occupation": "0401 - General Natural Resources Management And Bi",
       "agency": "Department of Agriculture",
       "location": "Starkville, Mississippi",
       "grade": "GS-12",
@@ -794,7 +794,7 @@
     },
     {
       "position_title": "Animal Health Technician (New World Screwworm)",
-      "occupation": "704 - Animal Health Technician",
+      "occupation": "0704 - Animal Health Technician",
       "agency": "Department of Agriculture",
       "location": "Douglas, Arizona",
       "grade": "GS-6",
@@ -806,7 +806,7 @@
     },
     {
       "position_title": "Animal Health Technician",
-      "occupation": "704 - Animal Health Technician",
+      "occupation": "0704 - Animal Health Technician",
       "agency": "Department of Agriculture",
       "location": "Douglas, Arizona",
       "grade": "GS-6",
@@ -818,7 +818,7 @@
     },
     {
       "position_title": "Supervisory Veterinary Medical Officer",
-      "occupation": "701 - Veterinary Medical Science",
+      "occupation": "0701 - Veterinary Medical Science",
       "agency": "Department of Agriculture",
       "location": "Douglas, Arizona",
       "grade": "GS-11/12",
@@ -830,7 +830,7 @@
     },
     {
       "position_title": "Administrative Officer",
-      "occupation": "341 - Administrative Officer",
+      "occupation": "0341 - Administrative Officer",
       "agency": "Department of Justice",
       "location": "Saint Louis, Missouri",
       "grade": "GS-11",
@@ -854,7 +854,7 @@
     },
     {
       "position_title": "Logistics Management Specialist (Assistant Fire Dispatch Center Manager)",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Interior",
       "location": "Shoshone, Idaho",
       "grade": "GS-9",
@@ -878,7 +878,7 @@
     },
     {
       "position_title": "Supervisory Veterinary Medical Officer",
-      "occupation": "701 - Veterinary Medical Science",
+      "occupation": "0701 - Veterinary Medical Science",
       "agency": "Department of Agriculture",
       "location": "Fort Collins, Colorado",
       "grade": "GS-14",
@@ -890,7 +890,7 @@
     },
     {
       "position_title": "Social Worker",
-      "occupation": "185 - Social Work",
+      "occupation": "0185 - Social Work",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Gulfport, Mississippi",
       "grade": "GS-11",
@@ -902,7 +902,7 @@
     },
     {
       "position_title": "Social Worker",
-      "occupation": "185 - Social Work",
+      "occupation": "0185 - Social Work",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Gulfport, Mississippi",
       "grade": "GS-11",
@@ -914,7 +914,7 @@
     },
     {
       "position_title": "Entomologist",
-      "occupation": "414 - Entomology",
+      "occupation": "0414 - Entomology",
       "agency": "Department of Agriculture",
       "location": "Washington, District of Columbia",
       "grade": "GS-13",
@@ -926,7 +926,7 @@
     },
     {
       "position_title": "Supervisory Plant Protection and Quarantine Officer",
-      "occupation": "401 - General Natural Resources Management And Bio",
+      "occupation": "0401 - General Natural Resources Management And Bi",
       "agency": "Department of Agriculture",
       "location": "Honolulu, Hawaii",
       "grade": "GS-12",
@@ -938,7 +938,7 @@
     },
     {
       "position_title": "Botanist",
-      "occupation": "430 - Botany",
+      "occupation": "0430 - Botany",
       "agency": "Department of Agriculture",
       "location": "Washington, District of Columbia",
       "grade": "GS-13",
@@ -950,7 +950,7 @@
     },
     {
       "position_title": "Molecular Biologist - Plant Pathology",
-      "occupation": "401 - General Natural Resources Management And Bio",
+      "occupation": "0401 - General Natural Resources Management And Bi",
       "agency": "Department of Agriculture",
       "location": "Beltsville, Maryland",
       "grade": "GS-12/13",
@@ -962,7 +962,7 @@
     },
     {
       "position_title": "Molecular Biologist - Plant Pathology",
-      "occupation": "401 - General Natural Resources Management And Bio",
+      "occupation": "0401 - General Natural Resources Management And Bi",
       "agency": "Department of Agriculture",
       "location": "Beltsville, Maryland",
       "grade": "GS-11/12",
@@ -974,7 +974,7 @@
     },
     {
       "position_title": "Logistics Assistant",
-      "occupation": "303 - Miscellaneous Clerk And Assistant",
+      "occupation": "0303 - Miscellaneous Clerk And Assistant",
       "agency": "Executive Office of the President",
       "location": "Washington, District of Columbia",
       "grade": "GS-7",
@@ -1010,7 +1010,7 @@
     },
     {
       "position_title": "Veterinary Medical Officer (Import/Export)",
-      "occupation": "701 - Veterinary Medical Science",
+      "occupation": "0701 - Veterinary Medical Science",
       "agency": "Department of Agriculture",
       "location": "Fort Collins, Colorado",
       "grade": "GS-13",
@@ -1022,7 +1022,7 @@
     },
     {
       "position_title": "Animal Health Technician (Highly Pathogenic Avian Influenza Response)",
-      "occupation": "704 - Animal Health Technician",
+      "occupation": "0704 - Animal Health Technician",
       "agency": "Department of Agriculture",
       "location": "El Segundo, California",
       "grade": "GS-5",
@@ -1058,7 +1058,7 @@
     },
     {
       "position_title": "Assistant Chief",
-      "occupation": "83 - Police",
+      "occupation": "0083 - Police",
       "agency": "Department of the Interior",
       "location": "Washington, District of Columbia",
       "grade": "SP-10",
@@ -1070,7 +1070,7 @@
     },
     {
       "position_title": "Security Guard",
-      "occupation": "85 - Security Guard",
+      "occupation": "0085 - Security Guard",
       "agency": "Department of the Interior",
       "location": "Honolulu, Hawaii",
       "grade": "GS-5",
@@ -1082,7 +1082,7 @@
     },
     {
       "position_title": "Equal Employment Specialist",
-      "occupation": "260 - Equal Employment Opportunity",
+      "occupation": "0260 - Equal Employment Opportunity",
       "agency": "Department of Justice",
       "location": "Arlington, Virginia",
       "grade": "GS-13",
@@ -1094,7 +1094,7 @@
     },
     {
       "position_title": "Licensed Practical Nurse",
-      "occupation": "620 - Practical Nurse",
+      "occupation": "0620 - Practical Nurse",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Washington, District of Columbia",
       "grade": "GS-7",
@@ -1106,7 +1106,7 @@
     },
     {
       "position_title": "Licensed Practical Nurse",
-      "occupation": "620 - Practical Nurse",
+      "occupation": "0620 - Practical Nurse",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Washington, District of Columbia",
       "grade": "GS-7",
@@ -1130,7 +1130,7 @@
     },
     {
       "position_title": "Deputy Inspector General for Mission Support (Chief Financial Officer)",
-      "occupation": "340 - Program Management",
+      "occupation": "0340 - Program Management",
       "agency": "Department of the Treasury",
       "location": "Washington, District of Columbia",
       "grade": "ES-00",
@@ -1142,7 +1142,7 @@
     },
     {
       "position_title": "Assistant Inspector General for Audit (Security and Information Technology Services)",
-      "occupation": "511 - Auditing",
+      "occupation": "0511 - Auditing",
       "agency": "Department of the Treasury",
       "location": "Fresno, California",
       "grade": "ES-00",
@@ -1190,7 +1190,7 @@
     },
     {
       "position_title": "Seasonal Park Ranger (Protection)",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Everglades City, Florida",
       "grade": "GS-5/7",
@@ -1202,7 +1202,7 @@
     },
     {
       "position_title": "Seasonal Park Ranger (Protection)",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Ajo, Arizona",
       "grade": "GS-5/7",
@@ -1214,7 +1214,7 @@
     },
     {
       "position_title": "Seasonal Park Ranger (Interpretation-Language)",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Homestead, Florida",
       "grade": "GS-5/7",
@@ -1226,7 +1226,7 @@
     },
     {
       "position_title": "Seasonal Recreation Fee Clerk & Technician",
-      "occupation": "503 - Financial Clerical And Assistance",
+      "occupation": "0503 - Financial Clerical And Assistance",
       "agency": "Department of the Interior",
       "location": "Homestead, Florida",
       "grade": "GS-3/5",
@@ -1238,7 +1238,7 @@
     },
     {
       "position_title": "Logistics Support Specialist",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Executive Office of the President",
       "location": "Washington, District of Columbia",
       "grade": "GS-9",
@@ -1250,7 +1250,7 @@
     },
     {
       "position_title": "Wildland Firefighter (Fuels)",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Columbia, North Carolina",
       "grade": "GW-8/9",
@@ -1262,7 +1262,7 @@
     },
     {
       "position_title": "Seasonal Park Ranger (Protection)",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Lowell, Massachusetts",
       "grade": "GS-5/7",
@@ -1274,7 +1274,7 @@
     },
     {
       "position_title": "Veterinary Medical Officer",
-      "occupation": "701 - Veterinary Medical Science",
+      "occupation": "0701 - Veterinary Medical Science",
       "agency": "Department of Agriculture",
       "location": "Fort Collins, Colorado",
       "grade": "GS-11",
@@ -1286,7 +1286,7 @@
     },
     {
       "position_title": "Park Ranger (Protection) (Seasonal)",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Paicines, California",
       "grade": "GS-5/7",
@@ -1334,7 +1334,7 @@
     },
     {
       "position_title": "Security Guard",
-      "occupation": "85 - Security Guard",
+      "occupation": "0085 - Security Guard",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Gulfport, Mississippi",
       "grade": "GS-5",
@@ -1346,7 +1346,7 @@
     },
     {
       "position_title": "Security Guard",
-      "occupation": "85 - Security Guard",
+      "occupation": "0085 - Security Guard",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Gulfport, Mississippi",
       "grade": "GS-5",
@@ -1382,7 +1382,7 @@
     },
     {
       "position_title": "Financial Economist (RESEARCH)",
-      "occupation": "110 - Economist",
+      "occupation": "0110 - Economist",
       "agency": "Department of the Treasury",
       "location": "Washington, District of Columbia",
       "grade": "GS-15",
@@ -1394,7 +1394,7 @@
     },
     {
       "position_title": "Chief Resident Services",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Gulfport, Mississippi",
       "grade": "GS-14",
@@ -1406,7 +1406,7 @@
     },
     {
       "position_title": "Chief Resident Services",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Gulfport, Mississippi",
       "grade": "GS-14",
@@ -1418,7 +1418,7 @@
     },
     {
       "position_title": "Support Service Supervisor (Logistical Support Branch Head)",
-      "occupation": "342 - Support Services Administration",
+      "occupation": "0342 - Support Services Administration",
       "agency": "Department of the Treasury",
       "location": "Washington, District of Columbia",
       "grade": "GS-14",
@@ -1454,7 +1454,7 @@
     },
     {
       "position_title": "Personnel Security Specialist (ADJ)",
-      "occupation": "80 - Security Administration",
+      "occupation": "0080 - Security Administration",
       "agency": "Department of Health and Human Services",
       "location": "Montgomery County, Maryland",
       "grade": "GS-12",
@@ -1466,7 +1466,7 @@
     },
     {
       "position_title": "Personnel Security Specialist (ADJ)",
-      "occupation": "80 - Security Administration",
+      "occupation": "0080 - Security Administration",
       "agency": "Department of Health and Human Services",
       "location": "Montgomery County, Maryland",
       "grade": "GS-12",
@@ -1478,7 +1478,7 @@
     },
     {
       "position_title": "Wildland Firefighter (Helicopter Squad Leader) (Direct Hire Authority)",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Homestead, Florida",
       "grade": "GW-7",
@@ -1490,7 +1490,7 @@
     },
     {
       "position_title": "Private (Police Officer)",
-      "occupation": "83 - Police",
+      "occupation": "0083 - Police",
       "agency": "Department of the Interior",
       "location": "San Francisco, California",
       "grade": "SP-1",
@@ -1502,7 +1502,7 @@
     },
     {
       "position_title": "JOINT INTERFACE AND NETWORK OPERATIONS SPECIALIST",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "McGuire AFB, New Jersey",
       "grade": "GS-12",
@@ -1514,7 +1514,7 @@
     },
     {
       "position_title": "OPERATIONAL TEST AND EVALUATION PROGRAM MANAGER",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "McGuire AFB, New Jersey",
       "grade": "GS-13",
@@ -1550,7 +1550,7 @@
     },
     {
       "position_title": "DIRECTOR OF STAFF",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Greater Pittsburgh Airport, Pennsylvania",
       "grade": "GS-13",
@@ -1562,7 +1562,7 @@
     },
     {
       "position_title": "Performance Improvement Integrator",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Gulfport, Mississippi",
       "grade": "GS-12",
@@ -1574,7 +1574,7 @@
     },
     {
       "position_title": "Performance Improvement Integrator",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Gulfport, Mississippi",
       "grade": "GS-12",
@@ -1586,7 +1586,7 @@
     },
     {
       "position_title": "SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Barksdale AFB, Louisiana",
       "grade": "GS-13",
@@ -1598,7 +1598,7 @@
     },
     {
       "position_title": "SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Altus AFB, Oklahoma",
       "grade": "GS-11",
@@ -1610,7 +1610,7 @@
     },
     {
       "position_title": "Wildland Firefighter (Wildland Fire Module) - Direct Hire Authority",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Marblemount, Washington",
       "grade": "GS-6",
@@ -1622,7 +1622,7 @@
     },
     {
       "position_title": "HOST AVIATION RESOURCE MANAGEMENT SPECIALIST",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "March AFB, California",
       "grade": "GS-9",
@@ -1670,7 +1670,7 @@
     },
     {
       "position_title": "MISSION INTEGRATION SPECIALIST",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Fort Bliss, Texas",
       "grade": "GS-11/12",
@@ -1682,7 +1682,7 @@
     },
     {
       "position_title": "COMMAND STAFF OFFICER",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Dobbins AFB, Georgia",
       "grade": "GS-14",
@@ -1694,7 +1694,7 @@
     },
     {
       "position_title": "COUNTER NARCOTICS PLANNING SPECIALIST",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Peterson AFB, Colorado",
       "grade": "GS-12/13",
@@ -1706,7 +1706,7 @@
     },
     {
       "position_title": "SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Barksdale AFB, Louisiana",
       "grade": "GS-13",
@@ -1718,7 +1718,7 @@
     },
     {
       "position_title": "SUPERVISORY PROGRAM ANALYST",
-      "occupation": "343 - Management And Program Analysis",
+      "occupation": "0343 - Management And Program Analysis",
       "agency": "Department of the Air Force",
       "location": "Barksdale AFB, Louisiana",
       "grade": "GS-14",
@@ -1742,7 +1742,7 @@
     },
     {
       "position_title": "PROGRAM ANALYST",
-      "occupation": "343 - Management And Program Analysis",
+      "occupation": "0343 - Management And Program Analysis",
       "agency": "Department of the Air Force",
       "location": "McGuire AFB, New Jersey",
       "grade": "GS-13",
@@ -1754,7 +1754,7 @@
     },
     {
       "position_title": "Security Guard",
-      "occupation": "85 - Security Guard",
+      "occupation": "0085 - Security Guard",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Washington, District of Columbia",
       "grade": "GS-5",
@@ -1766,7 +1766,7 @@
     },
     {
       "position_title": "Security Guard",
-      "occupation": "85 - Security Guard",
+      "occupation": "0085 - Security Guard",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Washington, District of Columbia",
       "grade": "GS-5",
@@ -1790,7 +1790,7 @@
     },
     {
       "position_title": "UNIT DEPLOYMENT MANAGER",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "McGuire AFB, New Jersey",
       "grade": "GS-9",
@@ -1862,7 +1862,7 @@
     },
     {
       "position_title": "Seasonal Administrative Support Assistant (OA)",
-      "occupation": "303 - Miscellaneous Clerk And Assistant",
+      "occupation": "0303 - Miscellaneous Clerk And Assistant",
       "agency": "Department of the Interior",
       "location": "Empire, Michigan",
       "grade": "GS-6",
@@ -1886,7 +1886,7 @@
     },
     {
       "position_title": "Biological Science Laboratory Technician (Highly Pathogenic Avian Influenza)",
-      "occupation": "404 - Biological Science Technician",
+      "occupation": "0404 - Biological Science Technician",
       "agency": "Department of Agriculture",
       "location": "Ames, Iowa",
       "grade": "GS-5/7",
@@ -1934,7 +1934,7 @@
     },
     {
       "position_title": "SUPV LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Laughlin AFB, Texas",
       "grade": "GS-11",
@@ -1946,7 +1946,7 @@
     },
     {
       "position_title": "UNIT DEPLOYMENT MANAGER",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "McGuire AFB, New Jersey",
       "grade": "GS-9",
@@ -1958,7 +1958,7 @@
     },
     {
       "position_title": "LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Scott AFB, Illinois",
       "grade": "GS-12",
@@ -1970,7 +1970,7 @@
     },
     {
       "position_title": "Park Manager - Superintendent",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Del Rio, Texas",
       "grade": "GS-14",
@@ -2006,7 +2006,7 @@
     },
     {
       "position_title": "Seasonal Park Ranger (Interpretation)",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Homestead, Florida",
       "grade": "GS-5/7",
@@ -2018,7 +2018,7 @@
     },
     {
       "position_title": "Park Manager - Park Superintendent",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Fort Smith, Montana",
       "grade": "GS-14",
@@ -2030,7 +2030,7 @@
     },
     {
       "position_title": "Park Manager",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Hereford, Arizona",
       "grade": "GS-14",
@@ -2222,7 +2222,7 @@
     },
     {
       "position_title": "SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Yokota Air Base, Japan",
       "grade": "GS-12",
@@ -2258,7 +2258,7 @@
     },
     {
       "position_title": "Animal Health Technician (HPAI)",
-      "occupation": "704 - Animal Health Technician",
+      "occupation": "0704 - Animal Health Technician",
       "agency": "Department of Agriculture",
       "location": "Miami, Florida",
       "grade": "GS-6",
@@ -2294,7 +2294,7 @@
     },
     {
       "position_title": "Supervisory Nurse",
-      "occupation": "610 - Nurse",
+      "occupation": "0610 - Nurse",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Gulfport, Mississippi",
       "grade": "GS-11",
@@ -2342,7 +2342,7 @@
     },
     {
       "position_title": "Veterinary Medical Officer (New World Screwworm)",
-      "occupation": "701 - Veterinary Medical Science",
+      "occupation": "0701 - Veterinary Medical Science",
       "agency": "Department of Agriculture",
       "location": "Fort Collins, Colorado",
       "grade": "GS-13",
@@ -2354,7 +2354,7 @@
     },
     {
       "position_title": "Supervisory Park Ranger (Protection)",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Carlsbad, New Mexico",
       "grade": "GS-12",
@@ -2366,7 +2366,7 @@
     },
     {
       "position_title": "SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Laughlin AFB, Texas",
       "grade": "GS-12",
@@ -2390,7 +2390,7 @@
     },
     {
       "position_title": "UNIT DEPLOYMENT MANAGER",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "McGuire AFB, New Jersey",
       "grade": "GS-9",
@@ -2414,7 +2414,7 @@
     },
     {
       "position_title": "LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Patrick AFB, Florida",
       "grade": "GS-11",
@@ -2426,7 +2426,7 @@
     },
     {
       "position_title": "Supervisory Veterinary Medical Officer",
-      "occupation": "701 - Veterinary Medical Science",
+      "occupation": "0701 - Veterinary Medical Science",
       "agency": "Department of Agriculture",
       "location": "District of Columbia, District of Columbia",
       "grade": "GS-14",
@@ -2474,7 +2474,7 @@
     },
     {
       "position_title": "Social Service Representative",
-      "occupation": "187 - Social Services",
+      "occupation": "0187 - Social Services",
       "agency": "Department of the Interior",
       "location": "Portland, Oregon",
       "grade": "GS-7/9",
@@ -2486,7 +2486,7 @@
     },
     {
       "position_title": "Supervisory Park Ranger (P)",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Grand Canyon, Arizona",
       "grade": "GS-13",
@@ -2570,7 +2570,7 @@
     },
     {
       "position_title": "Park Ranger (Interpretation) (Seasonal)",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Baltimore, Maryland",
       "grade": "GS-5",
@@ -2582,7 +2582,7 @@
     },
     {
       "position_title": "Recreation Fee Technician (Seasonal)",
-      "occupation": "503 - Financial Clerical And Assistance",
+      "occupation": "0503 - Financial Clerical And Assistance",
       "agency": "Department of the Interior",
       "location": "Baltimore, Maryland",
       "grade": "GS-5",
@@ -2594,7 +2594,7 @@
     },
     {
       "position_title": "Intelligence Operations Specialist",
-      "occupation": "132 - Intelligence",
+      "occupation": "0132 - Intelligence",
       "agency": "Department of Agriculture",
       "location": "Washington, District of Columbia",
       "grade": "GS-12/13",
@@ -2618,7 +2618,7 @@
     },
     {
       "position_title": "WING REFUELING DOCUMENT CONTROL OFFICER",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Charleston AFB, South Carolina",
       "grade": "GS-9",
@@ -2690,7 +2690,7 @@
     },
     {
       "position_title": "UNIT DEPLOYMENT MANAGER",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "McGuire AFB, New Jersey",
       "grade": "GS-9",
@@ -2702,7 +2702,7 @@
     },
     {
       "position_title": "LEGISLATIVE AFFAIRS SPECIALIST",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Hurlburt Field, Florida",
       "grade": "GS-13",
@@ -2714,7 +2714,7 @@
     },
     {
       "position_title": "DEPUTY DIRECTOR OF OPERATIONS",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Scott AFB, Illinois",
       "grade": "GS-14",
@@ -2750,7 +2750,7 @@
     },
     {
       "position_title": "FOREIGN AFFAIRS SPECIALIST",
-      "occupation": "130 - Foreign Affairs",
+      "occupation": "0130 - Foreign Affairs",
       "agency": "Department of the Air Force",
       "location": "Randolph AFB, Texas",
       "grade": "GS-9",
@@ -2786,7 +2786,7 @@
     },
     {
       "position_title": "Park Ranger (Protection)",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Salt Lake City, Utah",
       "grade": "GS-11",
@@ -2798,7 +2798,7 @@
     },
     {
       "position_title": "SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Barksdale AFB, Louisiana",
       "grade": "GS-13",
@@ -2810,7 +2810,7 @@
     },
     {
       "position_title": "LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Barksdale AFB, Louisiana",
       "grade": "GS-13",
@@ -2882,7 +2882,7 @@
     },
     {
       "position_title": "Park Ranger (Protection)",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Sacramento, California",
       "grade": "GS-12",
@@ -2894,7 +2894,7 @@
     },
     {
       "position_title": "Social Services Assistant",
-      "occupation": "186 - Social Services Aid And Assistant",
+      "occupation": "0186 - Social Services Aid And Assistant",
       "agency": "Department of the Interior",
       "location": "Belcourt, North Dakota",
       "grade": "GS-7",
@@ -2906,7 +2906,7 @@
     },
     {
       "position_title": "COMMAND POST SPECIALIST (SORTS)",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Dobbins AFB, Georgia",
       "grade": "GS-9",
@@ -2918,7 +2918,7 @@
     },
     {
       "position_title": "LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Scott AFB, Illinois",
       "grade": "GS-12",
@@ -2930,7 +2930,7 @@
     },
     {
       "position_title": "SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Fort Worth, Texas",
       "grade": "GS-12",
@@ -2942,7 +2942,7 @@
     },
     {
       "position_title": "Supervisory Veterinary Medical Officer/Biological Scientist (Highly Pathogenic Avian Influenza)",
-      "occupation": "401 - General Natural Resources Management And Bio",
+      "occupation": "0401 - General Natural Resources Management And Bi",
       "agency": "Department of Agriculture",
       "location": "Ames, Iowa",
       "grade": "GS-14",
@@ -2954,7 +2954,7 @@
     },
     {
       "position_title": "Biological Science Technician (Wildlife)",
-      "occupation": "404 - Biological Science Technician",
+      "occupation": "0404 - Biological Science Technician",
       "agency": "Department of Agriculture",
       "location": "Annapolis, Maryland",
       "grade": "GS-5",
@@ -2966,7 +2966,7 @@
     },
     {
       "position_title": "TELLER",
-      "occupation": "530 - Cash Processing",
+      "occupation": "0530 - Cash Processing",
       "agency": "Department of Defense",
       "location": "McGuire AFB, New Jersey",
       "grade": "GS-4",
@@ -2978,7 +2978,7 @@
     },
     {
       "position_title": "Nuclear Medicine Technician",
-      "occupation": "642 - Nuclear Medicine Technician",
+      "occupation": "0642 - Nuclear Medicine Technician",
       "agency": "Department of Defense",
       "location": "Tripler Army Medical Center, Hawaii",
       "grade": "GS-10",
@@ -2990,7 +2990,7 @@
     },
     {
       "position_title": "Fire Protection Engineer",
-      "occupation": "804 - Fire Protection Engineering",
+      "occupation": "0804 - Fire Protection Engineering",
       "agency": "Department of the Interior",
       "location": "Philadelphia, Pennsylvania",
       "grade": "GS-13",
@@ -3002,7 +3002,7 @@
     },
     {
       "position_title": "Electronics Technician",
-      "occupation": "856 - Electronics Technical",
+      "occupation": "0856 - Electronics Technical",
       "agency": "Department of Commerce",
       "location": "Palmer, Alaska",
       "grade": "GS-11",
@@ -3014,7 +3014,7 @@
     },
     {
       "position_title": "Electronics Technician",
-      "occupation": "856 - Electronics Technical",
+      "occupation": "0856 - Electronics Technical",
       "agency": "Department of Commerce",
       "location": "Palmer, Alaska",
       "grade": "GS-11",
@@ -3026,7 +3026,7 @@
     },
     {
       "position_title": "Electronics Technician",
-      "occupation": "856 - Electronics Technical",
+      "occupation": "0856 - Electronics Technical",
       "agency": "Department of Commerce",
       "location": "Anchorage, Alaska",
       "grade": "GS-8/11",
@@ -3038,7 +3038,7 @@
     },
     {
       "position_title": "Electronics Technician",
-      "occupation": "856 - Electronics Technical",
+      "occupation": "0856 - Electronics Technical",
       "agency": "Department of Commerce",
       "location": "Anchorage, Alaska",
       "grade": "GS-8/11",
@@ -3050,7 +3050,7 @@
     },
     {
       "position_title": "Electronics Technician",
-      "occupation": "856 - Electronics Technical",
+      "occupation": "0856 - Electronics Technical",
       "agency": "Department of Commerce",
       "location": "Phoenix, Arizona",
       "grade": "GS-8/11",
@@ -3062,7 +3062,7 @@
     },
     {
       "position_title": "Electronics Technician",
-      "occupation": "856 - Electronics Technical",
+      "occupation": "0856 - Electronics Technical",
       "agency": "Department of Commerce",
       "location": "Phoenix, Arizona",
       "grade": "GS-8/11",
@@ -3254,7 +3254,7 @@
     },
     {
       "position_title": "Park Manager - Superintendent",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Big Bend National Park, Texas",
       "grade": "GS-15",
@@ -3266,7 +3266,7 @@
     },
     {
       "position_title": "Performance Improvement Integrator",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Washington, District of Columbia",
       "grade": "GS-12",
@@ -3278,7 +3278,7 @@
     },
     {
       "position_title": "Performance Improvement Integrator",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Other Agencies and Independent Organizations",
       "location": "Washington, District of Columbia",
       "grade": "GS-12",
@@ -3290,7 +3290,7 @@
     },
     {
       "position_title": "Veterinary Medical Officer (New World Screwworm)",
-      "occupation": "701 - Veterinary Medical Science",
+      "occupation": "0701 - Veterinary Medical Science",
       "agency": "Department of Agriculture",
       "location": "Fort Collins, Colorado",
       "grade": "GS-13",
@@ -3386,7 +3386,7 @@
     },
     {
       "position_title": "Archeologist (Fire/Fuels) - Direct Hire Authority",
-      "occupation": "193 - Archeology",
+      "occupation": "0193 - Archeology",
       "agency": "Department of the Interior",
       "location": "Battle Mountain, Nevada",
       "grade": "GS-9/11",
@@ -3398,7 +3398,7 @@
     },
     {
       "position_title": "Director Emergency Management and National Security",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of Housing and Urban Development",
       "location": "Washington, District of Columbia",
       "grade": "GS-15",
@@ -3410,7 +3410,7 @@
     },
     {
       "position_title": "Director Emergency Management and National Security",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of Housing and Urban Development",
       "location": "Washington, District of Columbia",
       "grade": "GS-15",
@@ -3422,7 +3422,7 @@
     },
     {
       "position_title": "UNIT DEPLOYMENT MANAGER",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Lackland AFB, Texas",
       "grade": "GS-9",
@@ -3434,7 +3434,7 @@
     },
     {
       "position_title": "Management and Program Analyst (Fire Business) - Direct Hire Authority",
-      "occupation": "343 - Management And Program Analysis",
+      "occupation": "0343 - Management And Program Analysis",
       "agency": "Department of the Interior",
       "location": "Hines, Oregon",
       "grade": "GS-11",
@@ -3446,7 +3446,7 @@
     },
     {
       "position_title": "Logistics Management Specialist (Assistant Dispatch Fire Center Manager)",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Interior",
       "location": "Las Vegas, Nevada",
       "grade": "GW-9",
@@ -3458,7 +3458,7 @@
     },
     {
       "position_title": "LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Barksdale AFB, Louisiana",
       "grade": "GS-13",
@@ -3470,7 +3470,7 @@
     },
     {
       "position_title": "Biological Science Laboratory Technician (Microbiology) (Highly Pathogenic Avian Influenza)",
-      "occupation": "404 - Biological Science Technician",
+      "occupation": "0404 - Biological Science Technician",
       "agency": "Department of Agriculture",
       "location": "Manhattan, Kansas",
       "grade": "GS-9",
@@ -3482,7 +3482,7 @@
     },
     {
       "position_title": "Wildland Firefighter - CTAP/ICTAP",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Tucson, Arizona",
       "grade": "GW-5",
@@ -3494,7 +3494,7 @@
     },
     {
       "position_title": "Forestry Technician (Fire Dispatch) - Direct Hire Authority",
-      "occupation": "462 - Forestry Technician",
+      "occupation": "0462 - Forestry Technician",
       "agency": "Department of the Interior",
       "location": "Lewistown, Montana",
       "grade": "GW-4/5",
@@ -3506,7 +3506,7 @@
     },
     {
       "position_title": "Supervisory Forestry Technician (Smokejumper)",
-      "occupation": "462 - Forestry Technician",
+      "occupation": "0462 - Forestry Technician",
       "agency": "Department of the Interior",
       "location": "Boise, Idaho",
       "grade": "GW-12",
@@ -3518,7 +3518,7 @@
     },
     {
       "position_title": "Teller",
-      "occupation": "530 - Cash Processing",
+      "occupation": "0530 - Cash Processing",
       "agency": "Department of Defense",
       "location": "Joint Base Anacostia-Bolling, District of Columbia",
       "grade": "GS-4",
@@ -3686,7 +3686,7 @@
     },
     {
       "position_title": "Park Fire Chief",
-      "occupation": "81 - Fire Protection and Prevention",
+      "occupation": "0081 - Fire Protection and Prevention",
       "agency": "Department of the Interior",
       "location": "Parks, Arizona",
       "grade": "GS-13",
@@ -3698,7 +3698,7 @@
     },
     {
       "position_title": "Park Fire Chief",
-      "occupation": "81 - Fire Protection and Prevention",
+      "occupation": "0081 - Fire Protection and Prevention",
       "agency": "Department of the Interior",
       "location": "Grand Canyon, Arizona",
       "grade": "GS-13",
@@ -3710,7 +3710,7 @@
     },
     {
       "position_title": "Park Guide (Seasonal)",
-      "occupation": "90 - Guide",
+      "occupation": "0090 - Guide",
       "agency": "Department of the Interior",
       "location": "Medora, North Dakota",
       "grade": "GS-5",
@@ -3722,7 +3722,7 @@
     },
     {
       "position_title": "Management and Program Analyst (Fire) - Direct Hire Authority",
-      "occupation": "343 - Management And Program Analysis",
+      "occupation": "0343 - Management And Program Analysis",
       "agency": "Department of the Interior",
       "location": "Salt Lake City, Utah",
       "grade": "GS-11/12",
@@ -3734,7 +3734,7 @@
     },
     {
       "position_title": "Wildland Firefighter (Fuels Management) - Direct Hire Authority",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Harrison, Arkansas",
       "grade": "GW-12",
@@ -3746,7 +3746,7 @@
     },
     {
       "position_title": "Wildland Firefighter (Aviation) Unit Aviation Manager - Direct Hire Authority",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Winnemucca, Nevada",
       "grade": "GW-11",
@@ -3758,7 +3758,7 @@
     },
     {
       "position_title": "Budget Analyst",
-      "occupation": "560 - Budget Analysis",
+      "occupation": "0560 - Budget Analysis",
       "agency": "Department of Justice",
       "location": "Arlington, Virginia",
       "grade": "GS-11/12",
@@ -3770,7 +3770,7 @@
     },
     {
       "position_title": "Animal Health Technician",
-      "occupation": "704 - Animal Health Technician",
+      "occupation": "0704 - Animal Health Technician",
       "agency": "Department of Agriculture",
       "location": "Cabo Rojo, Puerto Rico",
       "grade": "GS-8",
@@ -3902,7 +3902,7 @@
     },
     {
       "position_title": "PRINCIPAL SARC (TITLE 5)",
-      "occupation": "101 - Social Science",
+      "occupation": "0101 - Social Science",
       "agency": "Department of the Army",
       "location": "Saint Augustine, Florida",
       "grade": "GS-13",
@@ -3914,7 +3914,7 @@
     },
     {
       "position_title": "Social Worker",
-      "occupation": "185 - Social Work",
+      "occupation": "0185 - Social Work",
       "agency": "Department of the Interior",
       "location": "Sacramento, California",
       "grade": "GS-11/12",
@@ -3926,7 +3926,7 @@
     },
     {
       "position_title": "COMMERCIAL AVIATION OPERATIONS ANALYST",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Scott AFB, Illinois",
       "grade": "GS-13",
@@ -3974,7 +3974,7 @@
     },
     {
       "position_title": "DIRECTOR OF STAFF",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Ellsworth AFB, South Dakota",
       "grade": "GS-14",
@@ -3986,7 +3986,7 @@
     },
     {
       "position_title": "Administrative Management Specialist (National Fire Incident Business Lead)",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Interior",
       "location": "Boise, Idaho",
       "grade": "GS-13",
@@ -3998,7 +3998,7 @@
     },
     {
       "position_title": "COMMERCIAL AVIATION OPERATIONS ANALYST",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Scott AFB, Illinois",
       "grade": "GS-13",
@@ -4010,7 +4010,7 @@
     },
     {
       "position_title": "Wildland Firefighter (Prevention) - Direct Hire Authority",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Anchorage, Alaska",
       "grade": "GW-8/11",
@@ -4094,7 +4094,7 @@
     },
     {
       "position_title": "Safety and Occupational Health Manager",
-      "occupation": "18 - Safety and Occupational Health Management",
+      "occupation": "0018 - Safety and Occupational Health Management",
       "agency": "Department of the Interior",
       "location": "Washington, District of Columbia",
       "grade": "GS-12",
@@ -4106,7 +4106,7 @@
     },
     {
       "position_title": "Senior Staff Ranger",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Grand Canyon, Arizona",
       "grade": "GS-13",
@@ -4118,7 +4118,7 @@
     },
     {
       "position_title": "UNIT DEPLOYMENT MANAGER",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Mildenhall, United Kingdom",
       "grade": "GS-9",
@@ -4130,7 +4130,7 @@
     },
     {
       "position_title": "Administrative Officer",
-      "occupation": "341 - Administrative Officer",
+      "occupation": "0341 - Administrative Officer",
       "agency": "Department of Justice",
       "location": "Nashville, Tennessee",
       "grade": "GS-13",
@@ -4142,7 +4142,7 @@
     },
     {
       "position_title": "SUPERVISORY LOGISTICS MANAGEMENT SPECIALIST",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Air Force",
       "location": "Yokota Air Base, Japan",
       "grade": "GS-12",
@@ -4154,7 +4154,7 @@
     },
     {
       "position_title": "Biological Science Technician (Wildlife)",
-      "occupation": "404 - Biological Science Technician",
+      "occupation": "0404 - Biological Science Technician",
       "agency": "Department of Agriculture",
       "location": "Hilo, Hawaii",
       "grade": "GS-6/7",
@@ -4166,7 +4166,7 @@
     },
     {
       "position_title": "Wildlife Biologist",
-      "occupation": "486 - Wildlife Biology",
+      "occupation": "0486 - Wildlife Biology",
       "agency": "Department of Agriculture",
       "location": "Concord, New Hampshire",
       "grade": "GS-7/9",
@@ -4214,7 +4214,7 @@
     },
     {
       "position_title": "Park Fire Chief",
-      "occupation": "81 - Fire Protection and Prevention",
+      "occupation": "0081 - Fire Protection and Prevention",
       "agency": "Department of the Interior",
       "location": "Page, Arizona",
       "grade": "GS-13",
@@ -4226,7 +4226,7 @@
     },
     {
       "position_title": "SUPERVISORY PROGRAM ANALYST",
-      "occupation": "343 - Management And Program Analysis",
+      "occupation": "0343 - Management And Program Analysis",
       "agency": "Department of the Air Force",
       "location": "Barksdale AFB, Louisiana",
       "grade": "GS-14",
@@ -4238,7 +4238,7 @@
     },
     {
       "position_title": "Supervisory Biologist (National Wildlife Disease Program Coordinator)",
-      "occupation": "401 - General Natural Resources Management And Bio",
+      "occupation": "0401 - General Natural Resources Management And Bi",
       "agency": "Department of Agriculture",
       "location": "Fort Collins, Colorado",
       "grade": "GS-14",
@@ -4250,7 +4250,7 @@
     },
     {
       "position_title": "Wildlife Biologist (Rabies Program Assistant)",
-      "occupation": "486 - Wildlife Biology",
+      "occupation": "0486 - Wildlife Biology",
       "agency": "Department of Agriculture",
       "location": "Elberton, Georgia",
       "grade": "GS-12",
@@ -4382,7 +4382,7 @@
     },
     {
       "position_title": "Park Ranger (P)",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Willcox, Arizona",
       "grade": "GS-11",
@@ -4394,7 +4394,7 @@
     },
     {
       "position_title": "Archeologist",
-      "occupation": "193 - Archeology",
+      "occupation": "0193 - Archeology",
       "agency": "Department of the Interior",
       "location": "Atascadero, California",
       "grade": "GS-9/11",
@@ -4406,7 +4406,7 @@
     },
     {
       "position_title": "Archeologist",
-      "occupation": "193 - Archeology",
+      "occupation": "0193 - Archeology",
       "agency": "Department of the Interior",
       "location": "Atascadero, California",
       "grade": "GS-9/11",
@@ -4418,7 +4418,7 @@
     },
     {
       "position_title": "SUPERVISORY EXECUTIVE STAFF OFFICER",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Kirtland AFB, New Mexico",
       "grade": "NH-4",
@@ -4430,7 +4430,7 @@
     },
     {
       "position_title": "Program Specialist",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of Agriculture",
       "location": "Sacramento, California",
       "grade": "GS-7",
@@ -4442,7 +4442,7 @@
     },
     {
       "position_title": "Chief of Staff",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of Justice",
       "location": "Washington, District of Columbia",
       "grade": "GS-15",
@@ -4454,7 +4454,7 @@
     },
     {
       "position_title": "Import Permit Examiner",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of Agriculture",
       "location": "Fort Collins, Colorado",
       "grade": "GS-7",
@@ -4466,7 +4466,7 @@
     },
     {
       "position_title": "PROGRAM ANALYST",
-      "occupation": "343 - Management And Program Analysis",
+      "occupation": "0343 - Management And Program Analysis",
       "agency": "Department of the Air Force",
       "location": "McChord AFB, Washington",
       "grade": "GS-12",
@@ -4478,7 +4478,7 @@
     },
     {
       "position_title": "Logistics Management Specialist (Fire - Dispatch Center Manager)",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Interior",
       "location": "Cody, Wyoming",
       "grade": "GW-11",
@@ -4490,7 +4490,7 @@
     },
     {
       "position_title": "Supervisory Natural Recourses Specialist",
-      "occupation": "401 - General Natural Resources Management And Bio",
+      "occupation": "0401 - General Natural Resources Management And Bi",
       "agency": "Department of the Interior",
       "location": "Casper, Wyoming",
       "grade": "GS-12",
@@ -4502,7 +4502,7 @@
     },
     {
       "position_title": "Plant Protection Technician",
-      "occupation": "421 - Plant Protection Technician",
+      "occupation": "0421 - Plant Protection Technician",
       "agency": "Department of Agriculture",
       "location": "Peoria, Illinois",
       "grade": "GS-5/7",
@@ -4514,7 +4514,7 @@
     },
     {
       "position_title": "Supervisory Wildland Firefighter (Assistant Superintendent)(IHC)(Vet Crew)",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Bakersfield, California",
       "grade": "GS-8",
@@ -4526,7 +4526,7 @@
     },
     {
       "position_title": "Wildland Firefighter - Direct Hire Authority",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Parker, Arizona",
       "grade": "GS-6",
@@ -4538,7 +4538,7 @@
     },
     {
       "position_title": "Wildlife Biologist",
-      "occupation": "486 - Wildlife Biology",
+      "occupation": "0486 - Wildlife Biology",
       "agency": "Department of Agriculture",
       "location": "Roseburg, Oregon",
       "grade": "GS-7",
@@ -4550,7 +4550,7 @@
     },
     {
       "position_title": "Wildlife Bioloigst",
-      "occupation": "486 - Wildlife Biology",
+      "occupation": "0486 - Wildlife Biology",
       "agency": "Department of Agriculture",
       "location": "Fort Collins, Colorado",
       "grade": "GS-11",
@@ -4562,7 +4562,7 @@
     },
     {
       "position_title": "Interdisciplinary Supervisory General Engineer/Architect",
-      "occupation": "801 - General Engineering",
+      "occupation": "0801 - General Engineering",
       "agency": "Department of the Interior",
       "location": "Albuquerque, New Mexico",
       "grade": "GS-13",
@@ -4574,7 +4574,7 @@
     },
     {
       "position_title": "Interdisciplinary Supervisory General Engineer/Architect",
-      "occupation": "801 - General Engineering",
+      "occupation": "0801 - General Engineering",
       "agency": "Department of the Interior",
       "location": "Albuquerque, New Mexico",
       "grade": "GS-13",
@@ -4718,7 +4718,7 @@
     },
     {
       "position_title": "WING REFUELING DOCUMENT CONTROL OFFICER",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Charleston AFB, South Carolina",
       "grade": "GS-9",
@@ -4730,7 +4730,7 @@
     },
     {
       "position_title": "Project Manager - National Wildlfire Coordinating Group (NWCG) Writer/Editor",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Interior",
       "location": "Boise, Idaho",
       "grade": "GS-9",
@@ -4742,7 +4742,7 @@
     },
     {
       "position_title": "SUPERVISORY OPERATIONS AND PLANS SPECIALIST",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Mildenhall, United Kingdom",
       "grade": "GS-14",
@@ -4754,7 +4754,7 @@
     },
     {
       "position_title": "Field Supervisor",
-      "occupation": "303 - Miscellaneous Clerk And Assistant",
+      "occupation": "0303 - Miscellaneous Clerk And Assistant",
       "agency": "Department of Commerce",
       "location": "Colusa County, California",
       "grade": "GG-6",
@@ -4766,7 +4766,7 @@
     },
     {
       "position_title": "Secretary (Office Automation)",
-      "occupation": "318 - Secretary",
+      "occupation": "0318 - Secretary",
       "agency": "Department of Defense",
       "location": "San Diego, California",
       "grade": "GS-6",
@@ -4778,7 +4778,7 @@
     },
     {
       "position_title": "Plant Pathologist (Mycology)",
-      "occupation": "434 - Plant Pathology",
+      "occupation": "0434 - Plant Pathology",
       "agency": "Department of Agriculture",
       "location": "South San Francisco, California",
       "grade": "GS-9/11",
@@ -4790,7 +4790,7 @@
     },
     {
       "position_title": "Wildland Firefighter (Aviation Manager) - Direct Hire Authority",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Whiteriver, Arizona",
       "grade": "GS-11",
@@ -4802,7 +4802,7 @@
     },
     {
       "position_title": "Wildland Firefighter (Aviation Specialist) - Direct Hire Authority",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Boise, Idaho",
       "grade": "GW-12",
@@ -4814,7 +4814,7 @@
     },
     {
       "position_title": "RESOURCES ANALYST",
-      "occupation": "501 - Financial Administration And Program",
+      "occupation": "0501 - Financial Administration And Program",
       "agency": "Department of Defense",
       "location": "Fort Lee, Virginia",
       "grade": "GS-13",
@@ -4922,7 +4922,7 @@
     },
     {
       "position_title": "Safety & Occupational Health Specialist",
-      "occupation": "18 - Safety and Occupational Health Management",
+      "occupation": "0018 - Safety and Occupational Health Management",
       "agency": "Department of the Interior",
       "location": "Fairbanks, Alaska",
       "grade": "GS-7/11",
@@ -4934,7 +4934,7 @@
     },
     {
       "position_title": "Supervisory General Engineer",
-      "occupation": "801 - General Engineering",
+      "occupation": "0801 - General Engineering",
       "agency": "Department of Commerce",
       "location": "Washington, District of Columbia",
       "grade": "GS-15",
@@ -4946,7 +4946,7 @@
     },
     {
       "position_title": "General Engineer",
-      "occupation": "801 - General Engineering",
+      "occupation": "0801 - General Engineering",
       "agency": "Department of Commerce",
       "location": "Washington, District of Columbia",
       "grade": "GS-13",
@@ -4958,7 +4958,7 @@
     },
     {
       "position_title": "General Engineer",
-      "occupation": "801 - General Engineering",
+      "occupation": "0801 - General Engineering",
       "agency": "Department of Commerce",
       "location": "Washington, District of Columbia",
       "grade": "GS-14",
@@ -5054,7 +5054,7 @@
     },
     {
       "position_title": "Physical Security Specialist",
-      "occupation": "80 - Security Administration",
+      "occupation": "0080 - Security Administration",
       "agency": "Department of the Interior",
       "location": "Boise, Idaho",
       "grade": "GS-7",
@@ -5066,7 +5066,7 @@
     },
     {
       "position_title": "Intelligence Research Specialist",
-      "occupation": "132 - Intelligence",
+      "occupation": "0132 - Intelligence",
       "agency": "Department of Homeland Security",
       "location": "Camp Springs, Maryland",
       "grade": "GS-12/13",
@@ -5078,7 +5078,7 @@
     },
     {
       "position_title": "Intelligence Research Specialist",
-      "occupation": "132 - Intelligence",
+      "occupation": "0132 - Intelligence",
       "agency": "Department of Homeland Security",
       "location": "Camp Springs, Maryland",
       "grade": "GS-14",
@@ -5090,7 +5090,7 @@
     },
     {
       "position_title": "Supervisory Management and Program Analyst",
-      "occupation": "343 - Management And Program Analysis",
+      "occupation": "0343 - Management And Program Analysis",
       "agency": "Department of Homeland Security",
       "location": "Chicago, Illinois",
       "grade": "GS-14",
@@ -5138,7 +5138,7 @@
     },
     {
       "position_title": "UNIT DEPLOYMENT MANAGER",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
       "location": "Little Rock AFB, Arkansas",
       "grade": "GS-9",
@@ -5150,7 +5150,7 @@
     },
     {
       "position_title": "Policy Analyst",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Executive Office of the President",
       "location": "District of Columbia, District of Columbia",
       "grade": "GS-13/14",
@@ -5162,7 +5162,7 @@
     },
     {
       "position_title": "Lead Management and Program Analyst",
-      "occupation": "343 - Management And Program Analysis",
+      "occupation": "0343 - Management And Program Analysis",
       "agency": "Department of Homeland Security",
       "location": "Denver, Colorado",
       "grade": "GS-14",
@@ -5174,7 +5174,7 @@
     },
     {
       "position_title": "Supervisory Logistics Management Specialist",
-      "occupation": "346 - Logistics Management",
+      "occupation": "0346 - Logistics Management",
       "agency": "Department of the Interior",
       "location": "Fairbanks, Alaska",
       "grade": "GS-11",
@@ -5186,7 +5186,7 @@
     },
     {
       "position_title": "Agriculturist (New World Screwworm Program Manager)",
-      "occupation": "401 - General Natural Resources Management And Bio",
+      "occupation": "0401 - General Natural Resources Management And Bi",
       "agency": "Department of Agriculture",
       "location": "College Station, Texas",
       "grade": "GS-15",
@@ -5198,7 +5198,7 @@
     },
     {
       "position_title": "Lead Wildland Firefighter (Engine Captain)",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Titusville, Florida",
       "grade": "GW-8",
@@ -5210,7 +5210,7 @@
     },
     {
       "position_title": "Wildland Firefighter Apprentice - Direct Hire Authority",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Whiteriver, Arizona",
       "grade": "GS-3/5",
@@ -5222,7 +5222,7 @@
     },
     {
       "position_title": "Civil Engineer",
-      "occupation": "810 - Civil Engineering",
+      "occupation": "0810 - Civil Engineering",
       "agency": "Department of the Interior",
       "location": "Salt Lake City, Utah",
       "grade": "GS-12",
@@ -5234,7 +5234,7 @@
     },
     {
       "position_title": "Civil Engineer (Hydrologic)",
-      "occupation": "810 - Civil Engineering",
+      "occupation": "0810 - Civil Engineering",
       "agency": "Department of the Interior",
       "location": "Boulder, Colorado",
       "grade": "GS-12",
@@ -5462,7 +5462,7 @@
     },
     {
       "position_title": "Park Ranger (P) - Green River District Ranger - Supervisory",
-      "occupation": "25 - Park Ranger",
+      "occupation": "0025 - Park Ranger",
       "agency": "Department of the Interior",
       "location": "Jensen, Utah",
       "grade": "GS-11",
@@ -5474,7 +5474,7 @@
     },
     {
       "position_title": "Lead Intelligence Operations Specialist",
-      "occupation": "132 - Intelligence",
+      "occupation": "0132 - Intelligence",
       "agency": "Department of Agriculture",
       "location": "Washington, District of Columbia",
       "grade": "GS-14",
@@ -5486,7 +5486,7 @@
     },
     {
       "position_title": "Supervisory Human Resources Specialist (LER) Deputy Chief",
-      "occupation": "201 - Human Resources Management",
+      "occupation": "0201 - Human Resources Management",
       "agency": "Department of Homeland Security",
       "location": "Camp Springs, Maryland",
       "grade": "GS-15",
@@ -5498,7 +5498,7 @@
     },
     {
       "position_title": "Policy Analyst",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Executive Office of the President",
       "location": "Washington, District of Columbia",
       "grade": "GS-14/15",
@@ -5510,7 +5510,7 @@
     },
     {
       "position_title": "Administrative Services Specialist",
-      "occupation": "301 - Miscellaneous Administration And Program",
+      "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of Justice",
       "location": "Shreveport, Louisiana",
       "grade": "GS-9/12",
@@ -5522,7 +5522,7 @@
     },
     {
       "position_title": "Management and Program Analyst",
-      "occupation": "343 - Management And Program Analysis",
+      "occupation": "0343 - Management And Program Analysis",
       "agency": "Department of Homeland Security",
       "location": "Camp Springs, Maryland",
       "grade": "GS-13",
@@ -5534,7 +5534,7 @@
     },
     {
       "position_title": "Management and Program Analyst (Fire Program Analyst)",
-      "occupation": "343 - Management And Program Analysis",
+      "occupation": "0343 - Management And Program Analysis",
       "agency": "Department of the Interior",
       "location": "Sacramento, California",
       "grade": "GS-7",
@@ -5546,7 +5546,7 @@
     },
     {
       "position_title": "Management and Program Analyst (Fire Program Analyst)",
-      "occupation": "343 - Management And Program Analysis",
+      "occupation": "0343 - Management And Program Analysis",
       "agency": "Department of the Interior",
       "location": "Bakersfield, California",
       "grade": "GS-9",
@@ -5558,7 +5558,7 @@
     },
     {
       "position_title": "Wildland Firefighter (Helitack Senior Firefighter)",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Billings, Montana",
       "grade": "GS-5",
@@ -5570,7 +5570,7 @@
     },
     {
       "position_title": "Wildland Firefighter (Prevention) - Direct Hire Authority",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Sacaton, Arizona",
       "grade": "GS-9",
@@ -5582,7 +5582,7 @@
     },
     {
       "position_title": "Wildland Firefighter - Direct Hire Authority",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Parker, Arizona",
       "grade": "GS-6",
@@ -5726,7 +5726,7 @@
     },
     {
       "position_title": "Program Manager",
-      "occupation": "340 - Program Management",
+      "occupation": "0340 - Program Management",
       "agency": "Department of Homeland Security",
       "location": "Camp Springs, Maryland",
       "grade": "GS-15",
@@ -5738,7 +5738,7 @@
     },
     {
       "position_title": "Wildland Firefighter - Direct Hire Authority",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Parker, Arizona",
       "grade": "GS-7",
@@ -5750,7 +5750,7 @@
     },
     {
       "position_title": "Wildland Firefighter - Direct Hire Authority",
-      "occupation": "456 - Wildland Fire Management",
+      "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
       "location": "Fort Defiance, Arizona",
       "grade": "GS-5",
@@ -5762,7 +5762,7 @@
     },
     {
       "position_title": "Teller",
-      "occupation": "530 - Cash Processing",
+      "occupation": "0530 - Cash Processing",
       "agency": "Department of Defense",
       "location": "Tinker AFB, Oklahoma",
       "grade": "GS-4",
