@@ -207,7 +207,12 @@ def scrape_questionnaire(url, output_dir, timeout_seconds=60, headless=True, ses
                 text_content = re.sub(r'<[^>]+>', ' ', text_content)
                 text_content = ' '.join(text_content.split())
                 
-                # Save text file
+                # Check if content is too small (likely an error)
+                if len(text_content) < 1000:
+                    print(f"    ⚠️  Content too small ({len(text_content)} chars) - likely an error")
+                    return None  # Return None to trigger retry
+                
+                # Save text file only if content is substantial
                 with open(txt_path, 'w', encoding='utf-8') as f:
                     f.write(text_content)
                 
@@ -359,7 +364,13 @@ def scrape_questionnaire(url, output_dir, timeout_seconds=60, headless=True, ses
                     browser.close()
                     return None
                 
-                # Save text file
+                # Check if content is too small (likely an error)
+                if len(page_text) < 1000:
+                    print(f"    ⚠️  Content too small ({len(page_text)} chars) - likely an error")
+                    browser.close()
+                    return None  # Return None to trigger retry
+                
+                # Save text file only if content is substantial
                 with open(txt_path, 'w', encoding='utf-8') as f:
                     f.write(page_text)
                 
@@ -398,44 +409,55 @@ def scrape_questionnaire_worker(args):
     with progress_lock:
         print(f"\n[{index}/{total}] {questionnaire['position_title']}")
     
-    # Use a hard timeout via threading
-    result = [None]
-    exception = [None]
+    # Try scraping with retry logic
+    max_retries = 2
+    retry_count = 0
+    questionnaire_text = None
     
-    def scrape_with_timeout():
-        try:
-            result[0] = scrape_questionnaire(
-                questionnaire['questionnaire_url'], 
-                output_dir,
-                timeout_seconds=60,  # 60 second timeout per questionnaire
-                headless=headless,
-                session_file=session_file
-            )
-        except Exception as e:
-            exception[0] = e
-    
-    thread = threading.Thread(target=scrape_with_timeout)
-    thread.daemon = True
-    thread.start()
-    thread.join(timeout=90)  # 90 second hard timeout
-    
-    if thread.is_alive():
-        print(f"    ⚠️  HARD TIMEOUT: Thread still running after 90 seconds!")
-        questionnaire['questionnaire_text'] = None
-        questionnaire['scrape_status'] = 'timeout'
-        with progress_lock:
-            failed_count += 1
-        return questionnaire, False
-    
-    if exception[0]:
-        print(f"    ❌ Thread exception: {str(exception[0])[:80]}")
-        questionnaire['questionnaire_text'] = None
-        questionnaire['scrape_status'] = 'error'
-        with progress_lock:
-            failed_count += 1
-        return questionnaire, False
-    
-    questionnaire_text = result[0]
+    while retry_count < max_retries and questionnaire_text is None:
+        if retry_count > 0:
+            print(f"    🔄 Retry attempt {retry_count}/{max_retries-1}")
+            time.sleep(2)  # Wait before retry
+        
+        # Use a hard timeout via threading
+        result = [None]
+        exception = [None]
+        
+        def scrape_with_timeout():
+            try:
+                result[0] = scrape_questionnaire(
+                    questionnaire['questionnaire_url'], 
+                    output_dir,
+                    timeout_seconds=60,  # 60 second timeout per questionnaire
+                    headless=headless,
+                    session_file=session_file
+                )
+            except Exception as e:
+                exception[0] = e
+        
+        thread = threading.Thread(target=scrape_with_timeout)
+        thread.daemon = True
+        thread.start()
+        thread.join(timeout=90)  # 90 second hard timeout
+        
+        if thread.is_alive():
+            print(f"    ⚠️  HARD TIMEOUT: Thread still running after 90 seconds!")
+            questionnaire['questionnaire_text'] = None
+            questionnaire['scrape_status'] = 'timeout'
+            with progress_lock:
+                failed_count += 1
+            return questionnaire, False
+        
+        if exception[0]:
+            print(f"    ❌ Thread exception: {str(exception[0])[:80]}")
+            questionnaire['questionnaire_text'] = None
+            questionnaire['scrape_status'] = 'error'
+            with progress_lock:
+                failed_count += 1
+            return questionnaire, False
+        
+        questionnaire_text = result[0]
+        retry_count += 1
     
     if questionnaire_text:
         questionnaire['questionnaire_text'] = questionnaire_text
@@ -864,6 +886,18 @@ def main():
     print(f"Failed: {failed_count}")
     print(f"Total scraped files: {already_scraped + scraped_count}")
     print(f"Total time: {total_time/60:.1f} minutes")
+    
+    # Save failed scrapes count for the website
+    scraping_stats = {
+        'failed_scrapes': failed_count,
+        'last_run': datetime.now().isoformat()
+    }
+    
+    with open('scraping_stats.json', 'w') as f:
+        json.dump(scraping_stats, f, indent=2)
+    
+    if failed_count > 0:
+        print(f"\n⚠️  {failed_count} questionnaires failed to scrape (saved to scraping_stats.json)")
     print(f"Average rate: {completed_count/total_time:.2f} questionnaires/second")
     
     print(f"\nRaw text files saved in: {output_dir}")

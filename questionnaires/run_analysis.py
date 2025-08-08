@@ -5,6 +5,7 @@ Run questionnaire analysis after update_all.py
 import subprocess
 import sys
 import os
+import json
 import pandas as pd
 from pathlib import Path
 
@@ -127,11 +128,19 @@ if new_count > 0 or has_untracked_questionnaires or unscraped_count > 0:
     # Create commit message
     new_files_count = len(untracked_files.splitlines()) if untracked_files else 0
     
+    # Load scraping stats if available
+    failed_scrapes = 0
+    if Path('scraping_stats.json').exists():
+        with open('scraping_stats.json', 'r') as f:
+            stats = json.load(f)
+            failed_scrapes = stats.get('failed_scrapes', 0)
+    
     if new_count > 0:
         commit_message = f"""Update questionnaires: {new_count:,} new links found, {newly_found_scraped:,} scraped
 
 - Extracted {new_count:,} new questionnaire links
 - Scraped {newly_found_scraped:,} questionnaire files  
+- Failed to scrape: {failed_scrapes} files
 - Total questionnaire links: {updated_count:,}
 - Total scraped files: {len(scraped_files):,}
 - Unique questionnaires still needed: {unscraped_count:,}
@@ -144,6 +153,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
 
 - No new questionnaire links found
 - Scraped {new_files_count} previously unscraped questionnaires
+- Failed to scrape: {failed_scrapes} files
 - Total questionnaire links: {updated_count:,}
 - Total scraped files: {len(scraped_files):,}
 - Unique questionnaires still needed: {unscraped_count:,}
@@ -155,6 +165,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         # This shouldn't happen now, but just in case
         commit_message = f"""Update questionnaires: processing unscraped files
 
+- Failed to scrape: {failed_scrapes} files
 - Total questionnaire links: {updated_count:,}
 - Total scraped files: {len(scraped_files):,}
 - Unique questionnaires still needed: {unscraped_count:,}

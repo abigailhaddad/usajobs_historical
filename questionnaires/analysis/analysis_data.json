@@ -1,8 +1,8 @@
 {
   "overview": {
     "total_scraped": 19380,
-    "total_with_eo": "850",
-    "percentage_with_eo": 4.4,
+    "total_with_eo": "863",
+    "percentage_with_eo": 4.5,
     "data_coverage": "Analyzing questionnaires from federal job postings from June 01, 2025 to August 08, 2025"
   },
   "service_analysis": [
@@ -10,8 +10,8 @@
       "Service Type": "Competitive",
       "Total Jobs": 12164,
       "Scraped Questionnaires": 11719,
-      "Jobs with Essay Question": 820,
-      "% of Scraped with Essay Question": 7.0
+      "Jobs with Essay Question": 833,
+      "% of Scraped with Essay Question": 7.1
     },
     {
       "Service Type": "Excepted",
@@ -33,8 +33,8 @@
       "Grade Level": "GS-12",
       "Total Jobs": 1604,
       "Scraped Questionnaires": 1586,
-      "Jobs with Essay Question": 38,
-      "% of Scraped with Essay Question": 2.4
+      "Jobs with Essay Question": 39,
+      "% of Scraped with Essay Question": 2.5
     },
     {
       "Grade Level": "VN-00",
@@ -61,15 +61,15 @@
       "Grade Level": "GS-9",
       "Total Jobs": 923,
       "Scraped Questionnaires": 877,
-      "Jobs with Essay Question": 29,
-      "% of Scraped with Essay Question": 3.3
+      "Jobs with Essay Question": 30,
+      "% of Scraped with Essay Question": 3.4
     },
     {
       "Grade Level": "GS-7",
       "Total Jobs": 713,
       "Scraped Questionnaires": 710,
-      "Jobs with Essay Question": 23,
-      "% of Scraped with Essay Question": 3.2
+      "Jobs with Essay Question": 24,
+      "% of Scraped with Essay Question": 3.4
     },
     {
       "Grade Level": "GS-6",
@@ -96,8 +96,8 @@
       "Grade Level": "GS-9/11",
       "Total Jobs": 578,
       "Scraped Questionnaires": 579,
-      "Jobs with Essay Question": 8,
-      "% of Scraped with Essay Question": 1.4
+      "Jobs with Essay Question": 10,
+      "% of Scraped with Essay Question": 1.7
     }
   ],
   "location_analysis": [
@@ -105,8 +105,8 @@
       "Location": "Washington, District of Columbia",
       "Total Jobs": 697,
       "Scraped Questionnaires": 741,
-      "Jobs with Essay Question": 84,
-      "% of Scraped with Essay Question": 11.3
+      "Jobs with Essay Question": 85,
+      "% of Scraped with Essay Question": 11.5
     },
     {
       "Location": "San Diego, California",
@@ -198,7 +198,7 @@
       "Agency": "Department of Defense",
       "Total Jobs": 2055,
       "Scraped Questionnaires": 2066,
-      "Jobs with Essay Question": 76,
+      "Jobs with Essay Question": 77,
       "% of Scraped with Essay Question": 3.7
     },
     {
@@ -240,15 +240,15 @@
       "Agency": "Department of the Interior",
       "Total Jobs": 390,
       "Scraped Questionnaires": 377,
-      "Jobs with Essay Question": 108,
-      "% of Scraped with Essay Question": 28.6
+      "Jobs with Essay Question": 115,
+      "% of Scraped with Essay Question": 30.5
     },
     {
       "Agency": "Department of Agriculture",
       "Total Jobs": 243,
       "Scraped Questionnaires": 214,
-      "Jobs with Essay Question": 100,
-      "% of Scraped with Essay Question": 46.7
+      "Jobs with Essay Question": 103,
+      "% of Scraped with Essay Question": 48.1
     },
     {
       "Agency": "Legislative Branch",
@@ -268,8 +268,8 @@
       "Agency": "Department of Commerce",
       "Total Jobs": 98,
       "Scraped Questionnaires": 99,
-      "Jobs with Essay Question": 41,
-      "% of Scraped with Essay Question": 41.4
+      "Jobs with Essay Question": 42,
+      "% of Scraped with Essay Question": 42.4
     },
     {
       "Agency": "Judicial Branch",
@@ -282,8 +282,8 @@
       "Agency": "Department of the Treasury",
       "Total Jobs": 36,
       "Scraped Questionnaires": 34,
-      "Jobs with Essay Question": 5,
-      "% of Scraped with Essay Question": 14.7
+      "Jobs with Essay Question": 6,
+      "% of Scraped with Essay Question": 17.6
     },
     {
       "Agency": "Department of State",
@@ -368,15 +368,15 @@
       "Occupation Series": "1101 - General Business And Industry",
       "Total Jobs": 485,
       "Scraped Questionnaires": 396,
-      "Jobs with Essay Question": 51,
-      "% of Scraped with Essay Question": 12.9
+      "Jobs with Essay Question": 52,
+      "% of Scraped with Essay Question": 13.1
     },
     {
       "Occupation Series": "0303 - Miscellaneous Clerk And Assistant",
       "Total Jobs": 449,
       "Scraped Questionnaires": 416,
-      "Jobs with Essay Question": 7,
-      "% of Scraped with Essay Question": 1.7
+      "Jobs with Essay Question": 8,
+      "% of Scraped with Essay Question": 1.9
     },
     {
       "Occupation Series": "0620 - Practical Nurse",
@@ -474,21 +474,21 @@
       "Week 2": 3.4,
       "Week 3": 4.9,
       "Week 4": 6.3,
-      "Week 5": 7.0,
+      "Week 5": 7.2,
       "Monthly Percentage": 4.8,
       "Total Jobs Posted": 12650,
-      "Jobs with Essay Question": 607
+      "Jobs with Essay Question": 610
     },
     {
       "Month": "August 2025",
-      "Week 1": 6.2,
+      "Week 1": 6.5,
       "Week 2": 1.9,
       "Week 3": null,
       "Week 4": null,
       "Week 5": null,
-      "Monthly Percentage": 6.0,
+      "Monthly Percentage": 6.3,
       "Total Jobs Posted": 3565,
-      "Jobs with Essay Question": 213
+      "Jobs with Essay Question": 223
     }
   ],
   "job_postings": [
@@ -7825,6 +7825,18 @@
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774387"
     },
     {
+      "position_title": "Seasonal Administrative Support Assistant (OA)",
+      "occupation": "0303 - Miscellaneous Clerk And Assistant",
+      "agency": "Department of the Interior",
+      "location": "Homestead, Florida",
+      "grade": "GS-7",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/14/2025",
+      "usajobs_link": 842187500,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12766385"
+    },
+    {
       "position_title": "PROGRAM ANALYST",
       "occupation": "0343 - Management And Program Analysis",
       "agency": "Department of the Air Force",
@@ -7861,6 +7873,30 @@
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12771607"
     },
     {
+      "position_title": "PPQ Officer (Pest Identification)",
+      "occupation": "0401 - General Natural Resources Management And Bi",
+      "agency": "Department of Agriculture",
+      "location": "Douglas, Arizona",
+      "grade": "GS-7/11",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/07/2025",
+      "usajobs_link": 842183300,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774960"
+    },
+    {
+      "position_title": "Entomologist (Identifier)",
+      "occupation": "0414 - Entomology",
+      "agency": "Department of Agriculture",
+      "location": "Fort Lauderdale, Florida",
+      "grade": "GS-9/11",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/07/2025",
+      "usajobs_link": 842192200,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776009"
+    },
+    {
       "position_title": "Plant Protection Technician",
       "occupation": "0421 - Plant Protection Technician",
       "agency": "Department of Agriculture",
@@ -7873,6 +7909,30 @@
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774289"
     },
     {
+      "position_title": "Plant Pathologist (Mycology)",
+      "occupation": "0434 - Plant Pathology",
+      "agency": "Department of Agriculture",
+      "location": "South San Francisco, California",
+      "grade": "GS-9/11",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/07/2025",
+      "usajobs_link": 842206500,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774907"
+    },
+    {
+      "position_title": "Wildland Firefighter - Direct Hire Authority",
+      "occupation": "0456 - Wildland Fire Management",
+      "agency": "Department of the Interior",
+      "location": "Whiteriver, Arizona",
+      "grade": "GS-6/7",
+      "service": "Competitive",
+      "open_date": "07/31/2025",
+      "close_date": "08/22/2025",
+      "usajobs_link": 842150700,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776093"
+    },
+    {
       "position_title": "Supervisory Wildland Firefighter (Assistant Superintendent)(IHC)(Vet Crew)",
       "occupation": "0456 - Wildland Fire Management",
       "agency": "Department of the Interior",
@@ -7883,6 +7943,18 @@
       "close_date": "12/31/2025",
       "usajobs_link": 842163700,
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12771923"
+    },
+    {
+      "position_title": "Lead Wildland Firefighter (Assistant Fire Helicopter Crew Manager) - Direct Hire Authority",
+      "occupation": "0456 - Wildland Fire Management",
+      "agency": "Department of the Interior",
+      "location": "Whiteriver, Arizona",
+      "grade": "GS-8",
+      "service": "Competitive",
+      "open_date": "07/31/2025",
+      "close_date": "08/22/2025",
+      "usajobs_link": 842206600,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774261"
     },
     {
       "position_title": "Wildland Firefighter - Direct Hire Authority",
@@ -8109,6 +8181,18 @@
       "service": "Competitive",
       "open_date": "07/31/2025",
       "close_date": "08/14/2025",
+      "usajobs_link": 842215800,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12765834"
+    },
+    {
+      "position_title": "Financial Analyst",
+      "occupation": "1160 - Financial Analysis",
+      "agency": "Department of the Treasury",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-15",
+      "service": "Competitive",
+      "open_date": "07/31/2025",
+      "close_date": "08/14/2025",
       "usajobs_link": 842216000,
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12766804"
     },
@@ -8293,6 +8377,18 @@
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12705384"
     },
     {
+      "position_title": "Supervisory Park Ranger (Protection)",
+      "occupation": "0025 - Park Ranger",
+      "agency": "Department of the Interior",
+      "location": "Chinle, Arizona",
+      "grade": "GS-12",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/15/2025",
+      "usajobs_link": 842300500,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12741638"
+    },
+    {
       "position_title": "WING REFUELING DOCUMENT CONTROL OFFICER",
       "occupation": "0301 - Miscellaneous Administration And Program",
       "agency": "Department of the Air Force",
@@ -8375,6 +8471,30 @@
       "close_date": "08/25/2025",
       "usajobs_link": 842255700,
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774347"
+    },
+    {
+      "position_title": "Wildland Firefighter (Fuels Management) - Direct Hire Authority",
+      "occupation": "0456 - Wildland Fire Management",
+      "agency": "Department of the Interior",
+      "location": "Whiteriver, Arizona",
+      "grade": "GS-9",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/18/2025",
+      "usajobs_link": 842257400,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776209"
+    },
+    {
+      "position_title": "Supervisory Wildland Firefighter (Assistant Fire Management Officer)",
+      "occupation": "0456 - Wildland Fire Management",
+      "agency": "Department of the Interior",
+      "location": "Saint George, Utah",
+      "grade": "GW-12",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/18/2025",
+      "usajobs_link": 842262500,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12772650"
     },
     {
       "position_title": "Wildland Firefighter (Aviation Specialist) - Direct Hire Authority",
@@ -8485,6 +8605,18 @@
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12774565"
     },
     {
+      "position_title": "COMPUTER ASSISTED ORDERING TECHNICIAN",
+      "occupation": "1101 - General Business And Industry",
+      "agency": "Department of Defense",
+      "location": "Virginia Beach, Virginia",
+      "grade": "GS-5",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/11/2025",
+      "usajobs_link": 842270900,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776793"
+    },
+    {
       "position_title": "Supervisory Patent Examiner - TC2100",
       "occupation": "1224 - Patent Examining",
       "agency": "Department of Commerce",
@@ -8495,6 +8627,18 @@
       "close_date": "08/15/2025",
       "usajobs_link": 842282900,
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776383"
+    },
+    {
+      "position_title": "Supervisory Patent Examiner - TC2400",
+      "occupation": "1224 - Patent Examining",
+      "agency": "Department of Commerce",
+      "location": "Alexandria, Virginia",
+      "grade": "GS-15",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/15/2025",
+      "usajobs_link": 842283000,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776559"
     },
     {
       "position_title": "Supervisory Patent Examiner - TC2600",
@@ -8531,6 +8675,18 @@
       "close_date": "08/07/2025",
       "usajobs_link": 842231900,
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12773541"
+    },
+    {
+      "position_title": "National Aviation Program Manager (Air Tanker Program Manager) - Direct Hiring Authority",
+      "occupation": "2101 - Transportation Specialist",
+      "agency": "Department of the Interior",
+      "location": "Boise, Idaho",
+      "grade": "GW-12/13",
+      "service": "Competitive",
+      "open_date": "08/01/2025",
+      "close_date": "08/14/2025",
+      "usajobs_link": 842258200,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12772320"
     },
     {
       "position_title": "Supervisory Transportation Specialist - DIRECT HIRE",

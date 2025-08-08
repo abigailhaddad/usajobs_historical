@@ -1,28 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>USA Staffing</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <link href="/Content/CSS/css?v=_igTKCWX1MIDqUHfmT5oYUrWStKW4MEWx9yIsVdqUHY1" rel="stylesheet"/>
+
+        
+        <script src="/knockout?v=REqX-Kxtu21R2-NiZ4XRnffNDxH5oiVgYb2a0ccrfO41"></script>
+<script src="/js?v=KC20xqF9Q86gnLQ8QswWutmUZNPsVxSSErWGfX4WTX81"></script>
+<script src="/bundles/modernizr?v=Bx1GATe2J9wj39LH3TwJuiNA5w3JpFwYQYSIRmVDAXU1"></script>
+        
+        <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
+    <script src="~/Content/Scripts/lib/misc/html5shiv.js"></script>
+<![endif]-->
+        <link rel="shortcut icon" href="/Content/Images/favicon.ico">
+		<script language="javascript" type="text/javascript">
+           if (top.location != self.location) {
+               top.location = self.location;
+           } else if (parent && parent.frames && parent.frames.length > 0) {
+               top.location = self.location;
+           }
+		</script>
+    </head>
+    <body>
+
+        <div class="container">
+            <link href="/Content/CSS/PageStyles/Application/Apply.css" rel="stylesheet"/>
 
 
 
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+        </div>
+
+        <div class="navbar-collapse collapse">
+            
+        </div>
+    </div>
+</div>
 
 
+<div>
+    
+    <div class="container header-container">
+        <div class="row spacer-15">
+            <div class="col-md-4 col-md-offset-1">
+                <img class="img-responsive" src="https://media.usajobs.gov/agencylogos/CM56.gif" alt="Patent and Trademark Office Logo" />
+            </div>
+            <div class="col-md-6">
+                <div>
+                    <dl id="HeaderAppInfo" class="dl-horizontal">
+                        <dt>Position Title</dt>
+                        <dd>Supervisory Patent Examiner - TC2400</dd>
+                        <dt>Agency</dt>
+                        <dd>Patent and Trademark Office</dd>
+                        <dt>Announcement Number</dt>
+                        <dd><span><a href="https://www.usajobs.gov/GetJob/ViewDetails/842283000" target="_blank" rel="noopener" title="View Announcement PATS-2400-25-12776559-MP">PATS-2400-25-12776559-MP <span class="sr-only">Opens in new window</span></a></span></dd>
+                        <dt>Open Period</dt>
+                        <dd>Friday, August 1, 2025 to Friday, August 15, 2025</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="questionsContainer" class="container main-container">
+        
+        <div class="row">
+            <div class="col-lg-offset-1 col-lg-10">
+                <div class="alert alert-info spacer-15 text-center">
+                    For preview purposes only. To apply, please return to the USAJOBS announcement and click the <strong>Apply</strong> button.
+                </div>
+            </div>
+        </div>
+        <div class="row push-down-75">
+            <div id="AnnouncementSections">
+                <div data-bind="template: { name: 'AnnouncementTemplate', foreach: AnnouncementSections }" />
+            </div>
+
+            <div id="AssessmentSections">
+                <div data-bind="template: { name: 'AssessmentTemplate', foreach: AssessmentSections }" />
+            </div>
+        </div>
+    </div>
+</div>
 
 
+<script id="AnnouncementTemplate" type="text/html">
+    <div class="spacer-15">
+        <div class="col-md-10 col-md-offset-1">
+            <span class="font-18" data-bind="text: SectionName"></span>
+        </div>
+    </div>
 
-We are not able to display the page requested at this time.
+    <div class="col-md-12">
+        <div>
+            <div data-bind="template: { name: 'QuestionTemplate', foreach: Questions, as: 'question' }" />
+        </div>
+    </div>
+
+</script>
+
+<script id="AssessmentTemplate" type="text/html">
+    <div class="spacer-15">
+        <div class="col-md-10 col-md-offset-1">
+            <span class="font-18" data-bind="text: SectionName"></span>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div>
+            <div data-bind="template: { name: 'QuestionTemplate', foreach: Questions, as: 'question' }" />
+        </div>
+    </div>
+
+</script>
+
+<script id="QuestionTemplate" type="text/html">
+    <div class="col-md-10 col-md-offset-1 row push-down-25">
+        <div class="push-down-5">
+            <span class="question-DisplayIndentifier" data-bind="visible: QuestionDisplayIdentifier() !== null">
+                <span data-bind="text: QuestionDisplayIdentifier"></span>.
+            </span>
+            <span data-bind="textDecode: QuestionText, visible: DisplayName() !== 'DisplayOnly'"></span>
+            <span data-bind="visible: CharacterLimit () !== null && CharacterLimit () !== 0 && DisplayName() !== 'DisplayOnly'">
+                (limit <span data-bind="text: CharacterLimitFormatted"></span> characters)
+            </span>
+        </div>
+        <div>
+            <div class="qAnswers" data-bind="template: { name: DisplayName, data: question }"></div>
+        </div>
+    </div>
+</script>
+
+<script id="RadioList" type="text/html">
+    <div data-bind="foreach: question.Answers">
+        <div class="radio">
+            <label>
+                <input type="radio" data-bind="radioCheck: Selected, value: Key, attr: { name: QuestionID, 'aria-labelledby': 'text' + QuestionID() + ResponseID() }, checked: question.AnswerString()" />
+                <span data-bind="visible: ResponseDisplayIdentifier() !== null">
+                    <span data-bind="text: ResponseDisplayIdentifier"></span>.
+                </span>
+                <span data-bind="text: Text, css:{'response-Text': ResponseDisplayIdentifier() !== null}, attr: { id: 'text' + QuestionID() + ResponseID() }"></span>
+            </label>
+        </div>
+    </div>
+</script>
+
+<script id="TextBox" type="text/html">
+    <div class="col-md-12">
+        <input type="text" class="form-control" data-bind="value: question.AnswerString" />
+    </div>
+</script>
+
+<script id="TextBoxCalendar" type="text/html">
+    <div class="input-group col-md-3">
+        <input type="text" class="form-control" data-bind="dateValue: question.AnswerString, datepicker: question.AnswerString" />
+        <span class="input-group-addon"><i class="fa"><svg height="14" viewBox="0 0 448 512" width="14"><path d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z" fill="currentColor"></path></svg></i></span>
+    </div>
+</script>
+
+<script id="TextBoxYearModeCalendar" type="text/html">
+    <div class="input-group col-md-3">
+        <input type="text" class="form-control" data-bind="dateValue: question.AnswerString, datepicker: question.AnswerString, datepickerOptions: { viewMode: 'years' }" />
+        <span class="input-group-addon"><i class="fa"><svg height="14" viewBox="0 0 448 512" width="14"><path d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z" fill="currentColor"></path></svg></i></span>
+    </div>
+</script>
+
+<script id="TextArea" type="text/html">
+    <div class="col-md-12">
+        <textarea rows="5" style="resize:none;" class="form-control" data-bind="value: question.AnswerString"></textarea>
+    </div>
+</script>
+
+<script id="CheckBoxList" type="text/html">
+    <div data-bind="foreach: question.Answers">
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" data-bind="checked: Selected, attr: { 'aria-labelledby': 'text' + QuestionID() + ResponseID() }" />
+                <span data-bind="visible: ResponseDisplayIdentifier() !== null">
+                    <span data-bind="text: ResponseDisplayIdentifier"></span>.
+                </span>
+                <span class="response-Text" data-bind="text: Text, css:{'response-Text': ResponseDisplayIdentifier() !== null}, attr: { id: 'text' + QuestionID() + ResponseID() }"></span>
+            </label>
+        </div>
+    </div>
+</script>
 
 
-Please try refreshing the page. If you continue to receive the error, please provide your
-Agency's USA Staffing Office Administrator with the steps taken before the message was
-received as well as the Reference # identified below.
-
-Thank you for your patience.
-
-
-Reference ID: 21.0c2b3417.1754127955.3b59de72
-Client IP: 64.236.131.243
-Time: Sat, 02-Aug-2025 9:45:55 GMT
-URL: apply.usastaffing.gov%2fViewQuestionnaire%2f12776559
-User-Agent: Mozilla/5.0 (X11, Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/139.0.7258.5 Safari/537.36
-
+<script id="MultipleDropDown" type="text/html">
+    <div class="col-md-12">
+        <select class="form-control" multiple="multiple" data-bind='select2jsOptions: { minimumResultsForSearch: -1},
+                                     options: question.Answers(),
+                                     optionsText: "Text",
+                                     optionsValue: "Key",
+                                     selectedOptions: (typeof question.AnswerString() === "string") ? question.AnswerString() .split(";") : question.AnswerString(),
+                                     select2jsMultiple: question.AnswerString,
+                                     uniquename: true, attr:{id: "dd" + QuestionID()}'></select>
+    </div>
+</script>
 
 
+<script id="DropDown" type="text/html">
+    <div class="col-md-12">
+        <select class="form-control" data-bind='select2jsOptions: { minimumResultsForSearch: -1 },
+                                     options: question.Answers(),
+                                     optionsText: "Text",
+                                     optionsValue: "Key",
+                                     optionsCaption: "--Select--",
+                                     select2js: question.AnswerString,
+                                     uniquename: true'></select>
+    </div>
+</script>
+
+<script id="DropDownSmall" type="text/html">
+    <div class="col-md-3">
+        <select class="form-control" data-bind='select2jsOptions: { minimumResultsForSearch: -1 },
+                                     options: question.Answers(),
+                                     optionsText: "Text",
+                                     optionsValue: "Key",
+                                     optionsCaption: "--Select--",
+                                     select2js: question.AnswerString,
+                                     uniquename: true'></select>
+    </div>
+</script>
+
+<script id="DisplayOnly" type="text/html">
+    <span data-bind="text: QuestionItemTypeName"></span>:
+    <span data-bind="text: question.AnswerString()"></span>
+</script>
+
+<script id="Label" type="text/html">
+    
+</script>
+
+<script type="text/javascript">
+    var Model = { "model" : {"AgencyBannerURL":"https://media.usajobs.gov/agencylogos/CM56.gif","PositionTitle":"Supervisory Patent Examiner - TC2400","AgencyName":"Patent and Trademark Office","AnnouncementNumber":"PATS-2400-25-12776559-MP","OpenPeriod":"Friday, August 1, 2025 to Friday, August 15, 2025","JOBSAnnouncementURL":"https://www.usajobs.gov/GetJob/ViewDetails/842283000","NavigationMenu":null,"AnnouncementSections":[{"SectionID":11254035,"SectionName":"Eligibilities","ResponseLocked":false,"SortOrder":2,"Questions":[{"MinDate":"01/01/1900","QuestionID":97535855,"CAUItemID":3138832,"QuestionTitle":"Career Transition Assistance Plan (CTAP)","QuestionText":"Are you a current or former federal employee displaced from the agency hiring for this position? If yes, confirm:\n<ul>\n\t<li>you are located in the same local commuting area of the vacancy; AND,</li>\n\t<li>you are applying to a position that is at or below the grade level of the position from which you were or will be separated; AND,</li>\n\t<li>you are applying to a position that does not have greater promotion potential than the position from which you were or will be separated; AND,</li>\n\t<li>your last performance rating of record is at least fully successful or the equivalent. For more information, review the<a href=\"http://www.usajobs.gov/Help/working-in-government/unique-hiring-paths/federal-employees/ctap/\"> USAJOBS Help Center.</a></li>\n</ul>\n<br />\n<strong>To verify your eligibility, you must </strong>submit supporting documentation such as a Reduction in Force (RIF) separation notice or a Proposed Removal/Separation notice to include your latest performance rating (if the notice does not have this information included, you must submit a copy of your most recent performance appraisal) and a copy of your latest Notification of Personnel Action, Standard Form 50.","DisplayName":"RadioList","Answers":[{"ResponseID":13,"QuestionID":97535855,"Key":"Yes","Text":"Yes","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":14,"QuestionID":97535855,"Key":"No","Text":"No","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"}],"AnswerString":"","QuestionDisplayIdentifier":"1","QuestionItemTypeID":10,"QuestionItemTypeName":"Yes No","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":1,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Eligibilities"},{"MinDate":"01/01/1900","QuestionID":97535856,"CAUItemID":3138833,"QuestionTitle":"Current PTO Employee (PTO Employee)","QuestionText":"Are you a current U.S. Patent and Trademark Office employee in the competitive service?<br />\n<br />\nIf eligible, submit a copy of your Notification of Personnel Action, Standard Form 50 or equivalent personnel action form reflecting your permanent, competitive status. Your Notification of Personnel Action, Standard Form 50 (or equivalent personnel action form) must reflect career or career-conditional (Block #24 Tenure 1 or 2) and Your Notification of Personnel Action, Standard Form 50 (or equivalent personnel action form) must reflect your status was in the competitive service (Position Occupied is 1). <br />\n<br />\n<strong>Please note: Examples of appropriate SF-50s include promotions, with-in grade/range increases. While a General Adjustment and/or Award SF-50 may be your most recent SF-50 it typically DOES NOT show proof of Time in Grade. </strong>Thus, you may have to submit more than one SF-50 as proof of Time in Grade.","DisplayName":"RadioList","Answers":[{"ResponseID":13,"QuestionID":97535856,"Key":"Yes","Text":"Yes","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":14,"QuestionID":97535856,"Key":"No","Text":"No","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"}],"AnswerString":"","QuestionDisplayIdentifier":"2","QuestionItemTypeID":10,"QuestionItemTypeName":"Yes No","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":15,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Eligibilities"},{"MinDate":"01/01/1900","QuestionID":97535857,"CAUItemID":3138834,"QuestionTitle":"USPTO - Non-Competitive Current Employee (IMP - Non-Comp.)","QuestionText":"Are you a current USPTO employee who holds or has previously held a career or career-conditional position in the competitive service at the same or higher grade level with the same or higher promotion potential as the position being announced?<br />\n<br />\nIf eligible, submit a copy of your separation Notification of Personnel Action, Standard Form 50 or equivalent personnel action form reflecting your permanent, competitive status.\n<ul>\n\t<li>Your separation Notification of Personnel Action, Standard Form 50 (or equivalent personnel action form) must reflect career or career-conditional (Block #24 Tenure 1 or 2) AND</li>\n\t<li>Your separation Notification of Personnel Action, Standard Form 50 (or equivalent personnel action form) must reflect your status was in the competitive service (Block #34 Position Occupied is 1).</li>\n</ul>","DisplayName":"RadioList","Answers":[{"ResponseID":13,"QuestionID":97535857,"Key":"Yes","Text":"Yes","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":14,"QuestionID":97535857,"Key":"No","Text":"No","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"}],"AnswerString":"","QuestionDisplayIdentifier":"3","QuestionItemTypeID":10,"QuestionItemTypeName":"Yes No","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":15,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Eligibilities"}],"AnnouncementHeader":null,"ApplicationID":0,"NavigationMenu":null,"OpenAnnouncement":false,"RemovedAnnouncement":false,"SpecialAccess":null},{"SectionID":11254036,"SectionName":"Preferences","ResponseLocked":false,"SortOrder":3,"Questions":[{"MinDate":"01/01/1900","QuestionID":97535858,"CAUItemID":3138835,"QuestionTitle":"USPTO Job Opportunity","QuestionText":"How did you hear about this USPTO job opportunity? (No Choice Limit)","DisplayName":"CheckBoxList","Answers":[{"ResponseID":177667530,"QuestionID":97535858,"Key":"25401157","Text":"Email","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667531,"QuestionID":97535858,"Key":"25401155","Text":"Facebook","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"},{"ResponseID":177667532,"QuestionID":97535858,"Key":"25401169","Text":"Instagram","SortOrder":2,"Selected":false,"ResponseDisplayIdentifier":"C"},{"ResponseID":177667533,"QuestionID":97535858,"Key":"25401170","Text":"LinkedIn","SortOrder":3,"Selected":false,"ResponseDisplayIdentifier":"D"},{"ResponseID":177667534,"QuestionID":97535858,"Key":"25401180","Text":"@USPTOJobs \"X\" (Twitter)","SortOrder":4,"Selected":false,"ResponseDisplayIdentifier":"E"},{"ResponseID":177667535,"QuestionID":97535858,"Key":"25401171","Text":"Reddit","SortOrder":5,"Selected":false,"ResponseDisplayIdentifier":"F"},{"ResponseID":177667536,"QuestionID":97535858,"Key":"25401172","Text":"Google Reviews","SortOrder":6,"Selected":false,"ResponseDisplayIdentifier":"G"},{"ResponseID":177667537,"QuestionID":97535858,"Key":"25401167","Text":"Handshake University Platform","SortOrder":7,"Selected":false,"ResponseDisplayIdentifier":"H"},{"ResponseID":177667538,"QuestionID":97535858,"Key":"25401173","Text":"Monster","SortOrder":8,"Selected":false,"ResponseDisplayIdentifier":"I"},{"ResponseID":177667539,"QuestionID":97535858,"Key":"25401174","Text":"Indeed","SortOrder":9,"Selected":false,"ResponseDisplayIdentifier":"J"},{"ResponseID":177667540,"QuestionID":97535858,"Key":"25401175","Text":"Glassdoor","SortOrder":10,"Selected":false,"ResponseDisplayIdentifier":"K"},{"ResponseID":177667541,"QuestionID":97535858,"Key":"25401160","Text":"USAJOBS","SortOrder":11,"Selected":false,"ResponseDisplayIdentifier":"L"},{"ResponseID":177667542,"QuestionID":97535858,"Key":"25401168","Text":"University Job Board","SortOrder":12,"Selected":false,"ResponseDisplayIdentifier":"M"},{"ResponseID":177667543,"QuestionID":97535858,"Key":"25401176","Text":"Online Blog / Bulletin Board","SortOrder":13,"Selected":false,"ResponseDisplayIdentifier":"N"},{"ResponseID":177667544,"QuestionID":97535858,"Key":"25401177","Text":"Friend","SortOrder":14,"Selected":false,"ResponseDisplayIdentifier":"O"},{"ResponseID":177667545,"QuestionID":97535858,"Key":"25401161","Text":"USPTO Employee","SortOrder":15,"Selected":false,"ResponseDisplayIdentifier":"P"},{"ResponseID":177667546,"QuestionID":97535858,"Key":"25401178","Text":"Professional Society / Organization","SortOrder":16,"Selected":false,"ResponseDisplayIdentifier":"Q"},{"ResponseID":177667547,"QuestionID":97535858,"Key":"25401164","Text":"State Bar Association","SortOrder":17,"Selected":false,"ResponseDisplayIdentifier":"R"},{"ResponseID":177667548,"QuestionID":97535858,"Key":"25401158","Text":"University Career Fair","SortOrder":18,"Selected":false,"ResponseDisplayIdentifier":"S"},{"ResponseID":177667549,"QuestionID":97535858,"Key":"25401179","Text":"Conference","SortOrder":19,"Selected":false,"ResponseDisplayIdentifier":"T"},{"ResponseID":177667550,"QuestionID":97535858,"Key":"25401159","Text":"University Career Placement Office","SortOrder":20,"Selected":false,"ResponseDisplayIdentifier":"U"},{"ResponseID":177667551,"QuestionID":97535858,"Key":"25401163","Text":"Virtual Job Fair","SortOrder":21,"Selected":false,"ResponseDisplayIdentifier":"V"},{"ResponseID":177667552,"QuestionID":97535858,"Key":"25401156","Text":"USPTO Information Session","SortOrder":22,"Selected":false,"ResponseDisplayIdentifier":"W"},{"ResponseID":177667553,"QuestionID":97535858,"Key":"25401165","Text":"USPTO Jobs web pages","SortOrder":23,"Selected":false,"ResponseDisplayIdentifier":"X"},{"ResponseID":177667554,"QuestionID":97535858,"Key":"25401162","Text":"USPTO website","SortOrder":24,"Selected":false,"ResponseDisplayIdentifier":"Y"},{"ResponseID":177667555,"QuestionID":97535858,"Key":"25401166","Text":"Other","SortOrder":25,"Selected":false,"ResponseDisplayIdentifier":"Z"}],"AnswerString":"","QuestionDisplayIdentifier":"1","QuestionItemTypeID":3,"QuestionItemTypeName":"Multiple Choice - Multiple Select","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Custom"},{"MinDate":"01/01/1900","QuestionID":97535859,"CAUItemID":3138840,"QuestionTitle":"Political Appointment","QuestionText":"Have you held a political appointment within the previous five-year period?","DisplayName":"RadioList","Answers":[{"ResponseID":177667556,"QuestionID":97535859,"Key":"Yes","Text":"Yes","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667557,"QuestionID":97535859,"Key":"No","Text":"No","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"}],"AnswerString":"","QuestionDisplayIdentifier":"2","QuestionItemTypeID":10,"QuestionItemTypeName":"Yes No","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Custom"},{"MinDate":"01/01/1900","QuestionID":97535860,"CAUItemID":3138836,"QuestionTitle":"Department of Commerce Bureau","QuestionText":"If you are a current or former Federal civilian employee, by what agency/office or Department of Commerce bureau are you employed?","DisplayName":"DropDown","Answers":[{"ResponseID":177667558,"QuestionID":97535860,"Key":"25401181","Text":"I am not a current Federal civilian employee","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667559,"QuestionID":97535860,"Key":"25401182","Text":"Other agency/office not in the Department of Commerce","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"},{"ResponseID":177667560,"QuestionID":97535860,"Key":"25401183","Text":"Department of Commerce, Bureau of Economic Analysis (BEA)","SortOrder":2,"Selected":false,"ResponseDisplayIdentifier":"C"},{"ResponseID":177667561,"QuestionID":97535860,"Key":"25401184","Text":"Department of Commerce, Bureau of Industry and Security (BIS)","SortOrder":3,"Selected":false,"ResponseDisplayIdentifier":"D"},{"ResponseID":177667562,"QuestionID":97535860,"Key":"25401185","Text":"Department of Commerce, Bureau of the Census (CENSUS)","SortOrder":4,"Selected":false,"ResponseDisplayIdentifier":"E"},{"ResponseID":177667563,"QuestionID":97535860,"Key":"25401186","Text":"Department of Commerce, Economic Development Administration (EDA)","SortOrder":5,"Selected":false,"ResponseDisplayIdentifier":"F"},{"ResponseID":177667564,"QuestionID":97535860,"Key":"25401187","Text":"Department of Commerce, Economic and Statistics Administration (ESA)","SortOrder":6,"Selected":false,"ResponseDisplayIdentifier":"G"},{"ResponseID":177667565,"QuestionID":97535860,"Key":"25401188","Text":"Department of Commerce, International Trade Administration (ITA)","SortOrder":7,"Selected":false,"ResponseDisplayIdentifier":"H"},{"ResponseID":177667566,"QuestionID":97535860,"Key":"25401189","Text":"Department of Commerce, Minority Business Development Agency (MBDA)","SortOrder":8,"Selected":false,"ResponseDisplayIdentifier":"I"},{"ResponseID":177667567,"QuestionID":97535860,"Key":"25401190","Text":"Department of Commerce, National Institute of Standards and Technology (NIST)","SortOrder":9,"Selected":false,"ResponseDisplayIdentifier":"J"},{"ResponseID":177667568,"QuestionID":97535860,"Key":"25401191","Text":"Department of Commerce, National Oceanic and Atmospheric Administration (NOAA)","SortOrder":10,"Selected":false,"ResponseDisplayIdentifier":"K"},{"ResponseID":177667569,"QuestionID":97535860,"Key":"25401192","Text":"Department of Commerce, National Telecommunications and Information Administration (NTIA)","SortOrder":11,"Selected":false,"ResponseDisplayIdentifier":"L"},{"ResponseID":177667570,"QuestionID":97535860,"Key":"25401193","Text":"Department of Commerce, National Technical Information Service (NTIS)","SortOrder":12,"Selected":false,"ResponseDisplayIdentifier":"M"},{"ResponseID":177667571,"QuestionID":97535860,"Key":"25401194","Text":"Department of Commerce, Office of the Secretary (OS)","SortOrder":13,"Selected":false,"ResponseDisplayIdentifier":"N"},{"ResponseID":177667572,"QuestionID":97535860,"Key":"25401195","Text":"Department of Commerce, U.S. Patent and Trademark Office (USPTO)","SortOrder":14,"Selected":false,"ResponseDisplayIdentifier":"O"},{"ResponseID":177667573,"QuestionID":97535860,"Key":"25401196","Text":"Department of Commerce, Office of the Inspector General","SortOrder":15,"Selected":false,"ResponseDisplayIdentifier":"P"},{"ResponseID":177667574,"QuestionID":97535860,"Key":"25401197","Text":"Other","SortOrder":16,"Selected":false,"ResponseDisplayIdentifier":"Q"}],"AnswerString":"","QuestionDisplayIdentifier":"3","QuestionItemTypeID":2,"QuestionItemTypeName":"Multiple Choice - Single Select","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Custom"},{"MinDate":"01/01/1900","QuestionID":97535861,"CAUItemID":3138841,"QuestionTitle":"\"Other\" than Department of Commerce","QuestionText":"If you answered \"Other\" to the above question, please enter the agency and organization.","DisplayName":"TextBox","Answers":[],"AnswerString":"","QuestionDisplayIdentifier":"4","QuestionItemTypeID":4,"QuestionItemTypeName":"Short Answer Textbox","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Custom"}],"AnnouncementHeader":null,"ApplicationID":0,"NavigationMenu":null,"OpenAnnouncement":false,"RemovedAnnouncement":false,"SpecialAccess":null},{"SectionID":11254038,"SectionName":"Merit Hiring Plan Short Essay Questions","ResponseLocked":false,"SortOrder":4,"Questions":[{"MinDate":"01/01/1900","QuestionID":97535875,"CAUItemID":3138860,"QuestionTitle":"Merit Hiring Plan Instructions","QuestionText":"The following four narrative questions provide an opportunity for you to highlight your dedication to public service for the hiring manager and agency leadership (or designee(s)). While your responses are not required and will not be scored, we encourage you to thoughtfully address each question. Please provide a response of 200 words or less to each question. You will be asked to certify that you are using your own words and did not use a consultant or artificial intelligence (AI) such as a large language model (LLM) like ChatGPT or Copilot.","DisplayName":"Label","Answers":[],"AnswerString":"","QuestionDisplayIdentifier":null,"QuestionItemTypeID":1,"QuestionItemTypeName":"Instructions","IsRequired":false,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Custom"},{"MinDate":"01/01/1900","QuestionID":97535876,"CAUItemID":3138859,"QuestionTitle":"Merit Hiring Plan Essay Question Number 1","QuestionText":"How has your commitment to the Constitution and the founding principles of the United States inspired you to pursue this role within the Federal government? Provide a concrete example from professional, academic, or personal experience.","DisplayName":"TextBox","Answers":[],"AnswerString":"","QuestionDisplayIdentifier":"1","QuestionItemTypeID":4,"QuestionItemTypeName":"Short Answer Textbox","IsRequired":false,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":1200,"CharacterLimitFormatted":"1,200","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Custom"},{"MinDate":"01/01/1900","QuestionID":97535877,"CAUItemID":3138858,"QuestionTitle":"Merit Hiring Plan Essay Question Number 2","QuestionText":"In this role, how would you use your skills and experience to improve government efficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes.","DisplayName":"TextBox","Answers":[],"AnswerString":"","QuestionDisplayIdentifier":"2","QuestionItemTypeID":4,"QuestionItemTypeName":"Short Answer Textbox","IsRequired":false,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":1200,"CharacterLimitFormatted":"1,200","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Custom"},{"MinDate":"01/01/1900","QuestionID":97535878,"CAUItemID":3138857,"QuestionTitle":"Merit Hiring Plan Essay Question Number 3","QuestionText":"How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hired.","DisplayName":"TextBox","Answers":[],"AnswerString":"","QuestionDisplayIdentifier":"3","QuestionItemTypeID":4,"QuestionItemTypeName":"Short Answer Textbox","IsRequired":false,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":1200,"CharacterLimitFormatted":"1,200","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Custom"},{"MinDate":"01/01/1900","QuestionID":97535879,"CAUItemID":3138856,"QuestionTitle":"Merit Hiring Plan Essay Question Number 4","QuestionText":"How has a strong work ethic contributed to your professional, academic or personal achievements? Provide one or two specific examples, and explain how those qualities would enable you to serve effectively in this position.","DisplayName":"TextBox","Answers":[],"AnswerString":"","QuestionDisplayIdentifier":"4","QuestionItemTypeID":4,"QuestionItemTypeName":"Short Answer Textbox","IsRequired":false,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":1200,"CharacterLimitFormatted":"1,200","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Custom"},{"MinDate":"01/01/1900","QuestionID":97535880,"CAUItemID":3138855,"QuestionTitle":"Merit Hiring Plan Certification Statement for Essay Questions","QuestionText":"I certify that the above responses are in my own words and I did not use a consultant or Artificial Intelligence (such as a large language model (LLM)).","DisplayName":"RadioList","Answers":[{"ResponseID":177667575,"QuestionID":97535880,"Key":"Yes","Text":"Yes","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667576,"QuestionID":97535880,"Key":"No","Text":"No","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"}],"AnswerString":"","QuestionDisplayIdentifier":"5","QuestionItemTypeID":10,"QuestionItemTypeName":"Yes No","IsRequired":false,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Custom"}],"AnnouncementHeader":null,"ApplicationID":0,"NavigationMenu":null,"OpenAnnouncement":false,"RemovedAnnouncement":false,"SpecialAccess":null}],"AssessmentSections":[{"SectionID":11254039,"SectionName":"Assessment 1","ResponseLocked":false,"SortOrder":1,"Questions":[{"MinDate":"01/01/1900","QuestionID":97535881,"CAUItemID":3138829,"QuestionTitle":null,"QuestionText":"WARNING STATEMENT: Do not overstate or understate your level of experience and demonstrated capability. You should be aware that your ratings are subject to evaluation and verification based on the resume, and other relevant documents you submit, as well as through verification of references as appropriate. Deliberate attempts to falsify information may be grounds for disqualifying you or for dismissing you from the position following acceptance. The following questions will be used to determine your minimum qualifications for this position.","DisplayName":"Label","Answers":[],"AnswerString":"","QuestionDisplayIdentifier":null,"QuestionItemTypeID":1,"QuestionItemTypeName":"Instructions","IsRequired":false,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Biographic"},{"MinDate":"01/01/1900","QuestionID":97535882,"CAUItemID":0,"QuestionTitle":"Yes/No (Default)","QuestionText":"Select “Yes” or “No” to the following question(s).","DisplayName":"Label","Answers":[],"AnswerString":"","QuestionDisplayIdentifier":null,"QuestionItemTypeID":1,"QuestionItemTypeName":"Instructions","IsRequired":false,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":null},{"MinDate":"01/01/1900","QuestionID":97535883,"CAUItemID":3138830,"QuestionTitle":null,"QuestionText":"Specialized experience is defined as having experience searching and/or examining patent applications involving one or more of the following art areas: biotechnology, biomedical, pharmaceutical, materials engineering, mechanical, business methods, electrical, computer, physics or chemical technologies. To be creditable, specialized experience must have been equivalent to at least the next lower grade level in the Federal Service. For this position, the next lower grade level is a GS-14.<br><br>Do you have at least one year of specialized experience at the GS-14 grade level or the equivalent pay band in the Federal service?<br>","DisplayName":"RadioList","Answers":[{"ResponseID":177667577,"QuestionID":97535883,"Key":"11","Text":"Yes","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667578,"QuestionID":97535883,"Key":"12","Text":"No","SortOrder":2,"Selected":false,"ResponseDisplayIdentifier":"B"}],"AnswerString":"","QuestionDisplayIdentifier":"1","QuestionItemTypeID":2,"QuestionItemTypeName":"Multiple Choice - Single Select","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Biographic"},{"MinDate":"01/01/1900","QuestionID":97535884,"CAUItemID":3138831,"QuestionTitle":null,"QuestionText":"Do you have full signatory authority?<br>","DisplayName":"RadioList","Answers":[{"ResponseID":177667579,"QuestionID":97535884,"Key":"11","Text":"Yes","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667580,"QuestionID":97535884,"Key":"12","Text":"No","SortOrder":2,"Selected":false,"ResponseDisplayIdentifier":"B"}],"AnswerString":"","QuestionDisplayIdentifier":"2","QuestionItemTypeID":2,"QuestionItemTypeName":"Multiple Choice - Single Select","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Biographic"},{"MinDate":"01/01/1900","QuestionID":97535885,"CAUItemID":3138821,"QuestionTitle":null,"QuestionText":"Please select the response that best describes your supervisory/managerial experience.<br>","DisplayName":"RadioList","Answers":[{"ResponseID":177667581,"QuestionID":97535885,"Key":"25401100","Text":"Managed subordinate staff and built support for goals and projects from people who do not report to me and over whom I have no authority. Work with high-level program officials in setting overall goals and objectives for assigned staff. Adjust staffing levels or work procedures to accomodate changes to Agency goals or strategic initiatives.","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667582,"QuestionID":97535885,"Key":"25401101","Text":"Supervised a subordinate staff. Utilized technical data, suggestions, statistics, and performed other administrative functions. Decide the methodologies for achieving goals and objectives for assigned staff.","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"},{"ResponseID":177667583,"QuestionID":97535885,"Key":"25401102","Text":"Assisted in the development of production-oriented staff through formalized training programs, approval of work product and mentoring on established practices and procedures.","SortOrder":2,"Selected":false,"ResponseDisplayIdentifier":"C"},{"ResponseID":177667584,"QuestionID":97535885,"Key":"25401103","Text":"Relied upon by superiors to review and approve the work product of others and/or to provide technical guidance.","SortOrder":3,"Selected":false,"ResponseDisplayIdentifier":"D"},{"ResponseID":177667585,"QuestionID":97535885,"Key":"25401104","Text":"None of the above.","SortOrder":4,"Selected":false,"ResponseDisplayIdentifier":"E"}],"AnswerString":"","QuestionDisplayIdentifier":"3","QuestionItemTypeID":2,"QuestionItemTypeName":"Multiple Choice - Single Select","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Biographic"},{"MinDate":"01/01/1900","QuestionID":97535886,"CAUItemID":3138822,"QuestionTitle":null,"QuestionText":"Please select the response that best describes your knowledge and experience in the training and development of a team through work accomplishments.<br>","DisplayName":"RadioList","Answers":[{"ResponseID":177667586,"QuestionID":97535886,"Key":"25401105","Text":"Responsible for the training and development of team members with a focus to ensure a quality work product, providing problem solving methods and techniques and advice on work methods/practices/procedures. Provide guidance or input for performance reviews of team members, including suggesting room for improvement.","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667587,"QuestionID":97535886,"Key":"25401106","Text":"Conducted formalized training on work methods/practices/procedures. Communicate work assignments, problems, program issues to team with appropriate deadlines and time frames for completion.","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"},{"ResponseID":177667588,"QuestionID":97535886,"Key":"25401107","Text":"Provide guidance to team in accomplishment of work task(s), identifying, distributing and balancing workload.","SortOrder":2,"Selected":false,"ResponseDisplayIdentifier":"C"},{"ResponseID":177667589,"QuestionID":97535886,"Key":"25401108","Text":"Monitored and reported on the status and progress of the work product of team members.","SortOrder":3,"Selected":false,"ResponseDisplayIdentifier":"D"},{"ResponseID":177667590,"QuestionID":97535886,"Key":"25401109","Text":"None of the above.","SortOrder":4,"Selected":false,"ResponseDisplayIdentifier":"E"}],"AnswerString":"","QuestionDisplayIdentifier":"4","QuestionItemTypeID":2,"QuestionItemTypeName":"Multiple Choice - Single Select","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Biographic"},{"MinDate":"01/01/1900","QuestionID":97535887,"CAUItemID":3138823,"QuestionTitle":null,"QuestionText":"Please select the responses that describe your experience training, developing, motivating, and evaluating staff.<br>","DisplayName":"CheckBoxList","Answers":[{"ResponseID":177667591,"QuestionID":97535887,"Key":"25401110","Text":"Coordinate the work of others in a supervisory setting.","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667592,"QuestionID":97535887,"Key":"25401111","Text":"Deal with interpersonal issues.","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"},{"ResponseID":177667593,"QuestionID":97535887,"Key":"25401112","Text":"Set priorities.","SortOrder":2,"Selected":false,"ResponseDisplayIdentifier":"C"},{"ResponseID":177667594,"QuestionID":97535887,"Key":"25401113","Text":"Review the work of others.","SortOrder":3,"Selected":false,"ResponseDisplayIdentifier":"D"},{"ResponseID":177667595,"QuestionID":97535887,"Key":"25401114","Text":"Motivate staff to achieve organizational goals and objectives.","SortOrder":4,"Selected":false,"ResponseDisplayIdentifier":"E"},{"ResponseID":177667596,"QuestionID":97535887,"Key":"25401115","Text":"Develop measures that evaluate performance.","SortOrder":5,"Selected":false,"ResponseDisplayIdentifier":"F"},{"ResponseID":177667597,"QuestionID":97535887,"Key":"25401116","Text":"Foster teamwork.","SortOrder":6,"Selected":false,"ResponseDisplayIdentifier":"G"},{"ResponseID":177667598,"QuestionID":97535887,"Key":"25401117","Text":"Ascertain that staff is well-trained.","SortOrder":7,"Selected":false,"ResponseDisplayIdentifier":"H"},{"ResponseID":177667599,"QuestionID":97535887,"Key":"25401118","Text":"Knowledge of current regulations and procedures.","SortOrder":8,"Selected":false,"ResponseDisplayIdentifier":"I"},{"ResponseID":177667600,"QuestionID":97535887,"Key":"25401119","Text":"Develop standard operation procedures.","SortOrder":9,"Selected":false,"ResponseDisplayIdentifier":"J"},{"ResponseID":177667601,"QuestionID":97535887,"Key":"25401120","Text":"Facilitate group training techniques.","SortOrder":10,"Selected":false,"ResponseDisplayIdentifier":"K"},{"ResponseID":177667602,"QuestionID":97535887,"Key":"25401121","Text":"Make recommendations and proposals concerning overall plans and proposals that impact human capital.","SortOrder":11,"Selected":false,"ResponseDisplayIdentifier":"L"},{"ResponseID":177667603,"QuestionID":97535887,"Key":"25401122","Text":"Streamline policies and procedures.","SortOrder":12,"Selected":false,"ResponseDisplayIdentifier":"M"},{"ResponseID":177667604,"QuestionID":97535887,"Key":"25401123","Text":"Assign work.","SortOrder":13,"Selected":false,"ResponseDisplayIdentifier":"N"},{"ResponseID":177667605,"QuestionID":97535887,"Key":"25401124","Text":"Effectively manage numerous competing projects and responsibilities.","SortOrder":14,"Selected":false,"ResponseDisplayIdentifier":"O"},{"ResponseID":177667606,"QuestionID":97535887,"Key":"25401125","Text":"Establish and abolish positions.","SortOrder":15,"Selected":false,"ResponseDisplayIdentifier":"P"},{"ResponseID":177667607,"QuestionID":97535887,"Key":"25401126","Text":"Improve the performance of others through constructive feedback and identify room for improvement.","SortOrder":16,"Selected":false,"ResponseDisplayIdentifier":"Q"},{"ResponseID":177667608,"QuestionID":97535887,"Key":"25401127","Text":"Guide others in overcoming challenges with and/or adapting to change.","SortOrder":17,"Selected":false,"ResponseDisplayIdentifier":"R"},{"ResponseID":177667609,"QuestionID":97535887,"Key":"25401128","Text":"Identify and implement methods to boost morale.","SortOrder":18,"Selected":false,"ResponseDisplayIdentifier":"S"},{"ResponseID":177667610,"QuestionID":97535887,"Key":"25401129","Text":"None of the above.","SortOrder":19,"Selected":false,"ResponseDisplayIdentifier":"T"}],"AnswerString":"","QuestionDisplayIdentifier":"5","QuestionItemTypeID":3,"QuestionItemTypeName":"Multiple Choice - Multiple Select","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Biographic"},{"MinDate":"01/01/1900","QuestionID":97535888,"CAUItemID":3138824,"QuestionTitle":null,"QuestionText":"Select the statement that best describes your experience with scientific and technical matters associated with the patent process in one of the following art areas: Surface Transportation, Static Structures, Supports, Aeronautics Weaponry, Nuclear Systems, Material and Article Handling, Computerized Vehicle Controls and Navigation, Radio/Optical/Acoustic Wave Communications, Robotics, Physics, Construction, Agriculture, Petroleum, Wells and Earth Boring, Electronic Commerce (Business Methods), or general mechanical or electrical technologies.<br>\n<br>\n.","DisplayName":"RadioList","Answers":[{"ResponseID":177667611,"QuestionID":97535888,"Key":"25401130","Text":"I have not had education, training or experience in performing this task.","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667612,"QuestionID":97535888,"Key":"25401131","Text":"I have had education or training in performing this task, but have not yet performed this task on the job.","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"},{"ResponseID":177667613,"QuestionID":97535888,"Key":"25401132","Text":"I have provided guidance and advice on scientific or technical issues related to patent/technology matters on the job with close supervision\nfrom a supervisor or senior employee.","SortOrder":2,"Selected":false,"ResponseDisplayIdentifier":"C"},{"ResponseID":177667614,"QuestionID":97535888,"Key":"25401133","Text":"I have provided guidance and advice on scientific or technical issues related to patent/technology matters as a regular part of the job,\nindependently and usually without review by a supervisor or senior employee.","SortOrder":3,"Selected":false,"ResponseDisplayIdentifier":"D"},{"ResponseID":177667615,"QuestionID":97535888,"Key":"25401134","Text":"I have supervised performance of this task and/or I have trained others in providing guidance and advice on scientific or technical issues\nrelated to patent/technology matters and/or am normally consulted as an expert for assistance in performing this task.","SortOrder":4,"Selected":false,"ResponseDisplayIdentifier":"E"}],"AnswerString":"","QuestionDisplayIdentifier":"6","QuestionItemTypeID":2,"QuestionItemTypeName":"Multiple Choice - Single Select","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Biographic"},{"MinDate":"01/01/1900","QuestionID":97535889,"CAUItemID":3138825,"QuestionTitle":null,"QuestionText":"Select the statement that best describes your experience with legal matters associated with the patent process, which includes demonstrated competence in examination practice and procedure or comparable experience in the patent field.<br>","DisplayName":"RadioList","Answers":[{"ResponseID":177667616,"QuestionID":97535889,"Key":"25401135","Text":"I have not had education, training or experience in performing this task.","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667617,"QuestionID":97535889,"Key":"25401136","Text":"I have had education or training in performing this task but have not yet performed this task on the job.","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"},{"ResponseID":177667618,"QuestionID":97535889,"Key":"25401137","Text":"I have provided guidance and advice on the patent process in the designated area with close supervision from a supervisor or senior employee.","SortOrder":2,"Selected":false,"ResponseDisplayIdentifier":"C"},{"ResponseID":177667619,"QuestionID":97535889,"Key":"25401138","Text":"I have provided guidance and advice on the patent process in the designated area independently and usually without review by a supervisor or senior employee.","SortOrder":3,"Selected":false,"ResponseDisplayIdentifier":"D"},{"ResponseID":177667620,"QuestionID":97535889,"Key":"25401139","Text":"I have supervised or acted on behalf of my supervisor in the performance of this task including training others in the patent process in the designated area and/or am normally consulted as an expert for assistance in performing this task.","SortOrder":4,"Selected":false,"ResponseDisplayIdentifier":"E"}],"AnswerString":"","QuestionDisplayIdentifier":"7","QuestionItemTypeID":2,"QuestionItemTypeName":"Multiple Choice - Single Select","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Biographic"},{"MinDate":"01/01/1900","QuestionID":97535890,"CAUItemID":3138826,"QuestionTitle":null,"QuestionText":"Select the statement that best describes your experience with making authoritative interpretations of legal precedents.<br>","DisplayName":"RadioList","Answers":[{"ResponseID":177667621,"QuestionID":97535890,"Key":"25401140","Text":"I have not had education, training or experience in performing this task.","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667622,"QuestionID":97535890,"Key":"25401141","Text":"I have had education or training in performing this task but have not yet performed this task on the job.","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"},{"ResponseID":177667623,"QuestionID":97535890,"Key":"25401142","Text":"I have provided guidance and advice on making authoritative interpretations of legal precedents with close supervision from a supervisor or senior employee.","SortOrder":2,"Selected":false,"ResponseDisplayIdentifier":"C"},{"ResponseID":177667624,"QuestionID":97535890,"Key":"25401143","Text":"I have provided guidance and advice on making authoritative interpretations of legal precedents and usually without review by a supervisor or senior employee.","SortOrder":3,"Selected":false,"ResponseDisplayIdentifier":"D"},{"ResponseID":177667625,"QuestionID":97535890,"Key":"25401144","Text":"I have supervised performance of this task and/or I have trained others in making authoritative interpretations of legal precedents and/or am normally consulted as an expert for assistance in performing this task.","SortOrder":4,"Selected":false,"ResponseDisplayIdentifier":"E"}],"AnswerString":"","QuestionDisplayIdentifier":"8","QuestionItemTypeID":2,"QuestionItemTypeName":"Multiple Choice - Single Select","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Biographic"},{"MinDate":"01/01/1900","QuestionID":97535891,"CAUItemID":3138827,"QuestionTitle":null,"QuestionText":"Please select the response that best describes your experience and/or ability to communicate with various levels of employees and management in order to obtain and provide information.","DisplayName":"RadioList","Answers":[{"ResponseID":177667626,"QuestionID":97535891,"Key":"25401145","Text":"I have applied communication skills to conduct work activities with internal and external customers as well as co-workers and superiors. I have responded to inquiries regarding non-technical or routine matters.","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667627,"QuestionID":97535891,"Key":"25401146","Text":"I have made informative and persuasive communications in a business setting on specialized but not complex issues.","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"},{"ResponseID":177667628,"QuestionID":97535891,"Key":"25401147","Text":"I have typically maintained effective ongoing contacts and working relationships with personnel at various levels throughout the organization as well as external contacts.","SortOrder":2,"Selected":false,"ResponseDisplayIdentifier":"C"},{"ResponseID":177667629,"QuestionID":97535891,"Key":"25401148","Text":"I have discussed and explained technical material that was often controversial or sensitive. I have acted as the main liaison with other departments or organizations.","SortOrder":3,"Selected":false,"ResponseDisplayIdentifier":"D"},{"ResponseID":177667630,"QuestionID":97535891,"Key":"25401149","Text":"None of the above.","SortOrder":4,"Selected":false,"ResponseDisplayIdentifier":"E"}],"AnswerString":"","QuestionDisplayIdentifier":"9","QuestionItemTypeID":2,"QuestionItemTypeName":"Multiple Choice - Single Select","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Biographic"},{"MinDate":"01/01/1900","QuestionID":97535892,"CAUItemID":3138828,"QuestionTitle":null,"QuestionText":"Please select the response that best describes your ability to communicate effectively in writing.<br>","DisplayName":"RadioList","Answers":[{"ResponseID":177667631,"QuestionID":97535892,"Key":"25401150","Text":"Working independently, I have produced written communications within a work area requiring original composition of a detailed nature. Written material consisted primarily of generating reports, providing comprehensive communications on procedures or regulations as well as communicating basic concepts.","SortOrder":0,"Selected":false,"ResponseDisplayIdentifier":"A"},{"ResponseID":177667632,"QuestionID":97535892,"Key":"25401151","Text":"I have produced written communications within a work area requiring some original composition of a routine nature. Written material consists of small or routine reports, responses to inquiries, as well as communicating basic ideas, procedures or regulations.","SortOrder":1,"Selected":false,"ResponseDisplayIdentifier":"B"},{"ResponseID":177667633,"QuestionID":97535892,"Key":"25401152","Text":"I have demonstrated experience in writing communications, reports or documents that provide instructions, request information and/or set out factual data and was normally disseminated outside the work area assigned.","SortOrder":2,"Selected":false,"ResponseDisplayIdentifier":"C"},{"ResponseID":177667634,"QuestionID":97535892,"Key":"25401153","Text":"I have experience in copying information from one document to another, preparing correspondence from model letters and paragraphs, and format letters or other documents.","SortOrder":3,"Selected":false,"ResponseDisplayIdentifier":"D"},{"ResponseID":177667635,"QuestionID":97535892,"Key":"25401154","Text":"None of the above.","SortOrder":4,"Selected":false,"ResponseDisplayIdentifier":"E"}],"AnswerString":"","QuestionDisplayIdentifier":"10","QuestionItemTypeID":2,"QuestionItemTypeName":"Multiple Choice - Single Select","IsRequired":true,"IsEncrypted":false,"MaxNoResponses":0,"CharacterLimit":null,"CharacterLimitFormatted":"","EligibilityTypeID":null,"ValueVerifiedWithUSAJOBS":null,"IsVerifiedWithUSAJOBS":null,"QuestionGroupTypeName":"Biographic"}],"AnnouncementHeader":null,"ApplicationID":0,"NavigationMenu":null,"OpenAnnouncement":false,"RemovedAnnouncement":false,"SpecialAccess":null}]} };
+    var ReadOnlyViewModel = function (data) {
+        var self = this;
+        self.AnnouncementSections = ko.observableArray([]);
+        self.AssessmentSections = ko.observableArray([]);
+
+        ko.mapping.fromJS(data, {}, self);
+
+        self.SortSections = function () {
+            self.AnnouncementSections.sort(function (l, r) { return l.SortOrder() === r.SortOrder() ? 0 : l.SortOrder() < r.SortOrder() ? -1 : 1; });
+            self.AssessmentSections.sort(function (l, r) { return l.SortOrder() === r.SortOrder() ? 0 : l.SortOrder() < r.SortOrder() ? -1 : 1; });
+        }
+
+        self.init = function () {
+            self.SortSections();
+        }
+        self.init();
+
+    }
+    $(document).ready(function () {
+        var viewModel = new ReadOnlyViewModel(Model.model)
+        ko.applyBindings(viewModel, document.getElementById('questionsContainer'));
+        $("input:not(:button):not(:hidden)").prop('disabled', true);
+        $("textarea").prop('disabled', true);
+    });
+
+    function dateFixup(a) {
+        var format = "MM/DD/YYYY";
+        var d = new Date(a);
+        var m = dayjs(a, format, true)
+        if (m.isValid()) {
+            return m.format(format);
+        } else {
+            return a;
+        }
+    }
+
+    ko.bindingHandlers.radioCheck = {
+        init: function (element, valueAccessor) {
+            ////attach event to handle changes
+            $(element).change(function (e) {
+                var binder = ko.contextFor(element).$parent.AnswerString;
+                binder(this.value);
+            });
+        }
+    };
+
+    ko.bindingHandlers.textDecode = {
+        init: function (element, valueAccessor) {
+            var value = valueAccessor();
+            var valueUW = ko.unwrap(value);
+            $(element).html(valueUW);
+        }
+    };
+
+    ko.bindingHandlers.dateValue = {
+        init: function (element, valueAccessor, allBindingsAccessor) {
+            var value = valueAccessor();
+            var valueUW = ko.unwrap(value);
+            if (valueUW != '') {
+                $(element).val(dateFixup(valueUW));
+            }
+        }
+    },
+
+    ko.bindingHandlers.datepicker = {
+        init: function (element, valueAccessor, allBindingsAccessor) {
+            //initialize datepicker with some optional options
+            var options = allBindingsAccessor().datepickerOptions || {};
+            $(element).datepicker(options).on("changeDate", function (ev) {
+                var observable = valueAccessor();
+                if (ev.date != '') {
+                    observable(dateFixup(ev.date));
+                }
+                else {
+                    observable(ev.date);
+                }
+            }).on("change", function (ev) {
+                var binder = ko.contextFor(element).$parent.AnswerString;
+                binder(this.value);
+            }).parent().find('span i.fa-calendar').on('click', function () {
+                $(element).datepicker('show');
+            });
+
+        }
+    };
+
+    ko.bindingHandlers.select2js = {
+        init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+            //initialize select2 with any options passed in
+            var value = ko.unwrap(valueAccessor());
+            $(element).val(value);
+
+            var options = allBindings.get('select2jsOptions') || {};
+            $(element).select2(options);
+
+            $(element).on('change', function () {
+                var wrapped = valueAccessor();
+                wrapped($(element).val());
+            });
+
+            //Clean up if for some reason we remove select2 binding
+            ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+                $(element).select2('destroy');
+            });
+        },
+        update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+            //unwrap and touch the value binding to force a dependency
+            var value = ko.unwrap(valueAccessor());
+            $(element).select2("val", value);
+        },
+        after: ['options', 'select2jsOptions']
+    };
+</script>
+        </div>
+
+        <div class="container foot-container text-center">
+    <div class="row">
+        <div class="col-md-2 ">
+            <ul class="nav nav-pills">
+                <li>
+                    <a href="#" class="footer-link" title="Terms and Conditions" id="linkTerms">
+                        <i class="fa">
+                            <svg height="16" viewBox="0 0 512 512" width="16"><title>Terms and Conditions</title><path d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" fill="currentColor"></path></svg>
+                        </i>
+                        Terms of Use
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-2">
+            <ul class="nav nav-pills">
+                <li>
+                    <a class="footer-link" href="//www.opm.gov/information-management/freedom-of-information-act/" target="_blank" title="Freedom of Information" rel="noopener">
+                        <i class="fa">
+                            <svg height="16" viewBox="0 0 448 512" width="16"><title>Freedom of Information (Opens in New Window)</title><path d="M400 224h-24v-72C376 68.2 307.8 0 224 0S72 68.2 72 152v72H48c-26.5 0-48 21.5-48 48v192c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V272c0-26.5-21.5-48-48-48zm-104 0H152v-72c0-39.7 32.3-72 72-72s72 32.3 72 72v72z" fill="currentColor"></path></svg>
+                        </i>
+                        FOIA
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-2">
+            <ul class="nav nav-pills">
+                <li>
+                    <script type="text/html" id="privacy-cookie">
+                        
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12  ">
+
+        <div class="modal-scroll">
+            <h4>Privacy Policy</h4>
+            <p>
+                Thank you for visiting the USA Staffing web site and reviewing our privacy policy. We collect no personal information about you when you visit our Web site unless you choose to provide that information to us. Also, we are committed to maintaining the privacy of your personal information and the security of our computer system. With respect to the collection, use and disclosure of personal information, USA Staffing makes every effort to ensure compliance with applicable Federal law, including but not limited to, the Privacy Act of 1974, the Paperwork Reduction Act of 1995, and the Freedom of Information Act.
+            </p>
+
+            <h4>Information Collected and Stored Automatically</h4>
+            <p>
+                If you do nothing during your visit but browse through the Web site, read pages, or download information, the Web reporting software collects and stores the following information about your visit automatically. This information does not identify you personally.
+                <ul>
+                    <li>The IP address from which you access our Web site (an IP address is a number that is automatically assigned to your computer whenever you are surfing the Web);</li>
+                    <li>The type of browser and operating system used to access our site;</li>
+                    <li>The date and time you access our site;</li>
+                    <li>The pages you visit; and</li>
+                    <li>The Internet address of the Web site from which you linked directly to USA Staffing.</li>
+                </ul>
+            </p>
+            <h4>Providing Personal Information</h4>
+            <p>
+                If you provide us with personally identifiable information (name, email address, Social Security Number, Username, your Password or other unique identifier) this information is used only in connection with USA Staffing and for such purposes as are described at the point of collection. We only share the information you give us with another government agency if your transaction relates to that agency, or as otherwise required by law. Information is collected for statistical purposes, and for history reports required to document the transactions you complete through USA Staffing. Also, USA Staffing sometimes performs analyses of user behavior in order to measure customer interest in the various areas of our site. We will disclose this information to third parties only in aggregate form. We do not collect information for commercial marketing.
+            </p>
+
+            <h4>Cookies</h4>
+            <p>
+                "Cookies" are small bits of text which are either used for the duration of a session ("session cookies"), or saved on a user's hard drive in order to identify that user, or information about that user, the next time the user logs on to a website ("persistent cookies"). The Office of Personnel Management and its program sites may use Tier 1, Tier 2, and Tier 3 cookies as defined in the <a href="https://obamawhitehouse.archives.gov/sites/default/files/omb/assets/memoranda_2010/m10-22.pdf" rel="noopener noreferrer" target="_blank">Office of Management and Budget memorandum</a>.
+            </p>
+            <p>  USA Staffing utilizes web measurement technology in order to improve our website and provide a better user experience for our customers. The Office of Management and Budget classifies this as a Tier 2 usage, since we are utilizing a multi-session web measurement technology that does not collect any personally identifiable information (PII). This technology anonymously tracks how visitors interact with opm.gov, including where they came from, what they did on the site, and whether they completed any pre-determined tasks while on the site.</p>
+            <p> This technology is provided by Google Analytics and the information collected is used to optimize our website; helping us determine top tasks, improve our user interface and diversify our content offerings to meet the needs of our customers. No personally identifiable information is collected, so the anonymity of the end user is protected. The measurement data that is collected is only retained for as long as is needed for proper analysis and optimization of the website and is accessible only to employees whose position necessitates it.</p>
+            <p> Since disabling this web measurement technology requires modifying individual browser settings it is enabled by default. If you wish to opt-out of this technology, you can find step-by-step instructions for changing your settings at <a href="http://www.usa.gov/optout_instructions.shtml" rel="noopener noreferrer" target="_blank">http://www.usa.gov/optout_instructions.shtml</a>.</p>
+            <p>  Google also provides a browser plug-in that will allow you to opt-out of all Google Analytics measurements, which you can find at <a href="http://tools.google.com/dlpage/gaoptout" rel="noopener noreferrer" target="_blank"> http://tools.google.com/dlpage/gaoptout </a>. Please note that opting-out in no way affects your access to content within opm.gov or how you see the site.</p>
+            <p>
+                OPM may make very limited use of some Tier 3 persistent cookies to allow cross session and website authentication. OPM will make notice of the use of such technologies on the application or websites employing them and inform the user to opt-in to allow the Tier 3 cookie to be set before engaging USA Staffing. USA Staffing does make use of persistent cookies from USAJOBS to determine if you are already authenticated with USAJOBS when you access the site.
+            </p>      
+            <h4>Site Security</h4>
+            <p>
+                You must enter personally identifiable information (Username and Password) to access USA Staffing. For added security, the system does not display your Username and Password when signing on the system. We ensure that our Web site remains available to all users by employing software programs and hardware devices to monitor network traffic. This aids in identifying unauthorized attempts to upload or change information, or otherwise cause damage.
+            </p>
+            <h4>Links to Other Sites</h4>
+            <p>
+                Our Web site has links to other Federal agency Web sites. We also link to other organizations’ Web sites when we have a good business reason to do so. This does not constitute an endorsement of their privacy act policies or products. Once you link to another site, you are subject to the privacy policy of the new site. In addition, you will not be able to return to USA Staffing without re-entering your personally identifiable information.
+            </p>
+        </div> 
+    </div>
+</div>
+                    </script>
+                    <a class="footer-link" href="#" title="Privacy and Cookies" onclick="javascript:ShowPrivacyCookieModal()"><span class="glyphicon glyphicon-lock"></span> Privacy & Cookies</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-2">
+            <ul class="nav nav-pills">
+                <li>
+                    <a href="//www.usajobs.gov" class="footer-link" target="_blank" title="USAJOBS.gov" rel="noopener">
+                        <i class="fa usajobs" style="font-size: 30px; width:30px; height:30px;">
+                            <svg height="30" viewBox="0 0 892 1024" width="30"><title>USAJOBS.gov (Opens in New Window)</title><path d="M87.637 209.846h57.046v146.017q0 15.732 6.884 26.914t16.708 15.902 19.651 7.19 16.708 2.411l6.884-0.058t22.662-3.389q40.588-10.469 41.197-42.158 0.379-19.488 0.379-57.801t-0.189-66.883l-0.189-28.571h56.619q3.398 115.028 0 160.492-0.741 9.923-3.483 19.091t-7.838 17.783-12.266 15.936-17.168 13.41-22.119 10.36-27.541 6.626-33.039 2.358q-29.044 0-52.799-8.574t-38.196-22.423-22.174-30.165-7.733-32.918zM536.757 224.743q-35.846-17.886-80.032-22.138-49.569-4.46-73.647 21.711-19.493 21.188-20.008 41.292 0 1.238-0.138 5.259t-0.041 6.254 0.47 6.469 1.545 7.781 3.027 8.188 5.067 9.694 7.528 10.421q6.109 7.855 31.136 20.233t42.511 18.081q48.661 15.393 32.358 41.292-0.868 1.474-2.936 3.622t-11.441 5.385-22.236 2.485q-44.353-3.038-80.032-26.394l-1.278 48.105q1.352 0.882 3.918 2.357t11.259 5.31 18.228 6.857 24.438 5.719 30.276 3.175q23.783 0.599 45.679-8.818t32.652-22.26q12.247-14.049 13.409-38.634t-14.687-45.654q-2.605-2.915-6.165-5.879t-7.379-5.56-8.45-5.268-8.925-4.871-9.286-4.506-9.050-4.038-8.7-3.603-7.757-3.062-6.697-2.558-5.070-1.953q-36.61-15.254-36.61-28.522 0-31.347 51.084-25.117 17.409 2.065 40.060 10.771t25.925 13.070zM721.51 209.846h-68.964l-96.633 242.227h56.619l18.306-48.105h116.217l22.563 48.105h61.729zM647.013 360.546l39.591-99.19 39.591 99.19h-79.183zM280.908 491.661q-2.75 0.053-7.483 0.403t-18.397 3.109-26.089 7.357-27.602 14.501-26.089 23.1-18.397 34.592-7.483 47.629q0 79.66 83.452 110.219 25.881 9.474 48.089 11.106 3.097 0.058 8.429-0.103t20.718-2.308 29.384-6.136 31.085-13.012 29.384-21.411 20.718-32.856 8.429-45.924q-0.086-27.016-8.305-48.807t-21.288-35.013-28.858-22.937-31.557-14.020-28.806-6.726-21.184-2.59zM285.165 693.873q-2.976 0.116-7.911-0.137t-17.561-3.856-22.271-10.373-17.561-22.144-7.911-36.712q0-16.594 4.038-29.928t10.495-21.386 14.266-13.928 15.619-8.435 14.266-3.971 10.495-1.471l4.038-0.060q1.058-0.123 2.907-0.251t7.512 0.024 11.164 0.931 12.977 3.027 13.897 5.71 12.977 9.585 11.164 14.050 7.512 19.7 2.907 25.985q0 18.070-4.578 31.898t-11.899 21.486-16.175 12.714-17.707 6.502-16.175 1.873-11.899-0.2zM60.394 488.682h56.194v274.155q-2.157 40.902-16.176 58.746-0.435 0.624-1.262 1.695t-3.671 4.168-5.996 5.911-8.147 6.253-10.22 5.911-12.116 4.168-13.93 1.695h-31.504v-48.958q25.99 0.404 37.036-10.64 10.64-10.64 10.64-31.077zM606.573 607.453q4.672-1.676 11.622-5.126t18.76-16.425 12.193-28.681q0.583-24.132-19.112-41.529t-38.356-18.921h-127.712v241.8h141.334q25.813 0 43.771-21.811t17.958-46.727q-0.325-23.726-18.609-43.153t-41.841-19.427zM519.301 535.084q31.533-2.124 46.828 0 11.262 1.565 18.405 9.555t7.137 18.116q0 12.299-6.066 20.493t-12.134 10.241l-6.066 2.045h-48.105v-60.451zM581.030 699.405h-61.729v-65.986h58.32q16.832 0 25.871 11.231t9.037 25.379q-0.189 11.92-8.065 19.264t-15.657 8.726zM866.253 512.947q-4.015-2.003-11.17-5.089t-28.171-9.121-40.69-7.927q-50-4.455-74.072 21.711-19.493 21.188-20.008 41.292 0 0.607-0.135 6.132t0.002 7.637 1.058 7.838 2.71 9.884 5.302 10.415 8.514 12.583q2.559 3.287 9.18 7.759t15.004 8.881 17.625 8.713 17.555 7.655 14.286 5.308q48.661 15.393 32.358 41.292-0.313 0.536-1.002 1.413t-3.572 3.063-6.616 3.763-10.523 2.654-14.897 0.598q-22.939-1.571-42.554-8.135t-37.479-18.258q-0.568-0.379-0.884 11.647t-0.354 24.242l-0.036 12.216q1.352 0.882 3.918 2.357t11.259 5.31 18.228 6.857 24.438 5.719 30.276 3.175q23.783 0.599 45.679-8.818t32.652-22.26q12.247-14.049 13.409-38.634t-14.687-45.654q-3.673-4.111-9.002-8.221t-11.901-7.829-12.49-6.784-13.503-6.266-12.022-5.011-10.963-4.284-7.595-2.9q-36.61-15.254-36.61-28.522 0-31.347 51.084-25.117 17.409 2.065 40.060 10.771t25.925 13.070z" fill="currentColor"></path></svg>
+                        </i>
+                        USAJOBS.gov
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-2">
+            <ul class="nav nav-pills">
+                <li>
+                    <a href="//www.opm.gov" class="footer-link" target="_blank" title="US Office of Personnel Management" rel="noopener">
+                        <i class="fa">
+                            <svg height="16" viewBox="0 0 1024 1024" width="16"><title>US Office of Personnel Management (Opens in New Window)</title><path d="M439.286 86.227q119.546 0 220.501 58.915t159.87 159.87 58.915 220.501-58.915 220.501-159.87 159.87-220.501 58.915-220.501-58.915-159.87-159.87-58.915-220.501 58.915-220.501 159.87-159.87 220.501-58.915zM596.011 384.232q-1.144 0.572-5.434 5.434t-7.722 5.434q1.144 0 2.574-2.86t2.86-6.292 2.002-4.004q3.432-4.004 12.583-8.579 8.008-3.432 29.743-6.864 19.448-4.575 29.171 6.292-1.144-1.144 5.434-7.436t8.294-6.864q1.716-1.144 8.579-2.574t8.579-4.29l1.144-12.583q-6.864 0.572-10.010-4.004t-3.718-12.012q0 1.144-3.432 4.575 0-4.004-2.574-4.575t-6.577 0.572-5.148 0.572q-5.72-1.716-8.579-4.29t-4.575-9.438-2.288-8.579q-1.144-2.86-5.434-6.006t-5.434-6.006q-0.572-1.144-1.43-3.146t-1.716-3.718-2.288-3.146-3.146-1.43-4.004 2.86-4.29 5.72-2.574 2.86q-1.716-1.144-3.432-0.858t-2.574 0.572-2.574 1.716-2.86 2.002q-1.716 1.144-4.862 1.716t-4.862 1.144q8.579-2.86-0.572-6.292-5.72-2.288-9.152-1.716 5.148-2.288 4.29-6.864t-4.862-8.008h2.86q-0.572-2.288-4.862-4.862t-10.010-4.862-7.436-3.432q-4.575-2.86-19.448-5.434t-18.875-0.286q-2.86 3.432-2.574 6.006t2.288 8.008 2.002 7.15q0.572 3.432-3.146 7.436t-3.718 6.864q0 4.004 8.008 8.866t5.72 12.298q-1.716 4.575-9.152 9.152t-9.152 6.864q-2.86 4.575-0.858 10.581t6.006 9.438q1.144 1.144 0.858 2.288t-2.002 2.574-3.146 2.288-3.718 2.002l-1.716 1.144q-6.292 2.86-11.725-3.432t-7.722-14.872q-4.004-14.3-9.152-17.16-13.156-4.575-16.587 0.572-2.86-7.436-23.452-14.872-14.3-5.148-33.175-2.288 3.432-0.572 0-8.579-4.004-8.579-10.868-6.864 1.716-3.432 2.288-10.010t0.572-7.722q1.716-7.436 6.864-13.156 0.572-0.572 4.004-4.862t5.434-7.722 0.286-3.432q20.020 2.288 28.599-6.292 2.86-2.86 6.577-9.723t6.006-9.723q5.148-3.432 8.008-3.146t8.294 3.146 8.294 2.86q8.008 0.572 8.866-6.292t-4.29-11.44q6.864 0.572 1.716-9.723-2.86-4.004-4.575-5.148-6.864-2.288-15.444 2.86-4.575 2.288 1.144 4.575-0.572-0.572-5.434 6.006t-9.438 10.010-9.152-2.86q-0.572-0.572-3.146-7.722t-5.434-7.722q-4.575 0-9.152 8.579 1.716-4.575-6.292-8.579t-13.727-4.575q10.868-6.864-4.575-15.444-4.004-2.288-11.725-2.86t-11.154 2.288q-2.86 4.004-3.146 6.577t2.86 4.575 6.006 3.146 6.577 2.288 4.862 1.716q8.008 5.72 4.575 8.008-1.144 0.572-4.862 2.002t-6.577 2.574-3.432 2.288q-1.716 2.288 0 8.008t-1.144 8.008q-2.86-2.86-5.148-10.010t-4.004-9.438q4.004 5.148-14.3 3.432l-5.72-0.572q-2.288 0-9.152 1.144t-11.725 0.572-7.722-4.575q-2.288-4.575 0-11.44 0.572-2.288 2.288-1.144-2.288-1.716-6.292-5.434t-5.72-4.862q-26.312 8.579-53.767 23.452 3.432 0.572 6.864-0.572 2.86-1.144 7.436-3.718t5.72-3.146q19.448-8.008 24.023-4.004l2.86-2.86q8.008 9.152 11.44 14.3-4.004-2.288-17.16-0.572-11.44 3.432-12.583 6.864 4.004 6.864 2.86 10.296-2.288-1.716-6.577-5.72t-8.294-6.292-8.579-2.86q-9.152 0-12.583 0.572-83.511 45.759-134.417 126.981 4.004 4.004 6.864 4.575 2.288 0.572 2.86 5.148t1.43 6.292 6.577-1.716q5.148 4.575 1.716 10.868 0.572-0.572 25.168 15.444 10.868 9.723 12.012 12.012 1.716 6.292-5.72 10.296-0.572-1.144-5.148-5.148t-5.148-2.288q-1.716 2.86 0.286 10.581t6.006 7.15q-4.004 0-5.434 9.152t-1.43 20.306-0.572 13.442l1.144 0.572q-1.716 6.864 3.146 19.733t12.298 11.154q-7.436 1.716 11.44 24.595 3.432 4.575 4.575 5.148 1.716 1.144 6.864 4.29t8.579 5.72 5.72 6.006q2.288 2.86 5.72 12.87t8.008 13.442q-1.144 3.432 5.434 11.44t6.006 13.156q-0.572 0-1.43 0.572t-1.43 0.572q1.716 4.004 8.866 8.008t8.866 7.436q0.572 1.716 1.144 5.72t1.716 6.292 4.575 1.144q1.144-11.44-13.727-35.464-8.579-14.3-9.723-16.587-1.716-2.86-3.146-8.866t-2.574-8.294q1.144 0 3.432 0.858t4.862 2.002 4.29 2.288 1.144 1.716q-1.716 4.004 1.144 10.010t6.864 10.581 9.723 10.868 6.864 7.436q3.432 3.432 8.008 11.154t0 7.722q5.148 0 11.44 5.72t9.723 11.44q2.86 4.575 4.575 14.872t2.86 13.727q1.144 4.004 4.862 7.722t7.15 5.434l9.152 4.575 7.436 4.004q2.86 1.144 10.581 6.006t12.298 6.577q5.72 2.288 9.152 2.288t8.294-1.43 7.722-2.002q8.579-1.144 16.587 8.579t12.012 12.012q20.591 10.868 31.46 6.292-1.144 0.572 0.286 4.29t4.575 8.866 5.148 8.294 3.146 4.862q2.86 3.432 10.296 8.579t10.296 8.579q3.432-2.288 4.004-5.148-1.716 4.575 4.004 11.44t10.296 5.72q8.008-1.716 8.008-18.304-17.731 8.579-28.027-10.296 0-0.572-1.43-3.146t-2.288-4.862-1.43-4.862 0-4.29 2.86-1.716q5.148 0 5.72-2.002t-1.144-7.15-2.288-7.436q-0.572-4.575-6.292-11.44t-6.864-8.579q-2.86 5.148-9.152 4.575t-9.152-5.148q0 0.572-0.858 3.146t-0.858 3.718q-7.436 0-8.579-0.572 0.572-1.716 1.43-10.010t2.002-12.87q0.572-2.288 3.146-6.864t4.29-8.294 2.288-7.15-2.574-5.434-10.010-1.43q-10.868 0.572-14.872 11.44-0.572 1.716-1.716 6.006t-2.86 6.577-5.148 4.004q-4.004 1.716-13.727 1.144t-13.727-2.86q-7.436-4.575-12.87-16.587t-5.434-21.164q0-5.72 1.43-15.158t1.716-14.3-3.146-14.014q1.716-1.144 5.148-5.434t5.72-6.006q1.144-0.572 2.574-0.858t2.574 0 2.288-0.858 1.716-3.432q-0.572-0.572-2.288-1.716-1.716-1.716-2.288-1.716 4.004 1.716 16.302-0.858t15.729 0.858q8.579 6.292 12.583-1.144 0-0.572-1.43-5.434t-0.286-7.722q2.86 15.444 16.587 5.148 1.716 1.716 8.866 2.86t10.010 2.86q1.716 1.144 4.004 3.146t3.146 2.574 2.86-0.286 4.862-3.718q5.72 8.008 6.864 13.727 6.292 22.879 10.868 25.168 4.004 1.716 6.292 1.144t2.574-5.434 0-8.008-0.858-7.15l-0.572-4.575v-10.296l-0.572-4.575q-8.579-1.716-10.581-6.864t0.858-10.581 8.579-10.581q0.572-0.572 4.575-2.002t8.866-3.718 7.15-4.575q12.012-10.868 8.579-20.020 4.004 0 6.292-5.148-0.572 0-2.86-1.716t-4.29-2.86-2.574-1.144q5.148-2.86 1.144-9.152 2.86-1.716 4.29-6.292t4.29-5.72q5.148 6.864 12.012 1.144 4.004-4.575 0.572-9.152 2.86-4.004 11.725-6.006t10.581-5.434q4.004 1.144 4.575-1.144t0.572-6.864 1.716-6.864q2.288-2.86 8.579-5.148t7.436-2.86l9.723-6.292q1.716-2.288 0-2.288 10.296 1.144 17.731-6.292 5.72-6.292-3.432-11.44 1.716-3.432-1.716-5.434t-8.579-3.146q1.716-0.572 6.577-0.286t6.006-0.858q8.579-5.72-4.004-9.152-9.723-2.86-24.595 6.864zM502.777 885.865q117.829-20.591 200.767-108.106-1.716-1.716-7.15-2.574t-7.15-2.002q-10.296-4.004-13.727-4.575 0.572-4.004-1.43-7.436t-4.575-5.148-7.15-4.575-6.292-4.004q-1.144-1.144-4.004-3.432t-4.004-3.146-4.29-2.574-4.862-1.144-5.72 0.572l-1.716 0.572q-1.716 0.572-3.146 1.43t-3.146 1.716-2.288 1.716 0 1.43q-12.012-9.723-20.591-12.583-2.86-0.572-6.292-3.146t-6.006-4.004-5.72-0.858-6.577 4.004q-2.86 2.86-3.432 8.579t-1.144 7.436q-4.004-2.86 0-10.010t1.144-10.581q-1.716-3.432-6.006-2.574t-6.864 2.574-6.577 4.862-5.148 3.718-4.862 3.146-4.862 4.29q-1.716 2.288-3.432 6.864t-2.86 6.292q-1.144-2.288-6.577-3.718t-5.434-3.146q1.144 5.72 2.288 20.020t2.86 21.735q4.004 17.731-6.864 27.456-15.444 14.3-16.587 22.879-2.288 12.583 6.864 14.872 0 4.004-4.575 11.725t-4.004 12.298q0 3.432 1.144 9.152z" fill="currentColor"></path></svg>
+                        </i>
+                        OPM
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-2">
+            <ul class="nav nav-pills">
+                <li>
+                    <a href="http://www.usa.gov" class="footer-link" target="_blank" title="USA.gov" rel="noopener">
+                        <i class="fa">
+                            <svg height="16" viewBox="0 0 576 512" width="16"><title>USA.gov (Opens in New Window)</title><path d="M528.1 171.5L382 150.2 316.7 17.8c-11.7-23.6-45.6-23.9-57.4 0L194 150.2 47.9 171.5c-26.2 3.8-36.7 36.1-17.7 54.6l105.7 103-25 145.5c-4.5 26.3 23.2 46 46.4 33.7L288 439.6l130.7 68.7c23.2 12.2 50.9-7.4 46.4-33.7l-25-145.5 105.7-103c19-18.5 8.5-50.8-17.7-54.6zM388.6 312.3l23.7 138.4L288 385.4l-124.3 65.3 23.7-138.4-100.6-98 139-20.2 62.2-126 62.2 126 139 20.2-100.6 98z" fill="currentColor"></path></svg>
+                        </i>
+                        USA.gov
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="row text-center copy-footer">
+        <div class="col-md-12">
+            <small>&copy; 2025 US Office of Personnel Management</small><br />
+            <small>This is a USA Staffing&reg; System</small>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#linkTerms').click(function (event) {
+            event.preventDefault();
+            $('#termsModal').modal('show');
+        });
+    });
+
+    function ShowPrivacyCookieModal() {
+        bootbox.dialog({
+            message: $('#privacy-cookie')[0].innerHTML,
+            className: 'bootbox-large all-tasks-completed',
+            onShown: function () {
+                $('body.modal-open').css("padding-right", "0px");
+            },
+            buttons: {
+                Cancel: {
+                    label: "Ok",
+                    className: "btn-ok btn btn-default btn-sm"
+                }
+            }
+
+        });
+        //prevent dialog from making background shift
+        $('body.modal-open').css("padding-right", "0px");
+    }
+ </script>
+        
+        <div id="termsModal" class="modal fade" tabindex="-1" aria-labelledby="termsTitle termsBody">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 id="termsTitle">Terms & Conditions</h3>
+            </div>
+            <div id="termsBody" class="modal-body">
+                <p>
+                    This online application, powered by USA Staffing®, a U. S. Government information system, is to be used only in the manner authorized.
+                    You are authorized to use this system’s menus, controls, and features to do any and all of the following as a job applicant or potential
+                    job applicant, subject to any limitations that may be imposed, such as due dates, or any requirement that a particular assessment be
+                    completed personally by the job applicant:
+                </p>
+                <p>
+                    <ul>
+                        <li>Prepare, complete, and submit application packages, questionnaires, and other assessments.</li>
+                        <li>View, print, modify, and save questionnaires and assessment responses and documents.</li>
+                        <li>View the status of application packages you have in progress and correspondence addressed to you.</li>
+                    </ul>
+                </p>
+                <p>
+                    You are prohibited from accessing or attempting to access this system or records it contains to access information about anyone who has not given 
+                    you permission to do so, because the data and documents on this system include Federal records that contain sensitive information protected by 
+                    various Federal statutes, including the Privacy Act, 5 U.S.C. § 552a.
+                </p>
+                <p>
+                    You are also prohibited from attempting to access, view, upload, change, or delete information on this system in any manner not consistent with and 
+                    supported by its own menu options and controls, even if that information pertains to you. You are not permitted to modify the system, deny access to 
+                    the system, accrue system resources for unauthorized use, or otherwise misuse this system, and if you do so, or try to do so, you may face criminal, 
+                    civil, or administrative penalties.
+                </p>
+                <p>
+                    If you use this system, that will be construed to mean you understand and agree to abide by these terms and constitutes unconditional consent to review, 
+                    monitor, record, audit, and take action by all authorized government and law enforcement personnel.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
+        
+            <script src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js" id="_fed_an_ua_tag" language="text/javascript" defer async></script>
+    <script type="text/javascript"  src="/IVQfd_cBzIikUneaogeV/Oz1tGStr6bbfJhOO/IXh6AQ/Qz/46BGE9W3EB"></script></body>
+</html>
