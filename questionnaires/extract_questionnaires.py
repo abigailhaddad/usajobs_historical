@@ -11,6 +11,7 @@ import sys
 import subprocess
 import signal
 import hashlib
+import requests
 from pathlib import Path
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
@@ -152,16 +153,26 @@ def extract_questionnaire_links_from_job(job_row):
 def scrape_questionnaire(url, output_dir, timeout_seconds=60, headless=True, session_file=None):
     """Scrape a single questionnaire with timeout and error handling"""
     
-    # Only process USAStaffing links
-    if 'monstergovt.com' in url:
-        print(f"  Skipping Monster link: {url}")
-        return None
+    # Transform Monster URLs to preview format
+    if 'monstergovt.com' in url and '/ros/rosDashboard.hms' in url:
+        match = re.search(r'https://jobs\.monstergovt\.com/([^/]+)/ros/rosDashboard\.hms\?O=(\d+)&J=(\d+)', url)
+        if match:
+            subdomain = match.group(1)
+            org_id = match.group(2)
+            job_num = match.group(3)
+            url = f'https://jobs.monstergovt.com/{subdomain}/vacancy/previewVacancyQuestions.hms?orgId={org_id}&jnum={job_num}'
+            print(f"  Transformed Monster URL to preview: {url}")
     
     # Extract ID from URL for filename
     if 'usastaffing.gov' in url:
         match = re.search(r'ViewQuestionnaire/(\d+)', url)
         file_id = match.group(1) if match else 'unknown'
         prefix = 'usastaffing'
+    elif 'monstergovt.com' in url:
+        # Extract jnum from Monster URL
+        match = re.search(r'jnum=(\d+)', url)
+        file_id = match.group(1) if match else str(hash(url))[:8]
+        prefix = 'monster'
     else:
         file_id = str(hash(url))[:8]
         prefix = 'other'
@@ -176,6 +187,47 @@ def scrape_questionnaire(url, output_dir, timeout_seconds=60, headless=True, ses
     
     start_time = time.time()
     
+    # Use requests for Monster preview URLs (they don't require JavaScript)
+    if 'monstergovt.com' in url and '/vacancy/previewVacancyQuestions.hms' in url:
+        try:
+            print(f"  Scraping Monster preview URL with requests...")
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            response = requests.get(url, headers=headers, timeout=timeout_seconds)
+            
+            if response.status_code == 200:
+                # Extract text from HTML
+                content = response.text
+                
+                # Remove HTML tags and clean up text
+                text_content = re.sub(r'<script[^>]*>.*?</script>', '', content, flags=re.DOTALL)
+                text_content = re.sub(r'<style[^>]*>.*?</style>', '', text_content, flags=re.DOTALL)
+                text_content = re.sub(r'<[^>]+>', ' ', text_content)
+                text_content = ' '.join(text_content.split())
+                
+                # Save text file
+                with open(txt_path, 'w', encoding='utf-8') as f:
+                    f.write(text_content)
+                
+                elapsed = time.time() - start_time
+                print(f"    Saved: {txt_path} ({elapsed:.1f}s)")
+                return text_content
+            else:
+                print(f"    ❌ Monster preview returned status {response.status_code}")
+                return None
+                
+        except requests.exceptions.Timeout:
+            elapsed = time.time() - start_time
+            print(f"    ⏱️  Timeout after {elapsed:.1f}s: {url}")
+            return None
+        except Exception as e:
+            elapsed = time.time() - start_time
+            print(f"    ❌ Error after {elapsed:.1f}s: {str(e)[:80]}")
+            return None
+    
+    # Use Playwright for USAStaffing URLs
     try:
         with sync_playwright() as p:
             # Connect to existing browser if running in non-headless mode
@@ -691,15 +743,26 @@ def main():
     
     for idx, (_, row) in enumerate(df.iterrows()):
         url = row['questionnaire_url']
-        # Skip Monster URLs entirely
-        if 'monstergovt.com' in url:
-            continue
+        # Transform Monster URLs for checking
+        if 'monstergovt.com' in url and '/ros/rosDashboard.hms' in url:
+            # Transform to preview URL for consistency
+            match = re.search(r'https://jobs\.monstergovt\.com/([^/]+)/ros/rosDashboard\.hms\?O=(\d+)&J=(\d+)', url)
+            if match:
+                subdomain = match.group(1)
+                org_id = match.group(2) 
+                job_num = match.group(3)
+                url = f'https://jobs.monstergovt.com/{subdomain}/vacancy/previewVacancyQuestions.hms?orgId={org_id}&jnum={job_num}'
             
         # Check if file exists
         if 'usastaffing.gov' in url:
             match = re.search(r'ViewQuestionnaire/(\d+)', url)
             file_id = match.group(1) if match else 'unknown'
             prefix = 'usastaffing'
+        elif 'monstergovt.com' in url:
+            # Extract jnum from Monster URL
+            match = re.search(r'jnum=(\d+)', url)
+            file_id = match.group(1) if match else str(hash(url))[:8]
+            prefix = 'monster'
         else:
             file_id = str(hash(url))[:8]
             prefix = 'other'

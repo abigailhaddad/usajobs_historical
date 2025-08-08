@@ -137,9 +137,6 @@
                             <div class="col-12">
                                 <h3>Data Coverage</h3>
                                 <p id="dataCoverage"></p>
-                                <div id="monsterNote" class="alert alert-warning" style="display: none;">
-                                    <strong>Note:</strong> <span id="monsterPercentage"></span>% of job postings had questionnaire links from Monster Government Solutions (monstergovt.com) that could not be scraped due to authentication requirements. These jobs are not included in the analysis above.
-                                </div>
                                 <div class="alert alert-info mt-3">
                                     <strong>Understanding the Statistics:</strong><br>
                                     • <strong>Total Jobs:</strong> All federal job postings in this category<br>
@@ -325,18 +322,6 @@
                 document.getElementById('percentageWithEO').textContent = data.overview.percentage_with_eo + '%';
                 document.getElementById('dataCoverage').textContent = data.overview.data_coverage;
                 
-                // Load and display Monster statistics if available
-                fetch('monster_stats.json')
-                    .then(response => response.json())
-                    .then(monsterData => {
-                        if (monsterData.percentage_with_monster > 0) {
-                            document.getElementById('monsterNote').style.display = 'block';
-                            document.getElementById('monsterPercentage').textContent = Math.round(monsterData.percentage_with_monster);
-                        }
-                    })
-                    .catch(error => {
-                        console.log('Monster stats not available');
-                    });
                 
                 // Create simple tables for analyses
                 createSimpleTable('serviceTable', data.service_analysis);
