@@ -92,72 +92,15 @@ def extract_questionnaire_id(url):
     return None
 
 def main():
-    # Load ALL jobs from parquet files for total job counts
-    all_jobs_dfs = []
-    parquet_files = sorted(DATA_DIR.glob('current_jobs_*.parquet'))
-    cutoff_date = pd.to_datetime('2025-06-01')
+    # First generate the clean all jobs data if it doesn't exist
+    if not Path('all_jobs_clean.csv').exists():
+        print("Generating clean all jobs data...")
+        import subprocess
+        subprocess.run(['python3', 'generate_all_jobs_data.py'], check=True)
     
-    print("Loading all job data for total counts...")
-    for parquet_file in parquet_files:
-        df = pd.read_parquet(parquet_file)
-        if 'positionOpenDate' in df.columns:
-            df['positionOpenDate'] = pd.to_datetime(df['positionOpenDate'])
-            df = df[df['positionOpenDate'] >= cutoff_date]
-        all_jobs_dfs.append(df)
-    
-    all_jobs_df = pd.concat(all_jobs_dfs, ignore_index=True)
+    # Load the clean all jobs data
+    all_jobs_df = pd.read_csv('all_jobs_clean.csv')
     print(f"Total jobs loaded: {len(all_jobs_df):,}")
-    
-    # Extract fields we need for grouping from all jobs
-    for idx, row in all_jobs_df.iterrows():
-        if pd.notna(row.get('MatchedObjectDescriptor')):
-            try:
-                mod = json.loads(row['MatchedObjectDescriptor'])
-                
-                # Extract service type
-                if 'UserArea' in mod and 'Details' in mod['UserArea']:
-                    service_type_code = mod['UserArea']['Details'].get('ServiceType')
-                    if service_type_code:
-                        service_type_map = {
-                            '01': 'Competitive',
-                            '02': 'Excepted', 
-                            '03': 'Senior Executive'
-                        }
-                        all_jobs_df.at[idx, 'service_type'] = service_type_map.get(service_type_code, service_type_code)
-                
-                # Extract location
-                if 'PositionLocation' in mod and isinstance(mod['PositionLocation'], list) and len(mod['PositionLocation']) > 0:
-                    loc = mod['PositionLocation'][0]
-                    city = loc.get('CityName', '')
-                    state = loc.get('CountrySubDivisionCode', '')
-                    if city and state:
-                        if state.lower() in city.lower():
-                            all_jobs_df.at[idx, 'position_location'] = city
-                        else:
-                            all_jobs_df.at[idx, 'position_location'] = f"{city}, {state}"
-                    elif city:
-                        all_jobs_df.at[idx, 'position_location'] = city
-                    elif state:
-                        all_jobs_df.at[idx, 'position_location'] = state
-                        
-                # Extract occupation
-                if 'JobCategory' in mod and isinstance(mod['JobCategory'], list) and len(mod['JobCategory']) > 0:
-                    all_jobs_df.at[idx, 'occupation_series'] = mod['JobCategory'][0].get('Code')
-                    all_jobs_df.at[idx, 'occupation_name'] = mod['JobCategory'][0].get('Name')
-            except:
-                pass
-    
-    # Add grade level from minimumGrade
-    if 'minimumGrade' in all_jobs_df.columns:
-        all_jobs_df['grade_level'] = all_jobs_df['minimumGrade'].fillna('Not Specified')
-    else:
-        all_jobs_df['grade_level'] = 'Not Specified'
-    
-    # Add occupation_full
-    all_jobs_df['occupation_full'] = all_jobs_df['occupation_series'].astype(str) + ' - ' + all_jobs_df['occupation_name'].fillna('Unknown')
-    
-    # Rename columns for consistency
-    all_jobs_df.rename(columns={'hiringAgencyName': 'hiring_agency'}, inplace=True)
     
     # Load questionnaire links
     links_df = pd.read_csv(QUESTIONNAIRE_DIR / 'questionnaire_links.csv')
@@ -207,7 +150,7 @@ def main():
         }
     }
     
-    # Add grade_level column to both dataframes
+    # Add grade_level column to scraped dataframe (using grade_code as-is)
     if 'grade_code' in links_df.columns:
         links_df['grade_level'] = links_df['grade_code'].fillna('Not Specified')
         scraped_df['grade_level'] = scraped_df['grade_code'].fillna('Not Specified')
