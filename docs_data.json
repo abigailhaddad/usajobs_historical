@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-08-08T07:20:52.216109",
-  "total_jobs": 3006211,
+  "generated_at": "2025-08-09T07:15:28.165340",
+  "total_jobs": 3007088,
   "total_fields": 42,
-  "file_size": "559MB",
-  "latest_job_date": "2025-08-08",
+  "file_size": "563MB",
+  "latest_job_date": "2025-08-09",
   "data_coverage": [
     {
       "year": 2013,
@@ -84,17 +84,17 @@
     },
     {
       "year": 2024,
-      "total_jobs": 367753,
-      "jobs_opened": 367753,
+      "total_jobs": 367754,
+      "jobs_opened": 367754,
       "jobs_closed": 352296,
       "coverage": "\u2705 Complete year"
     },
     {
       "year": 2025,
-      "total_jobs": 126946,
-      "jobs_opened": 126946,
-      "jobs_closed": 125488,
-      "coverage": "Current through August 08, 2025"
+      "total_jobs": 127822,
+      "jobs_opened": 127822,
+      "jobs_closed": 126349,
+      "coverage": "Current through August 09, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1320\"}, {\"series\": \"1515\"}, {\"series\": \"0855\"}, {\"series\": \"1550\"}, {\"series\": \"0830\"}, {\"series\": \"1301\"}, {\"series\": \"0893\"}, {\"series\": \"0801\"}], [{\"series\": \"0850\"}, {\"series\": \"0830\"}], [{\"series\": \"0855\"}, {\"series\": \"1313\"}], [{\"series\": \"0101\"}, {\"series\": \"1301\"}, {\"series\": \"0184\"}, {\"series\": \"0801\"}, {\"series\": \"0819\"}, {\"series\": \"0401\"}, {\"series\": \"1350\"}, {\"series\": \"0020\"}, {\"series\": \"0150\"}, {\"series\": \"0807\"}, {\"series\": \"0110\"}, {\"series\": \"0810\"}] (3060 unique)",
+      "examples": "[{\"series\": \"0830\"}, {\"series\": \"0850\"}, {\"series\": \"0810\"}, {\"series\": \"0808\"}, {\"series\": \"1350\"}], [{\"series\": \"0638\"}], [{\"series\": \"0850\"}, {\"series\": \"0110\"}, {\"series\": \"0810\"}, {\"series\": \"0830\"}, {\"series\": \"0801\"}, {\"series\": \"0808\"}], [{\"series\": \"1501\"}, {\"series\": \"0830\"}, {\"series\": \"0801\"}, {\"series\": \"0871\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Legislative Branch\\Architect of the Capitol, Department of Education\\Immediate Office of the Secretary of Education, Department of Agriculture\\Food Safety and Inspection Service, Department of Housing and Urban Development\\Office of Healthy Homes and Lead Hazard Control (542 unique)",
+      "examples": "Department of the Army\\Materiel Acquisition Activities, Administrative Conference of the United States, Department of Veterans Affairs\\National Cemetery Administration, Department of Homeland Security\\DHS Headquarters (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "CBSY-12479309-24-AMB, PHX-2024-0053, AFMC-12357709-360428-JMW, DE-12441095-24-SW (363801 unique)",
+      "examples": "CBSW-12430687-24-KM, IHS-24-AQ-12408993-ESEP/MP, 7Q-ARTE-12500542-492083-DRJ, IHS-24-CA-12375719-ESEP/MP (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Internships, Term, Presidential Management Fellows, Agency Employees Only (15 unique)",
+      "examples": "Temporary Promotion, Internships, Term, Seasonal (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "ARMW, DD11, VADA, FT00 (528 unique)",
+      "examples": "EDEG, HE13, GS03, ARMC (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "National Endowment for the Arts, Administration for Strategic Preparedness and Response, Office of Special Counsel, Air Force Public Affairs Agency (502 unique)",
+      "examples": "Government Accountability Office, National Agricultural Statistics Service, Forest Service, Architectural and Transportation Barriers Compliance Board (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "DO, TC, HU, SK (122 unique)",
+      "examples": "HF, GB, FD, MA (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Defense, National Foundation on the Arts and the Humanities, Department of Transportation, General Services Administration (26 unique)",
+      "examples": "Department of Agriculture, National Foundation on the Arts and the Humanities, Department of Housing and Urban Development, Department of Homeland Security (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Prosthetics and Sensory Aids Service, Director of Human Resources Military Casualty Division, Directorate of Plans, Training, Mobilization and Security Training Division, Airfield Divsion, Wyoming State Office - 933 Planning, Recreation, and Physical Resources. (59973 unique)",
+      "examples": "USAG Hawaii- FMWR, CYS Registration & Parent Central Services, Schofield Barracks, FOREIGN SERVICE TRAINEE, NCA NORTH ATLANTIC DISTRICT OFFICE, Child Development Center & Before and After School Programs (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T14:27:06.586561, 2025-07-05T15:39:17.027200, 2025-07-05T15:22:10.642463, 2025-07-05T13:02:09.517582 (367177 unique)",
+      "examples": "2025-07-05T13:08:00.710128, 2025-07-05T13:05:06.365494, 2025-07-05T15:03:07.343341, 2025-07-05T14:37:52.445244 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "13, 09, 98, CM (127 unique)",
+      "examples": "H, EJ, LH, 08 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "05, AQ, EK, GI (125 unique)",
+      "examples": "98, LD, 19, 53 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "XC, DA, OR, FW (191 unique)",
+      "examples": "TE, ZZ, NB, FP (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-09-05, 2025-01-19, 2025-08-17, 2025-01-02 (672 unique)",
+      "examples": "2024-01-10, 2024-08-06, 2024-08-14, 2025-04-13 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-01-27, 2024-12-04, 2024-10-23, 2024-10-05 (550 unique)",
+      "examples": "2024-10-18, 2024-06-15, 2024-11-07, 2024-06-07 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-07-20, 2024-11-27, 2024-05-13, 2024-07-28 (365 unique)",
+      "examples": "2024-12-10, 2024-02-02, 2024-07-24, 2024-03-14 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Health Scientist Administrator (Clinical Informatics), BOWLING CENTER MANAGER, NF-03/RFT, CAMP KINSER, Health Technician (Patient Advocate/Customer Service Coordinator), Staff Psychologist- PCMHI (77986 unique)",
+      "examples": "Lead Ethics Specialist, AWG & FSO Hearings Officer, SOUS CHEF/PRODUCTION MANAGER, Licensed Professional Mental Health Counselor (Care Coordinator) (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "11, 16, PB3, 61 (115 unique)",
+      "examples": "52, 24, 42, 7 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "10, 07, 44, Many (157 unique)",
+      "examples": "08, 1000, 15, 69 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
