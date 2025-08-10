@@ -110,11 +110,10 @@ def transform_monster_url(url):
     return url
 
 def main():
-    # First generate the clean all jobs data if it doesn't exist
-    if not Path('all_jobs_clean.csv').exists():
-        print("Generating clean all jobs data...")
-        import subprocess
-        subprocess.run(['python3', 'generate_all_jobs_data.py'], check=True)
+    # Always regenerate the clean all jobs data to get the latest
+    print("Generating clean all jobs data from latest parquet files...")
+    import subprocess
+    subprocess.run(['python3', 'generate_all_jobs_data.py'], check=True)
     
     # Load the clean all jobs data
     all_jobs_df = pd.read_csv('all_jobs_clean.csv')
