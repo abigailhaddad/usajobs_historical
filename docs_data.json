@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-08-15T07:18:04.387616",
-  "total_jobs": 3011600,
+  "generated_at": "2025-08-16T07:14:57.423290",
+  "total_jobs": 3012334,
   "total_fields": 42,
-  "file_size": "586MB",
-  "latest_job_date": "2025-08-15",
+  "file_size": "589MB",
+  "latest_job_date": "2025-08-16",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 132334,
-      "jobs_opened": 132334,
-      "jobs_closed": 130806,
-      "coverage": "Current through August 15, 2025"
+      "total_jobs": 133068,
+      "jobs_opened": 133068,
+      "jobs_closed": 131536,
+      "coverage": "Current through August 16, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1015\"}, {\"series\": \"0170\"}], [{\"series\": \"0401\"}, {\"series\": \"1315\"}], [{\"series\": \"0850\"}, {\"series\": \"0830\"}, {\"series\": \"0896\"}, {\"series\": \"0801\"}, {\"series\": \"0861\"}], [{\"series\": \"0190\"}, {\"series\": \"1015\"}, {\"series\": \"0193\"}, {\"series\": \"0170\"}] (3060 unique)",
+      "examples": "[{\"series\": \"1301\"}, {\"series\": \"1320\"}, {\"series\": \"0401\"}], [{\"series\": \"0810\"}, {\"series\": \"0401\"}, {\"series\": \"0020\"}, {\"series\": \"1301\"}, {\"series\": \"0819\"}], [{\"series\": \"0401\"}, {\"series\": \"0193\"}, {\"series\": \"1301\"}], [{\"series\": \"0435\"}, {\"series\": \"0440\"}, {\"series\": \"0471\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Army\\US ARMY HUMAN RESOURCES COMMAND (DRU), Department of the Treasury\\Alcohol and Tobacco Tax and Trade Bureau, Department of Agriculture\\Forest Service, Legislative Branch\\Government Accountability Office (542 unique)",
+      "examples": "Department of the Interior\\Office of Inspector General, Department of the Air Force\\United States Space Force Forces, Department of the Air Force\\Air Education and Training Command, Department of the Army\\Army Installation Management Command (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "331-2024-MA-12501036-NBU, HSJG244833634702HW, HHS-CDC-IMP-25-12626639, 25-TEMPF3-R5-0200-5DH (363801 unique)",
+      "examples": "24-12478460O-TSM-0962-07, OR-12252143-AF-24-028, CO-12067549-T5-23-156, MCAD249284583835HD (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Seasonal, Term, Presidential Management Fellows, Recent graduates (15 unique)",
+      "examples": "Agency Employees Only, ICTAP Only, Summer, Seasonal (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "VAHG, JL02, EDEC, DLWB (528 unique)",
+      "examples": "DD13, VADD, VABH, ARFB (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Bureau of Engraving and Printing, Federal Reserve System--Board of Governors, National Highway Traffic Safety Administration, Executive Director, Office of Acquisition and Logistics (502 unique)",
+      "examples": "Headquarters, NASA, Homeland Security Staff, Defense POW/MIA Accounting Agency, U.S. Army Contracting Command (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "VD, LD, PO, LP (122 unique)",
+      "examples": "AF, SS, GQ, GG (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of the Army, Department of Justice, Department of the Interior, Other Agencies and Independent Organizations (26 unique)",
+      "examples": "Department of Transportation, Judicial Branch, Department of Agriculture, Department of Commerce (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "National Ground Intelligence Center (NGIC), ORR-DRSC-FEDERAL SELECT AGENT PROGRAM OPERATIONS BRANCH, Fort Gregg-Adams, VA  -  NAF - MWR -  Library, Department of Technology Services, Policy and Resources Management Division (59973 unique)",
+      "examples": "SWAC, North Cascades National Park, Great Lakes Science Center, Kilauea Military Camp (KMC), Big Island of Hawaii. (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T14:35:46.885521, 2025-07-05T14:35:46.951641, 2025-07-05T13:08:00.746381, 2025-07-05T14:33:32.177208 (367177 unique)",
+      "examples": "2025-07-05T13:47:41.917695, 2025-07-05T14:25:17.440852, 2025-07-05T13:50:17.143415, 2025-07-05T13:52:56.663010 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "IH, 51, F, 23 (127 unique)",
+      "examples": "NA, F, 35, IK (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "04, FJ, HS3, 44 (125 unique)",
+      "examples": "M, 52, 29, FI (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "GR, ZP, WY, CR (191 unique)",
+      "examples": "AE, IM, PB, WE (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-11-16, 2024-03-26, 2024-02-27, 2025-08-02 (672 unique)",
+      "examples": "2025-07-30, 2025-10-27, 2024-01-27, 2025-09-18 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2023-07-06, 2025-01-03, 2024-02-22, 2024-12-20 (550 unique)",
+      "examples": "2024-02-18, 2024-10-09, 2024-08-25, 2024-02-17 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-10-19, 2024-08-02, 2024-07-07, 2024-02-10 (365 unique)",
+      "examples": "2024-09-26, 2024-09-03, 2024-07-22, 2024-05-27 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Management and Program Assistant (Office Automation)(TEMP NTE 1 YR, MBP), Nurse (Chief Health Informatics Officer), Project Manager (Interdisciplinary), General Supply Specialist (Food Services) (77986 unique)",
+      "examples": "Electrical Worker Helper, Engineering Research Psychologist, SUPERVISORY FACILITIES OPERATIONS SPECIALIST, DIGITAL PRODUCTION SYSTEM TECHNICIAN (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "19, 42, 18, 61 (115 unique)",
+      "examples": "44, 23, 36, 31 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "003, 4, 25, 02 (157 unique)",
+      "examples": "360, 150, 001, 13 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
