@@ -1,28 +1,28 @@
 {
   "overview": {
-    "total_scraped": 21564,
-    "total_with_eo": "849",
-    "percentage_with_eo": 3.9,
-    "data_coverage": "Analyzing questionnaires from federal job postings from June 01, 2025 to August 15, 2025"
+    "total_scraped": 21935,
+    "total_with_eo": "879",
+    "percentage_with_eo": 4.0,
+    "data_coverage": "Analyzing questionnaires from federal job postings from June 01, 2025 to August 16, 2025"
   },
   "service_analysis": [
     {
       "Service Type": "Competitive",
-      "Total Jobs": 14810,
-      "Scraped Questionnaires": 12909,
-      "Jobs with Essay Question": 809,
-      "% of Scraped with Essay Question": 6.3
+      "Total Jobs": 15070,
+      "Scraped Questionnaires": 13122,
+      "Jobs with Essay Question": 836,
+      "% of Scraped with Essay Question": 6.4
     },
     {
       "Service Type": "Excepted",
-      "Total Jobs": 10863,
-      "Scraped Questionnaires": 8644,
-      "Jobs with Essay Question": 36,
+      "Total Jobs": 11078,
+      "Scraped Questionnaires": 8802,
+      "Jobs with Essay Question": 39,
       "% of Scraped with Essay Question": 0.4
     },
     {
       "Service Type": "Senior Executive",
-      "Total Jobs": 64,
+      "Total Jobs": 65,
       "Scraped Questionnaires": 11,
       "Jobs with Essay Question": 4,
       "% of Scraped with Essay Question": 36.4
@@ -31,143 +31,143 @@
   "grade_analysis": [
     {
       "Grade Level": "GS-12",
-      "Total Jobs": 1970,
-      "Scraped Questionnaires": 1826,
-      "Jobs with Essay Question": 49,
+      "Total Jobs": 1995,
+      "Scraped Questionnaires": 1847,
+      "Jobs with Essay Question": 50,
       "% of Scraped with Essay Question": 2.7
     },
     {
       "Grade Level": "VN-00",
-      "Total Jobs": 1677,
-      "Scraped Questionnaires": 1664,
+      "Total Jobs": 1714,
+      "Scraped Questionnaires": 1701,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Grade Level": "GS-13",
-      "Total Jobs": 1633,
-      "Scraped Questionnaires": 1538,
+      "Total Jobs": 1653,
+      "Scraped Questionnaires": 1553,
       "Jobs with Essay Question": 62,
       "% of Scraped with Essay Question": 4.0
     },
     {
       "Grade Level": "GS-11",
-      "Total Jobs": 1235,
-      "Scraped Questionnaires": 1116,
+      "Total Jobs": 1250,
+      "Scraped Questionnaires": 1126,
       "Jobs with Essay Question": 76,
-      "% of Scraped with Essay Question": 6.8
+      "% of Scraped with Essay Question": 6.7
     },
     {
       "Grade Level": "GS-9",
-      "Total Jobs": 1096,
-      "Scraped Questionnaires": 1010,
-      "Jobs with Essay Question": 36,
-      "% of Scraped with Essay Question": 3.6
+      "Total Jobs": 1111,
+      "Scraped Questionnaires": 1025,
+      "Jobs with Essay Question": 39,
+      "% of Scraped with Essay Question": 3.8
     },
     {
       "Grade Level": "GS-7",
-      "Total Jobs": 868,
-      "Scraped Questionnaires": 823,
+      "Total Jobs": 885,
+      "Scraped Questionnaires": 839,
       "Jobs with Essay Question": 30,
       "% of Scraped with Essay Question": 3.6
     },
     {
       "Grade Level": "GS-6",
-      "Total Jobs": 839,
-      "Scraped Questionnaires": 805,
-      "Jobs with Essay Question": 26,
-      "% of Scraped with Essay Question": 3.2
+      "Total Jobs": 858,
+      "Scraped Questionnaires": 824,
+      "Jobs with Essay Question": 29,
+      "% of Scraped with Essay Question": 3.5
     },
     {
       "Grade Level": "GS-14",
-      "Total Jobs": 713,
-      "Scraped Questionnaires": 649,
-      "Jobs with Essay Question": 49,
-      "% of Scraped with Essay Question": 7.6
-    },
-    {
-      "Grade Level": "GS-9/11",
-      "Total Jobs": 682,
-      "Scraped Questionnaires": 651,
-      "Jobs with Essay Question": 15,
-      "% of Scraped with Essay Question": 2.3
+      "Total Jobs": 732,
+      "Scraped Questionnaires": 664,
+      "Jobs with Essay Question": 51,
+      "% of Scraped with Essay Question": 7.7
     },
     {
       "Grade Level": "VM-15",
-      "Total Jobs": 680,
-      "Scraped Questionnaires": 38,
+      "Total Jobs": 695,
+      "Scraped Questionnaires": 40,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
+    },
+    {
+      "Grade Level": "GS-9/11",
+      "Total Jobs": 694,
+      "Scraped Questionnaires": 663,
+      "Jobs with Essay Question": 16,
+      "% of Scraped with Essay Question": 2.4
     }
   ],
   "location_analysis": [
     {
       "Location": "Washington, District of Columbia",
-      "Total Jobs": 830,
-      "Scraped Questionnaires": 622,
-      "Jobs with Essay Question": 77,
-      "% of Scraped with Essay Question": 12.4
+      "Total Jobs": 852,
+      "Scraped Questionnaires": 634,
+      "Jobs with Essay Question": 84,
+      "% of Scraped with Essay Question": 13.2
     },
     {
       "Location": "Salt Lake City, Utah",
-      "Total Jobs": 219,
-      "Scraped Questionnaires": 156,
+      "Total Jobs": 222,
+      "Scraped Questionnaires": 159,
       "Jobs with Essay Question": 4,
-      "% of Scraped with Essay Question": 2.6
+      "% of Scraped with Essay Question": 2.5
     },
     {
       "Location": "San Diego, California",
-      "Total Jobs": 204,
-      "Scraped Questionnaires": 140,
+      "Total Jobs": 210,
+      "Scraped Questionnaires": 143,
       "Jobs with Essay Question": 4,
-      "% of Scraped with Essay Question": 2.9
+      "% of Scraped with Essay Question": 2.8
     },
     {
       "Location": "Indianapolis, Indiana",
-      "Total Jobs": 189,
-      "Scraped Questionnaires": 167,
+      "Total Jobs": 194,
+      "Scraped Questionnaires": 171,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Location": "Phoenix, Arizona",
-      "Total Jobs": 183,
-      "Scraped Questionnaires": 144,
+      "Total Jobs": 188,
+      "Scraped Questionnaires": 146,
       "Jobs with Essay Question": 5,
-      "% of Scraped with Essay Question": 3.5
+      "% of Scraped with Essay Question": 3.4
     },
     {
       "Location": "Battle Creek, Michigan",
-      "Total Jobs": 170,
-      "Scraped Questionnaires": 162,
+      "Total Jobs": 174,
+      "Scraped Questionnaires": 166,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Location": "Albuquerque, New Mexico",
-      "Total Jobs": 164,
-      "Scraped Questionnaires": 150,
+      "Total Jobs": 168,
+      "Scraped Questionnaires": 154,
       "Jobs with Essay Question": 2,
       "% of Scraped with Essay Question": 1.3
     },
     {
       "Location": "Atlanta, Georgia",
-      "Total Jobs": 158,
-      "Scraped Questionnaires": 144,
+      "Total Jobs": 164,
+      "Scraped Questionnaires": 148,
       "Jobs with Essay Question": 4,
-      "% of Scraped with Essay Question": 2.8
+      "% of Scraped with Essay Question": 2.7
     },
     {
       "Location": "Portland, Oregon",
-      "Total Jobs": 147,
-      "Scraped Questionnaires": 128,
+      "Total Jobs": 152,
+      "Scraped Questionnaires": 132,
       "Jobs with Essay Question": 2,
-      "% of Scraped with Essay Question": 1.6
+      "% of Scraped with Essay Question": 1.5
     },
     {
       "Location": "San Antonio, Texas",
-      "Total Jobs": 146,
-      "Scraped Questionnaires": 133,
+      "Total Jobs": 151,
+      "Scraped Questionnaires": 138,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     }
@@ -175,73 +175,73 @@
   "agency_analysis": [
     {
       "Agency": "Department of Veterans Affairs",
-      "Total Jobs": 10088,
-      "Scraped Questionnaires": 9148,
+      "Total Jobs": 10271,
+      "Scraped Questionnaires": 9314,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Agency": "Department of the Navy",
-      "Total Jobs": 3264,
-      "Scraped Questionnaires": 1982,
+      "Total Jobs": 3290,
+      "Scraped Questionnaires": 1995,
       "Jobs with Essay Question": 2,
       "% of Scraped with Essay Question": 0.1
     },
     {
       "Agency": "Department of the Air Force",
-      "Total Jobs": 2860,
-      "Scraped Questionnaires": 2587,
-      "Jobs with Essay Question": 111,
+      "Total Jobs": 2918,
+      "Scraped Questionnaires": 2633,
+      "Jobs with Essay Question": 113,
       "% of Scraped with Essay Question": 4.3
     },
     {
       "Agency": "Department of Defense",
-      "Total Jobs": 2546,
-      "Scraped Questionnaires": 2443,
-      "Jobs with Essay Question": 118,
-      "% of Scraped with Essay Question": 4.8
+      "Total Jobs": 2603,
+      "Scraped Questionnaires": 2499,
+      "Jobs with Essay Question": 129,
+      "% of Scraped with Essay Question": 5.2
     },
     {
       "Agency": "Department of the Army",
-      "Total Jobs": 2365,
-      "Scraped Questionnaires": 2022,
+      "Total Jobs": 2403,
+      "Scraped Questionnaires": 2056,
       "Jobs with Essay Question": 12,
       "% of Scraped with Essay Question": 0.6
     },
     {
       "Agency": "Department of Homeland Security",
-      "Total Jobs": 1115,
-      "Scraped Questionnaires": 1036,
+      "Total Jobs": 1132,
+      "Scraped Questionnaires": 1052,
       "Jobs with Essay Question": 32,
-      "% of Scraped with Essay Question": 3.1
+      "% of Scraped with Essay Question": 3.0
     },
     {
       "Agency": "Department of Justice",
-      "Total Jobs": 934,
-      "Scraped Questionnaires": 652,
-      "Jobs with Essay Question": 178,
-      "% of Scraped with Essay Question": 27.3
+      "Total Jobs": 975,
+      "Scraped Questionnaires": 660,
+      "Jobs with Essay Question": 186,
+      "% of Scraped with Essay Question": 28.2
     },
     {
       "Agency": "Department of Transportation",
-      "Total Jobs": 517,
+      "Total Jobs": 528,
       "Scraped Questionnaires": 37,
       "Jobs with Essay Question": 20,
       "% of Scraped with Essay Question": 54.1
     },
     {
       "Agency": "Department of Health and Human Services",
-      "Total Jobs": 487,
-      "Scraped Questionnaires": 465,
-      "Jobs with Essay Question": 5,
-      "% of Scraped with Essay Question": 1.1
+      "Total Jobs": 501,
+      "Scraped Questionnaires": 479,
+      "Jobs with Essay Question": 6,
+      "% of Scraped with Essay Question": 1.3
     },
     {
       "Agency": "Department of the Interior",
-      "Total Jobs": 449,
-      "Scraped Questionnaires": 429,
-      "Jobs with Essay Question": 147,
-      "% of Scraped with Essay Question": 34.3
+      "Total Jobs": 453,
+      "Scraped Questionnaires": 433,
+      "Jobs with Essay Question": 149,
+      "% of Scraped with Essay Question": 34.4
     },
     {
       "Agency": "Department of Agriculture",
@@ -252,38 +252,38 @@
     },
     {
       "Agency": "Other Agencies and Independent Organizations",
-      "Total Jobs": 243,
-      "Scraped Questionnaires": 197,
-      "Jobs with Essay Question": 36,
-      "% of Scraped with Essay Question": 18.3
+      "Total Jobs": 246,
+      "Scraped Questionnaires": 199,
+      "Jobs with Essay Question": 37,
+      "% of Scraped with Essay Question": 18.6
     },
     {
       "Agency": "Legislative Branch",
-      "Total Jobs": 232,
+      "Total Jobs": 237,
       "Scraped Questionnaires": 118,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Agency": "Department of Commerce",
-      "Total Jobs": 114,
+      "Total Jobs": 117,
       "Scraped Questionnaires": 110,
       "Jobs with Essay Question": 51,
       "% of Scraped with Essay Question": 46.4
     },
     {
       "Agency": "Judicial Branch",
-      "Total Jobs": 57,
+      "Total Jobs": 59,
       "Scraped Questionnaires": 16,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Agency": "Department of the Treasury",
-      "Total Jobs": 45,
-      "Scraped Questionnaires": 39,
+      "Total Jobs": 52,
+      "Scraped Questionnaires": 46,
       "Jobs with Essay Question": 6,
-      "% of Scraped with Essay Question": 15.4
+      "% of Scraped with Essay Question": 13.0
     },
     {
       "Agency": "Department of State",
@@ -294,17 +294,17 @@
     },
     {
       "Agency": "Executive Office of the President",
-      "Total Jobs": 25,
-      "Scraped Questionnaires": 12,
-      "Jobs with Essay Question": 9,
-      "% of Scraped with Essay Question": 75.0
+      "Total Jobs": 30,
+      "Scraped Questionnaires": 15,
+      "Jobs with Essay Question": 12,
+      "% of Scraped with Essay Question": 80.0
     },
     {
       "Agency": "Department of Energy",
-      "Total Jobs": 14,
-      "Scraped Questionnaires": 11,
-      "Jobs with Essay Question": 3,
-      "% of Scraped with Essay Question": 27.3
+      "Total Jobs": 16,
+      "Scraped Questionnaires": 13,
+      "Jobs with Essay Question": 5,
+      "% of Scraped with Essay Question": 38.5
     },
     {
       "Agency": "Court Services and Offender Supervision Agency for DC",
@@ -317,129 +317,129 @@
   "occupation_analysis": [
     {
       "Occupation Series": "0610 - Nurse",
-      "Total Jobs": 1949,
-      "Scraped Questionnaires": 1929,
+      "Total Jobs": 1993,
+      "Scraped Questionnaires": 1971,
       "Jobs with Essay Question": 11,
       "% of Scraped with Essay Question": 0.6
     },
     {
       "Occupation Series": "0185 - Social Work",
-      "Total Jobs": 984,
-      "Scraped Questionnaires": 970,
+      "Total Jobs": 997,
+      "Scraped Questionnaires": 983,
       "Jobs with Essay Question": 7,
       "% of Scraped with Essay Question": 0.7
     },
     {
       "Occupation Series": "0602 - Medical Officer",
-      "Total Jobs": 957,
-      "Scraped Questionnaires": 120,
+      "Total Jobs": 974,
+      "Scraped Questionnaires": 121,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Occupation Series": "0301 - Miscellaneous Administration And Program",
-      "Total Jobs": 867,
-      "Scraped Questionnaires": 724,
+      "Total Jobs": 879,
+      "Scraped Questionnaires": 730,
       "Jobs with Essay Question": 60,
-      "% of Scraped with Essay Question": 8.3
+      "% of Scraped with Essay Question": 8.2
     },
     {
       "Occupation Series": "1702 - Education And Training Technician",
-      "Total Jobs": 701,
-      "Scraped Questionnaires": 620,
+      "Total Jobs": 712,
+      "Scraped Questionnaires": 630,
       "Jobs with Essay Question": 4,
       "% of Scraped with Essay Question": 0.6
     },
     {
       "Occupation Series": "0679 - Medical Support Assistance",
-      "Total Jobs": 680,
-      "Scraped Questionnaires": 666,
+      "Total Jobs": 701,
+      "Scraped Questionnaires": 687,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Occupation Series": "0189 - Recreation Aid And Assistant",
-      "Total Jobs": 663,
-      "Scraped Questionnaires": 504,
+      "Total Jobs": 674,
+      "Scraped Questionnaires": 514,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Occupation Series": "1101 - General Business And Industry",
-      "Total Jobs": 593,
-      "Scraped Questionnaires": 455,
-      "Jobs with Essay Question": 67,
-      "% of Scraped with Essay Question": 14.7
+      "Total Jobs": 612,
+      "Scraped Questionnaires": 469,
+      "Jobs with Essay Question": 72,
+      "% of Scraped with Essay Question": 15.4
     },
     {
       "Occupation Series": "2210 - Information Technology Management",
-      "Total Jobs": 556,
-      "Scraped Questionnaires": 453,
+      "Total Jobs": 571,
+      "Scraped Questionnaires": 464,
       "Jobs with Essay Question": 10,
       "% of Scraped with Essay Question": 2.2
     },
     {
       "Occupation Series": "0303 - Miscellaneous Clerk And Assistant",
-      "Total Jobs": 546,
-      "Scraped Questionnaires": 466,
+      "Total Jobs": 550,
+      "Scraped Questionnaires": 467,
       "Jobs with Essay Question": 9,
       "% of Scraped with Essay Question": 1.9
     },
     {
       "Occupation Series": "0620 - Practical Nurse",
-      "Total Jobs": 529,
-      "Scraped Questionnaires": 520,
+      "Total Jobs": 539,
+      "Scraped Questionnaires": 529,
       "Jobs with Essay Question": 6,
-      "% of Scraped with Essay Question": 1.2
+      "% of Scraped with Essay Question": 1.1
     },
     {
       "Occupation Series": "0180 - Psychology",
-      "Total Jobs": 436,
-      "Scraped Questionnaires": 412,
+      "Total Jobs": 440,
+      "Scraped Questionnaires": 415,
       "Jobs with Essay Question": 26,
       "% of Scraped with Essay Question": 6.3
     },
     {
       "Occupation Series": "3566 - Custodial Working",
-      "Total Jobs": 416,
-      "Scraped Questionnaires": 369,
+      "Total Jobs": 420,
+      "Scraped Questionnaires": 371,
       "Jobs with Essay Question": 3,
       "% of Scraped with Essay Question": 0.8
     },
     {
       "Occupation Series": "0640 - Health Aid And Technician",
-      "Total Jobs": 408,
-      "Scraped Questionnaires": 399,
+      "Total Jobs": 415,
+      "Scraped Questionnaires": 405,
       "Jobs with Essay Question": 12,
       "% of Scraped with Essay Question": 3.0
     },
     {
       "Occupation Series": "0343 - Management And Program Analysis",
-      "Total Jobs": 399,
-      "Scraped Questionnaires": 340,
-      "Jobs with Essay Question": 15,
-      "% of Scraped with Essay Question": 4.4
+      "Total Jobs": 406,
+      "Scraped Questionnaires": 346,
+      "Jobs with Essay Question": 17,
+      "% of Scraped with Essay Question": 4.9
     },
     {
       "Occupation Series": "7408 - Food Service Working",
-      "Total Jobs": 343,
-      "Scraped Questionnaires": 299,
+      "Total Jobs": 348,
+      "Scraped Questionnaires": 304,
       "Jobs with Essay Question": 0,
       "% of Scraped with Essay Question": 0.0
     },
     {
       "Occupation Series": "0621 - Nursing Assistant",
-      "Total Jobs": 315,
-      "Scraped Questionnaires": 313,
+      "Total Jobs": 317,
+      "Scraped Questionnaires": 315,
       "Jobs with Essay Question": 1,
       "% of Scraped with Essay Question": 0.3
     },
     {
       "Occupation Series": "0201 - Human Resources Management",
-      "Total Jobs": 304,
-      "Scraped Questionnaires": 241,
+      "Total Jobs": 313,
+      "Scraped Questionnaires": 246,
       "Jobs with Essay Question": 4,
-      "% of Scraped with Essay Question": 1.7
+      "% of Scraped with Essay Question": 1.6
     },
     {
       "Occupation Series": "0801 - General Engineering",
@@ -450,8 +450,8 @@
     },
     {
       "Occupation Series": "7404 - Cooking",
-      "Total Jobs": 274,
-      "Scraped Questionnaires": 241,
+      "Total Jobs": 282,
+      "Scraped Questionnaires": 247,
       "Jobs with Essay Question": 1,
       "% of Scraped with Essay Question": 0.4
     }
@@ -476,19 +476,19 @@
       "Week 4": 5.4,
       "Week 5": 5.7,
       "Monthly Percentage": 3.8,
-      "Total Jobs Posted": 12166,
+      "Total Jobs Posted": 12167,
       "Jobs with Essay Question": 462
     },
     {
       "Month": "August 2025",
       "Week 1": 5.6,
       "Week 2": 5.7,
-      "Week 3": 4.2,
+      "Week 3": 6.7,
       "Week 4": null,
       "Week 5": null,
-      "Monthly Percentage": 5.6,
-      "Total Jobs Posted": 6346,
-      "Jobs with Essay Question": 357
+      "Monthly Percentage": 5.8,
+      "Total Jobs Posted": 6716,
+      "Jobs with Essay Question": 387
     }
   ],
   "job_postings": [
@@ -10679,6 +10679,366 @@
       "close_date": "08/25/2025",
       "usajobs_link": 843365600,
       "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12783148"
+    },
+    {
+      "position_title": "Personnel Security Specialist",
+      "occupation": "0080 - Security Administration",
+      "agency": "Executive Office of the President",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-9/11",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/26/2025",
+      "usajobs_link": 843520300,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12782782"
+    },
+    {
+      "position_title": "Lead Nuclear Materials Courier (MBF)",
+      "occupation": "0084 - Nuclear Materials Courier",
+      "agency": "Department of Energy",
+      "location": "Oak Ridge, Tennessee",
+      "grade": "NV-3",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/28/2025",
+      "usajobs_link": 843495600,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12768027"
+    },
+    {
+      "position_title": "Lead Nuclear Materials Courier (SRF)",
+      "occupation": "0084 - Nuclear Materials Courier",
+      "agency": "Department of Energy",
+      "location": "Oak Ridge, Tennessee",
+      "grade": "NV-3",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/28/2025",
+      "usajobs_link": 843496000,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12782093"
+    },
+    {
+      "position_title": "College Intern (Student Volunteer) Spring 2026",
+      "occupation": "0099 - General Student Trainee",
+      "agency": "Department of Justice",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-00",
+      "service": "Excepted",
+      "open_date": "08/15/2025",
+      "close_date": "09/30/2025",
+      "usajobs_link": 843471600,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12780749"
+    },
+    {
+      "position_title": "Records & Information Management Specialist",
+      "occupation": "0308 - Records & Information Management",
+      "agency": "Department of Justice",
+      "location": "Fresno, California",
+      "grade": "GS-9",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/21/2025",
+      "usajobs_link": 843553400,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12785495"
+    },
+    {
+      "position_title": "Secretary (Office Automation)",
+      "occupation": "0318 - Secretary",
+      "agency": "Department of Defense",
+      "location": "Little Rock AFB, Arkansas",
+      "grade": "GS-6",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/25/2025",
+      "usajobs_link": 843570200,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12785656"
+    },
+    {
+      "position_title": "Program Analyst",
+      "occupation": "0343 - Management And Program Analysis",
+      "agency": "Department of Health and Human Services",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-14",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/28/2025",
+      "usajobs_link": 843470700,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12776680"
+    },
+    {
+      "position_title": "PROGRAM ANALYST",
+      "occupation": "0343 - Management And Program Analysis",
+      "agency": "Department of the Air Force",
+      "location": "Hurlburt Field, Florida",
+      "grade": "GS-12",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/28/2025",
+      "usajobs_link": 843491500,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12785110"
+    },
+    {
+      "position_title": "Wildland Firefighter (Aviation Fixed-Wing Specialist) - Direct Hire Authority",
+      "occupation": "0456 - Wildland Fire Management",
+      "agency": "Department of the Interior",
+      "location": "Fairbanks, Alaska",
+      "grade": "GW-11/12",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "09/04/2025",
+      "usajobs_link": 843563200,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12784656"
+    },
+    {
+      "position_title": "Financial Specialist",
+      "occupation": "0501 - Financial Administration And Program",
+      "agency": "Executive Office of the President",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-14",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/22/2025",
+      "usajobs_link": 843278800,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12782733"
+    },
+    {
+      "position_title": "Financial Analyst",
+      "occupation": "0501 - Financial Administration And Program",
+      "agency": "Executive Office of the President",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-11/12",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/22/2025",
+      "usajobs_link": 843301600,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12782931"
+    },
+    {
+      "position_title": "Attorney Advisor",
+      "occupation": "0905 - Attorney",
+      "agency": "Other Agencies and Independent Organizations",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-14/15",
+      "service": "Excepted",
+      "open_date": "08/15/2025",
+      "close_date": "08/28/2025",
+      "usajobs_link": 843475100,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12784868"
+    },
+    {
+      "position_title": "Legal Assistant (Office Automation)",
+      "occupation": "0986 - Legal Assistance",
+      "agency": "Department of Justice",
+      "location": "Jackson, Tennessee",
+      "grade": "GS-5",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/29/2025",
+      "usajobs_link": 843485600,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12783260"
+    },
+    {
+      "position_title": "Legal Assistant (Office Automation)",
+      "occupation": "0986 - Legal Assistance",
+      "agency": "Department of Justice",
+      "location": "Jackson, Tennessee",
+      "grade": "GS-5",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/29/2025",
+      "usajobs_link": 843485900,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12783580"
+    },
+    {
+      "position_title": "Legal Assistant (Office Automation) Grand Jury",
+      "occupation": "0986 - Legal Assistance",
+      "agency": "Department of Justice",
+      "location": "Jefferson City, Missouri",
+      "grade": "GS-8",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/28/2025",
+      "usajobs_link": 843505500,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12781206"
+    },
+    {
+      "position_title": "Legal Assistant (Office Automation) Grand Jury",
+      "occupation": "0986 - Legal Assistance",
+      "agency": "Department of Justice",
+      "location": "Jefferson City, Missouri",
+      "grade": "GS-8",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/28/2025",
+      "usajobs_link": 843506800,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12781205"
+    },
+    {
+      "position_title": "Lead Legal Assistant (OA)",
+      "occupation": "0986 - Legal Assistance",
+      "agency": "Department of Justice",
+      "location": "Houston, Texas",
+      "grade": "GS-9",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/21/2025",
+      "usajobs_link": 843508200,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12782898"
+    },
+    {
+      "position_title": "Law Student Volunteer - Spring 2026",
+      "occupation": "0999 - Legal Occupations Student Trainee",
+      "agency": "Department of Justice",
+      "location": "Washington, District of Columbia",
+      "grade": "GS-00",
+      "service": "Excepted",
+      "open_date": "08/14/2025",
+      "close_date": "09/30/2025",
+      "usajobs_link": 843471300,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12780802"
+    },
+    {
+      "position_title": "Commissary Contractor Monitor",
+      "occupation": "1101 - General Business And Industry",
+      "agency": "Department of Defense",
+      "location": "Fort Knox, Kentucky",
+      "grade": "GS-6",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/25/2025",
+      "usajobs_link": 843480700,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12782877"
+    },
+    {
+      "position_title": "COMMISSARY CONTRACTOR MONITOR",
+      "occupation": "1101 - General Business And Industry",
+      "agency": "Department of Defense",
+      "location": "Fort Knox, Kentucky",
+      "grade": "GS-6",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/25/2025",
+      "usajobs_link": 843481400,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12782878"
+    },
+    {
+      "position_title": "Store Associate",
+      "occupation": "1101 - General Business And Industry",
+      "agency": "Department of Defense",
+      "location": "Naval Air Station San Diego, California",
+      "grade": "GS-4",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "09/01/2025",
+      "usajobs_link": 843525500,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12785367"
+    },
+    {
+      "position_title": "Computer Assisted Ordering Technician",
+      "occupation": "1101 - General Business And Industry",
+      "agency": "Department of Defense",
+      "location": "Holloman AFB, New Mexico",
+      "grade": "GS-5",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "09/02/2025",
+      "usajobs_link": 843536300,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12785464"
+    },
+    {
+      "position_title": "Computer Assisted Ordering Technician",
+      "occupation": "1101 - General Business And Industry",
+      "agency": "Department of Defense",
+      "location": "Portsmouth, Virginia",
+      "grade": "GS-5",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/21/2025",
+      "usajobs_link": 843570900,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12785660"
+    },
+    {
+      "position_title": "FACILITY OPERATIONS SPECIALIST",
+      "occupation": "1640 - Facility Operations Services",
+      "agency": "Department of the Air Force",
+      "location": "Maxwell AFB, Alabama",
+      "grade": "GS-9",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/21/2025",
+      "usajobs_link": 843475900,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12783075"
+    },
+    {
+      "position_title": "Sales Store Checker",
+      "occupation": "2091 - Sales Store Clerical",
+      "agency": "Department of Defense",
+      "location": "Joint Base Lewis-McChord, Washington",
+      "grade": "GS-3",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/25/2025",
+      "usajobs_link": 843525300,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12784914"
+    },
+    {
+      "position_title": "Utility Systems Repairer Operator",
+      "occupation": "4742 - Utility Systems Repairing-Operating",
+      "agency": "Department of the Interior",
+      "location": "Manzanita Lake, California",
+      "grade": "WG-8",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/29/2025",
+      "usajobs_link": 843551900,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12754974"
+    },
+    {
+      "position_title": "MEATCUTTER",
+      "occupation": "7407 - Meatcutting",
+      "agency": "Department of Defense",
+      "location": "Joint Base Lewis-McChord, Washington",
+      "grade": "WG-7",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/25/2025",
+      "usajobs_link": 843526300,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12785212"
+    },
+    {
+      "position_title": "Meatcutting Worker",
+      "occupation": "7407 - Meatcutting",
+      "agency": "Department of Defense",
+      "location": "Lackland AFB, Texas",
+      "grade": "WG-5",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "09/08/2025",
+      "usajobs_link": 843545300,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12783600"
+    },
+    {
+      "position_title": "Meatcutting Worker",
+      "occupation": "7407 - Meatcutting",
+      "agency": "Department of Defense",
+      "location": "Lackland AFB, Texas",
+      "grade": "WG-5",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "09/08/2025",
+      "usajobs_link": 843545700,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12784634"
+    },
+    {
+      "position_title": "Meatcutter",
+      "occupation": "7407 - Meatcutting",
+      "agency": "Department of Defense",
+      "location": "Robins AFB, Georgia",
+      "grade": "WG-7",
+      "service": "Competitive",
+      "open_date": "08/15/2025",
+      "close_date": "08/20/2025",
+      "usajobs_link": 843571000,
+      "questionnaire_link": "https://apply.usastaffing.gov/ViewQuestionnaire/12785662"
     }
   ]
 }
