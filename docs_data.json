@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-08-17T07:17:17.771991",
-  "total_jobs": 3012354,
+  "generated_at": "2025-08-18T07:18:13.227708",
+  "total_jobs": 3012794,
   "total_fields": 42,
-  "file_size": "589MB",
-  "latest_job_date": "2025-08-17",
+  "file_size": "591MB",
+  "latest_job_date": "2025-08-18",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 133088,
-      "jobs_opened": 133088,
-      "jobs_closed": 131556,
-      "coverage": "Current through August 17, 2025"
+      "total_jobs": 133528,
+      "jobs_opened": 133528,
+      "jobs_closed": 131996,
+      "coverage": "Current through August 18, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0998\"}], [{\"series\": \"0854\"}, {\"series\": \"0830\"}, {\"series\": \"1520\"}, {\"series\": \"0855\"}, {\"series\": \"1550\"}], [{\"series\": \"0801\"}, {\"series\": \"0840\"}], [{\"series\": \"2604\"}, {\"series\": \"2610\"}] (3060 unique)",
+      "examples": "[{\"series\": \"0830\"}, {\"series\": \"0893\"}, {\"series\": \"0801\"}, {\"series\": \"0861\"}], [{\"series\": \"0850\"}, {\"series\": \"0801\"}, {\"series\": \"0855\"}, {\"series\": \"1310\"}], [{\"series\": \"5725\"}], [{\"series\": \"0017\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Air Force\\Headquarters, Air Force Space Command, Department of Education\\Office of Inspector General, Department of Labor\\Mine Safety and Health Administration, Occupational Safety and Health Review Commission (542 unique)",
+      "examples": "Millennium Challenge Corporation, Committee for Purchase from People Who Are Blind or Severely Disabled, Department of the Navy\\Chief of Naval Education and Training, Department of the Air Force\\DOD Cyber Crime Center (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "CHDE240779758392D, 12539292-FDSZNY-ST-24, SDDE243982341456R, CBTD-12641054-25-AL (363801 unique)",
+      "examples": "ST-12434749-24-HLS, 24-12430170L-TSB-0525-5T7, 8V-AFPC-12265776-269668-STG, DE-12446036-24-JHH (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Permanent, Agency Employees Only, Seasonal, Recent graduates (15 unique)",
+      "examples": "Term, Temporary Promotion, Telework, Detail (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "NV33, TV99, HUKK, CM56 (528 unique)",
+      "examples": "SM02, DLOW, NU00, AF3D (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Office of the Secretary of Defense, Army Installation Management Command, Cybersecurity and Infrastructure Security Agency, Air Force Services Agency (502 unique)",
+      "examples": "Deputy Assistant Secretary for FMBTS, Materiel Acquisition Activities, Bonneville Power Administration, National Gallery of Art (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "FD, VA, FI, PO (122 unique)",
+      "examples": "ZS, NL, MA, WU (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of the Interior, Department of Housing and Urban Development, Executive Office of the President, Judicial Branch (26 unique)",
+      "examples": "National Aeronautics and Space Administration, Department of Health and Human Services, Department of Homeland Security, Department of the Army (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Office of Environment, Safety and Health, RESEARCH DRILLING PROGRAM, Operations and Asset Management Section, Navigation Management Branch, U.S. Army Engineer District, Honolulu Program & Project Management Division, Environmental Branch (59973 unique)",
+      "examples": "Justice Management Division, Procurement Services Staff, Acquisition Management Group (JMD/OBD), Madigan Army Medical Center (MAMC), Air Traffic Organization (ATO), Human Resources Solutions, Center for Leadership Development, The Lab at OPM (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T15:31:46.140680, 2025-07-05T14:04:05.197355, 2025-07-05T14:04:05.200340, 2025-07-05T15:12:56.628934 (367177 unique)",
+      "examples": "2025-07-05T14:10:34.098222, 2025-07-05T12:59:13.262962, 2025-07-05T12:59:13.272168, 2025-07-05T15:34:27.889237 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "EK, IL, KH, FJ (127 unique)",
+      "examples": "JI, 09, 32, 20 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "HH, LH, 25, 81 (125 unique)",
+      "examples": "30, IK, HK, 34 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "SO, NF, AE, ZP (191 unique)",
+      "examples": "DJ, NS, MS, NC (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-12-15, 2025-03-27, 2024-12-26, 2024-10-17 (672 unique)",
+      "examples": "2024-09-29, 2025-06-27, 2024-11-12, 2024-06-30 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-03-26, 2025-01-03, 2025-01-13, 2024-12-24 (550 unique)",
+      "examples": "2025-03-07, 2024-06-23, 2024-05-13, 2024-10-12 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-05-04, 2024-10-04, 2024-10-29, 2024-01-04 (365 unique)",
+      "examples": "2024-09-25, 2024-07-19, 2024-12-17, 2024-06-02 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Supervisory Contact Representative (NTE 1 Year, MBE up to 5 years, MBMP), INTERDISCIPLINARY ECOLOGIST/WILDLIFE BIOLOGIST, Helicopter Flight Instructor, HR SPEC (CLASS) (Title 32) (77986 unique)",
+      "examples": "Supervisory Management Analyst - INTERNAL TO AGENCY, Information Technology (IT) Specialist (Policy Planning and Systems Analysis), PERSONAL AND PROFESSIONAL DEVELOPMENT ADVISOR NF4, Pharmacist (National Program Manager) (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "F, 90090, 24, 27 (115 unique)",
+      "examples": "35, 61, 51, 5 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "51, 003, 183, 87 (157 unique)",
+      "examples": "86, 55, 91, 37 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
