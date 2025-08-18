@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Which USAJobs Listings Have New Essay Questions?</title>
+    <title>Merit Hiring Plan Essay Tracker</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,11 +12,41 @@
     <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     
     <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container-fluid {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e50;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
         .tab-content {
-            padding: 20px 0;
+            padding: 30px 0;
         }
         .stats-card {
             margin-bottom: 20px;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        .stats-card .card-title {
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stats-card h2 {
+            font-weight: 700;
+            margin-top: 10px;
         }
         .heatmap-table td {
             text-align: center;
@@ -58,13 +88,104 @@
         .filter-tag .remove-filter:hover {
             color: #dc3545;
         }
+        .nav-tabs {
+            border-bottom: 2px solid #dee2e6;
+        }
+        .nav-tabs .nav-link {
+            color: #6c757d;
+            font-weight: 500;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.2s;
+        }
+        .nav-tabs .nav-link:hover {
+            border-color: transparent;
+            color: #495057;
+        }
+        .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            background-color: transparent;
+            border-color: transparent;
+            border-bottom-color: #0d6efd;
+        }
+        .table {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .alert-info {
+            background-color: #e3f2fd;
+            border-color: #bbdefb;
+            color: #1565c0;
+        }
+        .question-highlight {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        .question-highlight h4 {
+            color: #856404;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        .question-text {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: #495057;
+            line-height: 1.6;
+        }
+        .show-all-btn {
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        .table-container {
+            position: relative;
+        }
+        h3 {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 20px;
+        }
+        .sortable:hover {
+            background-color: #f0f0f0;
+        }
+        .sortable::after {
+            content: '↕';
+            position: absolute;
+            right: 5px;
+            color: #ccc;
+            font-size: 12px;
+        }
+        .sortable.asc::after {
+            content: '↑';
+            color: #0d6efd;
+        }
+        .sortable.desc::after {
+            content: '↓';
+            color: #0d6efd;
+        }
     </style>
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
-                <h1 class="mt-4 mb-4">Which USAJobs Listings Have New Essay Questions?</h1>
+                <h1 class="mt-5 mb-4 text-center">Merit Hiring Plan Essay Tracker</h1>
+                <p class="text-center text-muted mb-5">Tracking the implementation of new essay questions in federal job applications</p>
                 
                 <!-- Tabs -->
                 <ul class="nav nav-tabs" id="analysisTabs" role="tablist">
@@ -124,34 +245,102 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt-4">
+                        <div class="row mt-5">
                             <div class="col-12">
-                                <h3>Question Being Tracked</h3>
-                                <div class="alert alert-info">
-                                    <strong>Exact question text:</strong><br>
-                                    "How would you help advance the President's Executive Orders and policy priorities in this role?"
+                                <div class="card mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h4 class="mb-0">Essay Questions</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-4">The <a href="https://www.dcpas.osd.mil/sites/default/files/2025-05/Merit%20Hiring%20Plan%205-29-2025.pdf" target="_blank">Merit Hiring Plan</a> requires applicants for GS-5 and above positions to answer these four essay questions (200 words max each):</p>
+                                        
+                                        <div class="accordion" id="essayQuestions">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#question1">
+                                                        <strong>1. Commitment to the Constitution</strong>
+                                                    </button>
+                                                </h2>
+                                                <div id="question1" class="accordion-collapse collapse" data-bs-parent="#essayQuestions">
+                                                    <div class="accordion-body">
+                                                        "How has your commitment to the Constitution and the founding principles of the United States inspired you to pursue this role within the Federal government? Provide a concrete example from professional, academic, or personal experience."
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#question2">
+                                                        <strong>2. Government Efficiency</strong>
+                                                    </button>
+                                                </h2>
+                                                <div id="question2" class="accordion-collapse collapse" data-bs-parent="#essayQuestions">
+                                                    <div class="accordion-body">
+                                                        "In this role, how would you use your skills and experience to improve government efficiency and effectiveness? Provide specific examples where you improved processes, reduced costs, or improved outcomes."
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#question3">
+                                                        <strong>3. Executive Orders and Policy Priorities</strong>
+                                                    </button>
+                                                </h2>
+                                                <div id="question3" class="accordion-collapse collapse" data-bs-parent="#essayQuestions">
+                                                    <div class="accordion-body">
+                                                        "How would you help advance the President's Executive Orders and policy priorities in this role? Identify one or two relevant Executive Orders or policy initiatives that are significant to you, and explain how you would help implement them if hired."
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#question4">
+                                                        <strong>4. Work Ethic</strong>
+                                                    </button>
+                                                </h2>
+                                                <div id="question4" class="accordion-collapse collapse" data-bs-parent="#essayQuestions">
+                                                    <div class="accordion-body">
+                                                        "How has a strong work ethic contributed to your professional, academic or personal achievements? Provide one or two specific examples, and explain how those qualities would enable you to serve effectively in this position."
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <p class="text-muted small mb-0 mt-3"><strong>Technical note:</strong> This tracker identifies job postings containing these essay questions by searching questionnaire files for the text: <code style="background-color: #f8f9fa; padding: 2px 4px; border-radius: 3px;">How would you help advance the President's Executive Orders and policy priorities in this role?</code></p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt-4">
+                        <div class="row mt-5">
                             <div class="col-12">
-                                <h3>Data Coverage</h3>
-                                <p id="dataCoverage"></p>
-                                <div class="alert alert-info mt-3">
-                                    <strong>Understanding the Statistics:</strong><br>
-                                    • <strong>Total Jobs:</strong> All federal job postings in this category<br>
-                                    • <strong>Scraped Questionnaires:</strong> Jobs where we successfully downloaded the questionnaire<br>
-                                    • <strong>Jobs with Essay Question:</strong> Jobs containing the specific executive order question<br>
-                                    • <strong>% of Scraped:</strong> Percentage of successfully scraped questionnaires containing the essay question
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h4 class="mb-0">Data Coverage & Methodology</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-3" id="dataCoverage"></p>
+                                        
+                                        <h6 class="text-muted mb-2">Understanding the Statistics</h6>
+                                        <ul class="small mb-0">
+                                            <li><strong>Total Jobs:</strong> All federal job postings in each category</li>
+                                            <li><strong>Scraped Questionnaires:</strong> Jobs where we successfully downloaded the questionnaire</li>
+                                            <li><strong>Jobs with Essay Questions:</strong> Jobs containing the Merit Hiring Plan questions</li>
+                                            <li><strong>% of Scraped:</strong> Percentage of successfully scraped questionnaires containing the essay questions</li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt-4">
+                        <div class="row mt-5 pt-5 border-top">
                             <div class="col-12">
-                                <hr>
                                 <div class="text-center">
                                     <p class="mb-3">Created by Abigail Haddad</p>
                                     <div class="d-flex justify-content-center gap-3">
+                                        <a href="https://abigailhaddad.netlify.app/" target="_blank" class="btn btn-outline-info">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-globe me-2" viewBox="0 0 16 16">
+                                                <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4a7.966 7.966 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z"/>
+                                            </svg>
+                                            Website
+                                        </a>
                                         <a href="https://github.com/abigailhaddad/usajobs_historical" target="_blank" class="btn btn-outline-dark">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github me-2" viewBox="0 0 16 16">
                                                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
@@ -185,32 +374,57 @@
                     
                     <!-- Service Type Tab -->
                     <div class="tab-pane fade" id="service" role="tabpanel">
-                        <h3>Service Type Analysis</h3>
-                        <div id="serviceTable"></div>
+                        <div class="section-header">
+                            <h3>Service Type Analysis</h3>
+                            <button class="btn btn-outline-primary show-all-btn" data-table="serviceTable" style="display: none;">Show All</button>
+                        </div>
+                        <div class="table-container">
+                            <div id="serviceTable"></div>
+                        </div>
                     </div>
                     
                     <!-- Grade Level Tab -->
                     <div class="tab-pane fade" id="grade" role="tabpanel">
-                        <h3>Grade Level Analysis (Top 10)</h3>
-                        <div id="gradeTable"></div>
+                        <div class="section-header">
+                            <h3>Grade Level Analysis</h3>
+                            <button class="btn btn-outline-primary show-all-btn" data-table="gradeTable">Show All Grades</button>
+                        </div>
+                        <div class="table-container">
+                            <div id="gradeTable"></div>
+                        </div>
                     </div>
                     
                     <!-- Location Tab -->
                     <div class="tab-pane fade" id="location" role="tabpanel">
-                        <h3>Geographic Analysis (Top 10)</h3>
-                        <div id="locationTable"></div>
+                        <div class="section-header">
+                            <h3>Geographic Analysis</h3>
+                            <button class="btn btn-outline-primary show-all-btn" data-table="locationTable">Show All Locations</button>
+                        </div>
+                        <div class="table-container">
+                            <div id="locationTable"></div>
+                        </div>
                     </div>
                     
                     <!-- Agency Tab -->
                     <div class="tab-pane fade" id="agency" role="tabpanel">
-                        <h3>Agency Analysis (Top 20)</h3>
-                        <div id="agencyTable"></div>
+                        <div class="section-header">
+                            <h3>Agency Analysis</h3>
+                            <button class="btn btn-outline-primary show-all-btn" data-table="agencyTable">Show All Agencies</button>
+                        </div>
+                        <div class="table-container">
+                            <div id="agencyTable"></div>
+                        </div>
                     </div>
                     
                     <!-- Occupation Tab -->
                     <div class="tab-pane fade" id="occupation" role="tabpanel">
-                        <h3>Occupation Series Analysis (Top 20)</h3>
-                        <div id="occupationTable"></div>
+                        <div class="section-header">
+                            <h3>Occupation Series Analysis</h3>
+                            <button class="btn btn-outline-primary show-all-btn" data-table="occupationTable">Show All Occupations</button>
+                        </div>
+                        <div class="table-container">
+                            <div id="occupationTable"></div>
+                        </div>
                     </div>
                     
                     <!-- Timeline Tab -->
@@ -237,6 +451,7 @@
                         <table id="jobsTable" class="table table-striped table-bordered" style="width:100%">
                             <thead>
                                 <tr>
+                                    <th>ID</th>
                                     <th>Position Title</th>
                                     <th>Occupation</th>
                                     <th>Agency</th>
@@ -249,10 +464,11 @@
                                     <th>Questions</th>
                                 </tr>
                                 <tr class="search-row">
-                                    <th><input type="text" class="form-control form-control-sm column-search" data-column="0" placeholder="Search title..." /></th>
-                                    <th><input type="text" class="form-control form-control-sm column-search" data-column="1" placeholder="Search occupation..." /></th>
-                                    <th><input type="text" class="form-control form-control-sm column-search" data-column="2" placeholder="Search agency..." /></th>
-                                    <th><input type="text" class="form-control form-control-sm column-search" data-column="3" placeholder="Search location..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm column-search" data-column="0" placeholder="Search ID..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm column-search" data-column="1" placeholder="Search title..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm column-search" data-column="2" placeholder="Search occupation..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm column-search" data-column="3" placeholder="Search agency..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm column-search" data-column="4" placeholder="Search location..." /></th>
                                     <th>
                                         <div class="dropdown">
                                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
@@ -284,8 +500,8 @@
                                             </div>
                                         </div>
                                     </th>
-                                    <th><input type="text" class="form-control form-control-sm column-search" data-column="6" placeholder="Search date..." /></th>
                                     <th><input type="text" class="form-control form-control-sm column-search" data-column="7" placeholder="Search date..." /></th>
+                                    <th><input type="text" class="form-control form-control-sm column-search" data-column="8" placeholder="Search date..." /></th>
                                     <th></th>
                                     <th></th>
                                 </tr>
@@ -346,61 +562,154 @@
             const table = document.createElement('table');
             table.className = 'table table-bordered';
             
-            // Find max percentage for scaling
-            let maxPercent = 0;
-            data.forEach(row => {
-                Object.entries(row).forEach(([key, value]) => {
-                    if (key.includes('% of Scraped')) {
-                        const percent = parseFloat(value);
-                        if (percent > maxPercent) maxPercent = percent;
-                    }
-                });
-            });
+            // Store original data for sorting
+            let tableData = [...data];
+            let currentSort = { column: null, direction: null };
             
-            // Create header
+            // Determine initial row limit based on table type
+            const initialLimits = {
+                'gradeTable': 10,
+                'locationTable': 10,
+                'agencyTable': 20,
+                'occupationTable': 20,
+                'serviceTable': 999  // Show all for service table (usually small)
+            };
+            const initialLimit = initialLimits[elementId] || 10;
+            
+            // Function to render table body
+            function renderTableBody() {
+                // Clear existing tbody if any
+                const existingTbody = table.querySelector('tbody');
+                if (existingTbody) {
+                    existingTbody.remove();
+                }
+                
+                // Find max percentage for scaling
+                let maxPercent = 0;
+                tableData.forEach(row => {
+                    Object.entries(row).forEach(([key, value]) => {
+                        if (key.includes('% of Scraped')) {
+                            const percent = parseFloat(value);
+                            if (percent > maxPercent) maxPercent = percent;
+                        }
+                    });
+                });
+                
+                // Create body
+                const tbody = document.createElement('tbody');
+                tableData.forEach((row, index) => {
+                    const tr = document.createElement('tr');
+                    if (index >= initialLimit) {
+                        tr.style.display = 'none';
+                        tr.className = 'hidden-row';
+                    }
+                    Object.values(row).forEach((value, index) => {
+                        const td = document.createElement('td');
+                        const columnKey = Object.keys(row)[index];
+                        
+                        // Add % sign to percentage columns
+                        if (columnKey.includes('% of Scraped')) {
+                            td.textContent = value + '%';
+                            td.style.textAlign = 'center';
+                            const percent = parseFloat(value);
+                            // Scale to max percent in this table
+                            const intensity = maxPercent > 0 ? percent / maxPercent : 0;
+                            td.style.backgroundColor = `rgba(13, 110, 253, ${intensity})`;
+                            td.style.color = intensity > 0.5 ? 'white' : 'black';
+                        } else {
+                            // Format numbers with commas
+                            if (typeof value === 'number' && !columnKey.includes('% of Scraped')) {
+                                td.textContent = value.toLocaleString();
+                                td.style.textAlign = 'center';
+                            } else {
+                                td.textContent = value;
+                            }
+                        }
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+            }
+            
+            // Create header with sorting
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
-            Object.keys(data[0]).forEach(key => {
+            const columnKeys = Object.keys(data[0]);
+            
+            columnKeys.forEach((key, index) => {
                 const th = document.createElement('th');
                 th.textContent = key;
+                th.className = 'sortable';
+                th.setAttribute('data-column', index);
+                
+                th.addEventListener('click', function() {
+                    const columnIndex = parseInt(this.getAttribute('data-column'));
+                    
+                    // Remove sort classes from all headers
+                    headerRow.querySelectorAll('th').forEach(header => {
+                        header.classList.remove('asc', 'desc');
+                    });
+                    
+                    // Determine sort direction
+                    if (currentSort.column === columnIndex && currentSort.direction === 'asc') {
+                        currentSort.direction = 'desc';
+                        this.classList.add('desc');
+                    } else {
+                        currentSort.direction = 'asc';
+                        this.classList.add('asc');
+                    }
+                    currentSort.column = columnIndex;
+                    
+                    // Sort the data
+                    tableData.sort((a, b) => {
+                        const aVal = Object.values(a)[columnIndex];
+                        const bVal = Object.values(b)[columnIndex];
+                        
+                        // Handle numeric vs string sorting
+                        let comparison = 0;
+                        if (typeof aVal === 'number' && typeof bVal === 'number') {
+                            comparison = aVal - bVal;
+                        } else {
+                            comparison = String(aVal).localeCompare(String(bVal));
+                        }
+                        
+                        return currentSort.direction === 'asc' ? comparison : -comparison;
+                    });
+                    
+                    // Re-render the table body
+                    renderTableBody();
+                    
+                    // Update show all button visibility after sort
+                    const showAllBtn = document.querySelector(`[data-table="${elementId}"]`);
+                    if (showAllBtn && showAllBtn.textContent.includes('Show Less')) {
+                        // If showing all, make sure hidden rows stay visible
+                        const hiddenRows = table.querySelectorAll('.hidden-row');
+                        hiddenRows.forEach(row => {
+                            row.style.display = '';
+                        });
+                    }
+                });
+                
                 headerRow.appendChild(th);
             });
             thead.appendChild(headerRow);
             table.appendChild(thead);
             
-            // Create body
-            const tbody = document.createElement('tbody');
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                Object.values(row).forEach((value, index) => {
-                    const td = document.createElement('td');
-                    const columnKey = Object.keys(row)[index];
-                    
-                    // Add % sign to percentage columns
-                    if (columnKey.includes('% of Scraped')) {
-                        td.textContent = value + '%';
-                        td.style.textAlign = 'center';
-                        const percent = parseFloat(value);
-                        // Scale to max percent in this table
-                        const intensity = maxPercent > 0 ? percent / maxPercent : 0;
-                        td.style.backgroundColor = `rgba(13, 110, 253, ${intensity})`;
-                        td.style.color = intensity > 0.5 ? 'white' : 'black';
-                    } else {
-                        // Format numbers with commas
-                        if (typeof value === 'number' && !columnKey.includes('% of Scraped')) {
-                            td.textContent = value.toLocaleString();
-                            td.style.textAlign = 'center';
-                        } else {
-                            td.textContent = value;
-                        }
-                    }
-                    tr.appendChild(td);
-                });
-                tbody.appendChild(tr);
-            });
-            table.appendChild(tbody);
+            // Initial render
+            renderTableBody();
             
             container.appendChild(table);
+            
+            // Show/hide the "Show All" button if needed
+            if (data.length > initialLimit) {
+                const showAllBtn = document.querySelector(`[data-table="${elementId}"]`);
+                if (showAllBtn) {
+                    showAllBtn.style.display = 'block';
+                    showAllBtn.textContent = `Show All (${data.length} total)`;
+                    console.log(`Button shown for ${elementId}: ${data.length} items, limit ${initialLimit}`);
+                }
+            }
         }
         
         function createTimelineTable(elementId, data) {
@@ -477,6 +786,7 @@
             const table = $('#jobsTable').DataTable({
                 data: data,
                 columns: [
+                    { data: 'usajobs_link' },  // Use USAJobs control number as ID
                     { data: 'position_title' },
                     { data: 'occupation' },
                     { data: 'agency' },
@@ -525,11 +835,11 @@
                 initComplete: function() {
                     // Setup column search
                     const api = this.api();
-                    const columnNames = ['Position Title', 'Occupation', 'Agency', 'Location', 'Grade', 'Service', 'Open Date', 'Close Date'];
+                    const columnNames = ['ID', 'Position Title', 'Occupation', 'Agency', 'Location', 'Grade', 'Service', 'Open Date', 'Close Date'];
                     
                     // Store active filters for each column
                     const columnFilters = {
-                        0: [], 1: [], 2: [], 3: [], 6: [], 7: []
+                        0: [], 1: [], 2: [], 3: [], 4: [], 7: [], 8: []
                     };
                     
                     // Populate grade dropdown with checkboxes
@@ -658,9 +968,9 @@
                         
                         if (checkedGrades.length > 0) {
                             const pattern = '^(' + checkedGrades.map(g => g.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')$';
-                            api.column(4).search(pattern, true, false).draw();
+                            api.column(5).search(pattern, true, false).draw();
                         } else {
-                            api.column(4).search('').draw();
+                            api.column(5).search('').draw();
                         }
                         updateFilterDisplay();
                     });
@@ -683,9 +993,9 @@
                         
                         if (checkedServices.length > 0) {
                             const pattern = '^(' + checkedServices.join('|') + ')$';
-                            api.column(5).search(pattern, true, false).draw();
+                            api.column(6).search(pattern, true, false).draw();
                         } else {
-                            api.column(5).search('').draw();
+                            api.column(6).search('').draw();
                         }
                         updateFilterDisplay();
                     });
@@ -695,16 +1005,16 @@
                         const colIdx = parseInt($(this).data('column'));
                         const filterIndex = $(this).data('index');
                         
-                        if (colIdx === 4) {
+                        if (colIdx === 5) {
                             // Clear grade checkboxes
                             $('.grade-filter').prop('checked', false);
                             $('.grade-dropdown').closest('.dropdown').find('button').text('All Grades');
-                            api.column(4).search('').draw();
-                        } else if (colIdx === 5) {
+                            api.column(5).search('').draw();
+                        } else if (colIdx === 6) {
                             // Clear service checkboxes
                             $('.service-filter').prop('checked', false);
                             $('.service-dropdown').closest('.dropdown').find('button').text('All Services');
-                            api.column(5).search('').draw();
+                            api.column(6).search('').draw();
                         } else {
                             // Remove specific text filter
                             if (filterIndex !== undefined) {
@@ -733,11 +1043,12 @@
         
         // CSV download function
         function downloadCSV() {
-            const headers = ['Position Title', 'Occupation', 'Agency', 'Location', 'Grade', 'Service Type', 'Open Date', 'Close Date', 'USAJobs Link', 'Questionnaire Link'];
+            const headers = ['USAJobs ID', 'Position Title', 'Occupation', 'Agency', 'Location', 'Grade', 'Service Type', 'Open Date', 'Close Date', 'USAJobs Link', 'Questionnaire Link'];
             const csvContent = [
                 headers.join(','),
                 ...allJobsData.map(row => {
                     return [
+                        row.usajobs_link || '',
                         '"' + (row.position_title || '').replace(/"/g, '""') + '"',
                         '"' + (row.occupation || '').replace(/"/g, '""') + '"',
                         '"' + (row.agency || '').replace(/"/g, '""') + '"',
@@ -765,6 +1076,30 @@
             
             // Add event listener for CSV download button
             document.getElementById('downloadCSV').addEventListener('click', downloadCSV);
+            
+            // Add event listeners for "Show All" buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('show-all-btn')) {
+                    const tableId = e.target.getAttribute('data-table');
+                    const tableContainer = document.getElementById(tableId);
+                    const hiddenRows = tableContainer.querySelectorAll('.hidden-row');
+                    
+                    if (e.target.textContent.includes('Show All')) {
+                        // Show all rows
+                        hiddenRows.forEach(row => {
+                            row.style.display = '';
+                        });
+                        e.target.textContent = 'Show Less';
+                    } else {
+                        // Hide extra rows
+                        hiddenRows.forEach(row => {
+                            row.style.display = 'none';
+                        });
+                        const total = hiddenRows.length + tableContainer.querySelectorAll('tbody tr:not(.hidden-row)').length;
+                        e.target.textContent = `Show All (${total} total)`;
+                    }
+                }
+            });
         });
     </script>
 </body>

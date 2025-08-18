@@ -111,9 +111,9 @@ def transform_monster_url(url):
 
 def main():
     # Always regenerate the clean all jobs data to get the latest
-    print("Generating clean all jobs data from latest parquet files...")
-    import subprocess
-    subprocess.run(['python3', 'generate_all_jobs_data.py'], check=True)
+    # print("Generating clean all jobs data from latest parquet files...")
+    # import subprocess
+    # subprocess.run(['python3', 'generate_all_jobs_data.py'], check=True)
     
     # Load the clean all jobs data
     all_jobs_df = pd.read_csv('all_jobs_clean.csv')
@@ -185,28 +185,28 @@ def main():
     
     # Grade Level Analysis
     if 'grade_level' in scraped_df.columns and 'grade_level' in all_jobs_df.columns:
-        grade_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'grade_level', top_n=10, column_name='Grade Level')
+        grade_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'grade_level', top_n=None, column_name='Grade Level')
         analysis_data['grade_analysis'] = grade_stats.to_dict('records')
     else:
         analysis_data['grade_analysis'] = []
     
     # Location Analysis
     if 'position_location' in scraped_df.columns and 'position_location' in all_jobs_df.columns:
-        location_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'position_location', top_n=10, column_name='Location')
+        location_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'position_location', top_n=None, column_name='Location')
         analysis_data['location_analysis'] = location_stats.to_dict('records')
     else:
         analysis_data['location_analysis'] = []
     
     # Agency Analysis
     if 'hiring_agency' in all_jobs_df.columns:
-        agency_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'hiring_agency', top_n=20, column_name='Agency')
+        agency_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'hiring_agency', top_n=None, column_name='Agency')
         analysis_data['agency_analysis'] = agency_stats.to_dict('records')
     else:
         analysis_data['agency_analysis'] = []
     
     # Occupation Analysis
     if 'occupation_full' in all_jobs_df.columns:
-        occupation_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'occupation_full', top_n=20, column_name='Occupation Series')
+        occupation_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'occupation_full', top_n=None, column_name='Occupation Series')
         analysis_data['occupation_analysis'] = occupation_stats.to_dict('records')
     else:
         analysis_data['occupation_analysis'] = []
@@ -286,6 +286,7 @@ def main():
         job_postings = []
         for _, job in eo_jobs.iterrows():
             posting = {
+                'questionnaire_id': job['questionnaire_id'] if pd.notna(job['questionnaire_id']) else '',
                 'position_title': job['position_title'][:100] if pd.notna(job['position_title']) else '',
                 'occupation': job['occupation'][:50] if pd.notna(job['occupation']) else '',
                 'agency': job['hiring_agency'][:50] if pd.notna(job['hiring_agency']) else '',
