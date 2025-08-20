@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-08-19T07:16:21.836880",
-  "total_jobs": 3013613,
+  "generated_at": "2025-08-20T07:16:15.509486",
+  "total_jobs": 3014656,
   "total_fields": 42,
-  "file_size": "596MB",
-  "latest_job_date": "2025-08-19",
+  "file_size": "601MB",
+  "latest_job_date": "2025-08-20",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 134346,
-      "jobs_opened": 134346,
-      "jobs_closed": 132808,
-      "coverage": "Current through August 19, 2025"
+      "total_jobs": 135389,
+      "jobs_opened": 135389,
+      "jobs_closed": 133844,
+      "coverage": "Current through August 20, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1306\"}, {\"series\": \"1320\"}, {\"series\": \"0810\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}], [{\"series\": \"0850\"}, {\"series\": \"0810\"}, {\"series\": \"0808\"}, {\"series\": \"1350\"}, {\"series\": \"0830\"}], [{\"series\": \"0840\"}, {\"series\": \"0855\"}, {\"series\": \"1310\"}], [{\"series\": \"1301\"}, {\"series\": \"1370\"}, {\"series\": \"0150\"}, {\"series\": \"0401\"}] (3060 unique)",
+      "examples": "[{\"series\": \"0401\"}, {\"series\": \"0803\"}], [{\"series\": \"0170\"}, {\"series\": \"0401\"}, {\"series\": \"0193\"}], [{\"series\": \"0806\"}, {\"series\": \"0810\"}], [{\"series\": \"0890\"}, {\"series\": \"0810\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of Veterans Affairs\\Veterans Benefits Administration, Department of Defense\\Office of the Local Defense Community Corporation, Department of Homeland Security\\DHS Headquarters, Tennessee Valley Authority, OIG (542 unique)",
+      "examples": "Department of the Army\\United States Army Installation Management Command, Postal Regulatory Commission, Department of the Army\\U.S. Army Space and Missile Defense Command/U. S. Army Forces Strategic Command, Small Business Administration (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "IHS-24-OK-12399935-ESEP/MP, ST-12603884-25-CJM, MCGT242485181275R, C2SCNAFCY-24-12382385 (363801 unique)",
+      "examples": "CBTF-12273331-24-TH, HRSA-OIT-24-MP-12528647, ST-12354455-24-SRC, CAZM-12526425-24-MRA (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Presidential Management Fellows, ICTAP Only, Seasonal, Temporary (15 unique)",
+      "examples": "Presidential Management Fellows, Recent graduates, Multiple, ICTAP Only (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "DD82, AF02, ARSB, DLLS (528 unique)",
+      "examples": "NN23, RO00, LF00, BW00 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Central Intelligence Agency, U.S. Secret Service, Naval Medical Command, Office of Communications and Outreach (502 unique)",
+      "examples": "United States Space Force, Chief of Naval Education and Training, Federal Financial Institutions Examination Council, Administration for Children and Families (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "QQ, AU, OI, HD (122 unique)",
+      "examples": "XD, NQ, FD, TR (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Judicial Branch, Department of Veterans Affairs, Department of the Treasury, Department of Health and Human Services (26 unique)",
+      "examples": "Department of Agriculture, Department of Housing and Urban Development, Department of the Treasury, Department of Labor (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Phoenix Veteran Affairs Medical Center, South Atlantic Regional Business Directorate Resource Management Division, Social Sciences Unit (SSU), Human Resources, Office of Workforce Relations and Evaluations, Health Services Section (HRU) (59973 unique)",
+      "examples": "USAG Humphreys, DFMWR, BOD, Camp Humphreys Lodging, South Korea, Office of Infrastructure (NA-90), Savannah River Acquisition & Project Management Office (NA-94), National Weather Service (NWS), Southern Region (SR), River Forecast Centers (RFC), Export-Import Bank of the United States (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T14:06:16.832366, 2025-07-05T14:15:57.561496, 2025-07-05T13:08:00.736930, 2025-07-05T15:31:46.167788 (367177 unique)",
+      "examples": "2025-07-05T12:59:13.235101, 2025-07-05T14:31:20.561039, 2025-07-05T15:27:19.797516, 2025-07-05T15:24:20.046847 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "H, 09, 37, M (127 unique)",
+      "examples": "F, LI, 36, AA (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "HL, LH, 18, HJ (125 unique)",
+      "examples": "16, IK, 98, NA (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "BN, SY, LP, PA (191 unique)",
+      "examples": "NQ, PA, KJ, KA (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-07-14, 2025-03-25, 2024-02-29, 2025-01-25 (672 unique)",
+      "examples": "2025-01-25, 2024-01-17, 2025-06-08, 2024-02-29 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-05-30, 2024-10-11, 2024-07-08, 2025-03-14 (550 unique)",
+      "examples": "2024-10-22, 2024-05-11, 2025-06-27, 2024-12-14 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-11-08, 2024-01-01, 2024-09-29, 2024-04-07 (365 unique)",
+      "examples": "2024-04-15, 2024-01-26, 2024-02-04, 2024-05-15 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Training and Curriculum Specialist-DIRECT HIRE AUTHORITY, Clinical Pharmacist (Outpatient), INFORMATION TECHNOLOGY SPECIALIST (CUSTOMER SUPPORT), Major (77986 unique)",
+      "examples": "Diagnostic Radiologic Technologist Diagnostic & Fluoroscopic, Management and Program Analyst (IDRS Unit Security Representative (USR)/UNAX Analyst), Supervisory Nurse (ADON), RN - Mental Health Inpatient RRC (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "none, HS5, 44, 24 (115 unique)",
+      "examples": "CM, PB3, 18, 81 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "23, 51, 175, 17 (157 unique)",
+      "examples": "6, 32, 128, 63 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
