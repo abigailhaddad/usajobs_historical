@@ -92,9 +92,9 @@ function updateDateDisplay(stats) {
         document.getElementById('dateRangeSubtitle').textContent = 
             `Comparing ${prev.display} vs ${curr.display}`;
         
-        // Update stat labels
-        document.getElementById('previousYearLabel').textContent = `${prev.year} Listings`;
-        document.getElementById('currentYearLabel').textContent = `${curr.year} Listings`;
+        // Update stat labels with full date ranges
+        document.getElementById('previousYearLabel').textContent = `${prev.display}`;
+        document.getElementById('currentYearLabel').textContent = `${curr.display}`;
         document.getElementById('percentageLabel').textContent = `${curr.year} as % of ${prev.year}`;
         
         // Update last updated date
