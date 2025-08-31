@@ -467,13 +467,13 @@ function initializeBubbleChart() {
     const maxListings = d3.max(dataToShow, d => d.listings2024);
     const sizeScale = d3.scaleSqrt()
         .domain([0, maxListings])
-        .range([8, 60]);
+        .range([2, 80]);
     
     // Create force simulation
     const simulation = d3.forceSimulation(dataToShow)
         .force('x', d3.forceX(d => xScale(d.percentageOf2024)).strength(1))
         .force('y', d3.forceY(height / 2).strength(0.1))
-        .force('collide', d3.forceCollide(d => sizeScale(d.listings2024) + 2))
+        .force('collide', d3.forceCollide(d => sizeScale(d.listings2024) + 1))
         .stop();
     
     // Run simulation
