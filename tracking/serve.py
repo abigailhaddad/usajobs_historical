@@ -37,7 +37,10 @@ def is_port_in_use(port):
 
 def serve(port=8000):
     """Start HTTP server"""
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    # Change to public directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    public_dir = os.path.join(script_dir, 'public')
+    os.chdir(public_dir)
     
     Handler = http.server.SimpleHTTPRequestHandler
     
