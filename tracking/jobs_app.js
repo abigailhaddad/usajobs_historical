@@ -5,7 +5,9 @@ let jobListingsData = [];
 let columnFilters = {};
 let departmentData = [];
 let agencyData = [];
-let aggregationLevel = 'department'; // 'individual', 'agency', or 'department'
+let subelementData = [];
+let aggregationLevel = 'department'; // 'individual', 'agency', 'subelement', or 'department'
+let occupationSeriesMap = {};
 
 // Define department colors based on actual departments in our data
 const DEPARTMENT_COLORS = {
@@ -57,47 +59,57 @@ function formatPercentage(value) {
     return `${value.toFixed(1)}%`;
 }
 
+// Load occupation series mapping
+async function loadOccupationMap() {
+    try {
+        // Try to load the data-generated map first
+        let response = await fetch('occupation_series_from_data.json');
+        if (response.ok) {
+            occupationSeriesMap = await response.json();
+            console.log('Loaded occupation map from data with', Object.keys(occupationSeriesMap).length, 'entries');
+            return;
+        }
+        
+        // Fall back to the original map if the new one isn't available
+        response = await fetch('occupation_series_complete.json');
+        if (response.ok) {
+            occupationSeriesMap = await response.json();
+            console.log('Loaded fallback occupation map with', Object.keys(occupationSeriesMap).length, 'entries');
+        } else {
+            console.log('Failed to load occupation map, status:', response.status);
+        }
+    } catch (error) {
+        console.log('Could not load occupation series map, using codes only:', error);
+    }
+}
+
 // Load CSV data
 async function loadData() {
     try {
-        console.log('Starting to load CSV data...');
-        const response = await fetch('data/job_listings_summary.csv');
+        // Load occupation map first
+        await loadOccupationMap();
+        
+        console.log('Starting to load JSON data...');
+        const response = await fetch('data/job_listings_summary.json');
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const csvText = await response.text();
-        console.log('CSV loaded successfully, length:', csvText.length);
+        jobListingsData = await response.json();
+        console.log('JSON loaded successfully, rows:', jobListingsData.length);
         
-        // Parse CSV
-        const lines = csvText.split('\n');
-        const headers = lines[0].split(',');
-        
-        jobListingsData = [];
-        for (let i = 1; i < lines.length; i++) {
-            if (lines[i].trim() === '') continue;
-            
-            // Handle CSV parsing with proper quote handling
-            const values = parseCSVLine(lines[i]);
-            if (values.length !== headers.length) continue;
-            
-            const row = {};
-            headers.forEach((header, index) => {
-                row[header.trim()] = values[index];
-            });
-            
-            // Convert numeric values
-            row.listings2024Value = parseInt(row['Listings_2024'].replace(/,/g, '')) || 0;
-            row.listings2025Value = parseInt(row['Listings_2025'].replace(/,/g, '')) || 0;
-            row.percentageValue = parseFloat(row['Percentage_2025_of_2024'].replace('%', '')) || 0;
-            
-            jobListingsData.push(row);
+        // Debug: Check sample data
+        if (jobListingsData.length > 0) {
+            console.log('Sample row:', jobListingsData[0]);
+            console.log('Occupation series in first 10 rows:', 
+                jobListingsData.slice(0, 10).map(r => r.Occupation_Series));
         }
         
-        // Calculate department and agency-level aggregations
+        // Calculate department, agency, and subelement-level aggregations
         aggregateDepartmentData();
         aggregateAgencyData();
+        aggregateSubelementData();
         
         // Calculate summary statistics
         updateSummaryStats();
@@ -117,31 +129,6 @@ async function loadData() {
     }
 }
 
-// Parse CSV line handling quoted values
-function parseCSVLine(line) {
-    const result = [];
-    let current = '';
-    let inQuotes = false;
-    
-    for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        
-        if (char === '"') {
-            inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-            result.push(current.trim().replace(/^"|"$/g, ''));
-            current = '';
-        } else {
-            current += char;
-        }
-    }
-    
-    if (current) {
-        result.push(current.trim().replace(/^"|"$/g, ''));
-    }
-    
-    return result;
-}
 
 // Aggregate data by department
 function aggregateDepartmentData() {
@@ -215,6 +202,42 @@ function aggregateAgencyData() {
     agencyData.sort((a, b) => b.listings2024 - a.listings2024);
 }
 
+// Aggregate data by subelement
+function aggregateSubelementData() {
+    const subelementMap = new Map();
+    
+    jobListingsData.forEach(row => {
+        const subelement = row.Subelement || 'Unknown';
+        const agency = row.Agency || 'Unknown';
+        const dept = row.Department || 'Unknown';
+        const key = `${dept}|${agency}|${subelement}`;
+        
+        if (!subelementMap.has(key)) {
+            subelementMap.set(key, {
+                department: dept,
+                agency: agency,
+                name: subelement,
+                listings2024: 0,
+                listings2025: 0
+            });
+        }
+        
+        const subelementInfo = subelementMap.get(key);
+        subelementInfo.listings2024 += row.listings2024Value;
+        subelementInfo.listings2025 += row.listings2025Value;
+    });
+    
+    // Convert to array and calculate percentages
+    subelementData = Array.from(subelementMap.values()).map(subelement => ({
+        ...subelement,
+        percentageOf2024: subelement.listings2024 > 0 ? 
+            (subelement.listings2025 / subelement.listings2024 * 100) : 0
+    }));
+    
+    // Sort by 2024 listings descending
+    subelementData.sort((a, b) => b.listings2024 - a.listings2024);
+}
+
 // Update summary statistics
 function updateSummaryStats() {
     const total2024 = jobListingsData.reduce((sum, row) => sum + row.listings2024Value, 0);
@@ -232,16 +255,32 @@ function populateMainFilters() {
     // Get unique values
     const departments = [...new Set(jobListingsData.map(row => row.Department))].sort();
     const agencies = [...new Set(jobListingsData.map(row => row.Agency))].sort();
-    const appointmentTypes = [...new Set(jobListingsData.map(row => row.Appointment_Type))].sort();
-    const workSchedules = [...new Set(jobListingsData.map(row => row.Work_Schedule))].sort();
-    const hiringPaths = [...new Set(jobListingsData.map(row => row.Hiring_Paths))].sort();
+    // Get unique appointment types (case-insensitive)
+    const appointmentTypeMap = new Map();
+    jobListingsData.forEach(row => {
+        const apptType = row.Appointment_Type;
+        const upperType = apptType ? apptType.toUpperCase() : '';
+        if (!appointmentTypeMap.has(upperType) && apptType) {
+            appointmentTypeMap.set(upperType, apptType);
+        }
+    });
+    const appointmentTypes = Array.from(appointmentTypeMap.values()).sort();
+    const occupations = [...new Set(jobListingsData.map(row => row.Occupation_Series))]
+        .filter(occ => occ && occ !== 'Unknown' && occ !== '*')
+        .sort((a, b) => {
+            // Sort by series number
+            const aNum = parseInt(a) || 9999;
+            const bNum = parseInt(b) || 9999;
+            return aNum - bNum;
+        });
+    
     
     // Populate dropdowns
     populateDropdown('mainDepartmentFilter', departments);
     populateDropdown('mainAgencyFilter', agencies);
     populateDropdown('mainAppointmentFilter', appointmentTypes);
-    populateDropdown('mainScheduleFilter', workSchedules);
-    populateDropdown('mainHiringPathFilter', hiringPaths);
+    populateOccupationDropdown('mainOccupationFilter', occupations);
+    
 }
 
 // Populate a dropdown
@@ -254,6 +293,36 @@ function populateDropdown(selectId, options) {
     
     options.forEach(option => {
         $select.append(`<option value="${option}">${option}</option>`);
+    });
+    
+    // Restore previous selection if it exists
+    if (currentValue && options.includes(currentValue)) {
+        $select.val(currentValue);
+    }
+}
+
+// Populate occupation dropdown with series and names
+function populateOccupationDropdown(selectId, options) {
+    const $select = $(`#${selectId}`);
+    const currentValue = $select.val();
+    
+    $select.empty();
+    $select.append('<option value="">All Occupations</option>');
+    
+    options.forEach((series, index) => {
+        // The new map should already have both formats
+        let name = occupationSeriesMap[series] || '';
+        
+        // Format the name properly (title case instead of all caps)
+        if (name) {
+            name = name.toLowerCase()
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+        
+        const displayText = name ? `${series} - ${name}` : series;
+        $select.append(`<option value="${series}">${displayText}</option>`);
     });
     
     // Restore previous selection if it exists
@@ -302,8 +371,8 @@ function initializeDataTable() {
                 data: 'percentageOf2024',
                 render: function(data) {
                     // Color based on how close to 100% (maintaining 2024 levels)
-                    const className = data >= 100 ? 'high-percentage' :   // Green if maintained/grew
-                                    data >= 75 ? 'medium-percentage' :    // Yellow if moderate decline
+                    const className = data >= 90 ? 'high-percentage' :    // Green if maintained most hiring
+                                    data >= 50 ? 'medium-percentage' :    // Orange if moderate decline
                                     'low-percentage';                      // Red if major decline
                     return `<span class="percentage-cell ${className}">${formatPercentage(data)}</span>`;
                 }
@@ -328,7 +397,7 @@ function updateTableData() {
     if (aggregationLevel === 'department') {
         dataToShow = getFilteredDepartmentData().map(d => ({
             Department: d.name,
-            Agency: '—',
+            Agency: `${d.agencyCount} agencies`,
             listings2024: d.listings2024,
             listings2025: d.listings2025,
             percentageOf2024: d.percentageOf2024
@@ -337,6 +406,14 @@ function updateTableData() {
         dataToShow = getFilteredAgencyData().map(d => ({
             Department: d.department,
             Agency: d.name,
+            listings2024: d.listings2024,
+            listings2025: d.listings2025,
+            percentageOf2024: d.percentageOf2024
+        }));
+    } else if (aggregationLevel === 'subelement') {
+        dataToShow = getFilteredSubelementData().map(d => ({
+            Department: d.department,
+            Agency: `${d.agency} - ${d.name}`,
             listings2024: d.listings2024,
             listings2025: d.listings2025,
             percentageOf2024: d.percentageOf2024
@@ -353,11 +430,8 @@ function updateTableData() {
             const apptFilter = $('#mainAppointmentFilter').val();
             if (apptFilter && row.Appointment_Type !== apptFilter) return false;
             
-            const scheduleFilter = $('#mainScheduleFilter').val();
-            if (scheduleFilter && row.Work_Schedule !== scheduleFilter) return false;
-            
-            const pathFilter = $('#mainHiringPathFilter').val();
-            if (pathFilter && row.Hiring_Paths !== pathFilter) return false;
+            const occupationFilter = $('#mainOccupationFilter').val();
+            if (occupationFilter && row.Occupation_Series !== occupationFilter) return false;
             
             return true;
         }).map(row => ({
@@ -390,8 +464,10 @@ function initializeBubbleChart() {
     let dataToShow;
     if (aggregationLevel === 'department') {
         dataToShow = getFilteredDepartmentData();
-    } else {
+    } else if (aggregationLevel === 'agency') {
         dataToShow = getFilteredAgencyData();
+    } else {
+        dataToShow = getFilteredSubelementData();
     }
     
     // Filter out entities with no 2024 listings
@@ -545,11 +621,8 @@ function getFilteredDepartmentData() {
         const apptFilter = $('#mainAppointmentFilter').val();
         if (apptFilter && row.Appointment_Type !== apptFilter) return false;
         
-        const scheduleFilter = $('#mainScheduleFilter').val();
-        if (scheduleFilter && row.Work_Schedule !== scheduleFilter) return false;
-        
-        const pathFilter = $('#mainHiringPathFilter').val();
-        if (pathFilter && row.Hiring_Paths !== pathFilter) return false;
+        const occupationFilter = $('#mainOccupationFilter').val();
+        if (occupationFilter && row.Occupation_Series !== occupationFilter) return false;
         
         return true;
     });
@@ -597,11 +670,8 @@ function getFilteredAgencyData() {
         const apptFilter = $('#mainAppointmentFilter').val();
         if (apptFilter && row.Appointment_Type !== apptFilter) return false;
         
-        const scheduleFilter = $('#mainScheduleFilter').val();
-        if (scheduleFilter && row.Work_Schedule !== scheduleFilter) return false;
-        
-        const pathFilter = $('#mainHiringPathFilter').val();
-        if (pathFilter && row.Hiring_Paths !== pathFilter) return false;
+        const occupationFilter = $('#mainOccupationFilter').val();
+        if (occupationFilter && row.Occupation_Series !== occupationFilter) return false;
         
         return true;
     });
@@ -634,12 +704,87 @@ function getFilteredAgencyData() {
     }));
 }
 
+// Get filtered subelement data
+function getFilteredSubelementData() {
+    // Apply filters to raw data first
+    const filteredRaw = jobListingsData.filter(row => {
+        const deptFilter = $('#mainDepartmentFilter').val();
+        if (deptFilter && row.Department !== deptFilter) return false;
+        
+        const agencyFilter = $('#mainAgencyFilter').val();
+        if (agencyFilter && row.Agency !== agencyFilter) return false;
+        
+        const apptFilter = $('#mainAppointmentFilter').val();
+        if (apptFilter && row.Appointment_Type !== apptFilter) return false;
+        
+        const occupationFilter = $('#mainOccupationFilter').val();
+        if (occupationFilter && row.Occupation_Series !== occupationFilter) return false;
+        
+        return true;
+    });
+    
+    // Re-aggregate by subelement
+    const subelementMap = new Map();
+    filteredRaw.forEach(row => {
+        const subelement = row.Subelement || 'Unknown';
+        const agency = row.Agency || 'Unknown';
+        const dept = row.Department || 'Unknown';
+        const key = `${dept}|${agency}|${subelement}`;
+        
+        if (!subelementMap.has(key)) {
+            subelementMap.set(key, {
+                department: dept,
+                agency: agency,
+                name: subelement,
+                listings2024: 0,
+                listings2025: 0
+            });
+        }
+        
+        const subelementInfo = subelementMap.get(key);
+        subelementInfo.listings2024 += row.listings2024Value;
+        subelementInfo.listings2025 += row.listings2025Value;
+    });
+    
+    return Array.from(subelementMap.values()).map(subelement => ({
+        ...subelement,
+        percentageOf2024: subelement.listings2024 > 0 ? 
+            (subelement.listings2025 / subelement.listings2024 * 100) : 0
+    }));
+}
+
+// Update the active filters display under the title
+function updateActiveFiltersDisplay() {
+    const $display = $('#activeFiltersDisplay');
+    const filterTexts = [];
+    
+    // Get selected values
+    const dept = $('#mainDepartmentFilter').val();
+    const agency = $('#mainAgencyFilter').val();
+    const apptType = $('#mainAppointmentFilter').val();
+    const occupation = $('#mainOccupationFilter').val();
+    
+    // Only show if filters are applied
+    if (dept || agency || apptType || occupation) {
+        if (dept) filterTexts.push(`Department: ${dept}`);
+        if (agency) filterTexts.push(`Agency: ${agency}`);
+        if (apptType) filterTexts.push(`Type: ${apptType}`);
+        if (occupation) filterTexts.push(`Occupation: ${occupation}`);
+        
+        $display.text('Filtered by: ' + filterTexts.join(', '));
+    } else {
+        $display.text('');
+    }
+}
+
 // Initialize event handlers
 function initializeEventHandlers() {
     // Filter changes
-    $('#mainDepartmentFilter, #mainAgencyFilter, #mainAppointmentFilter, #mainScheduleFilter, #mainHiringPathFilter').on('change', function() {
+    $('#mainDepartmentFilter, #mainAgencyFilter, #mainAppointmentFilter, #mainOccupationFilter').on('change', function() {
+        console.log('Filter changed:', this.id, '=', $(this).val());
         updateTableData();
         updateFilteredStats();
+        updateActiveFiltersDisplay();
         initializeBubbleChart();
     });
     
@@ -650,7 +795,8 @@ function initializeEventHandlers() {
         initializeBubbleChart();
         
         // Update entity label
-        const label = aggregationLevel === 'department' ? 'Departments' : 'Agencies';
+        const label = aggregationLevel === 'department' ? 'Departments' : 
+                      aggregationLevel === 'agency' ? 'Agencies' : 'Subelements';
         $('#entityCount').siblings('.stat-label').text(label);
     });
 }
@@ -682,4 +828,5 @@ function updateFilteredStats() {
 $(document).ready(function() {
     loadData();
     initializeEventHandlers();
+    updateActiveFiltersDisplay();
 });
