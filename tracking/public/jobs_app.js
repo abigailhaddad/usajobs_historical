@@ -246,20 +246,79 @@ function updateSummaryStats() {
 
 // Populate main filter dropdowns
 function populateMainFilters() {
-    // Get unique values
+    // Get unique departments
     const departments = [...new Set(jobListingsData.map(row => row.Department))].sort();
-    const agencies = [...new Set(jobListingsData.map(row => row.Agency))].sort();
-    // Get unique appointment types (case-insensitive)
+    
+    // Populate department dropdown
+    populateDropdown('mainDepartmentFilter', departments);
+    
+    // Update dependent filters based on department selection
+    updateDependentFilters();
+    
+    // Change handlers will be set up in initializeEventHandlers()
+}
+
+// Update dependent filter dropdowns based on current selections
+function updateDependentFilters() {
+    const selectedDepartment = $('#mainDepartmentFilter').val();
+    const selectedAgency = $('#mainAgencyFilter').val();
+    const selectedAppointment = $('#mainAppointmentFilter').val();
+    
+    // Filter data based on current selections for cascading
+    let filteredData = jobListingsData;
+    
+    // Apply department filter
+    if (selectedDepartment) {
+        filteredData = filteredData.filter(row => row.Department === selectedDepartment);
+    }
+    
+    // Apply agency filter for subsequent dropdowns
+    if (selectedAgency) {
+        filteredData = filteredData.filter(row => row.Agency === selectedAgency);
+    }
+    
+    // Apply appointment type filter for occupation dropdown
+    if (selectedAppointment) {
+        filteredData = filteredData.filter(row => row.Appointment_Type === selectedAppointment);
+    }
+    
+    // Get current selections to preserve them if possible
+    const currentAgency = $('#mainAgencyFilter').val();
+    const currentAppointment = $('#mainAppointmentFilter').val();
+    const currentOccupation = $('#mainOccupationFilter').val();
+    
+    // Rebuild agency dropdown (filtered by department only)
+    let agencyFilterData = jobListingsData;
+    if (selectedDepartment) {
+        agencyFilterData = agencyFilterData.filter(row => row.Department === selectedDepartment);
+    }
+    const agencies = [...new Set(agencyFilterData
+        .filter(row => row.Agency && row.Agency !== row.Department)
+        .map(row => row.Agency)
+    )].sort();
+    
+    // Rebuild appointment type dropdown (filtered by department and agency)
+    let appointmentFilterData = jobListingsData;
+    if (selectedDepartment) {
+        appointmentFilterData = appointmentFilterData.filter(row => row.Department === selectedDepartment);
+    }
+    if (selectedAgency) {
+        appointmentFilterData = appointmentFilterData.filter(row => row.Agency === selectedAgency);
+    }
+    
     const appointmentTypeMap = new Map();
-    jobListingsData.forEach(row => {
+    appointmentFilterData.forEach(row => {
         const apptType = row.Appointment_Type;
         const upperType = apptType ? apptType.toUpperCase() : '';
-        if (!appointmentTypeMap.has(upperType) && apptType) {
+        // Exclude "All" and empty values
+        if (!appointmentTypeMap.has(upperType) && apptType && apptType !== 'All') {
             appointmentTypeMap.set(upperType, apptType);
         }
     });
     const appointmentTypes = Array.from(appointmentTypeMap.values()).sort();
-    const occupations = [...new Set(jobListingsData.map(row => row.Occupation_Series))]
+    
+    // Rebuild occupation dropdown (filtered by all previous selections)
+    const occupations = [...new Set(filteredData.map(row => row.Occupation_Series))]
         .filter(occ => occ && occ !== 'Unknown' && occ !== '*')
         .sort((a, b) => {
             // Sort by series number
@@ -268,13 +327,21 @@ function populateMainFilters() {
             return aNum - bNum;
         });
     
-    
-    // Populate dropdowns
-    populateDropdown('mainDepartmentFilter', departments);
+    // Repopulate dropdowns
     populateDropdown('mainAgencyFilter', agencies);
     populateDropdown('mainAppointmentFilter', appointmentTypes);
     populateOccupationDropdown('mainOccupationFilter', occupations);
     
+    // Restore selections if they're still valid
+    if (agencies.includes(currentAgency)) {
+        $('#mainAgencyFilter').val(currentAgency);
+    }
+    if (appointmentTypes.includes(currentAppointment)) {
+        $('#mainAppointmentFilter').val(currentAppointment);
+    }
+    if (occupations.includes(currentOccupation)) {
+        $('#mainOccupationFilter').val(currentOccupation);
+    }
 }
 
 // Populate a dropdown
@@ -460,7 +527,7 @@ function initializeBubbleChart() {
     // Create scales - dynamically based on actual data
     const xMax = d3.max(dataToShow, d => d.percentageOf2024) || 100;
     const xScale = d3.scaleLinear()
-        .domain([0, Math.max(100, xMax * 1.1)]) // Add 10% padding to max value
+        .domain([-5, Math.max(100, xMax * 1.1)]) // Start at -5 to give space for 0% bubbles
         .range([0, width]);
     
     // Size scale for bubbles
@@ -469,15 +536,26 @@ function initializeBubbleChart() {
         .domain([0, maxListings])
         .range([2, 80]);
     
-    // Create force simulation
+    // Create force simulation with boundary constraints
     const simulation = d3.forceSimulation(dataToShow)
         .force('x', d3.forceX(d => xScale(d.percentageOf2024)).strength(1))
-        .force('y', d3.forceY(height / 2).strength(0.1))
-        .force('collide', d3.forceCollide(d => sizeScale(d.listings2024) + 1))
+        .force('y', d3.forceY(height / 2).strength(0.05))  // Reduced strength for more vertical spread
+        .force('collide', d3.forceCollide(d => sizeScale(d.listings2024) + 3))  // Increased padding between bubbles
         .stop();
     
-    // Run simulation
-    for (let i = 0; i < 120; ++i) simulation.tick();
+    // Run simulation with boundary constraints
+    for (let i = 0; i < 200; ++i) {  // Increased iterations for better positioning
+        simulation.tick();
+        
+        // Constrain bubbles to stay within bounds
+        dataToShow.forEach(d => {
+            const radius = sizeScale(d.listings2024);
+            // Keep bubbles within x bounds
+            d.x = Math.max(radius, Math.min(width - radius, d.x));
+            // Keep bubbles within y bounds
+            d.y = Math.max(radius, Math.min(height - radius, d.y));
+        });
+    }
     
     // Create SVG
     const svg = container
@@ -519,8 +597,10 @@ function initializeBubbleChart() {
             .style('stroke', '#666')
             .style('stroke-dasharray', '3,3');
         
+        // Position text to avoid cutoff
+        const textX = Math.min(xScale(100) + 5, width - 70); // Ensure text doesn't go past right edge
         g.append('text')
-            .attr('x', xScale(100) + 5)
+            .attr('x', textX)
             .attr('y', 20)
             .style('font-size', '11px')
             .style('fill', '#666')
@@ -715,9 +795,39 @@ function updateActiveFiltersDisplay() {
 
 // Initialize event handlers
 function initializeEventHandlers() {
-    // Filter changes
-    $('#mainDepartmentFilter, #mainAgencyFilter, #mainAppointmentFilter, #mainOccupationFilter').on('change', function() {
-        console.log('Filter changed:', this.id, '=', $(this).val());
+    // Department filter changes - update dependent filters
+    $('#mainDepartmentFilter').on('change', function() {
+        console.log('Department filter changed:', $(this).val());
+        updateDependentFilters();
+        updateTableData();
+        updateFilteredStats();
+        updateActiveFiltersDisplay();
+        initializeBubbleChart();
+    });
+    
+    // Agency filter changes - update appointment and occupation filters
+    $('#mainAgencyFilter').on('change', function() {
+        console.log('Agency filter changed:', $(this).val());
+        updateDependentFilters();
+        updateTableData();
+        updateFilteredStats();
+        updateActiveFiltersDisplay();
+        initializeBubbleChart();
+    });
+    
+    // Appointment filter changes - update occupation filter
+    $('#mainAppointmentFilter').on('change', function() {
+        console.log('Appointment filter changed:', $(this).val());
+        updateDependentFilters();
+        updateTableData();
+        updateFilteredStats();
+        updateActiveFiltersDisplay();
+        initializeBubbleChart();
+    });
+    
+    // Occupation filter changes - just update display
+    $('#mainOccupationFilter').on('change', function() {
+        console.log('Occupation filter changed:', $(this).val());
         updateTableData();
         updateFilteredStats();
         updateActiveFiltersDisplay();

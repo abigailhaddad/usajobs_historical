@@ -379,6 +379,7 @@
                 <ul class="mb-0" style="padding-left: 20px;">
                     <li>Job listings ≠ actual hires. One listing may result in multiple hires, one hire, or no hires.</li>
                     <li>Not all federal positions are posted on USAJobs.</li>
+                    <li>Job listings which include multiple occupation series are counted under the first series listed.</li>
                 </ul>
             </small>
         </div>
@@ -420,31 +421,33 @@
             <h3>Filters & Display Options</h3>
             <div class="filter-controls">
                 <div class="row mb-3">
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label>Department</label>
                         <select class="form-control form-control-sm" id="mainDepartmentFilter">
                             <option value="">All Departments</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <label>Appointment Type</label>
-                        <select class="form-control form-control-sm" id="mainAppointmentFilter">
-                            <option value="">All Types</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label>Agency</label>
                         <select class="form-control form-control-sm" id="mainAgencyFilter">
                             <option value="">All Agencies</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
+                        <label>Appointment Type</label>
+                        <select class="form-control form-control-sm" id="mainAppointmentFilter">
+                            <option value="">All Types</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
                         <label>Occupation Series</label>
                         <select class="form-control form-control-sm" id="mainOccupationFilter">
                             <option value="">All Occupations</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3">
                         <label for="aggregationLevel">View By</label>
                         <select id="aggregationLevel" class="form-control form-control-sm">
                             <option value="department" selected>Department</option>
