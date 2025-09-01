@@ -51,24 +51,8 @@ def extract_occupation_series_from_parquet():
             # Get the most common title
             most_common_title, count = title_counts.most_common(1)[0]
             
-            # Try to extract a generic occupation name from the most common title
-            # Remove common prefixes/suffixes
+            # Use the most common title directly
             generic_title = most_common_title.upper()
-            
-            # Remove common job-specific terms
-            remove_terms = [
-                'SENIOR', 'JUNIOR', 'LEAD', 'SUPERVISORY', 'CHIEF', 'ASSISTANT',
-                'ASSOCIATE', 'ENTRY LEVEL', 'EXPERIENCED', 'SPECIALIST',
-                'I', 'II', 'III', 'IV', 'V', '(', ')', '-', 'LEVEL'
-            ]
-            
-            for term in remove_terms:
-                generic_title = generic_title.replace(f' {term} ', ' ')
-                generic_title = generic_title.replace(f'{term} ', '')
-                generic_title = generic_title.replace(f' {term}', '')
-            
-            # Clean up extra spaces
-            generic_title = ' '.join(generic_title.split()).strip()
             
             # Store both with and without leading zeros
             occupation_series_map[series] = generic_title

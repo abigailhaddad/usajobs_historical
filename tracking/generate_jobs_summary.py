@@ -9,6 +9,14 @@ import json
 from pathlib import Path
 import numpy as np
 
+# Load occupation series mapping
+occupation_series_map = {}
+try:
+    with open('public/occupation_series_from_data.json', 'r') as f:
+        occupation_series_map = json.load(f)
+except:
+    print("Warning: Could not load occupation series mapping")
+
 def normalize_appointment_type(appt_type):
     """Normalize appointment type to handle case variations"""
     if pd.isna(appt_type):
@@ -23,10 +31,39 @@ def extract_occupation_series(job_categories_json):
             return 'Unknown'
         categories = json.loads(job_categories_json)
         if categories and len(categories) > 0 and 'series' in categories[0]:
-            return categories[0]['series']
+            series = categories[0]['series']
+            # Look up name from mapping
+            name = occupation_series_map.get(series, occupation_series_map.get(series.lstrip('0'), ''))
+            if name:
+                return f"{series}: {name}"
+            else:
+                return series
         return 'Unknown'
     except:
         return 'Unknown'
+
+def extract_all_occupation_series(job_categories_json):
+    """Extract all occupational series from JobCategories JSON field"""
+    try:
+        if pd.isna(job_categories_json):
+            return []
+        categories = json.loads(job_categories_json)
+        if categories:
+            # Return series with names from mapping
+            result = []
+            for cat in categories:
+                series = cat.get('series', '')
+                if series:
+                    # Look up name from mapping
+                    name = occupation_series_map.get(series, occupation_series_map.get(series.lstrip('0'), ''))
+                    if name:
+                        result.append(f"{series}: {name}")
+                    else:
+                        result.append(series)
+            return result
+        return []
+    except:
+        return []
 
 def load_year_data(year):
     """Load and combine historical and current data for a year"""
@@ -87,6 +124,39 @@ def sanitize_filename(name):
     # Remove other problematic characters
     safe_name = ''.join(c for c in safe_name if c.isalnum() or c in ('_', '-'))
     return safe_name.lower()
+
+def generate_department_raw_jobs(df_2024, df_2025, department):
+    """Generate raw job listings for a specific department"""
+    # Filter by department
+    dept_2024 = df_2024[df_2024['hiringDepartmentName'] == department].copy()
+    dept_2025 = df_2025[df_2025['hiringDepartmentName'] == department].copy()
+    
+    # Add year column
+    dept_2024['year'] = 2024
+    dept_2025['year'] = 2025
+    
+    # Combine data
+    all_jobs = pd.concat([dept_2024, dept_2025], ignore_index=True)
+    
+    # Extract the fields we need
+    raw_jobs = []
+    for _, job in all_jobs.iterrows():
+        job_data = {
+            'control_number': job.get('usajobsControlNumber', ''),
+            'year': int(job['year']),
+            'position_title': job.get('positionTitle', ''),
+            'department': job.get('hiringDepartmentName', ''),
+            'agency': job.get('hiringAgencyName', ''),
+            'subagency': job.get('hiringSubelementName', ''),
+            'appointment_type': job.get('appointmentType', ''),
+            'occupation_series': extract_all_occupation_series(job.get('JobCategories', '')),
+            'open_date': pd.to_datetime(job.get('positionOpenDate')).strftime('%Y-%m-%d') if pd.notna(job.get('positionOpenDate')) else '',
+            'close_date': pd.to_datetime(job.get('positionCloseDate')).strftime('%Y-%m-%d') if pd.notna(job.get('positionCloseDate')) else '',
+            'usajobs_url': f"https://www.usajobs.gov/job/{job.get('usajobsControlNumber', '')}"
+        }
+        raw_jobs.append(job_data)
+    
+    return raw_jobs
 
 def generate_department_summary(df_2024, df_2025, department):
     """Generate summary WITH subagency for a specific department"""
@@ -203,6 +273,7 @@ def generate_job_listings_summary():
     # Create data directory if it doesn't exist
     Path('public/data').mkdir(parents=True, exist_ok=True)
     Path('public/data/departments').mkdir(exist_ok=True)
+    Path('public/data/raw_jobs').mkdir(exist_ok=True)
     
     # Save main summary (without subagency)
     summary_df.to_json('public/data/job_listings_summary.json', orient='records', indent=2)
@@ -226,17 +297,27 @@ def generate_job_listings_summary():
         filepath = f'public/data/departments/{filename}'
         dept_summary_df.to_json(filepath, orient='records', indent=2)
         
+        # Generate and save raw jobs for this department
+        raw_jobs = generate_department_raw_jobs(df_2024, df_2025, dept)
+        raw_filename = f'jobs_{sanitize_filename(dept)}.json'
+        raw_filepath = f'public/data/raw_jobs/{raw_filename}'
+        
+        with open(raw_filepath, 'w') as f:
+            json.dump(raw_jobs, f, separators=(',', ':'))  # Minified
+        
         # Track metadata
         dept_metadata.append({
             'department': dept,
             'filename': filename,
+            'raw_jobs_filename': raw_filename,
             'rows': len(dept_summary_df),
             'unique_subagencies': int(dept_summary_df['Subagency'].nunique()),
             'total_2024': int(dept_summary_df['listings2024Value'].sum()),
-            'total_2025': int(dept_summary_df['listings2025Value'].sum())
+            'total_2025': int(dept_summary_df['listings2025Value'].sum()),
+            'raw_jobs_count': len(raw_jobs)
         })
         
-        print(f"  {dept}: {len(dept_summary_df):,} rows, {dept_summary_df['Subagency'].nunique()} subagencies")
+        print(f"  {dept}: {len(dept_summary_df):,} rows, {dept_summary_df['Subagency'].nunique()} subagencies, {len(raw_jobs):,} raw jobs")
     
     # Save department metadata
     with open('public/data/department_metadata.json', 'w') as f:
