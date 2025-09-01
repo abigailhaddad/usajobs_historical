@@ -12,7 +12,7 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         lfs: true
@@ -26,6 +26,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pandas pyarrow
+    
+    - name: Pull Git LFS files
+      run: |
+        git lfs pull
+        echo "Checking data files:"
+        ls -lh data/*.parquet | head -5
     
     - name: Generate updated job data
       run: |
