@@ -1,10 +1,10 @@
-# No build needed - this is a static site
-# The publish directory is the current directory
+# Netlify configuration for Federal Hiring Essays/Questionnaires analysis
 
 # Ignore builds unless files in this directory change
 [build]
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- tracking/public/"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- questionnaires/analysis/"
 
+# Security headers
 [[headers]]
   for = "/*"
   [headers.values]

@@ -1,10 +1,10 @@
-# No build needed - this is a static site
-# The publish directory is the current directory
+# Netlify configuration for National Park Service hiring analysis
 
 # Ignore builds unless files in this directory change
 [build]
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- tracking/public/"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- analysis/national_park_service/"
 
+# Security headers
 [[headers]]
   for = "/*"
   [headers.values]
