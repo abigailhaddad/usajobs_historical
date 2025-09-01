@@ -60,7 +60,7 @@ function formatNumber(value) {
 
 // Format percentage
 function formatPercentage(value) {
-    return `${value.toFixed(1)}%`;
+    return `${Math.round(value)}%`;
 }
 
 // Load occupation series mapping
@@ -682,16 +682,16 @@ function updateBubbleChartTitle() {
         let baseTitle = '';
         switch(aggregationLevel) {
             case 'department':
-                baseTitle = 'Federal Job Listings Comparison by Department';
+                baseTitle = 'USAJobs Counts by Department';
                 break;
             case 'agency':
-                baseTitle = 'Federal Job Listings Comparison by Agency';
+                baseTitle = 'USAJobs Counts by Agency';
                 break;
             case 'subagency':
-                baseTitle = 'Federal Job Listings Comparison by Subagency';
+                baseTitle = 'USAJobs Counts by Subagency';
                 break;
             default:
-                baseTitle = 'Federal Job Listings Comparison';
+                baseTitle = 'USAJobs Counts';
         }
         
         title.textContent = baseTitle;
@@ -785,7 +785,7 @@ function initializeBubbleChart() {
         .attr('x', width / 2)
         .attr('y', height + 40)
         .style('text-anchor', 'middle')
-        .text('2025 Listings as % of 2024 Listings');
+        .text('2025 Listings as Percent of 2024 Listings');
     
     // Add date range on second line
     if (globalStats && globalStats.date_range) {
