@@ -6,6 +6,10 @@ on:
     - cron: '0 2 * * 1'
   workflow_dispatch: # Allow manual trigger
 
+# Needed for pushing changes back to repo
+permissions:
+  contents: write
+
 jobs:
   update-data:
     runs-on: ubuntu-latest
