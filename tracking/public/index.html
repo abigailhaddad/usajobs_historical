@@ -453,6 +453,7 @@
                         <select id="aggregationLevel" class="form-control form-control-sm">
                             <option value="department" selected>Department</option>
                             <option value="agency">Agency</option>
+                            <option value="subagency" disabled>Subagency (select a department first)</option>
                         </select>
                     </div>
                 </div>
@@ -466,8 +467,8 @@
         
         <div class="table-container">
             <table id="jobsTable" class="table table-striped">
-                <thead>
-                    <tr>
+                <thead id="tableHead">
+                    <tr id="tableHeaders">
                         <th>Department</th>
                         <th>Agency</th>
                         <th>2024 Listings (Feb-Aug)</th>
@@ -476,7 +477,7 @@
                         <th>2025 as % of 2024</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tableBody">
                 </tbody>
             </table>
         </div>

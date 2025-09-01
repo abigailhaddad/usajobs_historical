@@ -80,6 +80,64 @@ def load_year_data(year):
     
     return df
 
+def sanitize_filename(name):
+    """Convert department name to safe filename"""
+    # Replace spaces and special characters
+    safe_name = name.replace(' ', '_').replace('/', '_').replace('&', 'and')
+    # Remove other problematic characters
+    safe_name = ''.join(c for c in safe_name if c.isalnum() or c in ('_', '-'))
+    return safe_name.lower()
+
+def generate_department_summary(df_2024, df_2025, department):
+    """Generate summary WITH subagency for a specific department"""
+    # Filter by department
+    dept_2024 = df_2024[df_2024['hiringDepartmentName'] == department]
+    dept_2025 = df_2025[df_2025['hiringDepartmentName'] == department]
+    
+    # Count by combination including subagency
+    counts_2024 = dept_2024.groupby([
+        'hiringDepartmentName', 'hiringAgencyName', 'hiringSubelementName',
+        'appointmentType', 'occupation_series'
+    ], dropna=False).size().to_dict()
+    
+    counts_2025 = dept_2025.groupby([
+        'hiringDepartmentName', 'hiringAgencyName', 'hiringSubelementName',
+        'appointmentType', 'occupation_series'
+    ], dropna=False).size().to_dict()
+    
+    # Get all unique combinations from both years
+    all_combinations = set(counts_2024.keys()) | set(counts_2025.keys())
+    
+    # Build summary rows
+    summary_rows = []
+    for combo in all_combinations:
+        dept, agency, subelement, appt_type, occupation = combo
+        
+        count_2024 = counts_2024.get(combo, 0)
+        count_2025 = counts_2025.get(combo, 0)
+        
+        # Calculate percentage (2025 as % of 2024)
+        if count_2024 > 0:
+            percentage = (count_2025 / count_2024) * 100
+        else:
+            percentage = 0.0 if count_2025 == 0 else 100.0
+        
+        summary_rows.append({
+            'Department': dept if pd.notna(dept) else 'Unknown',
+            'Agency': agency if pd.notna(agency) else 'Unknown',
+            'Subagency': subelement if pd.notna(subelement) else 'Unknown',
+            'Appointment_Type': appt_type if pd.notna(appt_type) else 'All',
+            'Occupation_Series': occupation if pd.notna(occupation) else 'Unknown',
+            'Listings_2024': str(count_2024),
+            'Listings_2025': str(count_2025),
+            'Percentage_2025_of_2024': f"{percentage:.1f}%",
+            'listings2024Value': count_2024,
+            'listings2025Value': count_2025,
+            'percentageValue': percentage
+        })
+    
+    return pd.DataFrame(summary_rows)
+
 def generate_job_listings_summary():
     """Create job listings summary comparing 2024 vs 2025"""
     
@@ -91,7 +149,7 @@ def generate_job_listings_summary():
     df_2025 = load_year_data(2025)
     print(f"  Found {len(df_2025):,} listings for Feb-Aug 2025")
     
-    # Count by combination for each year (dropna=False to keep all records)
+    # Count by combination for each year WITHOUT subagency (for main file)
     counts_2024 = df_2024.groupby([
         'hiringDepartmentName', 'hiringAgencyName',
         'appointmentType', 'occupation_series'
@@ -105,7 +163,7 @@ def generate_job_listings_summary():
     # Get all unique combinations from both years
     all_combinations = set(counts_2024.keys()) | set(counts_2025.keys())
     
-    # Build summary rows
+    # Build summary rows (WITHOUT subagency for main file)
     summary_rows = []
     for combo in all_combinations:
         dept, agency, appt_type, occupation = combo
@@ -143,11 +201,46 @@ def generate_job_listings_summary():
     summary_df = summary_df.sort_values('listings2024Value', ascending=False)
     
     # Create data directory if it doesn't exist
-    Path('data').mkdir(exist_ok=True)
+    Path('public/data').mkdir(parents=True, exist_ok=True)
+    Path('public/data/departments').mkdir(exist_ok=True)
     
-    # Save as JSON for easier JavaScript consumption
-    summary_df.to_json('data/job_listings_summary.json', orient='records', indent=2)
-    print(f"\nWrote {len(summary_df):,} rows to data/job_listings_summary.json")
+    # Save main summary (without subagency)
+    summary_df.to_json('public/data/job_listings_summary.json', orient='records', indent=2)
+    print(f"\nWrote {len(summary_df):,} rows to public/data/job_listings_summary.json")
+    
+    # Generate department summaries (with subagency)
+    departments = set(df_2024['hiringDepartmentName'].dropna().unique()) | set(df_2025['hiringDepartmentName'].dropna().unique())
+    
+    print(f"\nGenerating {len(departments)} department files...")
+    dept_metadata = []
+    
+    for dept in sorted(departments):
+        if pd.isna(dept):
+            continue
+            
+        dept_summary_df = generate_department_summary(df_2024, df_2025, dept)
+        dept_summary_df = dept_summary_df.sort_values('listings2024Value', ascending=False)
+        
+        # Save department file
+        filename = f'dept_{sanitize_filename(dept)}.json'
+        filepath = f'public/data/departments/{filename}'
+        dept_summary_df.to_json(filepath, orient='records', indent=2)
+        
+        # Track metadata
+        dept_metadata.append({
+            'department': dept,
+            'filename': filename,
+            'rows': len(dept_summary_df),
+            'unique_subagencies': int(dept_summary_df['Subagency'].nunique()),
+            'total_2024': int(dept_summary_df['listings2024Value'].sum()),
+            'total_2025': int(dept_summary_df['listings2025Value'].sum())
+        })
+        
+        print(f"  {dept}: {len(dept_summary_df):,} rows, {dept_summary_df['Subagency'].nunique()} subagencies")
+    
+    # Save department metadata
+    with open('public/data/department_metadata.json', 'w') as f:
+        json.dump(dept_metadata, f, indent=2)
     
     # Verify totals match
     total_2024_csv = summary_df['listings2024Value'].sum()
@@ -170,10 +263,11 @@ def generate_job_listings_summary():
         'total_2025': len(df_2025),
         'unique_departments': len(summary_df['Department'].unique()),
         'unique_agencies': len(summary_df['Agency'].unique()),
-        'overall_percentage': (len(df_2025) / len(df_2024) * 100) if len(df_2024) > 0 else 0
+        'overall_percentage': (len(df_2025) / len(df_2024) * 100) if len(df_2024) > 0 else 0,
+        'department_files': len(dept_metadata)
     }
     
-    with open('data/job_listings_stats.json', 'w') as f:
+    with open('public/data/job_listings_stats.json', 'w') as f:
         json.dump(summary_stats, f, indent=2)
     
     print(f"\nOverall statistics:")
@@ -182,6 +276,7 @@ def generate_job_listings_summary():
     print(f"  2025 as % of 2024: {summary_stats['overall_percentage']:.1f}%")
     print(f"  Unique departments: {summary_stats['unique_departments']}")
     print(f"  Unique agencies: {summary_stats['unique_agencies']}")
+    print(f"  Department files created: {summary_stats['department_files']}")
 
 if __name__ == "__main__":
     generate_job_listings_summary()

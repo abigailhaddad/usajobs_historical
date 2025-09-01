@@ -5,8 +5,11 @@ let jobListingsData = [];
 let columnFilters = {};
 let departmentData = [];
 let agencyData = [];
-let aggregationLevel = 'department'; // 'individual', 'agency', or 'department'
+let subagencyData = [];
+let departmentMetadata = {};
+let aggregationLevel = 'department'; // 'individual', 'agency', 'department', or 'subagency'
 let occupationSeriesMap = {};
+let currentDepartmentData = null; // Store department-specific data when loaded
 
 // Define department colors based on actual departments in our data
 const DEPARTMENT_COLORS = {
@@ -106,11 +109,44 @@ function updateDateDisplay(stats) {
     }
 }
 
+// Load department-specific data with subagency information
+async function loadDepartmentData(departmentName) {
+    try {
+        // Find the department metadata
+        const deptMeta = departmentMetadata.find(d => d.department === departmentName);
+        if (!deptMeta) {
+            console.error('Department metadata not found for:', departmentName);
+            return null;
+        }
+        
+        console.log(`Loading department data for ${departmentName} from ${deptMeta.filename}`);
+        const response = await fetch(`data/departments/${deptMeta.filename}`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load department data: ${response.status}`);
+        }
+        
+        const deptData = await response.json();
+        console.log(`Loaded ${deptData.length} rows for ${departmentName}`);
+        return deptData;
+    } catch (error) {
+        console.error('Error loading department data:', error);
+        return null;
+    }
+}
+
 // Load CSV data
 async function loadData() {
     try {
         // Load occupation map first
         await loadOccupationMap();
+        
+        // Load department metadata
+        const metaResponse = await fetch('data/department_metadata.json');
+        if (metaResponse.ok) {
+            departmentMetadata = await metaResponse.json();
+            console.log('Loaded department metadata for', departmentMetadata.length, 'departments');
+        }
         
         // Load stats file first to get date ranges
         const statsResponse = await fetch('data/job_listings_stats.json');
@@ -393,33 +429,40 @@ function populateOccupationDropdown(selectId, options) {
 }
 
 // Initialize DataTable
-function initializeDataTable() {
-    // Initialize with empty data - will be populated by updateTableData
-    dataTable = $('#jobsTable').DataTable({
-        data: [],
-        columns: [
-            { 
-                data: 'Department',
-                render: function(data) {
-                    const color = DEPARTMENT_COLORS[data] || '#999999';
-                    return `<span style="display: inline-block; width: 10px; height: 10px; background-color: ${color}; border-radius: 50%; margin-right: 8px;"></span>${data}`;
-                }
-            },
-            { data: 'Agency' },
-            { 
-                data: 'listings2024',
-                render: function(data) {
-                    return formatNumber(data);
-                }
-            },
-            { 
-                data: 'listings2025',
-                render: function(data) {
-                    return formatNumber(data);
-                }
-            },
-            { 
-                data: null,
+function initializeDataTable(includeSubagency = false) {
+    // Define base columns
+    const columns = [
+        { 
+            data: 'Department',
+            render: function(data) {
+                const color = DEPARTMENT_COLORS[data] || '#999999';
+                return `<span style="display: inline-block; width: 10px; height: 10px; background-color: ${color}; border-radius: 50%; margin-right: 8px;"></span>${data}`;
+            }
+        },
+        { data: 'Agency' }
+    ];
+    
+    // Add subagency column if needed
+    if (includeSubagency) {
+        columns.push({ data: 'Subagency' });
+    }
+    
+    // Add numeric columns
+    columns.push(
+        { 
+            data: 'listings2024',
+            render: function(data) {
+                return formatNumber(data);
+            }
+        },
+        { 
+            data: 'listings2025',
+            render: function(data) {
+                return formatNumber(data);
+            }
+        },
+        { 
+            data: null,
                 render: function(data) {
                     const change = data.listings2025 - data.listings2024;
                     const sign = change >= 0 ? '+' : '';
@@ -428,18 +471,23 @@ function initializeDataTable() {
                     return `<span class="${className}">${sign}${formatNumber(change)}</span>`;
                 }
             },
-            { 
-                data: 'percentageOf2024',
-                render: function(data) {
-                    // Color based on how close to 100% (maintaining 2024 levels)
-                    const className = data >= 90 ? 'high-percentage' :    // Green if maintained most hiring
-                                    data >= 50 ? 'medium-percentage' :    // Orange if moderate decline
-                                    'low-percentage';                      // Red if major decline
-                    return `<span class="percentage-cell ${className}">${formatPercentage(data)}</span>`;
-                }
+        { 
+            data: 'percentageOf2024',
+            render: function(data) {
+                // Color based on how close to 100% (maintaining 2024 levels)
+                const className = data >= 90 ? 'high-percentage' :    // Green if maintained most hiring
+                                data >= 50 ? 'medium-percentage' :    // Orange if moderate decline
+                                'low-percentage';                      // Red if major decline
+                return `<span class="percentage-cell ${className}">${formatPercentage(data)}</span>`;
             }
-        ],
-        order: [[2, 'desc']], // Sort by 2024 listings
+        }
+    );
+    
+    // Initialize with empty data - will be populated by updateTableData
+    dataTable = $('#jobsTable').DataTable({
+        data: [],
+        columns: columns,
+        order: [[includeSubagency ? 3 : 2, 'desc']], // Sort by 2024 listings
         pageLength: 25,
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
         responsive: true,
@@ -451,7 +499,7 @@ function initializeDataTable() {
 }
 
 // Update table data based on current filters and aggregation level
-function updateTableData() {
+async function updateTableData() {
     if (!dataTable) return;
     
     let dataToShow;
@@ -471,6 +519,22 @@ function updateTableData() {
             listings2025: d.listings2025,
             percentageOf2024: d.percentageOf2024
         }));
+    } else if (aggregationLevel === 'subagency') {
+        // Handle subagency view
+        const deptFilter = $('#mainDepartmentFilter').val();
+        if (!deptFilter || !currentDepartmentData) {
+            // No department selected or data not loaded
+            dataToShow = [];
+        } else {
+            dataToShow = getFilteredSubagencyData().map(d => ({
+                Department: d.department,
+                Agency: d.agency,
+                Subagency: d.name,
+                listings2024: d.listings2024,
+                listings2025: d.listings2025,
+                percentageOf2024: d.percentageOf2024
+            }));
+        }
     } else {
         // Individual records with filters applied
         dataToShow = jobListingsData.filter(row => {
@@ -517,6 +581,8 @@ function initializeBubbleChart() {
     let dataToShow;
     if (aggregationLevel === 'department') {
         dataToShow = getFilteredDepartmentData();
+    } else if (aggregationLevel === 'subagency') {
+        dataToShow = getFilteredSubagencyData();
     } else {
         dataToShow = getFilteredAgencyData();
     }
@@ -648,6 +714,15 @@ function initializeBubbleChart() {
                     2025 as % of 2024: ${formatPercentage(d.percentageOf2024)}<br/>
                     Agencies: ${d.agencyCount}
                 `;
+            } else if (aggregationLevel === 'subagency') {
+                content = `
+                    <strong>${d.name}</strong><br/>
+                    Agency: ${d.agency}<br/>
+                    Department: ${d.department}<br/>
+                    2024 Listings: ${formatNumber(d.listings2024)}<br/>
+                    2025 Listings: ${formatNumber(d.listings2025)}<br/>
+                    2025 as % of 2024: ${formatPercentage(d.percentageOf2024)}
+                `;
             } else {
                 content = `
                     <strong>${d.name}</strong><br/>
@@ -719,6 +794,50 @@ function getFilteredDepartmentData() {
         percentageOf2024: dept.listings2024 > 0 ? 
             (dept.listings2025 / dept.listings2024 * 100) : 0
     }));
+}
+
+// Get subagency data from department-specific data
+function getFilteredSubagencyData() {
+    if (!currentDepartmentData) return [];
+    
+    // Apply filters to department data
+    const filteredRaw = currentDepartmentData.filter(row => {
+        const agencyFilter = $('#mainAgencyFilter').val();
+        if (agencyFilter && row.Agency !== agencyFilter) return false;
+        
+        const apptFilter = $('#mainAppointmentFilter').val();
+        if (apptFilter && row.Appointment_Type !== apptFilter) return false;
+        
+        const occupationFilter = $('#mainOccupationFilter').val();
+        if (occupationFilter && row.Occupation_Series !== occupationFilter) return false;
+        
+        return true;
+    });
+    
+    // Re-aggregate by subagency
+    const subagencyMap = new Map();
+    filteredRaw.forEach(row => {
+        const key = `${row.Department}|${row.Agency}|${row.Subagency}`;
+        if (!subagencyMap.has(key)) {
+            subagencyMap.set(key, {
+                department: row.Department,
+                agency: row.Agency,
+                name: row.Subagency,
+                listings2024: 0,
+                listings2025: 0
+            });
+        }
+        const data = subagencyMap.get(key);
+        data.listings2024 += row.listings2024Value;
+        data.listings2025 += row.listings2025Value;
+    });
+    
+    // Convert to array and calculate percentages
+    return Array.from(subagencyMap.values()).map(data => {
+        data.percentageOf2024 = data.listings2024 > 0 ? 
+            (data.listings2025 / data.listings2024 * 100) : 0;
+        return data;
+    });
 }
 
 // Get filtered agency data
@@ -796,8 +915,31 @@ function updateActiveFiltersDisplay() {
 // Initialize event handlers
 function initializeEventHandlers() {
     // Department filter changes - update dependent filters
-    $('#mainDepartmentFilter').on('change', function() {
+    $('#mainDepartmentFilter').on('change', async function() {
         console.log('Department filter changed:', $(this).val());
+        const selectedDept = $(this).val();
+        
+        // Handle subagency option availability
+        const $subagencyOption = $('#aggregationLevel option[value="subagency"]');
+        if (selectedDept) {
+            // Enable subagency option and update text
+            $subagencyOption.prop('disabled', false).text('Subagency');
+            
+            // If currently viewing subagency, load department data
+            if (aggregationLevel === 'subagency') {
+                currentDepartmentData = await loadDepartmentData(selectedDept);
+            }
+        } else {
+            // Disable subagency option
+            $subagencyOption.prop('disabled', true).text('Subagency (select a department first)');
+            
+            // If was viewing subagency, switch back to agency view
+            if (aggregationLevel === 'subagency') {
+                $('#aggregationLevel').val('agency').trigger('change');
+            }
+            currentDepartmentData = null;
+        }
+        
         updateDependentFilters();
         updateTableData();
         updateFilteredStats();
@@ -835,13 +977,72 @@ function initializeEventHandlers() {
     });
     
     // Aggregation level change
-    $('#aggregationLevel').on('change', function() {
+    $('#aggregationLevel').on('change', async function() {
         aggregationLevel = $(this).val();
+        
+        // If switching to subagency view, load department data if needed
+        if (aggregationLevel === 'subagency') {
+            const selectedDept = $('#mainDepartmentFilter').val();
+            if (selectedDept && !currentDepartmentData) {
+                currentDepartmentData = await loadDepartmentData(selectedDept);
+            }
+            
+            // Destroy existing DataTable
+            if (dataTable) {
+                dataTable.destroy();
+                $('#jobsTable').empty(); // Clear the entire table
+            }
+            
+            // Recreate table structure with subagency column
+            $('#jobsTable').html(`
+                <thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Agency</th>
+                        <th>Subagency</th>
+                        <th>2024 Listings (Feb-Aug)</th>
+                        <th>2025 Listings (Feb-Aug)</th>
+                        <th>Change</th>
+                        <th>2025 as % of 2024</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `);
+            
+            // Initialize DataTable with subagency column
+            initializeDataTable(true); // true = include subagency column
+        } else {
+            // Destroy existing DataTable
+            if (dataTable) {
+                dataTable.destroy();
+                $('#jobsTable').empty(); // Clear the entire table
+            }
+            
+            // Recreate table structure without subagency column
+            $('#jobsTable').html(`
+                <thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Agency</th>
+                        <th>2024 Listings (Feb-Aug)</th>
+                        <th>2025 Listings (Feb-Aug)</th>
+                        <th>Change</th>
+                        <th>2025 as % of 2024</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `);
+            
+            // Initialize DataTable without subagency column
+            initializeDataTable(false); // false = no subagency column
+        }
+        
         updateTableData();
         initializeBubbleChart();
         
         // Update entity label
-        const label = aggregationLevel === 'department' ? 'Departments' : 'Agencies';
+        const label = aggregationLevel === 'department' ? 'Departments' : 
+                      aggregationLevel === 'agency' ? 'Agencies' : 'Subagencies';
         $('#entityCount').siblings('.stat-label').text(label);
     });
 }
