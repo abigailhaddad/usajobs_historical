@@ -7,9 +7,10 @@ let departmentData = [];
 let agencyData = [];
 let subagencyData = [];
 let departmentMetadata = {};
-let aggregationLevel = 'department'; // 'individual', 'agency', 'department', or 'subagency'
+let aggregationLevel = 'department'; // 'individual', 'agency', 'department', 'subagency', or 'raw'
 let occupationSeriesMap = {};
 let currentDepartmentData = null; // Store department-specific data when loaded
+let currentRawJobsData = null; // Store raw jobs data when loaded
 
 // Define department colors based on actual departments in our data
 const DEPARTMENT_COLORS = {
@@ -131,6 +132,32 @@ async function loadDepartmentData(departmentName) {
         return deptData;
     } catch (error) {
         console.error('Error loading department data:', error);
+        return null;
+    }
+}
+
+// Load raw jobs data for a department
+async function loadRawJobsData(departmentName) {
+    try {
+        // Find the department metadata
+        const deptMeta = departmentMetadata.find(d => d.department === departmentName);
+        if (!deptMeta || !deptMeta.raw_jobs_filename) {
+            console.error('Raw jobs filename not found for:', departmentName);
+            return null;
+        }
+        
+        console.log(`Loading raw jobs for ${departmentName} from ${deptMeta.raw_jobs_filename}`);
+        const response = await fetch(`data/raw_jobs/${deptMeta.raw_jobs_filename}`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load raw jobs data: ${response.status}`);
+        }
+        
+        const rawJobs = await response.json();
+        console.log(`Loaded ${rawJobs.length} raw jobs for ${departmentName}`);
+        return rawJobs;
+    } catch (error) {
+        console.error('Error loading raw jobs data:', error);
         return null;
     }
 }
@@ -428,6 +455,47 @@ function populateOccupationDropdown(selectId, options) {
     }
 }
 
+// Initialize DataTable for raw jobs
+function initializeRawJobsDataTable() {
+    dataTable = $('#jobsTable').DataTable({
+        pageLength: 25,
+        order: [[0, 'desc'], [7, 'desc']], // Sort by year desc, then open date desc
+        columns: [
+            { data: 'year' },
+            { data: 'position_title' },
+            { data: 'department' },
+            { data: 'agency' },
+            { data: 'subagency' },
+            { data: 'appointment_type' },
+            { 
+                data: 'occupation_series',
+                render: function(data, type, row) {
+                    if (Array.isArray(data)) {
+                        return data.join(', ');
+                    }
+                    return data || '';
+                }
+            },
+            { data: 'open_date' },
+            { data: 'close_date' },
+            { 
+                data: 'usajobs_url',
+                render: function(data, type, row) {
+                    return `<a href="${data}" target="_blank" class="text-decoration-none">View →</a>`;
+                }
+            }
+        ],
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+        language: {
+            search: "Search jobs:"
+        },
+        drawCallback: function() {
+            // Update stats after filtering
+            updateFilteredStats();
+        }
+    });
+}
+
 // Initialize DataTable
 function initializeDataTable(includeSubagency = false) {
     // Define base columns
@@ -503,7 +571,46 @@ async function updateTableData() {
     if (!dataTable) return;
     
     let dataToShow;
-    if (aggregationLevel === 'department') {
+    const showRawJobs = $('#showRawJobs').is(':checked');
+    
+    if (showRawJobs) {
+        // Handle raw jobs view
+        const deptFilter = $('#mainDepartmentFilter').val();
+        if (!deptFilter || !currentRawJobsData) {
+            // No department selected or data not loaded
+            dataToShow = [];
+        } else {
+            // Apply filters to raw jobs data
+            dataToShow = currentRawJobsData.filter(job => {
+                const agencyFilter = $('#mainAgencyFilter').val();
+                if (agencyFilter && job.agency !== agencyFilter) return false;
+                
+                const apptFilter = $('#mainAppointmentFilter').val();
+                if (apptFilter && job.appointment_type !== apptFilter) return false;
+                
+                const occupationFilter = $('#mainOccupationFilter').val();
+                if (occupationFilter) {
+                    // Check if any of the job's occupation series match the filter
+                    if (!job.occupation_series || !job.occupation_series.includes(occupationFilter)) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            }).map(job => ({
+                year: job.year,
+                position_title: job.position_title,
+                department: job.department,
+                agency: job.agency,
+                subagency: job.subagency,
+                appointment_type: job.appointment_type,
+                occupation_series: job.occupation_series,
+                open_date: job.open_date,
+                close_date: job.close_date,
+                usajobs_url: job.usajobs_url
+            }));
+        }
+    } else if (aggregationLevel === 'department') {
         dataToShow = getFilteredDepartmentData().map(d => ({
             Department: d.name,
             Agency: `${d.agencyCount} agencies`,
@@ -919,25 +1026,76 @@ function initializeEventHandlers() {
         console.log('Department filter changed:', $(this).val());
         const selectedDept = $(this).val();
         
-        // Handle subagency option availability
+        // Handle subagency and raw jobs option availability
         const $subagencyOption = $('#aggregationLevel option[value="subagency"]');
+        const $rawJobsCheckbox = $('#showRawJobs');
+        const $rawJobsLabel = $('label[for="showRawJobs"]');
+        
         if (selectedDept) {
-            // Enable subagency option and update text
+            // Enable both options and update text
             $subagencyOption.prop('disabled', false).text('Subagency');
+            $rawJobsCheckbox.prop('disabled', false);
+            $rawJobsLabel.text('Show Raw Jobs');
             
             // If currently viewing subagency, load department data
             if (aggregationLevel === 'subagency') {
                 currentDepartmentData = await loadDepartmentData(selectedDept);
             }
+            // If raw jobs checkbox is checked, load raw jobs data
+            if ($rawJobsCheckbox.is(':checked')) {
+                currentRawJobsData = await loadRawJobsData(selectedDept);
+            }
         } else {
-            // Disable subagency option
+            // Check if we're currently showing raw jobs
+            const wasShowingRawJobs = $rawJobsCheckbox.is(':checked');
+            
+            // Disable both options
             $subagencyOption.prop('disabled', true).text('Subagency (select a department first)');
+            $rawJobsCheckbox.prop('disabled', true).prop('checked', false);
+            $rawJobsLabel.text('Show Raw Jobs (select a department first)');
+            
+            // Clear the data
+            currentDepartmentData = null;
+            currentRawJobsData = null;
+            
+            // If was showing raw jobs, we need to reset the table structure
+            if (wasShowingRawJobs) {
+                // Destroy existing DataTable
+                if (dataTable) {
+                    dataTable.destroy();
+                    $('#jobsTable').empty();
+                }
+                
+                // Reset to aggregated view table structure
+                // Since we're clearing department, we'll be in agency view
+                const tableHTML = `<thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Agency</th>
+                        <th>2024 Listings</th>
+                        <th>2025 Listings</th>
+                        <th>% of 2024</th>
+                        <th>Change</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>`;
+                
+                $('#jobsTable').html(tableHTML);
+                
+                // Reinitialize DataTable
+                initializeDataTable();
+                
+                // Show bubble chart
+                $('#bubble-chart').parent().show();
+                
+                // Reset entity label
+                $('#entityCount').siblings('.stat-label').text('Agencies');
+            }
             
             // If was viewing subagency, switch back to agency view
             if (aggregationLevel === 'subagency') {
                 $('#aggregationLevel').val('agency').trigger('change');
             }
-            currentDepartmentData = null;
         }
         
         updateDependentFilters();
@@ -1045,29 +1203,208 @@ function initializeEventHandlers() {
                       aggregationLevel === 'agency' ? 'Agencies' : 'Subagencies';
         $('#entityCount').siblings('.stat-label').text(label);
     });
+    
+    // Raw jobs checkbox change
+    $('#showRawJobs').on('change', async function() {
+        const isChecked = $(this).is(':checked');
+        const selectedDept = $('#mainDepartmentFilter').val();
+        
+        if (isChecked && selectedDept) {
+            // Load raw jobs data if needed
+            if (!currentRawJobsData) {
+                currentRawJobsData = await loadRawJobsData(selectedDept);
+            }
+            
+            // Destroy existing DataTable
+            if (dataTable) {
+                dataTable.destroy();
+                $('#jobsTable').empty(); // Clear the entire table
+            }
+            
+            // Recreate table structure for raw jobs
+            $('#jobsTable').html(`
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Position Title</th>
+                        <th>Department</th>
+                        <th>Agency</th>
+                        <th>Subagency</th>
+                        <th>Appointment Type</th>
+                        <th>Occupation Series</th>
+                        <th>Open Date</th>
+                        <th>Close Date</th>
+                        <th>USAJobs Link</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `);
+            
+            // Initialize DataTable for raw jobs
+            initializeRawJobsDataTable();
+            
+            // Hide bubble chart
+            $('#bubble-chart').parent().hide();
+            
+            // Update entity label
+            $('#entityCount').siblings('.stat-label').text('Job Listings');
+        } else {
+            // Return to aggregated view
+            $('#aggregationLevel').trigger('change');
+        }
+        
+        updateTableData();
+    });
+    
+    // Download CSV button
+    $('#downloadCSV').on('click', function() {
+        downloadCurrentViewAsCSV();
+    });
 }
 
 // Update filtered statistics
 function updateFilteredStats() {
     // Get the current table data (already filtered)
     const tableData = dataTable.data();
+    const showRawJobs = $('#showRawJobs').is(':checked');
     
-    let total2024 = 0;
-    let total2025 = 0;
-    let count = 0;
+    if (showRawJobs) {
+        // For raw jobs, just count the records
+        let count2024 = 0;
+        let count2025 = 0;
+        
+        tableData.each(function(row) {
+            if (row.year === 2024) count2024++;
+            else if (row.year === 2025) count2025++;
+        });
+        
+        const percentage = count2024 > 0 ? (count2025 / count2024 * 100) : 0;
+        
+        $('#total2024').text(formatNumber(count2024));
+        $('#total2025').text(formatNumber(count2025));
+        $('#overallPercentage').text(formatPercentage(percentage));
+        $('#entityCount').text(tableData.count());
+    } else {
+        // For aggregated views
+        let total2024 = 0;
+        let total2025 = 0;
+        let count = 0;
+        
+        tableData.each(function(row) {
+            total2024 += row.listings2024;
+            total2025 += row.listings2025;
+            count++;
+        });
+        
+        const percentage = total2024 > 0 ? (total2025 / total2024 * 100) : 0;
+        
+        $('#total2024').text(formatNumber(total2024));
+        $('#total2025').text(formatNumber(total2025));
+        $('#overallPercentage').text(formatPercentage(percentage));
+        $('#entityCount').text(count);
+    }
+}
+
+// Download current view as CSV
+function downloadCurrentViewAsCSV() {
+    const showRawJobs = $('#showRawJobs').is(':checked');
+    const aggregationLevel = $('#aggregationLevel').val();
     
-    tableData.each(function(row) {
-        total2024 += row.listings2024;
-        total2025 += row.listings2025;
-        count++;
-    });
+    // Get visible data from DataTable
+    const data = dataTable.rows({ search: 'applied' }).data();
+    const rows = [];
     
-    const percentage = total2024 > 0 ? (total2025 / total2024 * 100) : 0;
+    if (showRawJobs) {
+        // Raw jobs headers
+        rows.push(['Year', 'Position Title', 'Department', 'Agency', 'Subagency', 
+                   'Appointment Type', 'Occupation Series', 'Open Date', 'Close Date', 'USAJobs Link']);
+        
+        // Add data rows
+        data.each(function(row) {
+            rows.push([
+                row.year,
+                row.position_title || '',
+                row.department || '',
+                row.agency || '',
+                row.subagency || '',
+                row.appointment_type || '',
+                row.occupation_series || '',
+                row.open_date || '',
+                row.close_date || '',
+                row.usajobs_url || ''
+            ]);
+        });
+    } else {
+        // Aggregated view headers
+        if (aggregationLevel === 'department') {
+            rows.push(['Department', 'Agencies', '2024 Listings', '2025 Listings', '% of 2024']);
+        } else if (aggregationLevel === 'subagency') {
+            rows.push(['Department', 'Agency', 'Subagency', '2024 Listings', '2025 Listings', '% of 2024']);
+        } else {
+            rows.push(['Department', 'Agency', '2024 Listings', '2025 Listings', '% of 2024']);
+        }
+        
+        // Add data rows
+        data.each(function(row) {
+            if (aggregationLevel === 'department') {
+                rows.push([
+                    row.Department || '',
+                    row.Agency || '',
+                    row.listings2024 || 0,
+                    row.listings2025 || 0,
+                    (row.percentageOf2024 !== undefined ? row.percentageOf2024.toFixed(1) + '%' : '')
+                ]);
+            } else if (aggregationLevel === 'subagency') {
+                rows.push([
+                    row.Department || '',
+                    row.Agency || '',
+                    row.Subagency || '',
+                    row.listings2024 || 0,
+                    row.listings2025 || 0,
+                    (row.percentageOf2024 !== undefined ? row.percentageOf2024.toFixed(1) + '%' : '')
+                ]);
+            } else {
+                // Agency view
+                rows.push([
+                    row.Department || '',
+                    row.Agency || '',
+                    row.listings2024 || 0,
+                    row.listings2025 || 0,
+                    (row.percentageOf2024 !== undefined ? row.percentageOf2024.toFixed(1) + '%' : '')
+                ]);
+            }
+        });
+    }
     
-    $('#total2024').text(formatNumber(total2024));
-    $('#total2025').text(formatNumber(total2025));
-    $('#overallPercentage').text(formatPercentage(percentage));
-    $('#entityCount').text(count);
+    // Convert to CSV
+    const csvContent = rows.map(row => 
+        row.map(cell => {
+            // Escape quotes and wrap in quotes if contains comma, newline, or quotes
+            const cellStr = String(cell);
+            if (cellStr.includes(',') || cellStr.includes('\n') || cellStr.includes('"')) {
+                return '"' + cellStr.replace(/"/g, '""') + '"';
+            }
+            return cellStr;
+        }).join(',')
+    ).join('\n');
+    
+    // Create download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    // Generate filename
+    const date = new Date().toISOString().split('T')[0];
+    const viewType = showRawJobs ? 'raw_jobs' : aggregationLevel;
+    const dept = $('#mainDepartmentFilter').val() || 'all';
+    const filename = `usajobs_${viewType}_${dept}_${date}.csv`;
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 // Initialize on document ready
