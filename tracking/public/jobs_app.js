@@ -11,6 +11,7 @@ let aggregationLevel = 'department'; // 'individual', 'agency', 'department', 's
 let occupationSeriesMap = {};
 let currentDepartmentData = null; // Store department-specific data when loaded
 let currentRawJobsData = null; // Store raw jobs data when loaded
+let globalStats = null; // Store stats data globally for date ranges
 
 // Define department colors based on actual departments in our data
 const DEPARTMENT_COLORS = {
@@ -178,8 +179,8 @@ async function loadData() {
         // Load stats file first to get date ranges
         const statsResponse = await fetch('data/job_listings_stats.json');
         if (statsResponse.ok) {
-            const stats = await statsResponse.json();
-            updateDateDisplay(stats);
+            globalStats = await statsResponse.json();
+            updateDateDisplay(globalStats);
         }
         
         console.log('Starting to load JSON data...');
@@ -674,10 +675,36 @@ async function updateTableData() {
 }
 
 
+// Update bubble chart title based on aggregation level
+function updateBubbleChartTitle() {
+    const title = document.getElementById('bubbleChartTitle');
+    if (title) {
+        let baseTitle = '';
+        switch(aggregationLevel) {
+            case 'department':
+                baseTitle = 'Federal Job Listings Comparison by Department';
+                break;
+            case 'agency':
+                baseTitle = 'Federal Job Listings Comparison by Agency';
+                break;
+            case 'subagency':
+                baseTitle = 'Federal Job Listings Comparison by Subagency';
+                break;
+            default:
+                baseTitle = 'Federal Job Listings Comparison';
+        }
+        
+        title.textContent = baseTitle;
+    }
+}
+
 // Initialize bubble chart
 function initializeBubbleChart() {
     const container = d3.select('#bubble-chart');
     container.selectAll('*').remove();
+    
+    // Update the title
+    updateBubbleChartTitle();
     
     // Get dimensions
     const margin = {top: 20, right: 40, bottom: 60, left: 40};
@@ -756,9 +783,22 @@ function initializeBubbleChart() {
     g.append('text')
         .attr('class', 'axis-label')
         .attr('x', width / 2)
-        .attr('y', height + 45)
+        .attr('y', height + 40)
         .style('text-anchor', 'middle')
         .text('2025 Listings as % of 2024 Listings');
+    
+    // Add date range on second line
+    if (globalStats && globalStats.date_range) {
+        const prev = globalStats.date_range.previous_year;
+        const curr = globalStats.date_range.current_year;
+        g.append('text')
+            .attr('class', 'axis-label')
+            .attr('x', width / 2)
+            .attr('y', height + 55)
+            .style('text-anchor', 'middle')
+            .style('font-size', '12px')
+            .text(`${prev.display} vs ${curr.display}`);
+    }
     
     // Add 100% line
     if (xScale.domain()[1] >= 100) {
@@ -1158,8 +1198,8 @@ function initializeEventHandlers() {
                         <th>Department</th>
                         <th>Agency</th>
                         <th>Subagency</th>
-                        <th>2024 Listings (Feb-Aug)</th>
-                        <th>2025 Listings (Feb-Aug)</th>
+                        <th>2024 Listings</th>
+                        <th>2025 Listings</th>
                         <th>Change</th>
                         <th>2025 as % of 2024</th>
                     </tr>
@@ -1182,8 +1222,8 @@ function initializeEventHandlers() {
                     <tr>
                         <th>Department</th>
                         <th>Agency</th>
-                        <th>2024 Listings (Feb-Aug)</th>
-                        <th>2025 Listings (Feb-Aug)</th>
+                        <th>2024 Listings</th>
+                        <th>2025 Listings</th>
                         <th>Change</th>
                         <th>2025 as % of 2024</th>
                     </tr>

@@ -4,5 +4,20 @@
   "unique_departments": 27,
   "unique_agencies": 513,
   "overall_percentage": 42.57861163929973,
-  "department_files": 26
+  "department_files": 26,
+  "date_range": {
+    "previous_year": {
+      "year": 2024,
+      "start": "2024-02-01",
+      "end": "2024-08-31",
+      "display": "Feb 1-Aug 31 2024"
+    },
+    "current_year": {
+      "year": 2025,
+      "start": "2025-02-01",
+      "end": "2025-08-31",
+      "display": "Feb 1-Aug 31 2025"
+    }
+  },
+  "generated_at": "2025-09-01 19:31:50"
 }

@@ -338,6 +338,14 @@ def generate_job_listings_summary():
         print(f"  Missing 2024: {missing_2024:,}")
         print(f"  Missing 2025: {missing_2025:,}")
     
+    # Find actual date ranges in the data
+    start_date_2024 = pd.Timestamp(2024, 2, 1)
+    start_date_2025 = pd.Timestamp(2025, 2, 1)
+    
+    # Find the latest date in each dataset (up to Aug 31)
+    end_date_2024 = min(df_2024['positionOpenDate'].max(), pd.Timestamp(2024, 8, 31))
+    end_date_2025 = min(df_2025['positionOpenDate'].max(), pd.Timestamp(2025, 8, 31))
+    
     # Also save as JSON for reference
     summary_stats = {
         'total_2024': len(df_2024),
@@ -345,7 +353,22 @@ def generate_job_listings_summary():
         'unique_departments': len(summary_df['Department'].unique()),
         'unique_agencies': len(summary_df['Agency'].unique()),
         'overall_percentage': (len(df_2025) / len(df_2024) * 100) if len(df_2024) > 0 else 0,
-        'department_files': len(dept_metadata)
+        'department_files': len(dept_metadata),
+        'date_range': {
+            'previous_year': {
+                'year': 2024,
+                'start': start_date_2024.strftime('%Y-%m-%d'),
+                'end': end_date_2024.strftime('%Y-%m-%d'),
+                'display': f"Feb 1-{end_date_2024.strftime('%b %-d')} 2024"
+            },
+            'current_year': {
+                'year': 2025,
+                'start': start_date_2025.strftime('%Y-%m-%d'),
+                'end': end_date_2025.strftime('%Y-%m-%d'),
+                'display': f"Feb 1-{end_date_2025.strftime('%b %-d')} 2025"
+            }
+        },
+        'generated_at': pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
     }
     
     with open('public/data/job_listings_stats.json', 'w') as f:
