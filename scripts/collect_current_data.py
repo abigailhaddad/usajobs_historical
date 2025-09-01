@@ -141,6 +141,45 @@ def flatten_current_job(job_item: dict) -> dict:
     except (ValueError, TypeError):
         flattened["maximumSalary"] = None
     
+    # Extract JobCategories to match historical data format: [{"series": "XXXX"}]
+    # Historical data only has series codes, not names
+    job_categories = job.get("JobCategory", [])
+    if job_categories:
+        categories_list = []
+        for category in job_categories:
+            if isinstance(category, dict) and category.get("Code"):
+                categories_list.append({
+                    "series": category.get("Code", "")
+                })
+        flattened["JobCategories"] = json.dumps(categories_list) if categories_list else None
+    else:
+        flattened["JobCategories"] = None
+    
+    # Extract appointment type to match historical data format
+    # Map common codes to names based on historical data patterns
+    appointment_type_map = {
+        "15317": "Permanent",
+        "15318": "Temporary", 
+        "15319": "Term",
+        "15320": "Temporary Promotion",
+        "15321": "Internships",
+        "15322": "Recent graduates",
+        "15323": "Presidential Management Fellows",
+        "15324": "Seasonal",
+        "15325": "Intermittent",
+        "15326": "Multiple",
+        "15327": "Telework eligible",
+        "15328": "Detail"
+    }
+    
+    appointment_types = job.get("PositionOfferingType", [])
+    if appointment_types and appointment_types[0]:
+        # Try to map the code to a name, fall back to code if not found
+        code = appointment_types[0].get("Code", "")
+        flattened["appointmentType"] = appointment_type_map.get(code, code)
+    else:
+        flattened["appointmentType"] = ""
+    
     return flattened
 
 
