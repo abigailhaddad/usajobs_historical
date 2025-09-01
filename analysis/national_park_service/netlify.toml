@@ -2,7 +2,7 @@
 
 # Ignore builds unless files in this directory change
 [build]
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- analysis/national_park_service/"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ./"
 
 # Security headers
 [[headers]]
