@@ -1,6 +1,6 @@
 # USAJobs Data Pipeline
 
-**Data collection last run: 2025-09-01**
+**Data collection last run: 2025-09-02**
 
 **⚠️ This is not an official USAJobs project**
 
@@ -9,7 +9,7 @@
 - [Field documentation](https://abigailhaddad.github.io/usajobs_historical/) - Guide to data fields and statistics
 - [USAJobs API documentation](https://developer.usajobs.gov/) - Official U.S. government developer documentation for USAJOBS APIs
 
-**Job dataset with 3,023,009 job announcements from Historical + Current APIs**
+**Job dataset with 3,023,376 job announcements from Historical + Current APIs**
 
 This repository provides USAJobs data combining both Historical and Current APIs, with deduplication and field rationalization. Data is available in two ways:
 1. **📁 Ready-to-use Parquet files** - Download and analyze immediately
@@ -30,14 +30,14 @@ print(f"Loaded {len(df_2024):,} federal job postings from 2024")
 # See [examples.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py) for more analysis patterns
 ```
 
-This provides 642MB of data that works with Python, R, or any Parquet-compatible tool.
+This provides 644MB of data that works with Python, R, or any Parquet-compatible tool.
 
 ### Option 2: Run the Pipeline Yourself
 The pipeline collects data from USAJobs APIs and saves to Parquet files. Note that the USAJobs API can be unreliable - expect some failed requests that require retries. The system logs all failures and provides specific retry commands.
 
 ## Data Coverage
 
-Data collection last run: 2025-09-01. Early years are incomplete, mostly consisting of jobs with closing dates years after the opening dates. Note: Some job postings may have future opening dates. 
+Data collection last run: 2025-09-02. Early years are incomplete, mostly consisting of jobs with closing dates years after the opening dates. Note: Some job postings may have future opening dates. 
 
 
 | Year | Jobs Opened | Jobs Closed |
@@ -54,7 +54,7 @@ Data collection last run: 2025-09-01. Early years are incomplete, mostly consist
 | 2022 | 441,604 | 419,295 |
 | 2023 | 454,652 | 434,527 |
 | 2024 | 367,755 | 352,296 |
-| 2025 | 143,742 | 142,159 |
+| 2025 | 144,109 | 142,524 |
 
 Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,633 closed that year). 2017 starts with limited data in January-February, then ramps up significantly from March onward. 
 
