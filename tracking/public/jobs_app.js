@@ -820,6 +820,7 @@ function initializeBubbleChart() {
             .text('Same as 2024');
     }
     
+    
     // Create tooltip
     const tooltip = d3.select('body').append('div')
         .attr('class', 'tooltip')
