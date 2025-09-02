@@ -664,7 +664,8 @@ async function updateTableData() {
             Agency: row.Agency,
             listings2024: row.listings2024Value,
             listings2025: row.listings2025Value,
-            percentageOf2024: row.percentageValue
+            percentageOf2024: row.listings2024Value > 0 ? 
+                (row.listings2025Value / row.listings2024Value * 100) : 0
         }));
     }
     
@@ -730,32 +731,70 @@ function initializeBubbleChart() {
         .domain([-5, Math.max(100, xMax * 1.1)]) // Start at -5 to give space for 0% bubbles
         .range([0, width]);
     
-    // Size scale for bubbles
+    // Size scale for bubbles - keep full size
     const maxListings = d3.max(dataToShow, d => d.listings2024);
     const sizeScale = d3.scaleSqrt()
         .domain([0, maxListings])
         .range([2, 80]);
     
-    // Create force simulation with boundary constraints
-    const simulation = d3.forceSimulation(dataToShow)
-        .force('x', d3.forceX(d => xScale(d.percentageOf2024)).strength(1))
-        .force('y', d3.forceY(height / 2).strength(0.05))  // Reduced strength for more vertical spread
-        .force('collide', d3.forceCollide(d => sizeScale(d.listings2024) + 3))  // Increased padding between bubbles
-        .stop();
+    // Group bubbles by similar x positions
+    dataToShow.forEach(d => {
+        d.x = xScale(d.percentageOf2024);
+        d.radius = sizeScale(d.listings2024);
+    });
     
-    // Run simulation with boundary constraints
-    for (let i = 0; i < 200; ++i) {  // Increased iterations for better positioning
-        simulation.tick();
+    // Sort by x position for grouping
+    dataToShow.sort((a, b) => a.x - b.x);
+    
+    // Find groups of overlapping bubbles
+    const groups = [];
+    let currentGroup = [dataToShow[0]];
+    
+    for (let i = 1; i < dataToShow.length; i++) {
+        const current = dataToShow[i];
+        const lastInGroup = currentGroup[currentGroup.length - 1];
         
-        // Constrain bubbles to stay within bounds
-        dataToShow.forEach(d => {
-            const radius = sizeScale(d.listings2024);
-            // Keep bubbles within x bounds
-            d.x = Math.max(radius, Math.min(width - radius, d.x));
-            // Keep bubbles within y bounds
-            d.y = Math.max(radius, Math.min(height - radius, d.y));
-        });
+        // Check if current bubble overlaps with the group
+        if (current.x - lastInGroup.x < current.radius + lastInGroup.radius + 2) {
+            currentGroup.push(current);
+        } else {
+            groups.push(currentGroup);
+            currentGroup = [current];
+        }
     }
+    groups.push(currentGroup);
+    
+    // Position each group using full height
+    groups.forEach(group => {
+        if (group.length === 1) {
+            // Single bubble - center it
+            group[0].y = height / 2;
+        } else {
+            // Multiple bubbles - spread them vertically using full height
+            const padding = 10; // Minimum padding from edges
+            const availableHeight = height - 2 * padding;
+            
+            // Calculate total height needed for all bubbles
+            const totalRadius = group.reduce((sum, d) => sum + d.radius * 2, 0);
+            const spacing = Math.max(5, (availableHeight - totalRadius) / (group.length + 1));
+            
+            // Position bubbles vertically
+            let currentY = padding + spacing;
+            group.forEach(d => {
+                d.y = currentY + d.radius;
+                currentY += d.radius * 2 + spacing;
+                
+                // Ensure we stay within bounds
+                d.y = Math.max(d.radius + padding, Math.min(height - d.radius - padding, d.y));
+            });
+        }
+    });
+    
+    // Final bounds check
+    dataToShow.forEach(d => {
+        d.x = Math.max(d.radius, Math.min(width - d.radius, d.x));
+        d.y = Math.max(d.radius, Math.min(height - d.radius, d.y));
+    });
     
     // Create SVG
     const svg = container
@@ -840,7 +879,7 @@ function initializeBubbleChart() {
         .attr('class', 'bubble')
         .attr('cx', d => d.x)
         .attr('cy', d => d.y)
-        .attr('r', d => sizeScale(d.listings2024))
+        .attr('r', d => d.radius || sizeScale(d.listings2024))
         .attr('fill', d => {
             const dept = aggregationLevel === 'department' ? d.name : d.department;
             return DEPARTMENT_COLORS[dept] || '#999999';
