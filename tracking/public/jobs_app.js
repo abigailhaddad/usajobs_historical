@@ -53,6 +53,46 @@ const DEPARTMENT_COLORS = {
     "Unknown": "#999999"
 };
 
+// Define patterns for accessibility
+const PATTERN_DEFINITIONS = [
+    { id: 'dots', path: 'M 0,4 l 4,0 M 2,0 l 0,4', strokeWidth: 1 },
+    { id: 'stripes', path: 'M 0,4 l 8,0', strokeWidth: 1 },
+    { id: 'diagonals', path: 'M 0,8 l 8,-8 M 0,0 l 8,-8 M 0,16 l 8,-8', strokeWidth: 1 },
+    { id: 'crosshatch', path: 'M 0,4 l 8,0 M 4,0 l 0,8', strokeWidth: 1 },
+    { id: 'waves', path: 'M 0,4 Q 2,2 4,4 T 8,4', strokeWidth: 1.5 },
+    { id: 'circles', path: 'M 4,4 m -2,0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0', strokeWidth: 0.5, fill: true },
+    { id: 'zigzag', path: 'M 0,4 L 2,0 L 4,4 L 6,0 L 8,4', strokeWidth: 1 },
+    { id: 'dashes', path: 'M 0,4 l 3,0 M 5,4 l 3,0', strokeWidth: 1.5 },
+    { id: 'vertical-stripes', path: 'M 4,0 l 0,8', strokeWidth: 1 },
+    { id: 'diagonal-stripes-reverse', path: 'M 8,8 l -8,-8 M 8,0 l -8,-8 M 8,16 l -8,-8', strokeWidth: 1 },
+    { id: 'squares', path: 'M 1,1 l 2,0 l 0,2 l -2,0 Z M 5,5 l 2,0 l 0,2 l -2,0 Z', strokeWidth: 0.5, fill: true },
+    { id: 'triangles', path: 'M 2,6 L 4,2 L 6,6 Z', strokeWidth: 0.5, fill: true },
+    { id: 'diamonds', path: 'M 4,1 L 7,4 L 4,7 L 1,4 Z', strokeWidth: 1 },
+    { id: 'hexagons', path: 'M 2,4 L 2,2 L 4,1 L 6,2 L 6,4 L 4,5 Z', strokeWidth: 1 },
+    { id: 'plus', path: 'M 4,2 l 0,4 M 2,4 l 4,0', strokeWidth: 1.5 },
+    { id: 'x-marks', path: 'M 2,2 l 4,4 M 6,2 l -4,4', strokeWidth: 1 },
+    { id: 'dots-large', path: 'M 4,4 m -1.5,0 a 1.5,1.5 0 1,0 3,0 a 1.5,1.5 0 1,0 -3,0', strokeWidth: 0.5, fill: true },
+    { id: 'vertical-waves', path: 'M 4,0 Q 2,2 4,4 T 4,8', strokeWidth: 1.5 },
+    { id: 'checkerboard', path: 'M 0,0 l 4,0 l 0,4 l -4,0 Z M 4,4 l 4,0 l 0,4 l -4,0 Z', strokeWidth: 0, fill: true },
+    { id: 'stars', path: 'M 4,1 L 5,3 L 7,3 L 5,5 L 6,7 L 4,6 L 2,7 L 3,5 L 1,3 L 3,3 Z', strokeWidth: 0.5, fill: true },
+    { id: 'dense-dots', path: 'M 1,1 l 0,0 M 3,1 l 0,0 M 5,1 l 0,0 M 7,1 l 0,0 M 2,3 l 0,0 M 4,3 l 0,0 M 6,3 l 0,0 M 1,5 l 0,0 M 3,5 l 0,0 M 5,5 l 0,0 M 7,5 l 0,0 M 2,7 l 0,0 M 4,7 l 0,0 M 6,7 l 0,0', strokeWidth: 2 },
+    { id: 'horizontal-zigzag', path: 'M 0,2 L 2,4 L 4,2 L 6,4 L 8,2', strokeWidth: 1 },
+    { id: 'curved-lines', path: 'M 0,2 Q 4,0 8,2 M 0,6 Q 4,4 8,6', strokeWidth: 1 },
+    { id: 'double-diagonal', path: 'M 0,6 l 6,-6 M 2,8 l 6,-6 M 0,2 l 2,-2 M 6,8 l 2,-2', strokeWidth: 1 },
+    { id: 'mesh', path: 'M 0,2 l 8,0 M 0,6 l 8,0 M 2,0 l 0,8 M 6,0 l 0,8', strokeWidth: 0.5 },
+    { id: 'thick-thin-stripes', path: 'M 0,2 l 8,0 M 0,3 l 8,0 M 0,6 l 8,0', strokeWidth: 1 },
+    { id: 'scattered-dots', path: 'M 1,2 l 0,0 M 6,1 l 0,0 M 3,4 l 0,0 M 7,5 l 0,0 M 2,7 l 0,0 M 5,6 l 0,0', strokeWidth: 2 }
+];
+
+// Create a mapping of unique colors to patterns
+const COLOR_TO_PATTERN = {};
+const uniqueColors = [...new Set(Object.values(DEPARTMENT_COLORS))];
+uniqueColors.forEach((color, index) => {
+    if (index < PATTERN_DEFINITIONS.length) {
+        COLOR_TO_PATTERN[color] = PATTERN_DEFINITIONS[index].id;
+    }
+});
+
 // Format number with commas
 function formatNumber(value) {
     return value.toLocaleString();
@@ -505,7 +545,28 @@ function initializeDataTable(includeSubagency = false) {
             data: 'Department',
             render: function(data) {
                 const color = DEPARTMENT_COLORS[data] || '#999999';
-                return `<span style="display: inline-block; width: 10px; height: 10px; background-color: ${color}; border-radius: 50%; margin-right: 8px;"></span>${data}`;
+                const patternId = COLOR_TO_PATTERN[color];
+                
+                // Create a larger inline SVG with both color and pattern
+                const svg = `<svg width="20" height="20" style="vertical-align: middle; margin-right: 8px;">
+                    <defs>
+                        ${patternId && PATTERN_DEFINITIONS.find(p => p.id === patternId) ? 
+                            `<pattern id="table-pattern-${data.replace(/[^a-zA-Z0-9]/g, '-')}" patternUnits="userSpaceOnUse" width="8" height="8">
+                                ${PATTERN_DEFINITIONS.find(p => p.id === patternId).fill ? 
+                                    `<circle cx="4" cy="4" r="2" fill="rgba(0,0,0,0.3)"/>` :
+                                    `<path d="${PATTERN_DEFINITIONS.find(p => p.id === patternId).path}" 
+                                           stroke="rgba(0,0,0,0.3)" 
+                                           stroke-width="${PATTERN_DEFINITIONS.find(p => p.id === patternId).strokeWidth}" 
+                                           fill="none"/>`
+                                }
+                            </pattern>` : ''
+                        }
+                    </defs>
+                    <circle cx="10" cy="10" r="9" fill="${color}" stroke="#333" stroke-width="0.5"/>
+                    ${patternId ? `<circle cx="10" cy="10" r="9" fill="url(#table-pattern-${data.replace(/[^a-zA-Z0-9]/g, '-')})" stroke="#333" stroke-width="0.5"/>` : ''}
+                </svg>${data}`;
+                
+                return svg;
             }
         },
         { data: 'Agency' }
@@ -731,69 +792,35 @@ function initializeBubbleChart() {
         .domain([-5, Math.max(100, xMax * 1.1)]) // Start at -5 to give space for 0% bubbles
         .range([0, width]);
     
-    // Size scale for bubbles - keep full size
+    // Size scale for bubbles - scaled down to reduce overlap
     const maxListings = d3.max(dataToShow, d => d.listings2024);
     const sizeScale = d3.scaleSqrt()
         .domain([0, maxListings])
-        .range([2, 80]);
+        .range([2, 50]);  // Reduced max size from 80 to 50
     
-    // Group bubbles by similar x positions
+    // Initialize positions and radius
     dataToShow.forEach(d => {
         d.x = xScale(d.percentageOf2024);
+        d.y = height / 2;
         d.radius = sizeScale(d.listings2024);
     });
     
-    // Sort by x position for grouping
-    dataToShow.sort((a, b) => a.x - b.x);
+    // Use D3 force simulation for collision detection
+    const simulation = d3.forceSimulation(dataToShow)
+        .force('x', d3.forceX(d => d.x).strength(5))  // VERY STRONG x force - keeps bubbles at their exact x position
+        .force('y', d3.forceY(height / 2).strength(0.1))  // WEAK y force - gentle center pull
+        .force('collision', d3.forceCollide(d => d.radius + 2))  // Collision with 2px padding
+        .stop();  // Don't auto-start
     
-    // Find groups of overlapping bubbles
-    const groups = [];
-    let currentGroup = [dataToShow[0]];
-    
-    for (let i = 1; i < dataToShow.length; i++) {
-        const current = dataToShow[i];
-        const lastInGroup = currentGroup[currentGroup.length - 1];
-        
-        // Check if current bubble overlaps with the group
-        if (current.x - lastInGroup.x < current.radius + lastInGroup.radius + 2) {
-            currentGroup.push(current);
-        } else {
-            groups.push(currentGroup);
-            currentGroup = [current];
-        }
+    // Run the simulation manually for a fixed number of iterations
+    for (let i = 0; i < 500; i++) {
+        simulation.tick();
     }
-    groups.push(currentGroup);
     
-    // Position each group using full height
-    groups.forEach(group => {
-        if (group.length === 1) {
-            // Single bubble - center it
-            group[0].y = height / 2;
-        } else {
-            // Multiple bubbles - spread them vertically using full height
-            const padding = 10; // Minimum padding from edges
-            const availableHeight = height - 2 * padding;
-            
-            // Calculate total height needed for all bubbles
-            const totalRadius = group.reduce((sum, d) => sum + d.radius * 2, 0);
-            const spacing = Math.max(5, (availableHeight - totalRadius) / (group.length + 1));
-            
-            // Position bubbles vertically
-            let currentY = padding + spacing;
-            group.forEach(d => {
-                d.y = currentY + d.radius;
-                currentY += d.radius * 2 + spacing;
-                
-                // Ensure we stay within bounds
-                d.y = Math.max(d.radius + padding, Math.min(height - d.radius - padding, d.y));
-            });
-        }
-    });
-    
-    // Final bounds check
+    // Ensure bubbles stay within bounds
     dataToShow.forEach(d => {
-        d.x = Math.max(d.radius, Math.min(width - d.radius, d.x));
-        d.y = Math.max(d.radius, Math.min(height - d.radius, d.y));
+        const padding = 10;
+        d.y = Math.max(d.radius + padding, Math.min(height - d.radius - padding, d.y));
     });
     
     // Create SVG
@@ -801,6 +828,32 @@ function initializeBubbleChart() {
         .append('svg')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom);
+    
+    // Add defs for patterns
+    const defs = svg.append('defs');
+    
+    // Create patterns
+    PATTERN_DEFINITIONS.forEach((pattern) => {
+        const patternEl = defs.append('pattern')
+            .attr('id', `pattern-${pattern.id}`)
+            .attr('patternUnits', 'userSpaceOnUse')
+            .attr('width', 8)
+            .attr('height', 8);
+        
+        if (pattern.fill) {
+            patternEl.append('circle')
+                .attr('cx', 4)
+                .attr('cy', 4)
+                .attr('r', 2)
+                .attr('fill', 'rgba(0,0,0,0.3)');
+        } else {
+            patternEl.append('path')
+                .attr('d', pattern.path)
+                .attr('stroke', 'rgba(0,0,0,0.3)')
+                .attr('stroke-width', pattern.strokeWidth)
+                .attr('fill', 'none');
+        }
+    });
     
     const g = svg.append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
@@ -873,20 +926,38 @@ function initializeBubbleChart() {
         .style('pointer-events', 'none');
     
     // Add bubbles
-    const bubbles = g.selectAll('.bubble')
+    const bubbles = g.selectAll('.bubble-group')
         .data(dataToShow)
-        .enter().append('circle')
+        .enter().append('g')
+        .attr('class', 'bubble-group')
+        .attr('transform', d => `translate(${d.x},${d.y})`);
+    
+    // Add the base circle with color
+    bubbles.append('circle')
         .attr('class', 'bubble')
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y)
-        .attr('r', d => d.radius || sizeScale(d.listings2024))
+        .attr('r', d => d.radius)
         .attr('fill', d => {
             const dept = aggregationLevel === 'department' ? d.name : d.department;
             return DEPARTMENT_COLORS[dept] || '#999999';
         })
         .style('opacity', 0.8)
         .style('stroke', '#333')
+        .style('stroke-width', 1);
+    
+    // Add pattern overlay for accessibility
+    bubbles.append('circle')
+        .attr('class', 'bubble-pattern')
+        .attr('r', d => d.radius)
+        .attr('fill', d => {
+            const dept = aggregationLevel === 'department' ? d.name : d.department;
+            const color = DEPARTMENT_COLORS[dept] || '#999999';
+            const patternId = COLOR_TO_PATTERN[color];
+            return patternId ? `url(#pattern-${patternId})` : 'none';
+        })
+        .style('opacity', 0.8)
+        .style('stroke', '#333')
         .style('stroke-width', 1)
+        .style('pointer-events', 'all')
         .on('mouseover', function(event, d) {
             tooltip.transition()
                 .duration(200)
@@ -1364,6 +1435,10 @@ function updateFilteredStats() {
         $('#total2025').text(formatNumber(count2025));
         $('#overallPercentage').text(formatPercentage(percentage));
         $('#entityCount').text(tableData.count());
+        
+        // Announce to screen readers
+        const announcement = `Showing ${tableData.count()} job listings. ${count2024} in 2024, ${count2025} in 2025.`;
+        $('#ariaLiveRegion').text(announcement);
     } else {
         // For aggregated views
         let total2024 = 0;
@@ -1382,6 +1457,13 @@ function updateFilteredStats() {
         $('#total2025').text(formatNumber(total2025));
         $('#overallPercentage').text(formatPercentage(percentage));
         $('#entityCount').text(count);
+        
+        // Announce to screen readers
+        const entityType = $('#showRawJobs').is(':checked') ? 'job listings' : 
+                          $('#aggregationLevel').val() === 'department' ? 'departments' :
+                          $('#aggregationLevel').val() === 'agency' ? 'agencies' : 'subagencies';
+        const announcement = `Showing ${count} ${entityType}. Total listings: ${formatNumber(total2024)} in 2024, ${formatNumber(total2025)} in 2025.`;
+        $('#ariaLiveRegion').text(announcement);
     }
 }
 
