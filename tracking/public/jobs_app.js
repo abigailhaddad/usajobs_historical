@@ -1401,10 +1401,58 @@ function initializeEventHandlers() {
             $('#entityCount').siblings('.stat-label').text('Job Listings');
         } else {
             // Return to aggregated view
-            $('#aggregationLevel').trigger('change');
+            // Destroy existing DataTable
+            if (dataTable) {
+                dataTable.destroy();
+                $('#jobsTable').empty();
+            }
+            
+            // Recreate table structure based on current aggregation level
+            const includeSubagency = aggregationLevel === 'subagency';
+            const tableHTML = includeSubagency ? 
+                `<thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Agency</th>
+                        <th>Subagency</th>
+                        <th>2024 Listings</th>
+                        <th>2025 Listings</th>
+                        <th>Change</th>
+                        <th>2025 as % of 2024</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>` :
+                `<thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Agency</th>
+                        <th>2024 Listings</th>
+                        <th>2025 Listings</th>
+                        <th>Change</th>
+                        <th>2025 as % of 2024</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>`;
+            
+            $('#jobsTable').html(tableHTML);
+            
+            // Reinitialize DataTable
+            initializeDataTable(includeSubagency);
+            
+            // Show bubble chart
+            $('#bubble-chart').parent().show();
+            
+            // Update entity label based on aggregation level
+            const label = aggregationLevel === 'department' ? 'Departments' : 
+                          aggregationLevel === 'agency' ? 'Agencies' : 'Subagencies';
+            $('#entityCount').siblings('.stat-label').text(label);
+            
+            // Reinitialize bubble chart
+            initializeBubbleChart();
         }
         
         updateTableData();
+        updateFilteredStats();
     });
     
     // Download CSV button
