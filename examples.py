@@ -44,6 +44,17 @@ def safe_numeric_conversion(value):
     except (ValueError, TypeError):
         return None
 
+def is_git_lfs_pointer(file_path):
+    """Check if a file is a Git LFS pointer instead of actual data"""
+    try:
+        with open(file_path, 'r') as f:
+            first_line = f.readline().strip()
+            # Git LFS pointer files start with version line
+            return first_line.startswith('version https://git-lfs.github.com/')
+    except:
+        # If we can't read as text, it's probably binary (real parquet)
+        return False
+
 def run_local_examples():
     """Run examples using local parquet files"""
     print("\n" + "="*80)
@@ -53,13 +64,17 @@ def run_local_examples():
     # Check if local files exist - start with recent years
     recent_files = ['2024', '2023', '2022']
     available_files = []
+    lfs_pointer_files = []
     
     for year in recent_files:
         local_file = f'data/historical_jobs_{year}.parquet'
         if os.path.exists(local_file):
-            available_files.append((year, local_file))
+            if is_git_lfs_pointer(local_file):
+                lfs_pointer_files.append((year, local_file))
+            else:
+                available_files.append((year, local_file))
         
-    if not available_files:
+    if not available_files and not lfs_pointer_files:
         print("ERROR: No local files found in data/ directory")
         print("\nThis script expects you to have cloned the full repository.")
         print("If you haven't cloned the repo, the download examples below will work instead.")
@@ -68,22 +83,40 @@ def run_local_examples():
         print("2. Run this script from the repository root directory")
         return None
     
+    if lfs_pointer_files and not available_files:
+        print("⚠️  WARNING: Git LFS pointer files detected!")
+        print("\nIt looks like you cloned the repository but Git LFS is not configured.")
+        print("The parquet files are stored using Git Large File Storage (LFS).")
+        print("\nTo fix this:")
+        print("1. Install Git LFS: https://git-lfs.github.com/")
+        print("2. Run: git lfs install")
+        print("3. Run: git lfs pull")
+        print("\nAlternatively, the script will now attempt to download files from GitHub...")
+        return None
+    
     # Load the most recent available file
     year, file_path = available_files[0]
     print(f"Loading local file: {file_path}")
-    df = pd.read_parquet(file_path)
-    print(f"✓ Successfully loaded {len(df):,} job postings from {year}")
-    print(f"  Columns: {df.shape[1]}")
-    print(f"  Memory usage: {df.memory_usage(deep=True).sum() / 1024**2:.1f} MB")
     
-    # Load multiple years if available
-    if len(available_files) > 1:
-        print(f"\nAdditional files available:")
-        for yr, fp in available_files[1:]:
-            df_extra = pd.read_parquet(fp)
-            print(f"  {yr}: {len(df_extra):,} jobs")
-    
-    return df
+    try:
+        df = pd.read_parquet(file_path)
+        print(f"✓ Successfully loaded {len(df):,} job postings from {year}")
+        print(f"  Columns: {df.shape[1]}")
+        print(f"  Memory usage: {df.memory_usage(deep=True).sum() / 1024**2:.1f} MB")
+        
+        # Load multiple years if available
+        if len(available_files) > 1:
+            print(f"\nAdditional files available:")
+            for yr, fp in available_files[1:]:
+                df_extra = pd.read_parquet(fp)
+                print(f"  {yr}: {len(df_extra):,} jobs")
+        
+        return df
+        
+    except Exception as e:
+        print(f"ERROR loading parquet file: {e}")
+        print("\nThis might be due to Git LFS issues. The script will attempt to download from GitHub...")
+        return None
 
 def run_download_examples():
     """Run examples by downloading files from GitHub"""
@@ -310,8 +343,20 @@ def run_duckdb_examples(filenames=None):
         local_download_path = os.path.join(download_dir, filename)
         
         if os.path.exists(local_data_path):
-            print(f"✓ Using local file: {local_data_path}")
-            local_files.append(local_data_path)
+            # Check if it's a Git LFS pointer
+            if is_git_lfs_pointer(local_data_path):
+                print(f"⚠️  Git LFS pointer detected: {local_data_path}")
+                print(f"   Downloading actual file from GitHub...")
+                try:
+                    df_tmp = pd.read_parquet(base_url + filename)
+                    df_tmp.to_parquet(local_download_path)
+                    print(f"✓ Downloaded → {local_download_path}")
+                    local_files.append(local_download_path)
+                except Exception as e:
+                    print(f"✗ Failed to download {filename}: {e}")
+            else:
+                print(f"✓ Using local file: {local_data_path}")
+                local_files.append(local_data_path)
         elif os.path.exists(local_download_path):
             print(f"✓ Using cached download: {local_download_path}")
             local_files.append(local_download_path)

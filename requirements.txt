@@ -1,3 +1,10 @@
+# Note: This project uses Git LFS for parquet files
+# Install Git LFS:
+#   macOS: brew install git-lfs
+#   Ubuntu/Debian: apt-get install git-lfs
+#   Windows: choco install git-lfs
+# Then run: git lfs install && git lfs pull
+
 anyio==4.9.0
 appnope==0.1.4
 argon2-cffi==25.1.0

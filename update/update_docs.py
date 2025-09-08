@@ -40,8 +40,8 @@ def update_readme():
     content = re.sub(old_pattern, new_text, content)
     
     # Update file size
-    old_size_pattern = r'This provides \d+MB of'
-    new_size_text = f"This provides {data['file_size']} of"
+    old_size_pattern = r'This provides \d+MB of data'
+    new_size_text = f"This provides {data['file_size']} of data"
     content = re.sub(old_size_pattern, new_size_text, content)
     
     # Update Data Coverage section header with latest date

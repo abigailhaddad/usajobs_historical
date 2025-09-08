@@ -30,7 +30,7 @@ print(f"Loaded {len(df_2024):,} federal job postings from 2024")
 # See [examples.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py) for more analysis patterns
 ```
 
-This provides 665MB of data that works with Python, R, or any Parquet-compatible tool.
+This provides 665MB of data across all years (the repository itself is ~176MB without the parquet files, which are managed by Git LFS). Individual year files are typically 50-80MB and work with Python, R, or any Parquet-compatible tool.
 
 ### Option 2: Run the Pipeline Yourself
 The pipeline collects data from USAJobs APIs and saves to Parquet files. Note that the USAJobs API can be unreliable - expect some failed requests that require retries. The system logs all failures and provides specific retry commands.
@@ -95,18 +95,37 @@ Both APIs are rationalized to a common schema and stored in year-based Parquet f
 
 ## Setup
 
-1. **Create virtual environment:**
+1. **Install Git LFS (Large File Storage):**
+   This project uses Git LFS for parquet files. Install it before cloning:
+   ```bash
+   # macOS
+   brew install git-lfs
+   
+   # Ubuntu/Debian
+   apt-get install git-lfs
+   
+   # Windows
+   choco install git-lfs
+   ```
+   
+   After cloning the repository:
+   ```bash
+   git lfs install
+   git lfs pull
+   ```
+
+2. **Create virtual environment:**
    ```bash
    python3 -m venv venv
    source venv/bin/activate
    ```
 
-2. **Install dependencies:**
+3. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Create .env file (only needed for current jobs collection):**
+4. **Create .env file (only needed for current jobs collection):**
    ```bash
    # .env
    USAJOBS_API_TOKEN=your_api_token_here  # Get from https://developer.usajobs.gov/
