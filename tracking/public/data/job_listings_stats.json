@@ -1,23 +1,26 @@
 {
-  "total_2024": 213518,
-  "total_2025": 90913,
-  "unique_departments": 27,
-  "unique_agencies": 513,
-  "overall_percentage": 42.57861163929973,
-  "department_files": 26,
+  "generated_at": "2025-09-08T02:31:07.587330",
   "date_range": {
     "previous_year": {
       "year": 2024,
       "start": "2024-02-01",
-      "end": "2024-08-31",
-      "display": "Feb 1-Aug 31 2024"
+      "end": "2024-09-07",
+      "display": "February 01 - September 07, 2024"
     },
     "current_year": {
       "year": 2025,
       "start": "2025-02-01",
-      "end": "2025-08-31",
-      "display": "Feb 1-Aug 31 2025"
+      "end": "2025-09-07",
+      "display": "February 01 - September 07, 2025"
     }
   },
-  "generated_at": "2025-09-01 19:31:50"
+  "totals": {
+    "previous_year": 219009,
+    "current_year": 93668,
+    "percentage": 42.8
+  },
+  "unique_counts": {
+    "departments": 27,
+    "agencies": 515
+  }
 }
