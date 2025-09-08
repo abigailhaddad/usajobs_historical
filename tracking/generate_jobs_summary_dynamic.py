@@ -40,6 +40,26 @@ def extract_occupation_series(job_categories_json):
     
     return 'Unknown'
 
+def extract_all_occupation_series(job_categories_json):
+    """Extract all occupational series from JobCategories JSON field"""
+    if pd.isna(job_categories_json) or not job_categories_json:
+        return []
+    
+    try:
+        # Parse JSON string if it's a string
+        if isinstance(job_categories_json, str):
+            categories = json.loads(job_categories_json)
+        else:
+            categories = job_categories_json
+            
+        # Extract all series codes
+        if isinstance(categories, list):
+            return [cat.get('series', '') for cat in categories if cat.get('series')]
+    except:
+        pass
+    
+    return []
+
 def load_year_data(year, start_date, end_date):
     """Load data for a specific year and date range"""
     all_data = []
@@ -96,6 +116,97 @@ def load_year_data(year, start_date, end_date):
         return df_filtered
     else:
         return pd.DataFrame()
+
+def sanitize_filename(name):
+    """Convert department name to safe filename"""
+    # Replace spaces and special characters
+    safe_name = name.replace(' ', '_').replace('/', '_').replace('&', 'and')
+    # Remove other problematic characters
+    safe_name = ''.join(c for c in safe_name if c.isalnum() or c in ('_', '-'))
+    return safe_name.lower()
+
+def generate_department_raw_jobs(df_previous, df_current, department, previous_year, current_year):
+    """Generate raw job listings for a specific department"""
+    # Filter by department
+    dept_previous = df_previous[df_previous['hiringDepartmentName'] == department].copy()
+    dept_current = df_current[df_current['hiringDepartmentName'] == department].copy()
+    
+    # Add year column
+    dept_previous['year'] = previous_year
+    dept_current['year'] = current_year
+    
+    # Combine data
+    all_jobs = pd.concat([dept_previous, dept_current], ignore_index=True)
+    
+    # Extract the fields we need
+    raw_jobs = []
+    for _, job in all_jobs.iterrows():
+        job_data = {
+            'control_number': job.get('usajobsControlNumber', ''),
+            'year': int(job['year']),
+            'position_title': job.get('positionTitle', ''),
+            'department': job.get('hiringDepartmentName', ''),
+            'agency': job.get('hiringAgencyName', ''),
+            'subagency': job.get('hiringSubelementName', ''),
+            'appointment_type': job.get('appointmentType', ''),
+            'occupation_series': extract_all_occupation_series(job.get('JobCategories', '')),
+            'open_date': pd.to_datetime(job.get('positionOpenDate')).strftime('%Y-%m-%d') if pd.notna(job.get('positionOpenDate')) else '',
+            'close_date': pd.to_datetime(job.get('positionCloseDate')).strftime('%Y-%m-%d') if pd.notna(job.get('positionCloseDate')) else '',
+            'usajobs_url': f"https://www.usajobs.gov/job/{job.get('usajobsControlNumber', '')}"
+        }
+        raw_jobs.append(job_data)
+    
+    return raw_jobs
+
+def generate_department_summary(df_previous, df_current, department, previous_year, current_year):
+    """Generate summary WITH subagency for a specific department"""
+    # Filter by department
+    dept_previous = df_previous[df_previous['hiringDepartmentName'] == department]
+    dept_current = df_current[df_current['hiringDepartmentName'] == department]
+    
+    # Count by combination including subagency
+    counts_previous = dept_previous.groupby([
+        'hiringDepartmentName', 'hiringAgencyName', 'hiringSubelementName',
+        'appointmentType', 'occupation_series'
+    ], dropna=False).size().to_dict()
+    
+    counts_current = dept_current.groupby([
+        'hiringDepartmentName', 'hiringAgencyName', 'hiringSubelementName',
+        'appointmentType', 'occupation_series'
+    ], dropna=False).size().to_dict()
+    
+    # Get all unique combinations from both years
+    all_combinations = set(counts_previous.keys()) | set(counts_current.keys())
+    
+    # Build summary rows
+    summary_rows = []
+    for combo in all_combinations:
+        dept, agency, subelement, appt_type, occupation = combo
+        
+        count_previous = counts_previous.get(combo, 0)
+        count_current = counts_current.get(combo, 0)
+        
+        # Calculate percentage
+        if count_previous > 0:
+            percentage = (count_current / count_previous) * 100
+        else:
+            percentage = 0.0 if count_current == 0 else 100.0
+        
+        summary_rows.append({
+            'Department': dept if pd.notna(dept) else 'Unknown',
+            'Agency': agency if pd.notna(agency) else 'Unknown',
+            'Subagency': subelement if pd.notna(subelement) else 'Unknown',
+            'Appointment_Type': appt_type if pd.notna(appt_type) else 'All',
+            'Occupation_Series': occupation if pd.notna(occupation) else 'Unknown',
+            f'Listings_{previous_year}': str(count_previous),
+            f'Listings_{current_year}': str(count_current),
+            f'Percentage_{current_year}_of_{previous_year}': f"{percentage:.1f}%",
+            f'listings{previous_year}Value': count_previous,
+            f'listings{current_year}Value': count_current,
+            'percentageValue': percentage
+        })
+    
+    return pd.DataFrame(summary_rows)
 
 def generate_summary():
     """Generate summary comparing same period last year vs this year"""
@@ -239,6 +350,64 @@ def generate_summary():
     print(f"\nCSV totals:")
     print(f"  {previous_year}: {total_previous:,} (expected {len(df_previous):,})")
     print(f"  {current_year}: {total_current:,} (expected {len(df_current):,})")
+    
+    # Create directories for department and raw jobs data
+    (output_dir / 'departments').mkdir(exist_ok=True)
+    (output_dir / 'raw_jobs').mkdir(exist_ok=True)
+    
+    # Generate department summaries and raw jobs
+    departments = set(df_previous['hiringDepartmentName'].dropna().unique()) | set(df_current['hiringDepartmentName'].dropna().unique())
+    
+    print(f"\nGenerating {len(departments)} department files...")
+    dept_metadata = []
+    
+    for dept in sorted(departments):
+        if pd.isna(dept):
+            continue
+            
+        dept_summary_df = generate_department_summary(df_previous, df_current, dept, previous_year, current_year)
+        dept_summary_df = dept_summary_df.sort_values(f'listings{previous_year}Value', ascending=False)
+        
+        # Update column names for consistency with JS expectations
+        dept_summary_df = dept_summary_df.rename(columns={
+            f'Listings_{previous_year}': 'Listings_2024',
+            f'Listings_{current_year}': 'Listings_2025', 
+            f'Percentage_{current_year}_of_{previous_year}': 'Percentage_2025_of_2024',
+            f'listings{previous_year}Value': 'listings2024Value',
+            f'listings{current_year}Value': 'listings2025Value'
+        })
+        
+        # Save department file
+        filename = f'dept_{sanitize_filename(dept)}.json'
+        filepath = output_dir / 'departments' / filename
+        dept_summary_df.to_json(filepath, orient='records', indent=2)
+        
+        # Generate and save raw jobs for this department
+        raw_jobs = generate_department_raw_jobs(df_previous, df_current, dept, previous_year, current_year)
+        raw_filename = f'jobs_{sanitize_filename(dept)}.json'
+        raw_filepath = output_dir / 'raw_jobs' / raw_filename
+        
+        with open(raw_filepath, 'w') as f:
+            json.dump(raw_jobs, f, separators=(',', ':'))  # Minified
+        
+        # Track metadata
+        dept_metadata.append({
+            'department': dept,
+            'filename': filename,
+            'raw_jobs_filename': raw_filename,
+            'rows': len(dept_summary_df),
+            'unique_subagencies': int(dept_summary_df['Subagency'].nunique()),
+            'total_2024': int(dept_summary_df['listings2024Value'].sum()),
+            'total_2025': int(dept_summary_df['listings2025Value'].sum()),
+            'raw_jobs_count': len(raw_jobs)
+        })
+        
+        print(f"  {dept}: {len(dept_summary_df):,} rows, {dept_summary_df['Subagency'].nunique()} subagencies, {len(raw_jobs):,} raw jobs")
+    
+    # Save department metadata
+    metadata_file = output_dir / 'department_metadata.json'
+    with open(metadata_file, 'w') as f:
+        json.dump(dept_metadata, f, indent=2)
     
     # Save summary statistics
     overall_percentage = (total_current / total_previous * 100) if total_previous > 0 else 0
