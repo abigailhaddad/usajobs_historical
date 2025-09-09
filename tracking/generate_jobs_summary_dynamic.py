@@ -11,6 +11,14 @@ from pathlib import Path
 import numpy as np
 from datetime import datetime, timedelta
 
+# Load occupation series mapping
+occupation_series_map = {}
+try:
+    with open('public/occupation_series_from_data.json', 'r') as f:
+        occupation_series_map = json.load(f)
+except:
+    print("Warning: Could not load occupation series mapping")
+
 def normalize_appointment_type(appt_type):
     """Normalize appointment type to handle case variations"""
     if pd.isna(appt_type):
@@ -55,6 +63,58 @@ def extract_all_occupation_series(job_categories_json):
         # Extract all series codes
         if isinstance(categories, list):
             return [cat.get('series', '') for cat in categories if cat.get('series')]
+    except:
+        pass
+    
+    return []
+
+def extract_occupation_series_with_names(job_categories_json):
+    """Extract occupation series with names for display"""
+    if pd.isna(job_categories_json) or not job_categories_json:
+        return []
+    
+    try:
+        # Parse JSON string if it's a string
+        if isinstance(job_categories_json, str):
+            categories = json.loads(job_categories_json)
+        else:
+            categories = job_categories_json
+            
+        # Extract series with names
+        result = []
+        if isinstance(categories, list):
+            for cat in categories:
+                series = cat.get('series', '')
+                if series:
+                    # Look up name from mapping
+                    name = occupation_series_map.get(series, occupation_series_map.get(series.lstrip('0'), ''))
+                    if name:
+                        # Format name properly (title case)
+                        name = name.lower().title()
+                        result.append(f"{series} - {name}")
+                    else:
+                        result.append(series)
+        return result
+    except:
+        pass
+    
+    return []
+
+def extract_hiring_paths(hiring_paths_json):
+    """Extract hiring paths from HiringPaths JSON field"""
+    if pd.isna(hiring_paths_json) or not hiring_paths_json:
+        return []
+    
+    try:
+        # Parse JSON string if it's a string
+        if isinstance(hiring_paths_json, str):
+            paths = json.loads(hiring_paths_json)
+        else:
+            paths = hiring_paths_json
+            
+        # Extract hiring path descriptions
+        if isinstance(paths, list):
+            return [p.get('hiringPath', '') for p in paths if p.get('hiringPath')]
     except:
         pass
     
@@ -149,7 +209,8 @@ def generate_department_raw_jobs(df_previous, df_current, department, previous_y
             'agency': job.get('hiringAgencyName', ''),
             'subagency': job.get('hiringSubelementName', ''),
             'appointment_type': job.get('appointmentType', ''),
-            'occupation_series': extract_all_occupation_series(job.get('JobCategories', '')),
+            'occupation_series': extract_occupation_series_with_names(job.get('JobCategories', '')),
+            'hiring_paths': extract_hiring_paths(job.get('HiringPaths', '')),
             'open_date': pd.to_datetime(job.get('positionOpenDate')).strftime('%Y-%m-%d') if pd.notna(job.get('positionOpenDate')) else '',
             'close_date': pd.to_datetime(job.get('positionCloseDate')).strftime('%Y-%m-%d') if pd.notna(job.get('positionCloseDate')) else '',
             'usajobs_url': f"https://www.usajobs.gov/job/{job.get('usajobsControlNumber', '')}"

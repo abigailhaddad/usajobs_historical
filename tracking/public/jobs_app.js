@@ -500,7 +500,7 @@ function populateOccupationDropdown(selectId, options) {
 function initializeRawJobsDataTable() {
     dataTable = $('#jobsTable').DataTable({
         pageLength: 25,
-        order: [[0, 'desc'], [7, 'desc']], // Sort by year desc, then open date desc
+        order: [[0, 'desc'], [8, 'desc']], // Sort by year desc, then open date desc (adjusted for new column)
         columns: [
             { data: 'year' },
             { data: 'position_title' },
@@ -508,6 +508,15 @@ function initializeRawJobsDataTable() {
             { data: 'agency' },
             { data: 'subagency' },
             { data: 'appointment_type' },
+            { 
+                data: 'hiring_paths',
+                render: function(data, type, row) {
+                    if (Array.isArray(data)) {
+                        return data.join(', ');
+                    }
+                    return data || '';
+                }
+            },
             { 
                 data: 'occupation_series',
                 render: function(data, type, row) {
@@ -666,6 +675,7 @@ async function updateTableData() {
                 agency: job.agency,
                 subagency: job.subagency,
                 appointment_type: job.appointment_type,
+                hiring_paths: job.hiring_paths,
                 occupation_series: job.occupation_series,
                 open_date: job.open_date,
                 close_date: job.close_date,
@@ -1382,6 +1392,7 @@ function initializeEventHandlers() {
                         <th>Agency</th>
                         <th>Subagency</th>
                         <th>Appointment Type</th>
+                        <th>Hiring Paths</th>
                         <th>Occupation Series</th>
                         <th>Open Date</th>
                         <th>Close Date</th>
@@ -1527,7 +1538,7 @@ function downloadCurrentViewAsCSV() {
     if (showRawJobs) {
         // Raw jobs headers
         rows.push(['Year', 'Position Title', 'Department', 'Agency', 'Subagency', 
-                   'Appointment Type', 'Occupation Series', 'Open Date', 'Close Date', 'USAJobs Link']);
+                   'Appointment Type', 'Hiring Paths', 'Occupation Series', 'Open Date', 'Close Date', 'USAJobs Link']);
         
         // Add data rows
         data.each(function(row) {
@@ -1538,7 +1549,8 @@ function downloadCurrentViewAsCSV() {
                 row.agency || '',
                 row.subagency || '',
                 row.appointment_type || '',
-                row.occupation_series || '',
+                Array.isArray(row.hiring_paths) ? row.hiring_paths.join('; ') : (row.hiring_paths || ''),
+                Array.isArray(row.occupation_series) ? row.occupation_series.join(', ') : (row.occupation_series || ''),
                 row.open_date || '',
                 row.close_date || '',
                 row.usajobs_url || ''
