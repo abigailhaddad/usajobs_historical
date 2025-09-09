@@ -31,6 +31,27 @@ load_dotenv()
 # Base URL for USAJobs API
 BASE_URL = "https://data.usajobs.gov/api/Search"
 
+# Map current API hiring path codes to historical API descriptions
+HIRING_PATH_MAPPING = {
+    'public': 'The public',
+    'fed-internal-search': 'Internal to an agency', 
+    'fed-competitive': 'Federal employees - Competitive service',
+    'fed-excepted': 'Federal employees - Excepted service',
+    'fed-transition': 'Career transition (CTAP, ICTAP, RPL)',
+    'vet': 'Veterans',
+    'mspouse': 'Military spouses',
+    'disability': 'Individuals with disabilities',
+    'special-authorities': 'Special authorities',
+    'overseas': 'Family of overseas employees',
+    'peace': 'Peace Corps & AmeriCorps Vista',
+    'nguard': 'National Guard and reserves',
+    'native': 'Native Americans',
+    'land': 'Land and base management',
+    'student': 'Students',
+    'graduates': 'Recent graduates',
+    'ses': 'Senior executives'
+}
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch ALL current USAJobs data by occupational series")
@@ -154,6 +175,21 @@ def flatten_current_job(job_item: dict) -> dict:
         flattened["JobCategories"] = json.dumps(categories_list) if categories_list else None
     else:
         flattened["JobCategories"] = None
+    
+    # Extract HiringPaths to match historical data format: [{"hiringPath": "Description"}]
+    hiring_path_codes = user_area.get("HiringPath", [])
+    if hiring_path_codes:
+        hiring_paths = []
+        for code in hiring_path_codes:
+            if code in HIRING_PATH_MAPPING:
+                hiring_paths.append({"hiringPath": HIRING_PATH_MAPPING[code]})
+            else:
+                # Log unmapped codes but still include them
+                print(f"Warning: Unmapped hiring path code: {code}")
+                hiring_paths.append({"hiringPath": code})
+        flattened["HiringPaths"] = json.dumps(hiring_paths) if hiring_paths else None
+    else:
+        flattened["HiringPaths"] = None
     
     # Extract appointment type to match historical data format
     # Map common codes to names based on historical data patterns
