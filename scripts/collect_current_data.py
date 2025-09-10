@@ -31,26 +31,7 @@ load_dotenv()
 # Base URL for USAJobs API
 BASE_URL = "https://data.usajobs.gov/api/Search"
 
-# Map current API hiring path codes to historical API descriptions
-HIRING_PATH_MAPPING = {
-    'public': 'The public',
-    'fed-internal-search': 'Internal to an agency', 
-    'fed-competitive': 'Federal employees - Competitive service',
-    'fed-excepted': 'Federal employees - Excepted service',
-    'fed-transition': 'Career transition (CTAP, ICTAP, RPL)',
-    'vet': 'Veterans',
-    'mspouse': 'Military spouses',
-    'disability': 'Individuals with disabilities',
-    'special-authorities': 'Special authorities',
-    'overseas': 'Family of overseas employees',
-    'peace': 'Peace Corps & AmeriCorps Vista',
-    'nguard': 'National Guard and reserves',
-    'native': 'Native Americans',
-    'land': 'Land and base management',
-    'student': 'Students',
-    'graduates': 'Recent graduates',
-    'ses': 'Senior executives'
-}
+# We will fetch hiring path mappings dynamically from the API
 
 
 def parse_args():
@@ -90,7 +71,7 @@ def clean_text(text: Optional[str]) -> Optional[str]:
     return text if text else None
 
 
-def flatten_current_job(job_item: dict) -> dict:
+def flatten_current_job(job_item: dict, appointment_type_map: dict, hiring_path_map: dict) -> dict:
     """
     Keep all fields from current API job, plus add normalized fields to match historical API.
     """
@@ -181,33 +162,14 @@ def flatten_current_job(job_item: dict) -> dict:
     if hiring_path_codes:
         hiring_paths = []
         for code in hiring_path_codes:
-            if code in HIRING_PATH_MAPPING:
-                hiring_paths.append({"hiringPath": HIRING_PATH_MAPPING[code]})
-            else:
-                # Log unmapped codes but still include them
-                print(f"Warning: Unmapped hiring path code: {code}")
-                hiring_paths.append({"hiringPath": code})
+            # Use dynamic mapping, fall back to code if not found
+            path_name = hiring_path_map.get(code, code)
+            hiring_paths.append({"hiringPath": path_name})
         flattened["HiringPaths"] = json.dumps(hiring_paths) if hiring_paths else None
     else:
         flattened["HiringPaths"] = None
     
-    # Extract appointment type to match historical data format
-    # Map common codes to names based on historical data patterns
-    appointment_type_map = {
-        "15317": "Permanent",
-        "15318": "Temporary", 
-        "15319": "Term",
-        "15320": "Temporary Promotion",
-        "15321": "Internships",
-        "15322": "Recent graduates",
-        "15323": "Presidential Management Fellows",
-        "15324": "Seasonal",
-        "15325": "Intermittent",
-        "15326": "Multiple",
-        "15327": "Telework eligible",
-        "15328": "Detail"
-    }
-    
+    # Extract appointment type using the provided mapping
     appointment_types = job.get("PositionOfferingType", [])
     if appointment_types and appointment_types[0]:
         # Try to map the code to a name, fall back to code if not found
@@ -243,6 +205,68 @@ def fetch_jobs_page(params: Dict, headers: Dict, page: int = 1) -> Optional[Dict
     except requests.exceptions.RequestException as e:
         print(f"Error fetching page {page}: {e}")
         return None
+
+
+def fetch_position_offering_types() -> Dict[str, str]:
+    """Fetch position offering type codes and their names from the API"""
+    url = "https://data.usajobs.gov/api/codelist/positionofferingtypes"
+    
+    try:
+        print(f"🔍 Fetching position offering types from: {url}")
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        
+        # Extract code -> name mapping
+        type_map = {}
+        
+        if 'CodeList' in data:
+            for item in data['CodeList']:
+                if 'ValidValue' in item:
+                    for value in item['ValidValue']:
+                        code = value.get('Code')
+                        name = value.get('Value', '')
+                        is_disabled = value.get('IsDisabled', 'No')
+                        
+                        # Only include active types
+                        if code and is_disabled == 'No':
+                            type_map[code] = name
+        
+        print(f"   Found {len(type_map)} active position offering types")
+        return type_map
+    except Exception as e:
+        print(f"❌ Error fetching position offering types: {e}")
+        raise
+
+
+def fetch_hiring_paths() -> Dict[str, str]:
+    """Fetch hiring path codes and their names from the API"""
+    url = "https://data.usajobs.gov/api/codelist/hiringpaths"
+    
+    try:
+        print(f"🔍 Fetching hiring paths from: {url}")
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        
+        # Extract code -> name mapping
+        path_map = {}
+        
+        if 'CodeList' in data:
+            for item in data['CodeList']:
+                if 'ValidValue' in item:
+                    for value in item['ValidValue']:
+                        code = value.get('Code')
+                        name = value.get('Value', '')
+                        
+                        if code:
+                            path_map[code] = name
+        
+        print(f"   Found {len(path_map)} hiring paths")
+        return path_map
+    except Exception as e:
+        print(f"❌ Error fetching hiring paths: {e}")
+        raise
 
 
 def fetch_occupational_series() -> List[Dict[str, str]]:
@@ -291,7 +315,7 @@ def fetch_occupational_series() -> List[Dict[str, str]]:
         return []
 
 
-def fetch_all_jobs(params: Dict, headers: Dict, max_results: int = 10000) -> tuple[List[Dict], List[Dict]]:
+def fetch_all_jobs(params: Dict, headers: Dict, appointment_type_map: Dict[str, str], hiring_path_map: Dict[str, str], max_results: int = 10000) -> tuple[List[Dict], List[Dict]]:
     """Fetch all jobs with pagination up to max_results. Returns (raw_jobs, flattened_jobs)"""
     raw_jobs = []
     flattened_jobs = []
@@ -319,7 +343,7 @@ def fetch_all_jobs(params: Dict, headers: Dict, max_results: int = 10000) -> tup
         # Process and flatten each job
         for item in items:
             raw_jobs.append(item)
-            flattened = flatten_current_job(item)
+            flattened = flatten_current_job(item, appointment_type_map, hiring_path_map)
             flattened_jobs.append(flattened)
         
         # Get total count on first page
@@ -442,7 +466,17 @@ def main():
     # Create data directory if it doesn't exist
     os.makedirs(args.data_dir, exist_ok=True)
     
-    # First, fetch all occupational series
+    # First, fetch position offering types for mapping codes to names
+    print("📋 Fetching position offering types...")
+    appointment_type_map = fetch_position_offering_types()
+    print(f"✅ Loaded {len(appointment_type_map)} position offering types")
+    
+    # Fetch hiring paths for mapping codes to names
+    print("📋 Fetching hiring paths...")
+    hiring_path_map = fetch_hiring_paths()
+    print(f"✅ Loaded {len(hiring_path_map)} hiring paths")
+    
+    # Then fetch all occupational series
     print("📋 Fetching list of occupational series...")
     series_list = fetch_occupational_series()
     
@@ -485,7 +519,7 @@ def main():
         params['JobCategoryCode'] = series['code']
         
         try:
-            series_raw_jobs, series_flattened_jobs = fetch_all_jobs(params, headers)
+            series_raw_jobs, series_flattened_jobs = fetch_all_jobs(params, headers, appointment_type_map, hiring_path_map)
             
             # Add only unique jobs (some jobs may have multiple series)
             new_jobs = 0
