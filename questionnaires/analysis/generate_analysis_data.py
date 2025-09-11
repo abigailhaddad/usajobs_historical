@@ -140,7 +140,13 @@ def main():
     # Filter to only scraped questionnaires
     scraped_df = links_df[links_df['questionnaire_id'].isin(scraped_ids)].copy()
     
-    print(f"\nTotal scraped questionnaires: {len(scraped_df):,}")
+    # Deduplicate based on usajobs_control_number to avoid showing the same job twice
+    # Keep the first occurrence of each control number
+    original_count = len(scraped_df)
+    scraped_df = scraped_df.drop_duplicates(subset='usajobs_control_number', keep='first')
+    duplicate_count = original_count - len(scraped_df)
+    
+    print(f"\nTotal scraped questionnaires: {len(scraped_df):,} (removed {duplicate_count:,} duplicates)")
     print(f"Records with executive order mentions: {scraped_df['has_executive_order'].sum():,}")
     
     # Calculate overall statistics
