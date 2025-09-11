@@ -135,7 +135,7 @@ def extract_questionnaire_links_from_job(job_row):
         if match not in links:
             links.append(match)
     
-    # Check for Monster Government questionnaire links (but don't add them)
+    # Look for Monster Government questionnaire links
     monster_patterns = [
         r'https://jobs\.monstergovt\.com/[^/]+/vacancy/previewVacancyQuestions\.hms\?[^"\'\s<>]+',
         r'https://jobs\.monstergovt\.com/[^/]+/ros/rosDashboard\.hms\?[^"\'\s<>]+'
@@ -143,9 +143,10 @@ def extract_questionnaire_links_from_job(job_row):
     
     for pattern in monster_patterns:
         monster_matches = re.findall(pattern, job_str)
-        if monster_matches:
-            has_monster_link = True
-            break
+        for match in monster_matches:
+            if match not in links:
+                links.append(match)
+                has_monster_link = True
     
     return links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type, low_grade, high_grade, has_monster_link
 
