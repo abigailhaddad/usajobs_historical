@@ -45,15 +45,14 @@ jobs:
         # Fetch all branches
         git fetch origin
         
-        # Check if tracking-updates branch exists
-        if git show-ref --verify --quiet refs/remotes/origin/tracking-updates; then
-          echo "tracking-updates branch exists, checking out and resetting to main"
-          git checkout tracking-updates
-          git reset --hard origin/main
-        else
-          echo "Creating new tracking-updates branch"
-          git checkout -b tracking-updates
-        fi
+        # Always start from main for a clean state
+        git checkout main
+        git pull origin main
+        
+        # Create a fresh tracking-updates branch from main
+        # This ensures we always have the latest code and data
+        git checkout -B tracking-updates
+        echo "Created fresh tracking-updates branch from main"
     
     - name: Pull Git LFS files
       run: |
