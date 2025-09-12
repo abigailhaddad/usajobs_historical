@@ -5,11 +5,6 @@ on:
     # Run every Monday at 2 AM UTC
     - cron: '0 2 * * 1'
   workflow_dispatch: # Allow manual trigger
-  push:
-    branches:
-      - main
-    paths:
-      - 'tracking/public/data/**'
 
 # Needed for pushing changes back to repo and creating PRs
 permissions:
@@ -134,7 +129,8 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-to-prod:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && needs.update-data.result == 'success')
+    needs: update-data
     runs-on: ubuntu-latest
     
     steps:

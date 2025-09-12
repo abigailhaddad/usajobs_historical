@@ -5,11 +5,6 @@ on:
     # Run daily at 4 AM EST (9 AM UTC) - 2 hours after data update
     - cron: '0 9 * * *'
   workflow_dispatch:  # Allow manual trigger
-  push:
-    branches:
-      - main
-    paths:
-      - 'questionnaires/**'
 
 # Needed for pushing changes back to repo and creating PRs
 permissions:
@@ -145,7 +140,7 @@ jobs:
           gh pr merge $PR_NUMBER --merge --auto
         fi
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
@@ -160,7 +155,8 @@ jobs:
       uses: actions/deploy-pages@v4
 
   deploy-to-prod:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && needs.analyze-questionnaires.result == 'success')
+    needs: analyze-questionnaires
     runs-on: ubuntu-latest
     
     steps:
