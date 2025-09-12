@@ -75,7 +75,6 @@ jobs:
 
     - name: Run data integrity tests
       id: data_tests
-      continue-on-error: true
       run: |
         cd update
         python test_data_integrity.py

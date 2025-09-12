@@ -80,7 +80,6 @@ jobs:
 
     - name: Run questionnaire tests
       id: questionnaire_tests
-      continue-on-error: true
       run: |
         cd questionnaires
         python test_questionnaire_artifacts.py

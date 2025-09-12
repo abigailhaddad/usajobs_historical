@@ -68,7 +68,6 @@ jobs:
     
     - name: Run tracking site tests
       id: tracking_tests
-      continue-on-error: true
       run: |
         cd tracking
         python test_tracking_artifacts.py
