@@ -36,7 +36,7 @@ if existing_csv.exists():
     new_count = updated_count - existing_count
     
     # If we found new links but the script failed (likely timeout), commit the CSV
-    if new_count > 0 and result.returncode != 0:
+    if new_count > 0 and result.returncode != 0 and os.environ.get('GITHUB_ACTIONS', 'false').lower() != 'true':
         print(f"\n⚠️  Script exited with code {result.returncode} but found {new_count} new links")
         print("Committing CSV changes before exit...")
         subprocess.run(['git', 'add', 'questionnaire_links.csv'])
@@ -105,20 +105,25 @@ print(f"Newly found links that were scraped: {newly_found_scraped:,}")
 
 # Git operations
 if new_count > 0 or has_untracked_questionnaires or unscraped_count > 0:
-    print("\n=== GIT OPERATIONS ===")
-    print("Adding questionnaires folder to git...")
-    
-    # Add all changes in questionnaires folder
-    subprocess.run(['git', 'add', '.'])
-    
-    # Create commit message
-    new_files_count = len(untracked_files.splitlines()) if untracked_files else 0
-    
-    # We no longer track failed scrapes in a file
-    failed_scrapes = 0
-    
-    if new_count > 0:
-        commit_message = f"""Update questionnaires: {new_count:,} new links found, {newly_found_scraped:,} scraped
+    # Skip git operations when running in GitHub Actions
+    if os.environ.get('GITHUB_ACTIONS', 'false').lower() == 'true':
+        print("\n=== GIT OPERATIONS ===")
+        print("Running in GitHub Actions - skipping git operations")
+    else:
+        print("\n=== GIT OPERATIONS ===")
+        print("Adding questionnaires folder to git...")
+        
+        # Add all changes in questionnaires folder
+        subprocess.run(['git', 'add', '.'])
+        
+        # Create commit message
+        new_files_count = len(untracked_files.splitlines()) if untracked_files else 0
+        
+        # We no longer track failed scrapes in a file
+        failed_scrapes = 0
+        
+        if new_count > 0:
+            commit_message = f"""Update questionnaires: {new_count:,} new links found, {newly_found_scraped:,} scraped
 
 - Extracted {new_count:,} new questionnaire links
 - Scraped {newly_found_scraped:,} questionnaire files  
@@ -130,8 +135,8 @@ if new_count > 0 or has_untracked_questionnaires or unscraped_count > 0:
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"""
-    elif new_files_count > 0:
-        commit_message = f"""Update questionnaires: scraped {new_files_count} previously unscraped files
+        elif new_files_count > 0:
+            commit_message = f"""Update questionnaires: scraped {new_files_count} previously unscraped files
 
 - No new questionnaire links found
 - Scraped {new_files_count} previously unscraped questionnaires
@@ -143,9 +148,9 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"""
-    else:
-        # This shouldn't happen now, but just in case
-        commit_message = f"""Update questionnaires: processing unscraped files
+        else:
+            # This shouldn't happen now, but just in case
+            commit_message = f"""Update questionnaires: processing unscraped files
 
 - Failed to scrape: {failed_scrapes} files
 - Total questionnaire links: {updated_count:,}
@@ -155,25 +160,25 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"""
-    
-    # Commit
-    print("\nCommitting changes...")
-    result = subprocess.run(['git', 'commit', '-m', commit_message], capture_output=True, text=True)
-    if result.returncode == 0:
-        print("Changes committed successfully")
-    else:
-        print(f"Commit output: {result.stdout}")
-        if result.stderr:
-            print(f"Commit error: {result.stderr}")
-    
-    # Push
-    print("\nPushing to remote...")
-    result = subprocess.run(['git', 'push'], capture_output=True, text=True)
-    if result.returncode == 0:
-        print("Successfully pushed to remote repository")
-    else:
-        print(f"Push output: {result.stdout}")
-        if result.stderr:
-            print(f"Push error: {result.stderr}")
+        
+        # Commit
+        print("\nCommitting changes...")
+        result = subprocess.run(['git', 'commit', '-m', commit_message], capture_output=True, text=True)
+        if result.returncode == 0:
+            print("Changes committed successfully")
+        else:
+            print(f"Commit output: {result.stdout}")
+            if result.stderr:
+                print(f"Commit error: {result.stderr}")
+        
+        # Push
+        print("\nPushing to remote...")
+        result = subprocess.run(['git', 'push'], capture_output=True, text=True)
+        if result.returncode == 0:
+            print("Successfully pushed to remote repository")
+        else:
+            print(f"Push output: {result.stdout}")
+            if result.stderr:
+                print(f"Push error: {result.stderr}")
 else:
     print("\nNo new questionnaires found, skipping git operations")

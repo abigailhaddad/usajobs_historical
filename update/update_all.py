@@ -331,6 +331,11 @@ def check_file_sizes_vs_initial(initial_sizes):
 
 def commit_and_push_changes():
     """Commit and push changes to git repository"""
+    # Skip git operations when running in GitHub Actions
+    if os.environ.get('GITHUB_ACTIONS', 'false').lower() == 'true':
+        print("\n📤 Running in GitHub Actions - skipping git operations")
+        return True
+    
     print("\n📤 Committing and pushing changes...")
     
     # Check git status first
