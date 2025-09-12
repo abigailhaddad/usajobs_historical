@@ -66,10 +66,9 @@ jobs:
     - name: Run daily data update
       env:
         USAJOBS_API_TOKEN: ${{ secrets.USAJOBS_API_TOKEN }}
+        GITHUB_ACTIONS: true
       run: |
         cd update
-        # Remove the environment check - let it push normally
-        sed -i "s/os.environ.get('GITHUB_ACTIONS', 'false').lower() != 'true'/False/" update_all.py
         python update_all.py
 
     - name: Run data integrity tests
