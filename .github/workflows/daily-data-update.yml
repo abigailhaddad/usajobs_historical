@@ -131,47 +131,6 @@ jobs:
         if [ -n "$PR_NUMBER" ]; then
           echo "Auto-merging PR #$PR_NUMBER"
           gh pr merge $PR_NUMBER --merge --auto
-
-  deploy-to-prod:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && needs.update-data.result == 'success')
-    needs: update-data
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        fetch-depth: 0
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    
-    - name: Run tracking site tests
-      id: tracking_tests
-      run: |
-        cd tracking
-        python test_tracking_artifacts.py
-    
-    - name: Push to prod-tracking if tests pass
-      if: steps.tracking_tests.outcome == 'success'
-      run: |
-        git config --global user.name "GitHub Actions Bot"
-        git config --global user.email "actions@github.com"
-        
-        # Create or update prod-tracking branch
-        git checkout -B prod-tracking
-        git push -f origin prod-tracking
-        
-        echo "✅ Deployed to prod-tracking branch"
         fi
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
