@@ -531,7 +531,8 @@ function initializeRawJobsDataTable() {
             { 
                 data: 'usajobs_url',
                 render: function(data, type, row) {
-                    return `<a href="${data}" target="_blank" class="text-decoration-none">View →</a>`;
+                    const controlNumber = row.control_number || data.split('/').pop() || '';
+                    return `<a href="${data}" target="_blank" class="text-decoration-none">${controlNumber}</a>`;
                 }
             }
         ],
