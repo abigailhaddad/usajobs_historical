@@ -1,8 +1,8 @@
 {
-  "generated_at": "2025-09-11T15:07:23.780253",
-  "total_jobs": 3000034,
+  "generated_at": "2025-09-11T21:40:02.527898",
+  "total_jobs": 3000333,
   "total_fields": 42,
-  "file_size": "442MB",
+  "file_size": "443MB",
   "latest_job_date": "2025-09-11",
   "data_coverage": [
     {
@@ -91,9 +91,9 @@
     },
     {
       "year": 2025,
-      "total_jobs": 120763,
-      "jobs_opened": 120763,
-      "jobs_closed": 119622,
+      "total_jobs": 121062,
+      "jobs_opened": 121062,
+      "jobs_closed": 119917,
       "coverage": "Current through September 11, 2025"
     }
   ],
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0901\"}, {\"series\": \"0986\"}], [{\"series\": \"5201\"}], [{\"series\": \"0101\"}, {\"series\": \"0185\"}], [{\"series\": \"1603\"}] (3060 unique)",
+      "examples": "[{\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"0819\"}, {\"series\": \"0401\"}, {\"series\": \"0193\"}], [{\"series\": \"0830\"}, {\"series\": \"0801\"}, {\"series\": \"0850\"}], [{\"series\": \"1320\"}, {\"series\": \"0401\"}, {\"series\": \"0403\"}], [{\"series\": \"4749\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Army\\U.S. Army Cyber Command, Department of Justice, Department of Housing and Urban Development\\Office of the Secretary of Housing and Urban Development, General Services Administration\\Office of Strategic Communication (542 unique)",
+      "examples": "Department of Defense\\Defense Security Cooperation Agency, National Transportation Safety Board, Department of the Navy\\Naval Special Warfare Command, The US Semiquincentennial Commission (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "4Q-AFPC-12369105-305444-EKC, CBTB-12384585-24-JP, DE-12651547-25-NBH, DCSA-24-12462198-P (363801 unique)",
+      "examples": "FSACO-12612246-25-WA-AG, CBTF-12637962-25-JP, PA-12598792-AR-24-382, 2024-RMS-B915 (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Telework, Presidential Management Fellows, Permanent, Agency Employees Only (15 unique)",
+      "examples": "Detail, Summer, Term, Agency Employees Only (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "NV, CM55, HSAA, FM00 (528 unique)",
+      "examples": "NV41, AF3T, AG20, AB00 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Commission on Civil Rights, Office of Special Counsel, Assistant Secretary for Policy Development and Research, Woodrow Wilson International Center for Scholars (502 unique)",
+      "examples": "Defense Advanced Research Projects Agency, Air Force, Special Operations Command, Bureau of Reclamation, Defense Finance and Accounting Service (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "LP, WU, HU, GE (122 unique)",
+      "examples": "OI, HS, ED, JL (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Court Services and Offender Supervision Agency for DC, Department of Labor, Department of the Navy, Department of State (26 unique)",
+      "examples": "Department of Veterans Affairs, Department of Defense, Court Services and Offender Supervision Agency for DC, National Aeronautics and Space Administration (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Office of Justice Services,  Cultural Resources Division, VISN 10 Clinical Contact Center, Accounting Operations - Rome, NY, Portland District, Engineering and Construction Division, Technical Resources Branch (59973 unique)",
+      "examples": "CRSP Management Center, Power Marketing, Energy Management and Marketing Office, Merchant (L6520), CASCOM, SCOE DCS G-3/5/7 TNG & DOC INTEG DIR DOC DIVISION, Charleston Veterans Health Care System, Louisville District Locks & Dams Operations Division (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T15:19:45.195509, 2025-07-05T14:58:30.228914, 2025-07-05T15:29:17.249739, 2025-07-05T15:37:35.671148 (367177 unique)",
+      "examples": "2025-07-05T15:37:35.601167, 2025-07-05T15:17:17.101537, 2025-07-05T15:10:33.264919, 2025-07-05T14:01:38.946494 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "JJ, 27, 28, EJ (127 unique)",
+      "examples": "52, 24, 71, EK (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "EJ, 30, NA, H (125 unique)",
+      "examples": "12, LJ, HH, 20 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "EN, KP, SY, RG (191 unique)",
+      "examples": "PZ, ER, EP, VE (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-11-22, 2024-03-19, 2024-01-08, 2025-06-03 (672 unique)",
+      "examples": "2024-04-26, 2024-05-03, 2024-06-23, 2024-01-17 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-11-09, 2024-02-09, 2024-07-23, 2024-10-21 (550 unique)",
+      "examples": "2024-10-21, 2024-02-22, 2024-07-26, 2024-05-03 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-09-03, 2024-01-29, 2024-08-09, 2024-01-24 (365 unique)",
+      "examples": "2024-07-30, 2024-12-03, 2024-04-19, 2024-03-21 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Research Health Science Specialist - Geriatric Research, Education and Clinical Center (GRECC), Supervisory Health System Specialist- C&P Manager, AIRCRAFT ORDNANCE SYSTEM MECHANIC, Registered Nurse- Patient Aligned Care Team (PACT) Outpatient Staff (77986 unique)",
+      "examples": "Industry Analyst - DIRECT HIRE, Engineering Equipment Operator Leader (LRAM), Engineering Psychologist (Research), Supervisory General Engineer (Senior Resident Engineer) (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "CX, 19, PB2, 04 (115 unique)",
+      "examples": "GS13, B, 60, PB3 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "31, 4, 82, 134 (157 unique)",
+      "examples": "99999, 54, 225, 15 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157

@@ -114,7 +114,7 @@
             </ul>
         </div>
         <div class="stats">
-            <strong>Dataset:</strong> 3,000,034 total job postings | <strong>Coverage:</strong> | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
+            <strong>Dataset:</strong> 3,000,333 total job postings | <strong>Coverage:</strong> | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
         </div>
 
         <h2>Table of Contents</h2>
@@ -148,7 +148,7 @@
                 <tr><td>2022</td><td>441,604</td><td>419,295</td><td>✅ Complete year</td></tr>
                 <tr><td>2023</td><td>454,652</td><td>434,527</td><td>✅ Complete year</td></tr>
                 <tr><td>2024</td><td>367,759</td><td>352,296</td><td>✅ Complete year</td></tr>
-                <tr><td>2025</td><td>120,763</td><td>119,622</td><td>Current through September 11, 2025</td></tr>
+                <tr><td>2025</td><td>121,062</td><td>119,917</td><td>Current through September 11, 2025</td></tr>
             </tbody>
         </table>
 
@@ -173,7 +173,7 @@
                 <tr>
                     <td><code class="field-name">JobCategories</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"series": "0901"}, {"series": "0986"}], [{"series": "5201"}], [{"series": "0101"}, {"series": "0185"}], [{"series": "1603"}] (3060 unique)</td>
+                    <td class="examples">[{"series": "1301"}, {"series": "0801"}, {"series": "0819"}, {"series": "0401"}, {"series": "0193"}], [{"series": "0830"}, {"series": "0801"}, {"series": "0850"}], [{"series": "1320"}, {"series": "0401"}, {"series": "0403"}], [{"series": "4749"}] (3060 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -191,7 +191,7 @@
                 <tr>
                     <td><code class="field-name">agencyLevelSort</code></td>
                     <td>String</td>
-                    <td class="examples">Department of the Army\U.S. Army Cyber Command, Department of Justice, Department of Housing and Urban Development\Office of the Secretary of Housing and Urban Development, General Services Administration\Office of Strategic Communication (542 unique)</td>
+                    <td class="examples">Department of Defense\Defense Security Cooperation Agency, National Transportation Safety Board, Department of the Navy\Naval Special Warfare Command, The US Semiquincentennial Commission (542 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -209,13 +209,13 @@
                 <tr>
                     <td><code class="field-name">announcementNumber</code></td>
                     <td>String</td>
-                    <td class="examples">4Q-AFPC-12369105-305444-EKC, CBTB-12384585-24-JP, DE-12651547-25-NBH, DCSA-24-12462198-P (363801 unique)</td>
+                    <td class="examples">FSACO-12612246-25-WA-AG, CBTF-12637962-25-JP, PA-12598792-AR-24-382, 2024-RMS-B915 (363801 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">appointmentType</code></td>
                     <td>String</td>
-                    <td class="examples">Telework, Presidential Management Fellows, Permanent, Agency Employees Only (15 unique)</td>
+                    <td class="examples">Detail, Summer, Term, Agency Employees Only (15 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -233,43 +233,43 @@
                 <tr>
                     <td><code class="field-name">hiringAgencyCode</code></td>
                     <td>String</td>
-                    <td class="examples">NV, CM55, HSAA, FM00 (528 unique)</td>
+                    <td class="examples">NV41, AF3T, AG20, AB00 (528 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringAgencyName</code></td>
                     <td>String</td>
-                    <td class="examples">Commission on Civil Rights, Office of Special Counsel, Assistant Secretary for Policy Development and Research, Woodrow Wilson International Center for Scholars (502 unique)</td>
+                    <td class="examples">Defense Advanced Research Projects Agency, Air Force, Special Operations Command, Bureau of Reclamation, Defense Finance and Accounting Service (502 unique)</td>
                     <td class="completeness good">99%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringDepartmentCode</code></td>
                     <td>String</td>
-                    <td class="examples">LP, WU, HU, GE (122 unique)</td>
+                    <td class="examples">OI, HS, ED, JL (122 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringDepartmentName</code></td>
                     <td>String</td>
-                    <td class="examples">Court Services and Offender Supervision Agency for DC, Department of Labor, Department of the Navy, Department of State (26 unique)</td>
+                    <td class="examples">Department of Veterans Affairs, Department of Defense, Court Services and Offender Supervision Agency for DC, National Aeronautics and Space Administration (26 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringSubelementName</code></td>
                     <td>String</td>
-                    <td class="examples">Office of Justice Services,  Cultural Resources Division, VISN 10 Clinical Contact Center, Accounting Operations - Rome, NY, Portland District, Engineering and Construction Division, Technical Resources Branch (59973 unique)</td>
+                    <td class="examples">CRSP Management Center, Power Marketing, Energy Management and Marketing Office, Merchant (L6520), CASCOM, SCOE DCS G-3/5/7 TNG & DOC INTEG DIR DOC DIVISION, Charleston Veterans Health Care System, Louisville District Locks & Dams Operations Division (59973 unique)</td>
                     <td class="completeness poor">62%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">inserted_at</code></td>
                     <td>String</td>
-                    <td class="examples">2025-07-05T15:19:45.195509, 2025-07-05T14:58:30.228914, 2025-07-05T15:29:17.249739, 2025-07-05T15:37:35.671148 (367177 unique)</td>
+                    <td class="examples">2025-07-05T15:37:35.601167, 2025-07-05T15:17:17.101537, 2025-07-05T15:10:33.264919, 2025-07-05T14:01:38.946494 (367177 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">maximumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">JJ, 27, 28, EJ (127 unique)</td>
+                    <td class="examples">52, 24, 71, EK (127 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -281,7 +281,7 @@
                 <tr>
                     <td><code class="field-name">minimumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">EJ, 30, NA, H (125 unique)</td>
+                    <td class="examples">12, LJ, HH, 20 (125 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -293,25 +293,25 @@
                 <tr>
                     <td><code class="field-name">payScale</code></td>
                     <td>String</td>
-                    <td class="examples">EN, KP, SY, RG (191 unique)</td>
+                    <td class="examples">PZ, ER, EP, VE (191 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionCloseDate</code></td>
                     <td>String</td>
-                    <td class="examples">2024-11-22, 2024-03-19, 2024-01-08, 2025-06-03 (672 unique)</td>
+                    <td class="examples">2024-04-26, 2024-05-03, 2024-06-23, 2024-01-17 (672 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionExpireDate</code></td>
                     <td>String</td>
-                    <td class="examples">2024-11-09, 2024-02-09, 2024-07-23, 2024-10-21 (550 unique)</td>
+                    <td class="examples">2024-10-21, 2024-02-22, 2024-07-26, 2024-05-03 (550 unique)</td>
                     <td class="completeness poor">9%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionOpenDate</code></td>
                     <td>String</td>
-                    <td class="examples">2024-09-03, 2024-01-29, 2024-08-09, 2024-01-24 (365 unique)</td>
+                    <td class="examples">2024-07-30, 2024-12-03, 2024-04-19, 2024-03-21 (365 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -323,13 +323,13 @@
                 <tr>
                     <td><code class="field-name">positionTitle</code></td>
                     <td>String</td>
-                    <td class="examples">Research Health Science Specialist - Geriatric Research, Education and Clinical Center (GRECC), Supervisory Health System Specialist- C&P Manager, AIRCRAFT ORDNANCE SYSTEM MECHANIC, Registered Nurse- Patient Aligned Care Team (PACT) Outpatient Staff (77986 unique)</td>
+                    <td class="examples">Industry Analyst - DIRECT HIRE, Engineering Equipment Operator Leader (LRAM), Engineering Psychologist (Research), Supervisory General Engineer (Senior Resident Engineer) (77986 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">promotionPotential</code></td>
                     <td>String</td>
-                    <td class="examples">CX, 19, PB2, 04 (115 unique)</td>
+                    <td class="examples">GS13, B, 60, PB3 (115 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -377,7 +377,7 @@
                 <tr>
                     <td><code class="field-name">totalOpenings</code></td>
                     <td>String</td>
-                    <td class="examples">31, 4, 82, 134 (157 unique)</td>
+                    <td class="examples">99999, 54, 225, 15 (157 unique)</td>
                     <td class="completeness warning">90%</td>
                 </tr>
                 <tr>
