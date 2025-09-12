@@ -366,11 +366,18 @@ def commit_and_push_changes():
         print("ℹ️  No changes to commit or commit failed")
         return False
     
-    # Push to remote
-    success, _ = run_command("git push", "Pushing to remote repository")
+    # Get current branch name
+    success, branch_name = run_command("git rev-parse --abbrev-ref HEAD", "Getting current branch")
+    branch_name = branch_name.strip() if success else "main"
+    
+    # Push to remote (set upstream if needed)
+    success, _ = run_command(f"git push --set-upstream origin {branch_name}", "Pushing to remote repository")
     if not success:
-        print("❌ Failed to push to remote repository")
-        return False
+        # Try regular push if branch already exists
+        success, _ = run_command("git push", "Pushing to remote repository (retry)")
+        if not success:
+            print("❌ Failed to push to remote repository")
+            return False
     
     print("✅ Successfully committed and pushed changes")
     return True

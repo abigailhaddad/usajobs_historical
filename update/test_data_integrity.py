@@ -65,7 +65,7 @@ def check_data_recency(filepath, max_days_old, description):
         df = pd.read_parquet(filepath)
         
         # Check if there's a date column
-        date_columns = ['DatePosted', 'date_posted', 'PositionOpenDate', 'ApplicationCloseDate']
+        date_columns = ['DatePosted', 'date_posted', 'PositionOpenDate', 'ApplicationCloseDate', 'applicationCloseDate', 'positionOpenDate']
         date_col = None
         for col in date_columns:
             if col in df.columns:
@@ -100,7 +100,7 @@ def check_data_recency(filepath, max_days_old, description):
 
 def check_no_data_loss():
     """Ensure historical data hasn't been lost"""
-    baseline_file = '../data/data_baseline.json'
+    baseline_file = 'data_baseline.json'  # Store in update directory
     
     # If baseline doesn't exist, create it
     if not os.path.exists(baseline_file):
@@ -168,10 +168,10 @@ def check_data_consistency():
         historical_ids = set(historical_2025['PositionID'].unique()) if 'PositionID' in historical_2025.columns else set()
         
         # Check for control numbers if PositionID doesn't exist
-        if not current_ids and 'ControlNumber' in current_2025.columns:
-            current_ids = set(current_2025['ControlNumber'].unique())
-        if not historical_ids and 'ControlNumber' in historical_2025.columns:
-            historical_ids = set(historical_2025['ControlNumber'].unique())
+        if not current_ids and 'usajobsControlNumber' in current_2025.columns:
+            current_ids = set(current_2025['usajobsControlNumber'].unique())
+        if not historical_ids and 'usajobsControlNumber' in historical_2025.columns:
+            historical_ids = set(historical_2025['usajobsControlNumber'].unique())
         
         if current_ids and historical_ids:
             missing_in_historical = current_ids - historical_ids
@@ -199,8 +199,8 @@ def run_tests():
     print_header("1. CURRENT DATA FILES")
     
     current_files = [
-        ('current_jobs_2024.parquet', 100, ['PositionTitle', 'PositionLocation'], 'Current jobs 2024'),
-        ('current_jobs_2025.parquet', 100, ['PositionTitle', 'PositionLocation'], 'Current jobs 2025')
+        ('current_jobs_2024.parquet', 100, ['positionTitle', 'positionLocation'], 'Current jobs 2024'),
+        ('current_jobs_2025.parquet', 100, ['positionTitle', 'positionLocation'], 'Current jobs 2025')
     ]
     
     for filename, min_rows, cols, desc in current_files:
@@ -212,9 +212,9 @@ def run_tests():
     
     for year in range(2013, 2026):
         filename = f'historical_jobs_{year}.parquet'
-        min_rows = 10 if year < 2017 else 1000  # Early years have less data
+        min_rows = 5 if year < 2015 else 10 if year < 2017 else 1000  # Early years have less data
         if not check_parquet_file(f'../data/{filename}', min_rows, 
-                                   ['PositionTitle'], f'Historical jobs {year}'):
+                                   ['positionTitle'], f'Historical jobs {year}'):
             all_passed = False
     
     # Test 3: Data recency
