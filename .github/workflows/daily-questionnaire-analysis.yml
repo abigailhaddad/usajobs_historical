@@ -60,7 +60,7 @@ jobs:
       timeout-minutes: 150  # 2.5 hour timeout
       run: |
         cd questionnaires
-        python run_analysis.py
+        python run_questionnaire_pipeline.py
       continue-on-error: true  # Don't fail the workflow if scraping times out
 
     - name: Commit any remaining changes

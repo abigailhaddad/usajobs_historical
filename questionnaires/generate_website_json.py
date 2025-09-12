@@ -84,14 +84,41 @@ def check_executive_order_mentions(questionnaire_dir=RAW_QUESTIONNAIRES_DIR):
 
 
 def main():
-    # Always regenerate the clean all jobs data to get the latest
-    # print("Generating clean all jobs data from latest parquet files...")
-    # import subprocess
-    # subprocess.run(['python3', 'generate_all_jobs_data.py'], check=True)
+    # Load all jobs data from parquet files with same cutoff as questionnaire extraction
+    print("Loading job data from parquet files...")
+    all_jobs_dfs = []
+    cutoff_date = pd.to_datetime('2025-06-01')
     
-    # Load the clean all jobs data
-    all_jobs_df = pd.read_csv('all_jobs_clean.csv')
-    print(f"Total jobs loaded: {len(all_jobs_df):,}")
+    for parquet_file in sorted(DATA_DIR.glob('current_jobs_*.parquet')):
+        df = pd.read_parquet(parquet_file)
+        if 'positionOpenDate' in df.columns:
+            df['positionOpenDate'] = pd.to_datetime(df['positionOpenDate'])
+            df = df[df['positionOpenDate'] >= cutoff_date]
+        
+        # Extract fields from MatchedObjectDescriptor for each job
+        if 'MatchedObjectDescriptor' in df.columns:
+            for idx, row in df.iterrows():
+                if pd.notna(row.get('MatchedObjectDescriptor')):
+                    try:
+                        mod = json.loads(row['MatchedObjectDescriptor'])
+                        
+                        # Extract service type
+                        if 'UserArea' in mod and 'Details' in mod['UserArea']:
+                            service_type_code = mod['UserArea']['Details'].get('ServiceType')
+                            if service_type_code:
+                                service_type_map = {
+                                    '01': 'Competitive',
+                                    '02': 'Excepted', 
+                                    '03': 'Senior Executive'
+                                }
+                                df.at[idx, 'service_type'] = service_type_map.get(service_type_code, service_type_code)
+                    except:
+                        pass
+        
+        all_jobs_dfs.append(df)
+    
+    all_jobs_df = pd.concat(all_jobs_dfs, ignore_index=True)
+    print(f"Total jobs loaded from {cutoff_date}: {len(all_jobs_df):,}")
     
     # Load questionnaire links
     links_df = pd.read_csv(QUESTIONNAIRE_DIR / 'questionnaire_links.csv')
