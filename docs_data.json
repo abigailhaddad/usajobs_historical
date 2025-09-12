@@ -1,8 +1,8 @@
 {
-  "generated_at": "2025-09-12T07:17:47.589927",
-  "total_jobs": 3000814,
+  "generated_at": "2025-09-12T23:20:50.305743",
+  "total_jobs": 3001819,
   "total_fields": 42,
-  "file_size": "446MB",
+  "file_size": "450MB",
   "latest_job_date": "2025-09-12",
   "data_coverage": [
     {
@@ -91,9 +91,9 @@
     },
     {
       "year": 2025,
-      "total_jobs": 121543,
-      "jobs_opened": 121543,
-      "jobs_closed": 120398,
+      "total_jobs": 122548,
+      "jobs_opened": 122548,
+      "jobs_closed": 121402,
       "coverage": "Current through September 12, 2025"
     }
   ],
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1145\"}], [{\"series\": \"1515\"}, {\"series\": \"0343\"}, {\"series\": \"1101\"}, {\"series\": \"0301\"}, {\"series\": \"1102\"}, {\"series\": \"0510\"}, {\"series\": \"0560\"}, {\"series\": \"0855\"}, {\"series\": \"2210\"}, {\"series\": \"0340\"}, {\"series\": \"0801\"}], [{\"series\": \"0807\"}, {\"series\": \"0110\"}, {\"series\": \"0810\"}, {\"series\": \"0808\"}, {\"series\": \"0401\"}, {\"series\": \"0020\"}, {\"series\": \"0101\"}, {\"series\": \"1301\"}], [{\"series\": \"0810\"}, {\"series\": \"0819\"}] (3060 unique)",
+      "examples": "[{\"series\": \"0401\"}, {\"series\": \"1515\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}], [{\"series\": \"0101\"}, {\"series\": \"1301\"}, {\"series\": \"0810\"}, {\"series\": \"0401\"}], [{\"series\": \"0806\"}, {\"series\": \"1320\"}], [{\"series\": \"3111\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Air Force\\National Air and Space Intelligence Center, Department of Veterans Affairs\\Deputy Assistant Secretary for Budget, Department of Labor\\Office of the Solicitor, Department of Transportation\\Great Lakes Saint Lawrence Seaway Development Corporation (542 unique)",
+      "examples": "General Services Administration\\Federal Acquisition Service, Department of Veterans Affairs\\Board of Veterans' Appeals, Department of Transportation, Department of the Navy\\Naval Systems Management Activity (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "CBSU-12489772-24-KC, CERA245533737659R, DE-24-PHIL-OFCCP-12412272KG, CBSY-12310241-24-CR (363801 unique)",
+      "examples": "24-12486943O-TSB-0303-6, NCDE247884555885R3, FLD-2023-FR-BILINGUAL-DE, CERE5754324101 (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Agency Employees Only, Seasonal, Detail, Summer (15 unique)",
+      "examples": "Summer, Internships, Permanent, ICTAP Only (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "DD61, TV99, LL02, HE34 (528 unique)",
+      "examples": "BO00, AR, ARX7, CM62 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Internal Revenue Service, U.S. Army Element SHAPE, Office of Strategic Communication, U.S. International Trade Commission (502 unique)",
+      "examples": "Assistant Secretary for Congressional and Intergovernmental Relations, Armstrong Flight Research Center, Air Force Medical Command, U. S. Sentencing Commission (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "WK, HD, NL, EE (122 unique)",
+      "examples": "TC, FQ, SK, SZ (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Education, Legislative Branch, Department of State, Department of Health and Human Services (26 unique)",
+      "examples": "Judicial Branch, Department of the Treasury, Department of Energy, Department of Transportation (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "407TH AFSB LOGISTICS READINESS CENTER, ASSISTANT SECRETARY FOR CIVIL RIGHTS (ascr), Fort Pulaski National Park, SMM (59973 unique)",
+      "examples": "Enterprise Support, Training & Development, 346-Seattle Regional Benefits Office, Veterans Health Administration: Malcolm Randall - Gainesville VAMC, FL, Grant Programs Directorate, Office of Grants Administration (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T13:47:41.955404, 2025-07-05T13:45:23.267861, 2025-07-05T15:12:56.624268, 2025-07-05T15:22:10.709263 (367177 unique)",
+      "examples": "2025-07-05T15:08:10.757576, 2025-07-05T12:59:13.243950, 2025-07-05T13:50:17.139552, 2025-07-05T14:18:59.480579 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "JL, IH, CM, 3 (127 unique)",
+      "examples": "JJ, JI, KH, 71 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "6, 97, 25, 24 (125 unique)",
+      "examples": "2, 26, 27, 97 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "EX, VE, NL, WJ (191 unique)",
+      "examples": "KE, DP, DR, SR (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-03-02, 2025-05-14, 2025-12-16, 2024-06-14 (672 unique)",
+      "examples": "2025-07-16, 2025-01-06, 2024-01-09, 2024-08-24 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-07-08, 2025-01-14, 2025-01-10, 2024-08-29 (550 unique)",
+      "examples": "2025-06-12, 2025-02-16, 2024-10-13, 2024-11-07 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-07-19, 2024-10-23, 2024-01-27, 2024-03-12 (365 unique)",
+      "examples": "2024-11-19, 2024-02-14, 2024-07-10, 2024-02-10 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Food Services Worker (Barista), Deputy Managing Director (Human Resources Management Division), MC-0201-2D, TARGET SYSTEMS EQUIPMENT WORKER, Professional Practice and Improvement Specialist (77986 unique)",
+      "examples": "Health System Specialist-Credentialing and Privileging Specialist, Chief, Accountant, CM-0510-00 (Public), Management and Program Analyst (Program Officer), Physical Therapist Clinical Specialist (Orthopedic Clinical Specialist) (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "EM, FE, 27, 6 (115 unique)",
+      "examples": "53, 07, 35, 42 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "1000, 346, 25, 183 (157 unique)",
+      "examples": "3, 51, 1407, 04 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
