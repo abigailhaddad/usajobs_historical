@@ -93,7 +93,7 @@ jobs:
     - name: Create Pull Request
       if: env.CHANGES_MADE == 'true'
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
         # Check if PR already exists
         PR_EXISTS=$(gh pr list --base main --head data-updates --state open --json number --jq length)
@@ -123,7 +123,7 @@ jobs:
           gh pr merge $PR_NUMBER --merge --auto
         fi
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
     - name: Check for failures
       if: failure() || (env.CHANGES_MADE == 'true' && steps.data_tests.outcome == 'failure')
