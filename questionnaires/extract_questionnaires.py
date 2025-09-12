@@ -17,6 +17,10 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
 from threading import Lock, Event
 import threading
+from questionnaire_utils import (
+    transform_monster_url, extract_questionnaire_id, get_questionnaire_filename,
+    get_questionnaire_filepath, questionnaire_exists, RAW_QUESTIONNAIRES_DIR
+)
 
 try:
     from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
@@ -135,7 +139,7 @@ def extract_questionnaire_links_from_job(job_row):
         if match not in links:
             links.append(match)
     
-    # Check for Monster Government questionnaire links (but don't add them)
+    # Look for Monster Government questionnaire links
     monster_patterns = [
         r'https://jobs\.monstergovt\.com/[^/]+/vacancy/previewVacancyQuestions\.hms\?[^"\'\s<>]+',
         r'https://jobs\.monstergovt\.com/[^/]+/ros/rosDashboard\.hms\?[^"\'\s<>]+'
@@ -143,9 +147,10 @@ def extract_questionnaire_links_from_job(job_row):
     
     for pattern in monster_patterns:
         monster_matches = re.findall(pattern, job_str)
-        if monster_matches:
-            has_monster_link = True
-            break
+        for match in monster_matches:
+            if match not in links:
+                links.append(match)
+                has_monster_link = True
     
     return links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type, low_grade, high_grade, has_monster_link
 
@@ -154,30 +159,12 @@ def scrape_questionnaire(url, output_dir, timeout_seconds=60, headless=True, ses
     """Scrape a single questionnaire with timeout and error handling"""
     
     # Transform Monster URLs to preview format
-    if 'monstergovt.com' in url and '/ros/rosDashboard.hms' in url:
-        match = re.search(r'https://jobs\.monstergovt\.com/([^/]+)/ros/rosDashboard\.hms\?O=(\d+)&J=(\d+)', url)
-        if match:
-            subdomain = match.group(1)
-            org_id = match.group(2)
-            job_num = match.group(3)
-            url = f'https://jobs.monstergovt.com/{subdomain}/vacancy/previewVacancyQuestions.hms?orgId={org_id}&jnum={job_num}'
-            print(f"  Transformed Monster URL to preview: {url}")
+    url = transform_monster_url(url)
+    if 'monstergovt.com' in url and '/vacancy/previewVacancyQuestions.hms' in url:
+        print(f"  Transformed Monster URL to preview: {url}")
     
-    # Extract ID from URL for filename
-    if 'usastaffing.gov' in url:
-        match = re.search(r'ViewQuestionnaire/(\d+)', url)
-        file_id = match.group(1) if match else 'unknown'
-        prefix = 'usastaffing'
-    elif 'monstergovt.com' in url:
-        # Extract jnum from Monster URL
-        match = re.search(r'jnum=(\d+)', url)
-        file_id = match.group(1) if match else str(hash(url))[:8]
-        prefix = 'monster'
-    else:
-        file_id = str(hash(url))[:8]
-        prefix = 'other'
-    
-    txt_path = os.path.join(output_dir, f'{prefix}_{file_id}.txt')
+    # Get filename for this questionnaire
+    txt_path = os.path.join(output_dir, get_questionnaire_filename(url))
     
     # Check if already scraped
     if os.path.exists(txt_path):
@@ -600,21 +587,13 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
         else:
             final_df.to_csv(csv_file, index=False)
     
-    # Save Monster statistics to a separate file
-    monster_stats = {
-        'total_jobs_processed': total_jobs_processed,
-        'jobs_with_monster_links': jobs_with_monster_links,
-        'percentage_with_monster': (jobs_with_monster_links / total_jobs_processed * 100) if total_jobs_processed > 0 else 0,
-        'extraction_date': datetime.now().isoformat()
-    }
-    
-    with open('monster_stats.json', 'w') as f:
-        json.dump(monster_stats, f, indent=2)
+    # Print Monster statistics (don't save to file)
+    percentage_with_monster = (jobs_with_monster_links / total_jobs_processed * 100) if total_jobs_processed > 0 else 0
     
     print(f"\n\nMonster Link Statistics:")
     print(f"  Total jobs processed: {total_jobs_processed:,}")
     print(f"  Jobs with Monster links: {jobs_with_monster_links:,}")
-    print(f"  Percentage with Monster links: {monster_stats['percentage_with_monster']:.2f}%")
+    print(f"  Percentage with Monster links: {percentage_with_monster:.2f}%")
     
     return csv_file
 
@@ -624,17 +603,6 @@ def save_progress_and_exit(completed_questionnaires, start_time):
     print("\n" + "="*60)
     print("GRACEFUL SHUTDOWN - SAVING PROGRESS")
     print("="*60)
-    
-    # Save completed questionnaires to a progress file
-    if completed_questionnaires:
-        progress_file = f"questionnaire_progress_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(progress_file, 'w') as f:
-            json.dump({
-                'completed_count': len(completed_questionnaires),
-                'completed_urls': [q['questionnaire_url'] for q in completed_questionnaires],
-                'timestamp': datetime.now().isoformat()
-            }, f, indent=2)
-        print(f"✅ Saved progress to {progress_file}")
     
     total_time = time.time() - start_time
     print(f"\n📊 Session Summary:")
@@ -766,30 +734,10 @@ def main():
     for idx, (_, row) in enumerate(df.iterrows()):
         url = row['questionnaire_url']
         # Transform Monster URLs for checking
-        if 'monstergovt.com' in url and '/ros/rosDashboard.hms' in url:
-            # Transform to preview URL for consistency
-            match = re.search(r'https://jobs\.monstergovt\.com/([^/]+)/ros/rosDashboard\.hms\?O=(\d+)&J=(\d+)', url)
-            if match:
-                subdomain = match.group(1)
-                org_id = match.group(2) 
-                job_num = match.group(3)
-                url = f'https://jobs.monstergovt.com/{subdomain}/vacancy/previewVacancyQuestions.hms?orgId={org_id}&jnum={job_num}'
-            
-        # Check if file exists
-        if 'usastaffing.gov' in url:
-            match = re.search(r'ViewQuestionnaire/(\d+)', url)
-            file_id = match.group(1) if match else 'unknown'
-            prefix = 'usastaffing'
-        elif 'monstergovt.com' in url:
-            # Extract jnum from Monster URL
-            match = re.search(r'jnum=(\d+)', url)
-            file_id = match.group(1) if match else str(hash(url))[:8]
-            prefix = 'monster'
-        else:
-            file_id = str(hash(url))[:8]
-            prefix = 'other'
+        url = transform_monster_url(url)
         
-        txt_path = os.path.join(output_dir, f'{prefix}_{file_id}.txt')
+        # Check if file exists
+        txt_path = get_questionnaire_filepath(url)
         if os.path.exists(txt_path):
             already_scraped += 1
         else:
@@ -887,17 +835,8 @@ def main():
     print(f"Total scraped files: {already_scraped + scraped_count}")
     print(f"Total time: {total_time/60:.1f} minutes")
     
-    # Save failed scrapes count for the website
-    scraping_stats = {
-        'failed_scrapes': failed_count,
-        'last_run': datetime.now().isoformat()
-    }
-    
-    with open('scraping_stats.json', 'w') as f:
-        json.dump(scraping_stats, f, indent=2)
-    
     if failed_count > 0:
-        print(f"\n⚠️  {failed_count} questionnaires failed to scrape (saved to scraping_stats.json)")
+        print(f"\n⚠️  {failed_count} questionnaires failed to scrape")
     print(f"Average rate: {completed_count/total_time:.2f} questionnaires/second")
     
     print(f"\nRaw text files saved in: {output_dir}")
