@@ -98,9 +98,7 @@ jobs:
             --base main \
             --head tracking-updates \
             --title "Weekly tracking data update - $(date +'%Y-%m-%d')" \
-            --body "Automated weekly tracking data update" \
-            --label "automated" \
-            --label "tracking-update"
+            --body "Automated weekly tracking data update"
         else
           echo "PR already exists, skipping creation"
         fi

@@ -104,9 +104,7 @@ jobs:
             --base main \
             --head data-updates \
             --title "Daily data update - $(date +'%Y-%m-%d')" \
-            --body "Automated daily data update from USAJobs API" \
-            --label "automated" \
-            --label "data-update"
+            --body "Automated daily data update from USAJobs API"
         else
           echo "PR already exists, skipping creation"
         fi

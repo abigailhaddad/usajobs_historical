@@ -114,9 +114,7 @@ jobs:
             --base main \
             --head questionnaire-updates \
             --title "Questionnaire analysis update - $(date +'%Y-%m-%d')" \
-            --body "Automated questionnaire analysis update" \
-            --label "automated" \
-            --label "questionnaire-update"
+            --body "Automated questionnaire analysis update"
         else
           echo "PR already exists, skipping creation"
         fi
