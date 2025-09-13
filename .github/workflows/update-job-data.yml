@@ -130,6 +130,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
+        ref: tracking-updates  # Checkout the branch with the actual changes
     
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -154,7 +155,14 @@ jobs:
         git config --global user.name "GitHub Actions Bot"
         git config --global user.email "actions@github.com"
         
-        # Create or update prod-tracking branch
+        # First merge to main
+        git checkout main
+        git pull origin main
+        git merge tracking-updates --no-ff -m "Merge tracking-updates after tests pass"
+        git push origin main
+        echo "✅ Merged to main branch"
+        
+        # Then create or update prod-tracking branch from the updated main
         git checkout -B prod-tracking
         git push -f origin prod-tracking
         

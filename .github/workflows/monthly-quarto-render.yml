@@ -60,5 +60,19 @@ jobs:
         git config --local user.email "actions@github.com"
         git config --local user.name "GitHub Actions Bot"
         git add -A
-        git diff --staged --quiet || git commit -m "Monthly Quarto render - $(date +'%B %Y')"
-        git push
+        if ! git diff --staged --quiet; then
+          git commit -m "Monthly Quarto render - $(date +'%B %Y')"
+          git push
+          echo "CHANGES_MADE=true" >> $GITHUB_ENV
+        else
+          echo "No changes to commit"
+          echo "CHANGES_MADE=false" >> $GITHUB_ENV
+        fi
+    
+    - name: Push to prod-nps branch
+      if: env.CHANGES_MADE == 'true'
+      run: |
+        # Create or update prod-nps branch
+        git checkout -B prod-nps
+        git push -f origin prod-nps
+        echo "✅ Deployed to prod-nps branch"
