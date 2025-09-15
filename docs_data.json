@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-09-14T07:17:28.936808",
-  "total_jobs": 3001894,
+  "generated_at": "2025-09-15T07:16:58.116032",
+  "total_jobs": 3002411,
   "total_fields": 42,
-  "file_size": "451MB",
-  "latest_job_date": "2025-09-14",
+  "file_size": "453MB",
+  "latest_job_date": "2025-09-15",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 122623,
-      "jobs_opened": 122623,
-      "jobs_closed": 121477,
-      "coverage": "Current through September 14, 2025"
+      "total_jobs": 123140,
+      "jobs_opened": 123140,
+      "jobs_closed": 121994,
+      "coverage": "Current through September 15, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0020\"}, {\"series\": \"0830\"}, {\"series\": \"0819\"}, {\"series\": \"0807\"}, {\"series\": \"0810\"}, {\"series\": \"0808\"}, {\"series\": \"0401\"}], [{\"series\": \"0850\"}, {\"series\": \"0810\"}, {\"series\": \"0808\"}, {\"series\": \"0020\"}, {\"series\": \"0830\"}, {\"series\": \"0801\"}], [{\"series\": \"0350\"}], [{\"series\": \"0993\"}] (3060 unique)",
+      "examples": "[{\"series\": \"1320\"}, {\"series\": \"0401\"}, {\"series\": \"1350\"}, {\"series\": \"1301\"}, {\"series\": \"0893\"}, {\"series\": \"0801\"}, {\"series\": \"0819\"}], [{\"series\": \"0855\"}, {\"series\": \"1310\"}, {\"series\": \"0861\"}, {\"series\": \"1550\"}, {\"series\": \"0854\"}, {\"series\": \"0850\"}], [{\"series\": \"0810\"}, {\"series\": \"0881\"}], [{\"series\": \"7601\"}] (3060 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 3060
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of Health and Human Services\\Agency for Healthcare Research and Quality, Department of Agriculture\\Office of the Chief Information Officer, National Aeronautics and Space Administration\\Lyndon B. Johnson Space Center, General Services Administration\\Civilian Board of Contract Appeals (542 unique)",
+      "examples": "Department of the Army\\U.S. Army Central, National Credit Union Administration, Department of the Army\\U.S. Army Training and Doctrine Command, Department of the Treasury\\Bureau of Engraving and Printing (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "ACT-AJT-24-AJT-3-87996, ST-12396699-24-BS, IPJG247086958239HWR, 25-065-KS (363801 unique)",
+      "examples": "NV-12369622-24-039, WTEY230128783932, SDSB242663652059, HCJT246681058041HW (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Temporary, Presidential Management Fellows, Term, ICTAP Only (15 unique)",
+      "examples": "Seasonal, Summer, Telework, Agency Employees Only (15 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 15
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "AA00, EB00, AGDA, AN00 (528 unique)",
+      "examples": "BW00, ARNG, NN24, DD13 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Agricultural Marketing Service, Office of Healthy Homes and Lead Hazard Control, U.S. Air Force Academy, Office of Communications and Outreach (502 unique)",
+      "examples": "Electronic Health Record Modernization, Space Training and Readiness Command, Goddard Space Flight Center, Cybersecurity and Infrastructure Security Agency (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "BO, AM, IG, NP (122 unique)",
+      "examples": "DD, RR, HE, EE (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "General Services Administration, Department of Education, Executive Office of the President, Department of the Air Force (26 unique)",
+      "examples": "Department of the Navy, Legislative Branch, Department of Commerce, Department of Transportation (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Battle Creek VA Medical center, RES HEALTH SVCS DIV, NAF - 52 FSS Outdoor Recreation, 412th Test Wing, 412th Mission Support Group, 412th Force Support Squadron, School Age Annex (59973 unique)",
+      "examples": "Special Counsel and Labor Relations, PIMC | Division of Quality Management - Department of Infection and Control, Office of Security, International Security Programs Division, Belcourt Service Unit, Dietary Department (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T15:19:45.187795, 2025-07-05T15:17:17.071131, 2025-07-05T13:02:09.570412, 2025-07-05T15:37:35.668733 (367177 unique)",
+      "examples": "2025-07-05T15:37:35.661499, 2025-07-05T15:29:17.226720, 2025-07-05T13:57:17.388434, 2025-07-05T15:17:17.072963 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +237,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "17, H, AG, 20 (127 unique)",
+      "examples": "70, 18, B, I (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +253,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "08, 25, 26, DL (125 unique)",
+      "examples": "IJ, 71, DL, J (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +269,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "NG, AC, LP, CY (191 unique)",
+      "examples": "WB, NH, CP, KG (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +277,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-12-03, 2025-09-12, 2024-07-30, 2024-10-27 (672 unique)",
+      "examples": "2025-06-03, 2024-07-21, 2025-06-05, 2024-11-13 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +285,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-01-29, 2024-08-03, 2024-09-25, 2024-08-17 (550 unique)",
+      "examples": "2025-02-06, 2025-04-30, 2024-05-27, 2024-03-20 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +293,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-12-23, 2024-06-28, 2024-01-05, 2024-06-21 (365 unique)",
+      "examples": "2024-12-10, 2024-08-16, 2024-05-04, 2024-10-06 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -309,7 +309,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "PROGRAM MANAGER (DEPUTY CHIEF OF STAFF), Environmental Services Technician Leader, Physician Psychiatrist (Chief of Psychiatry), Park Ranger (Paramedic) (77986 unique)",
+      "examples": "Supervisory Air Traffic Control Specialist (T), MSS-2, Level 5, Supervisory Chemist (Laboratory Chief), Social Worker (PTSD RRTP Coordinator), CONSTRUCTION CONTROL REP (ICTAP) (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +317,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "20, Contingent, GS13, 39 (115 unique)",
+      "examples": "04, 44, no, 43 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -381,7 +381,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "70, 91, 58, 36 (157 unique)",
+      "examples": "02, 9, 15, 103 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
