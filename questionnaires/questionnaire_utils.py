@@ -17,6 +17,13 @@ def transform_monster_url(url):
             org_id = match.group(2)
             job_num = match.group(3)
             return f'https://jobs.monstergovt.com/{subdomain}/vacancy/previewVacancyQuestions.hms?orgId={org_id}&jnum={job_num}'
+    elif 'monstergovt.com' in url and '/rospost/' in url:
+        match = re.search(r'https://jobs\.monstergovt\.com/([^/]+)/rospost/\?O=(\d+)&J=(\d+)', url)
+        if match:
+            subdomain = match.group(1)
+            org_id = match.group(2)
+            job_num = match.group(3)
+            return f'https://jobs.monstergovt.com/{subdomain}/vacancy/previewVacancyQuestions.hms?orgId={org_id}&jnum={job_num}'
     return url
 
 
