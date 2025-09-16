@@ -11,7 +11,8 @@ QUESTIONNAIRE_LINKS_CSV = Path('./questionnaire_links.csv')
 def transform_monster_url(url):
     """Transform Monster dashboard URL to preview format"""
     if 'monstergovt.com' in url and '/ros/rosDashboard.hms' in url:
-        match = re.search(r'https://jobs\.monstergovt\.com/([^/]+)/ros/rosDashboard\.hms\?O=(\d+)&J=(\d+)', url)
+        # Handle both /ros/rosDashboard and /nga/ros/rosDashboard patterns
+        match = re.search(r'https://jobs\.monstergovt\.com/([^/]+)/(?:nga/)?ros/rosDashboard\.hms\?O=(\d+)&J=(\d+)', url)
         if match:
             subdomain = match.group(1)
             org_id = match.group(2)

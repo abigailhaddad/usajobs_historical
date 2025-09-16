@@ -142,7 +142,7 @@ def extract_questionnaire_links_from_job(job_row):
     # Look for Monster Government questionnaire links
     monster_patterns = [
         r'https://jobs\.monstergovt\.com/[^/]+/vacancy/previewVacancyQuestions\.hms\?[^"\'\s<>]+',
-        r'https://jobs\.monstergovt\.com/[^/]+/ros/rosDashboard\.hms\?[^"\'\s<>]+',
+        r'https://jobs\.monstergovt\.com/[^/]+/(?:nga/)?ros/rosDashboard\.hms\?[^"\'\s<>]+',
         r'https://jobs\.monstergovt\.com/[^/]+/rospost/\?[^"\'\s<>]+'
     ]
     
