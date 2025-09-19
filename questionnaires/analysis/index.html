@@ -443,6 +443,14 @@
                             <h3>Job Listings with New Essay Question</h3>
                             <button id="downloadCSV" class="btn btn-primary">Download All as CSV</button>
                         </div>
+                        <div class="alert alert-warning" role="alert">
+                            <strong>Important Notes:</strong>
+                            <ul class="mb-0">
+                                <li>This table now shows ALL federal jobs from our dataset, not just those with the essay question</li>
+                                <li>We only scrape questionnaires from USAStaffing and Monster Government sites</li>
+                                <li>Other agencies (e.g., FAA, Intelligence Community) may have questionnaires on their own sites that are not included</li>
+                            </ul>
+                        </div>
                         <div class="mb-3">
                             <p>Showing <span id="jobsShown">0</span> of <span id="jobsTotal">0</span> jobs</p>
                             <small class="text-muted">Tip: Press Enter to add a search term as a filter. Add multiple filters per column.</small>
@@ -460,6 +468,7 @@
                                     <th>Service</th>
                                     <th>Open</th>
                                     <th>Close</th>
+                                    <th>Questionnaire Status</th>
                                     <th>USAJobs</th>
                                     <th>Questions</th>
                                 </tr>
@@ -502,6 +511,15 @@
                                     </th>
                                     <th><input type="text" class="form-control form-control-sm column-search" data-column="7" placeholder="Search date..." /></th>
                                     <th><input type="text" class="form-control form-control-sm column-search" data-column="8" placeholder="Search date..." /></th>
+                                    <th>
+                                        <select class="form-select form-select-sm" id="statusFilter">
+                                            <option value="">All statuses</option>
+                                            <option value="No questionnaire">No questionnaire detected</option>
+                                            <option value="Has questionnaire (not scraped)">Has questionnaire (not scraped)</option>
+                                            <option value="Questionnaire without EO question">Questionnaire scraped (no EO question)</option>
+                                            <option value="Questionnaire with EO question">Questionnaire with EO question ✓</option>
+                                        </select>
+                                    </th>
                                     <th></th>
                                     <th></th>
                                 </tr>
@@ -533,8 +551,8 @@
                 const data = await response.json();
                 
                 // Populate overview
-                document.getElementById('totalScraped').textContent = data.overview.total_scraped.toLocaleString();
-                document.getElementById('totalWithEO').textContent = data.overview.total_with_eo.toLocaleString();
+                document.getElementById('totalScraped').textContent = data.overview.total_jobs_with_questionnaires.toLocaleString();
+                document.getElementById('totalWithEO').textContent = data.overview.total_jobs_with_eo.toLocaleString();
                 document.getElementById('percentageWithEO').textContent = data.overview.percentage_with_eo + '%';
                 document.getElementById('dataCoverage').textContent = data.overview.data_coverage;
                 
@@ -560,7 +578,7 @@
         function createSimpleTable(elementId, data) {
             const container = document.getElementById(elementId);
             const table = document.createElement('table');
-            table.className = 'table table-bordered';
+            table.className = 'table table-striped table-bordered table-hover';
             
             // Store original data for sorting
             let tableData = [...data];
@@ -588,7 +606,7 @@
                 let maxPercent = 0;
                 tableData.forEach(row => {
                     Object.entries(row).forEach(([key, value]) => {
-                        if (key.includes('% of Scraped')) {
+                        if (key.includes('%')) {
                             const percent = parseFloat(value);
                             if (percent > maxPercent) maxPercent = percent;
                         }
@@ -629,6 +647,53 @@
                     });
                     tbody.appendChild(tr);
                 });
+                
+                // Add totals row
+                const totalsRow = document.createElement('tr');
+                totalsRow.className = 'table-info font-weight-bold';
+                totalsRow.style.fontWeight = 'bold';
+                
+                // Calculate totals
+                const totals = {};
+                columnKeys.forEach((key, index) => {
+                    if (index === 0) {
+                        totals[key] = 'TOTAL';
+                    } else if (typeof tableData[0][key] === 'number' && !key.includes('%')) {
+                        totals[key] = tableData.reduce((sum, row) => sum + (row[key] || 0), 0);
+                    } else if (key.includes('%')) {
+                        // Calculate weighted percentage for totals
+                        const questKey = 'Jobs with Questionnaires';
+                        const eoKey = 'Jobs with Essay Question';
+                        if (key === '% with Essay Question' && totals[questKey] > 0) {
+                            totals[key] = ((totals[eoKey] / totals[questKey]) * 100).toFixed(1);
+                        } else {
+                            totals[key] = '';
+                        }
+                    } else {
+                        totals[key] = '';
+                    }
+                });
+                
+                // Create total row cells
+                Object.entries(totals).forEach(([key, value], index) => {
+                    const td = document.createElement('td');
+                    if (typeof value === 'number') {
+                        td.textContent = value.toLocaleString();
+                        td.style.textAlign = 'center';
+                    } else if (key.includes('%') && value !== '') {
+                        // Center percentage values
+                        td.textContent = value;
+                        td.style.textAlign = 'center';
+                    } else if (index === 0) {
+                        // Bold the TOTAL label
+                        td.innerHTML = '<strong>' + value + '</strong>';
+                    } else {
+                        td.textContent = value;
+                    }
+                    totalsRow.appendChild(td);
+                });
+                
+                tbody.appendChild(totalsRow);
                 table.appendChild(tbody);
             }
             
@@ -731,7 +796,7 @@
             // Create header
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
-            ['Month', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Monthly Percentage', 'Total Jobs Posted', 'Jobs with Essay Question'].forEach(header => {
+            ['Month', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Monthly %', 'Total Jobs', 'Jobs with Questionnaires', 'Jobs with Essay Question'].forEach(header => {
                 const th = document.createElement('th');
                 th.textContent = header;
                 headerRow.appendChild(th);
@@ -769,6 +834,57 @@
                 });
                 tbody.appendChild(tr);
             });
+            // Add totals row
+            const totalsRow = document.createElement('tr');
+            totalsRow.className = 'table-info';
+            totalsRow.style.fontWeight = 'bold';
+            
+            // Calculate totals
+            const totals = {
+                'Month': 'TOTAL',
+                'Week 1': null,
+                'Week 2': null,
+                'Week 3': null,
+                'Week 4': null,
+                'Week 5': null,
+                'Monthly Percentage': null,
+                'Total Jobs': 0,
+                'Jobs with Questionnaires': 0,
+                'Jobs with Essay Question': 0
+            };
+            
+            // Sum up the numeric columns
+            data.forEach(row => {
+                totals['Total Jobs'] += row['Total Jobs'] || 0;
+                totals['Jobs with Questionnaires'] += row['Jobs with Questionnaires'] || 0;
+                totals['Jobs with Essay Question'] += row['Jobs with Essay Question'] || 0;
+            });
+            
+            // Calculate overall percentage (EO jobs / questionnaire jobs)
+            if (totals['Jobs with Questionnaires'] > 0) {
+                totals['Monthly Percentage'] = (totals['Jobs with Essay Question'] / totals['Jobs with Questionnaires'] * 100).toFixed(1);
+            }
+            
+            // Create cells for totals row
+            Object.entries(totals).forEach(([key, value]) => {
+                const td = document.createElement('td');
+                if (key === 'Month') {
+                    td.innerHTML = '<strong>' + value + '</strong>';
+                } else if (key === 'Monthly Percentage' && value !== null) {
+                    td.textContent = value + '%';
+                    td.style.textAlign = 'center';
+                    td.style.backgroundColor = '#e9ecef';
+                } else if (typeof value === 'number') {
+                    td.textContent = value.toLocaleString();
+                    td.style.textAlign = 'center';
+                } else {
+                    td.textContent = '';
+                    td.style.backgroundColor = '#e9ecef';
+                }
+                totalsRow.appendChild(td);
+            });
+            
+            tbody.appendChild(totalsRow);
             table.appendChild(tbody);
             
             container.appendChild(table);
@@ -795,6 +911,7 @@
                     { data: 'service' },
                     { data: 'open_date' },
                     { data: 'close_date' },
+                    { data: 'questionnaire_status' },
                     { 
                         data: 'usajobs_link',
                         render: function(data, type, row) {
@@ -828,9 +945,16 @@
                 orderCellsTop: true,
                 fixedHeader: true,
                 drawCallback: function() {
-                    // Update shown count when page changes
-                    const info = this.api().page.info();
-                    document.getElementById('jobsShown').textContent = info.end;
+                    // Update counts based on filtered data
+                    const api = this.api();
+                    const info = api.page.info();
+                    
+                    // Update total to show filtered count
+                    document.getElementById('jobsTotal').textContent = info.recordsDisplay;
+                    
+                    // Update shown count (current page end, but not more than total filtered)
+                    const shownCount = Math.min(info.end, info.recordsDisplay);
+                    document.getElementById('jobsShown').textContent = shownCount;
                 },
                 initComplete: function() {
                     // Setup column search
@@ -1035,6 +1159,16 @@
                         e.stopPropagation();
                     });
                     
+                    // Handle questionnaire status filter
+                    $('#statusFilter').on('change', function() {
+                        const selectedStatus = $(this).val();
+                        if (selectedStatus) {
+                            api.column(9).search('^' + selectedStatus + '$', true, false).draw();
+                        } else {
+                            api.column(9).search('').draw();
+                        }
+                    });
+                    
                     // Initial display
                     updateFilterDisplay();
                 }
@@ -1043,7 +1177,7 @@
         
         // CSV download function
         function downloadCSV() {
-            const headers = ['USAJobs ID', 'Position Title', 'Occupation', 'Agency', 'Location', 'Grade', 'Service Type', 'Open Date', 'Close Date', 'USAJobs Link', 'Questionnaire Link'];
+            const headers = ['USAJobs ID', 'Position Title', 'Occupation', 'Agency', 'Location', 'Grade', 'Service Type', 'Open Date', 'Close Date', 'Questionnaire Status', 'USAJobs Link', 'Questionnaire Link'];
             const csvContent = [
                 headers.join(','),
                 ...allJobsData.map(row => {
@@ -1057,6 +1191,7 @@
                         '"' + (row.service || '').replace(/"/g, '""') + '"',
                         row.open_date || '',
                         row.close_date || '',
+                        '"' + (row.questionnaire_status || '').replace(/"/g, '""') + '"',
                         row.usajobs_link ? 'https://www.usajobs.gov/job/' + row.usajobs_link : '',
                         row.questionnaire_link || ''
                     ].join(',');
@@ -1066,7 +1201,7 @@
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = 'executive_order_jobs.csv';
+            link.download = 'all_federal_jobs.csv';
             link.click();
         }
         

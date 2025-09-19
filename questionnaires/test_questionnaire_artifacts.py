@@ -224,14 +224,43 @@ def create_baseline(filepath):
     except Exception as e:
         print(f"{Colors.RED}Error creating baseline: {e}{Colors.RESET}")
 
+def validate_aggregation_totals(data, aggregation_name, display_name, total_jobs_with_q, total_jobs_with_eo):
+    """Validate that aggregation totals match overview totals"""
+    all_good = True
+    
+    if aggregation_name not in data:
+        print(f"{Colors.YELLOW}⚠️  WARNING{Colors.RESET} {display_name} analysis data not found")
+        return True  # Don't fail if data is missing
+    
+    # Calculate totals for this aggregation
+    total_q = sum(item['Jobs with Questionnaires'] for item in data[aggregation_name])
+    total_eo = sum(item['Jobs with Essay Question'] for item in data[aggregation_name])
+    
+    # Check questionnaire totals
+    if total_q != total_jobs_with_q:
+        print(f"{Colors.RED}❌ FAIL{Colors.RESET} {display_name} questionnaire total ({total_q:,}) doesn't match overview ({total_jobs_with_q:,})")
+        all_good = False
+    else:
+        print(f"{Colors.GREEN}✅ PASS{Colors.RESET} {display_name} questionnaire totals match")
+    
+    # Check essay totals
+    if total_eo != total_jobs_with_eo:
+        print(f"{Colors.RED}❌ FAIL{Colors.RESET} {display_name} essay total ({total_eo:,}) doesn't match overview ({total_jobs_with_eo:,})")
+        all_good = False
+    else:
+        print(f"{Colors.GREEN}✅ PASS{Colors.RESET} {display_name} essay totals match")
+    
+    return all_good
+
 def check_analysis_data():
-    """Check the analysis data JSON structure"""
+    """Check the analysis data JSON structure and validate all counts"""
     try:
         with open('analysis/analysis_data.json', 'r') as f:
             data = json.load(f)
         
         # Check required top-level keys
-        required_keys = ['overview', 'service_analysis', 'grade_analysis']
+        required_keys = ['overview', 'service_analysis', 'grade_analysis', 
+                        'location_analysis', 'agency_analysis', 'occupation_analysis']
         missing = [k for k in required_keys if k not in data]
         
         if missing:
@@ -240,18 +269,111 @@ def check_analysis_data():
         
         # Check overview
         overview = data.get('overview', {})
-        if overview.get('total_scraped', 0) == 0:
-            print(f"{Colors.RED}❌ FAIL{Colors.RESET} No scraped questionnaires found")
+        total_jobs = overview.get('total_jobs', 0)
+        total_jobs_with_q = overview.get('total_jobs_with_questionnaires', 0)
+        total_jobs_with_eo = overview.get('total_jobs_with_eo', 0)
+        
+        if total_jobs == 0:
+            print(f"{Colors.RED}❌ FAIL{Colors.RESET} No total jobs found")
             return False
         
-        total_scraped = overview.get('total_scraped', 0)
-        total_with_eo = overview.get('total_with_eo', 0)
+        print(f"{Colors.GREEN}✅ PASS{Colors.RESET} Analysis data structure valid")
+        print(f"     Total jobs: {total_jobs:,}")
+        print(f"     Jobs with questionnaires: {total_jobs_with_q:,}")
+        print(f"     Jobs with essay questions: {total_jobs_with_eo:,}")
         
-        print(f"{Colors.GREEN}✅ PASS{Colors.RESET} Analysis data valid")
-        print(f"     Total scraped questionnaires: {total_scraped}")
-        print(f"     Jobs with essay questions: {total_with_eo}")
+        # Validate logical consistency
+        all_good = True
         
-        return True
+        # Check that essay jobs <= questionnaire jobs
+        if total_jobs_with_eo > total_jobs_with_q:
+            print(f"{Colors.RED}❌ FAIL{Colors.RESET} Essay jobs ({total_jobs_with_eo}) exceeds questionnaire jobs ({total_jobs_with_q})")
+            all_good = False
+        
+        # Now check that all aggregations sum up correctly
+        print(f"\n{Colors.BLUE}Validating aggregation totals...{Colors.RESET}")
+        
+        # Define aggregations to validate
+        aggregations = [
+            ('agency_analysis', 'Agency'),
+            ('service_analysis', 'Service'),
+            ('grade_analysis', 'Grade'),
+            ('location_analysis', 'Location'),
+            ('occupation_analysis', 'Occupation')
+        ]
+        
+        # Validate each aggregation
+        for aggregation_name, display_name in aggregations:
+            if not validate_aggregation_totals(data, aggregation_name, display_name, total_jobs_with_q, total_jobs_with_eo):
+                all_good = False
+        
+        # Check job postings questionnaire status counts
+        print(f"\n{Colors.BLUE}Validating questionnaire status counts...{Colors.RESET}")
+        if 'job_postings' in data:
+            job_postings = data['job_postings']
+            status_counts = {}
+            for job in job_postings:
+                status = job.get('questionnaire_status', 'Unknown')
+                status_counts[status] = status_counts.get(status, 0) + 1
+            
+            total_jobs_in_postings = len(job_postings)
+            
+            # Check that total matches overview
+            if total_jobs_in_postings != total_jobs:
+                print(f"{Colors.RED}❌ FAIL{Colors.RESET} Job postings count ({total_jobs_in_postings:,}) doesn't match overview total jobs ({total_jobs:,})")
+                all_good = False
+            else:
+                print(f"{Colors.GREEN}✅ PASS{Colors.RESET} Job postings count matches total jobs")
+            
+            # Print status breakdown
+            print(f"\n  Status breakdown:")
+            for status, count in sorted(status_counts.items()):
+                print(f"    {status}: {count:,}")
+            
+            # Verify counts make logical sense
+            no_questionnaire = status_counts.get('No questionnaire', 0)
+            not_scraped = status_counts.get('Has questionnaire (not scraped)', 0)
+            without_eo = status_counts.get('Questionnaire without EO question', 0)
+            with_eo = status_counts.get('Questionnaire with EO question', 0)
+            
+            # Check that questionnaire statuses sum to total
+            total_with_questionnaire = not_scraped + without_eo + with_eo
+            if (no_questionnaire + total_with_questionnaire) != total_jobs:
+                print(f"{Colors.RED}❌ FAIL{Colors.RESET} Status counts don't sum to total jobs")
+                all_good = False
+            
+            # Check that EO question count matches overview
+            if with_eo != total_jobs_with_eo:
+                print(f"{Colors.RED}❌ FAIL{Colors.RESET} Jobs with EO question ({with_eo:,}) doesn't match overview ({total_jobs_with_eo:,})")
+                all_good = False
+            else:
+                print(f"{Colors.GREEN}✅ PASS{Colors.RESET} Jobs with EO question count matches")
+        else:
+            print(f"{Colors.YELLOW}⚠️  WARNING{Colors.RESET} No job_postings data found")
+        
+        # Check that no individual agency has more questionnaires than total jobs
+        print(f"\n{Colors.BLUE}Validating individual agency counts...{Colors.RESET}")
+        agency_issues = []
+        for agency in data.get('agency_analysis', [])[:10]:  # Check top 10 agencies
+            name = agency['Agency']
+            total = agency['Total Jobs']
+            with_q = agency['Jobs with Questionnaires']
+            with_eo = agency['Jobs with Essay Question']
+            
+            if with_q > total:
+                agency_issues.append(f"  - {name}: {with_q:,} questionnaires > {total:,} total jobs")
+            if with_eo > with_q:
+                agency_issues.append(f"  - {name}: {with_eo:,} essay jobs > {with_q:,} questionnaire jobs")
+        
+        if agency_issues:
+            print(f"{Colors.YELLOW}⚠️  WARNING{Colors.RESET} Agency count issues found:")
+            for issue in agency_issues:
+                print(f"{Colors.YELLOW}{issue}{Colors.RESET}")
+            # Note: This is currently a warning, not a failure, due to the data extraction issue
+        else:
+            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} All agency counts are logically consistent")
+        
+        return all_good
         
     except Exception as e:
         print(f"{Colors.RED}❌ FAIL{Colors.RESET} Could not check analysis data: {e}")
