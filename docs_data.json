@@ -1,8 +1,8 @@
 {
-  "generated_at": "2025-09-19T22:51:40.140617",
-  "total_jobs": 3007705,
-  "total_fields": 42,
-  "file_size": "481MB",
+  "generated_at": "2025-09-19T23:32:36.253991",
+  "total_jobs": 3007734,
+  "total_fields": 43,
+  "file_size": "469MB",
   "latest_job_date": "2025-09-19",
   "data_coverage": [
     {
@@ -91,9 +91,9 @@
     },
     {
       "year": 2025,
-      "total_jobs": 128433,
-      "jobs_opened": 128433,
-      "jobs_closed": 127275,
+      "total_jobs": 128462,
+      "jobs_opened": 128462,
+      "jobs_closed": 127533,
       "coverage": "Current through September 19, 2025"
     }
   ],
@@ -101,31 +101,31 @@
     {
       "field_name": "HiringPaths",
       "field_type": "JSON Array",
-      "examples": "[{\"hiringPath\": \"Custom announcement\"}], [{\"hiringPath\": \"The public\"}] (75896 unique combinations)",
+      "examples": "[{\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"The public\"}], [{\"hiringPath\": \"Internal to an agency\"}] (75880 unique combinations)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 75896
+      "unique_count": 75880
     },
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1301\"}, {\"series\": \"1360\"}, {\"series\": \"1550\"}], [{\"series\": \"0413\"}, {\"series\": \"0180\"}], [{\"series\": \"2801\"}], [{\"series\": \"3501\"}] (3060 unique)",
+      "examples": "[{\"series\": \"1550\"}, {\"series\": \"0332\"}], [{\"series\": \"1301\"}, {\"series\": \"1550\"}], [{\"series\": \"0830\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"0840\"}, {\"series\": \"0850\"}], [{\"series\": \"1301\"}, {\"series\": \"0819\"}, {\"series\": \"1320\"}, {\"series\": \"0401\"}] (3146 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 3060
+      "unique_count": 3146
     },
     {
       "field_name": "PositionLocations",
       "field_type": "JSON Array",
-      "examples": "[{\"positionLocationCity\": \"Urbana\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Falls Church\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Woodlawn\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Baltimore\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Durham\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Washington\", \"positionLocationState\": \"District of Columbia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Alexandria\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Springfield\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Arlington\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"China Lake\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}] (26311 unique combinations)",
+      "examples": "[{\"positionLocationCity\": \"Highlands\", \"positionLocationState\": \"New Jersey\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Brooklyn\", \"positionLocationState\": \"New York\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Pentagon, Arlington\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}] (26493 unique combinations)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 26311
+      "unique_count": 26493
     },
     {
       "field_name": "agencyLevel",
       "field_type": "Integer",
-      "examples": "1, 2",
+      "examples": "2, 1",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 2
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Executive Office of the President\\Office of the U.S. Trade Representative, Department of Homeland Security\\Immigration and Customs Enforcement, Department of the Army\\Civilian Protection Center Of Excellence (CP CoE), Judicial Branch\\U. S. Sentencing Commission (542 unique)",
+      "examples": "Department of the Air Force\\Air Force Legal Operations Agency, Appalachian Regional Commission, Department of Agriculture\\Office of Budget and Program Analysis, Department of Health and Human Services\\Centers for Medicare & Medicaid Services (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "DAFN245380924551R, HHS-ACF-IMP-24-12261949, 24-JCOCR-EAST-0186-4-5-DP, MCFU240716695769 (363801 unique)",
+      "examples": "CBTG-12640851-25-LAP, WYMP-24-12515872-JP, 8C-CES-12268958-273424-SZ, ST-12497750-24-DGK (363801 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363801
@@ -165,10 +165,10 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Multiple, Summer, Seasonal, Internships (15 unique)",
+      "examples": "Detail, Temporary promotion, Intermittent, Summer (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 15
+      "unique_count": 16
     },
     {
       "field_name": "disableApplyOnline",
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "NV60, AG02, DLOW, HSBC (528 unique)",
+      "examples": "FM00, AG34, VABG, DD80 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "National Telecommunications and Information Administration, Defense Technical Information Center, Immediate Office of the Assistant Secretary for Operations, Security, and Preparedness, U.S. Air Forces, Europe (502 unique)",
+      "examples": "Transportation Security Administration, Naval Systems Management Activity, U.S. Court of Appeals for the Armed Forces, Defense Nuclear Facilities Safety Board (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "CI, PU, MA, RH (122 unique)",
+      "examples": "AP, FD, GS, AU (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Justice, National Foundation on the Arts and the Humanities, Department of the Interior, Department of Agriculture (26 unique)",
+      "examples": "General Services Administration, Department of Homeland Security, Department of the Air Force, National Foundation on the Arts and the Humanities (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Rehabilitation Medicine Service/Tuscaloosa VA Health Care System, CNRMA NAS OCEANA FFET WET AND WATERPARK N921E, ILSC ASSOCIATE DIR FOR LOGISTICS & TECHNICAL SUPPORT, Andersonville National Historic Site and Jimmy Carter National Historic Site (59973 unique)",
+      "examples": "Army Contracting Command 410th Regional Contracting Center (RCC) FT Sam Houston TX., 134 ARW/134 CFT, VISN 22 Human Resources Management Service (HRMS), Headquarters, United States European Command, Comptroller Division, ECJ813 (59973 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59973
@@ -229,7 +229,15 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T14:52:20.198038, 2025-07-05T13:45:23.260464, 2025-07-05T14:40:05.767362, 2025-07-05T14:58:30.212262 (367177 unique)",
+      "examples": "2025-07-05T13:47:41.912355, 2025-07-05T13:45:23.245147, 2025-07-05T15:27:19.787382, 2025-07-05T13:05:06.412724 (367177 unique)",
+      "completeness_percent": 100,
+      "completeness_class": "good",
+      "unique_count": 367177
+    },
+    {
+      "field_name": "last_seen",
+      "field_type": "String",
+      "examples": "2025-07-05T15:37:35.661909, 2025-07-05T13:47:41.927919, 2025-07-05T14:18:59.513052, 2025-07-05T15:31:46.165096 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -237,7 +245,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "81, JL, LD, 52 (127 unique)",
+      "examples": "08, 00, II, 44 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -253,7 +261,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "II, 70, 03, 61 (125 unique)",
+      "examples": "53, 21, 7, 07 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -269,7 +277,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "IM, BL, DK, XC (191 unique)",
+      "examples": "CN, NY, CR, DO (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -277,7 +285,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-01-22, 2024-08-04, 2024-12-13, 2024-04-18 (672 unique)",
+      "examples": "2024-05-12, 2024-05-25, 2024-03-28, 2025-12-04 (672 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 672
@@ -285,7 +293,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-02-05, 2025-05-30, 2024-01-07, 2024-03-01 (550 unique)",
+      "examples": "2024-06-27, 2023-10-16, 2024-03-31, 2025-02-18 (550 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 550
@@ -293,7 +301,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-06-07, 2024-06-09, 2024-07-14, 2024-12-11 (365 unique)",
+      "examples": "2024-08-01, 2024-07-28, 2024-06-14, 2024-10-22 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -301,7 +309,7 @@
     {
       "field_name": "positionOpeningStatus",
       "field_type": "String",
-      "examples": "Applications under review, Job closed, Job canceled, Candidate selected (5 unique)",
+      "examples": "Candidate selected, Job canceled, Applications under review, Job closed (5 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 5
@@ -309,7 +317,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "PROGRAM ANALYST-Title 5 OBO, Supervisory Physical Scientist (Environmental), Assistant Aquatics Manager, Safety and Occupational Health Manager (TEMP-INDEF) (TITLE 5) (77986 unique)",
+      "examples": "Social Worker HUD-VASH Program Coordinator, Social Insurance Specialist (BLNGL) (Claims Specialist), CONTRACTS AND PROGRAM MANAGEMENT SPECIALIST, CONTRACT SPECIALIST (T5) (77986 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77986
@@ -317,7 +325,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "31, Contingent, Contigent, 3 (115 unique)",
+      "examples": "6, 08, 06, 14 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -333,7 +341,7 @@
     {
       "field_name": "salaryType",
       "field_type": "String",
-      "examples": "Per Year, Per Hour, Without Compensation, Per Day (9 unique)",
+      "examples": "Per Hour, Per Year, Without Compensation, Per Day (9 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 9
@@ -341,7 +349,7 @@
     {
       "field_name": "securityClearance",
       "field_type": "String",
-      "examples": "Not Required, Secret, Other, L Access Authorization (8 unique)",
+      "examples": "Not Required, Secret, Other, Confidential (8 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 8
@@ -381,7 +389,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "318, 382, 228, 183 (157 unique)",
+      "examples": "12, 85, 49, 28 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
@@ -389,7 +397,7 @@
     {
       "field_name": "travelRequirement",
       "field_type": "String",
-      "examples": "Not required, Occasional travel, 25% or less, 75% or less (6 unique)",
+      "examples": "Not required, Occasional travel, 25% or less, 50% or less (6 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 6
@@ -397,7 +405,7 @@
     {
       "field_name": "usajobsControlNumber",
       "field_type": "Integer",
-      "examples": "593449300, 693894500, 702096500 (367177 unique)",
+      "examples": "767342200, 768473700, 769219600 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
@@ -405,7 +413,7 @@
     {
       "field_name": "usajobs_control_number",
       "field_type": "String",
-      "examples": "593449300, 693894500, 702096500 (367177 unique)",
+      "examples": "767342200, 768473700, 769219600 (367177 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367177
