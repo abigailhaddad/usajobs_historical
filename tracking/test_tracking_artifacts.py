@@ -306,7 +306,7 @@ def create_baseline(filepath):
                         jobs_data = json.load(f)
                     for job in jobs_data:
                         if 'control_number' in job:
-                            job_ids_set.add(job['control_number'])
+                            job_ids_set.add(str(job['control_number']))
                 except Exception as e:
                     print(f"Error reading {raw_file}: {e}")
         

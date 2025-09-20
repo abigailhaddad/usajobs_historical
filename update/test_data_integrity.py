@@ -167,14 +167,14 @@ def check_no_job_id_loss():
             try:
                 df = pd.read_parquet(filepath)
                 
-                # Get current job IDs using same column detection
-                current_ids = []
+                # Get current job IDs using same column detection - convert to string for comparison
+                current_ids = set()
                 if 'usajobsControlNumber' in df.columns:
-                    current_ids = set(df['usajobsControlNumber'].dropna().unique())
+                    current_ids = set(str(x) for x in df['usajobsControlNumber'].dropna().unique())
                 elif 'usajobs_control_number' in df.columns:
-                    current_ids = set(df['usajobs_control_number'].dropna().unique())
+                    current_ids = set(str(x) for x in df['usajobs_control_number'].dropna().unique())
                 elif 'PositionID' in df.columns:
-                    current_ids = set(df['PositionID'].dropna().unique())
+                    current_ids = set(str(x) for x in df['PositionID'].dropna().unique())
                 
                 if current_ids:
                     baseline_set = set(baseline_ids)
@@ -218,13 +218,13 @@ def create_baseline(filepath):
                 df = pd.read_parquet(os.path.join(data_dir, filename))
                 baseline['row_counts'][filename] = len(df)
                 
-                # Store job IDs based on available columns
+                # Store job IDs based on available columns - convert to string to ensure JSON serializable
                 if 'usajobsControlNumber' in df.columns:
-                    baseline['job_ids'][filename] = list(df['usajobsControlNumber'].dropna().unique())
+                    baseline['job_ids'][filename] = [str(x) for x in df['usajobsControlNumber'].dropna().unique()]
                 elif 'usajobs_control_number' in df.columns:
-                    baseline['job_ids'][filename] = list(df['usajobs_control_number'].dropna().unique())
+                    baseline['job_ids'][filename] = [str(x) for x in df['usajobs_control_number'].dropna().unique()]
                 elif 'PositionID' in df.columns:
-                    baseline['job_ids'][filename] = list(df['PositionID'].dropna().unique())
+                    baseline['job_ids'][filename] = [str(x) for x in df['PositionID'].dropna().unique()]
                     
             except Exception as e:
                 print(f"Could not read {filename}: {e}")
