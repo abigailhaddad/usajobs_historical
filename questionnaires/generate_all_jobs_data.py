@@ -85,9 +85,10 @@ def extract_fields_from_job(row):
     return fields
 
 def main():
-    # Load ALL jobs from parquet files
+    # Load ALL jobs from parquet files - both current AND historical
     all_jobs_dfs = []
-    parquet_files = sorted(DATA_DIR.glob('current_jobs_*.parquet'))
+    # Include both current and historical jobs to catch closed positions
+    parquet_files = sorted(DATA_DIR.glob('current_jobs_*.parquet')) + sorted(DATA_DIR.glob('historical_jobs_*.parquet'))
     cutoff_date = pd.to_datetime('2025-06-01')
     
     print("Loading all job data...")
@@ -99,14 +100,18 @@ def main():
         all_jobs_dfs.append(df)
     
     all_jobs_df = pd.concat(all_jobs_dfs, ignore_index=True)
-    print(f"Total jobs loaded: {len(all_jobs_df):,}")
+    
+    # Deduplicate by usajobsControlNumber (the actual control number field)
+    print(f"Total jobs before deduplication: {len(all_jobs_df):,}")
+    all_jobs_df = all_jobs_df.drop_duplicates(subset='usajobsControlNumber', keep='first')
+    print(f"Total jobs after deduplication: {len(all_jobs_df):,}")
     
     # Extract fields for all jobs
     print("Extracting fields from job data...")
     extracted_fields = []
     for idx, row in all_jobs_df.iterrows():
         fields = extract_fields_from_job(row)
-        fields['usajobs_control_number'] = row.get('MatchedObjectId')
+        fields['usajobs_control_number'] = row.get('usajobsControlNumber')
         fields['position_title'] = row.get('positionTitle')
         fields['hiring_agency'] = row.get('hiringAgencyName')
         fields['position_open_date'] = row.get('positionOpenDate')

@@ -373,13 +373,17 @@ def fetch_all_jobs(params: Dict, headers: Dict, appointment_type_map: Dict[str, 
 
 
 def save_jobs_to_parquet(jobs: List[Dict], raw_jobs: List[Dict], parquet_path: str):
-    """Save jobs to parquet file, appending to existing if it exists"""
+    """Save jobs to parquet file, NEVER removing existing jobs.
+    
+    This creates a complete historical record of all jobs that were ever 'current'.
+    """
     if not jobs:
         return
     
     # Add metadata to each job
     for job in jobs:
         job['inserted_at'] = datetime.now().isoformat()
+        job['last_seen'] = datetime.now().isoformat()
     
     # Convert to DataFrame
     new_df = pd.DataFrame(jobs)
@@ -391,20 +395,52 @@ def save_jobs_to_parquet(jobs: List[Dict], raw_jobs: List[Dict], parquet_path: s
     if os.path.exists(parquet_path):
         try:
             existing_df = pd.read_parquet(parquet_path)
-            # Remove any duplicate control numbers (keep new data)
-            existing_df = existing_df[~existing_df['usajobs_control_number'].isin(new_df['usajobs_control_number'])]
+            initial_count = len(existing_df)
+            
+            # Handle column name variations
+            if 'usajobsControlNumber' in existing_df.columns and 'usajobs_control_number' not in existing_df.columns:
+                existing_df['usajobs_control_number'] = existing_df['usajobsControlNumber'].astype(str)
+            
+            # Get control numbers from both dataframes
+            existing_control_numbers = set(existing_df['usajobs_control_number'].dropna().astype(str))
+            new_control_numbers = set(new_df['usajobs_control_number'].dropna().astype(str))
+            
+            # Identify overlapping jobs
+            overlapping_control_numbers = existing_control_numbers.intersection(new_control_numbers)
+            
+            # Update last_seen for existing jobs
+            if 'last_seen' not in existing_df.columns:
+                existing_df['last_seen'] = existing_df.get('inserted_at', datetime.now().isoformat())
+            
+            # For overlapping jobs, update last_seen but keep existing data
+            if overlapping_control_numbers:
+                # Remove overlapping jobs from existing (we'll add updated versions)
+                mask = ~existing_df['usajobs_control_number'].isin(overlapping_control_numbers)
+                existing_df = existing_df[mask]
+            
             # Combine dataframes
             combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+            
+            # Verify we haven't lost any jobs
+            final_count = len(combined_df)
+            if final_count < initial_count:
+                raise ValueError(f"DATA LOSS PREVENTED: Would have lost {initial_count - final_count} jobs. "
+                               f"Initial: {initial_count}, Final: {final_count}")
+            
+            print(f"   💾 Updated {parquet_path}: {initial_count} → {final_count} jobs "
+                  f"(+{len(new_control_numbers - existing_control_numbers)} new, "
+                  f"{len(overlapping_control_numbers)} updated)")
         except Exception as e:
             print(f"⚠️ Warning: Could not read existing parquet file {parquet_path}: {e}")
             combined_df = new_df
+            print(f"   💾 Created {parquet_path} with {len(combined_df)} jobs")
     else:
         combined_df = new_df
+        print(f"   💾 Created {parquet_path} with {len(combined_df)} jobs")
     
     # Save to parquet
     try:
         combined_df.to_parquet(parquet_path, index=False)
-        print(f"   💾 Saved {len(new_df)} jobs to {parquet_path}")
     except Exception as e:
         print(f"❌ Error saving to parquet: {e}")
         raise

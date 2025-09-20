@@ -323,8 +323,19 @@ def check_file_sizes_vs_initial(initial_sizes):
             diagnose_shrinkage(file, initial_counts.get(file, 0))
     
     if not all(size_checks):
-        print("⚠️  Some data files lost jobs! Skipping git operations for safety.")
-        print("⚠️  This should never happen - please investigate!")
+        print("\n" + "🚨" * 40)
+        print("🚨 CRITICAL: DATA LOSS DETECTED! ABORTING ALL OPERATIONS! 🚨")
+        print("🚨" * 40)
+        print("\n⚠️  Some data files lost jobs! This should NEVER happen!")
+        print("⚠️  Refusing to commit or push changes to prevent data loss.")
+        print("\n📋 Next steps:")
+        print("  1. Check the diagnostic information above")
+        print("  2. Restore data from git history if needed")
+        print("  3. Fix the root cause before running again")
+        print("  4. Consider running: git checkout -- ../data/*.parquet")
+        print("\n🔧 To restore missing data, run:")
+        print("  cd scripts")
+        print("  ./fetch_2024_2025.sh")
         return False, False
     
     return True, files_changed
