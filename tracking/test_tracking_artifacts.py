@@ -142,6 +142,51 @@ def check_raw_jobs_files():
     
     return True
 
+def check_no_job_id_loss():
+    """CRITICAL: Check that no job IDs have been lost"""
+    baseline_file = 'test_baseline.json'
+    
+    if not os.path.exists(baseline_file):
+        return True  # Can't check without baseline
+    
+    with open(baseline_file, 'r') as f:
+        baseline = json.load(f)
+    
+    if 'job_ids' not in baseline:
+        print(f"{Colors.YELLOW}⚠️  Old baseline format - updating...{Colors.RESET}")
+        create_baseline(baseline_file)
+        return True
+    
+    baseline_job_ids = set(baseline['job_ids'])
+    current_job_ids = set()
+    
+    # Collect current job IDs
+    for raw_file in os.listdir('public/data/raw_jobs'):
+        if raw_file.endswith('.json'):
+            try:
+                with open(f'public/data/raw_jobs/{raw_file}', 'r') as f:
+                    jobs_data = json.load(f)
+                for job in jobs_data:
+                    if 'control_number' in job:
+                        current_job_ids.add(job['control_number'])
+            except Exception:
+                pass
+    
+    # Check for lost IDs
+    lost_ids = baseline_job_ids - current_job_ids
+    
+    if lost_ids:
+        print(f"{Colors.RED}❌ CRITICAL FAIL{Colors.RESET} Lost {len(lost_ids)} job IDs!")
+        print(f"     First 10 lost IDs: {list(lost_ids)[:10]}")
+        return False
+    else:
+        new_ids = current_job_ids - baseline_job_ids
+        if new_ids:
+            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} No job IDs lost (+{len(new_ids)} new)")
+        else:
+            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} No job IDs lost (unchanged)")
+        return True
+
 def check_no_data_loss():
     """Check that we haven't lost any important data"""
     baseline_file = 'test_baseline.json'
@@ -219,7 +264,8 @@ def create_baseline(filepath):
         'departments': [],
         'appointment_types': [],
         'totals': {},
-        'department_totals': {}
+        'department_totals': {},
+        'job_ids': []  # Track all job IDs
     }
     
     try:
@@ -250,6 +296,21 @@ def create_baseline(filepath):
                 total_2025 = sum(row.get('listings2025Value', 0) for row in dept_data)
                 dept_totals[dept] = {'2024': total_2024, '2025': total_2025}
         baseline['department_totals'] = dept_totals
+        
+        # Capture all job IDs from raw jobs files
+        job_ids_set = set()
+        for raw_file in os.listdir('public/data/raw_jobs'):
+            if raw_file.endswith('.json'):
+                try:
+                    with open(f'public/data/raw_jobs/{raw_file}', 'r') as f:
+                        jobs_data = json.load(f)
+                    for job in jobs_data:
+                        if 'control_number' in job:
+                            job_ids_set.add(job['control_number'])
+                except Exception as e:
+                    print(f"Error reading {raw_file}: {e}")
+        
+        baseline['job_ids'] = list(job_ids_set)
         
         # Save baseline
         with open(filepath, 'w') as f:
@@ -329,13 +390,19 @@ def run_tests():
         print(f"{Colors.RED}❌ FAIL{Colors.RESET} Consistency check failed: {e}")
         all_passed = False
     
-    # Test 6: Regression testing - ensure no data loss
-    print_header("6. REGRESSION TESTS - NO DATA LOSS")
+    # Test 6: CRITICAL - No job ID loss
+    print_header("6. CRITICAL TEST - NO JOB ID LOSS")
+    if not check_no_job_id_loss():
+        all_passed = False
+        print(f"{Colors.RED}CRITICAL: Job IDs were lost! This must be fixed immediately!{Colors.RESET}")
+    
+    # Test 7: Regression testing - ensure no data loss
+    print_header("7. REGRESSION TESTS - NO DATA LOSS")
     if not check_no_data_loss():
         all_passed = False
     
-    # Test 7: Critical field name checks (what JS expects)
-    print_header("7. CRITICAL FIELD NAMES (JavaScript Compatibility)")
+    # Test 8: Critical field name checks (what JS expects)
+    print_header("8. CRITICAL FIELD NAMES (JavaScript Compatibility)")
     
     try:
         with open('public/data/job_listings_summary.json', 'r') as f:
@@ -359,8 +426,8 @@ def run_tests():
         print(f"{Colors.RED}❌ FAIL{Colors.RESET} Could not check field names: {e}")
         all_passed = False
     
-    # Test 8: Specific content checks
-    print_header("8. SPECIFIC CONTENT CHECKS")
+    # Test 9: Specific content checks
+    print_header("9. SPECIFIC CONTENT CHECKS")
     
     # Check that Internships appointment type exists
     try:
@@ -386,8 +453,8 @@ def run_tests():
         print(f"{Colors.RED}❌ FAIL{Colors.RESET} Content check failed: {e}")
         all_passed = False
     
-    # Test 9: Department filename matching
-    print_header("9. DEPARTMENT FILENAME MATCHING")
+    # Test 10: Department filename matching
+    print_header("10. DEPARTMENT FILENAME MATCHING")
     
     try:
         with open('public/data/department_metadata.json', 'r') as f:
@@ -421,6 +488,12 @@ def run_tests():
     if all_passed:
         print(f"{Colors.GREEN}✅ ALL TESTS PASSED!{Colors.RESET}")
         print("Your tracking site artifacts are properly generated.")
+        
+        # Update baseline with current data
+        print(f"\n{Colors.BLUE}Updating baseline with current data...{Colors.RESET}")
+        create_baseline('test_baseline.json')
+        print(f"{Colors.GREEN}✅ Baseline updated for next run{Colors.RESET}")
+        
         return 0
     else:
         print(f"{Colors.RED}❌ SOME TESTS FAILED!{Colors.RESET}")

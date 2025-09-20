@@ -136,11 +136,78 @@ def check_no_data_loss():
     
     return all_good
 
+def check_no_job_id_loss():
+    """CRITICAL: Ensure no job IDs have been lost from any file"""
+    baseline_file = 'data_baseline.json'
+    
+    # If baseline doesn't exist, we can't check job IDs
+    if not os.path.exists(baseline_file):
+        print(f"{Colors.YELLOW}⚠️  No baseline for job ID tracking yet{Colors.RESET}")
+        return True
+    
+    # Load baseline
+    with open(baseline_file, 'r') as f:
+        baseline = json.load(f)
+    
+    if 'job_ids' not in baseline:
+        print(f"{Colors.YELLOW}⚠️  Old baseline format - job IDs not tracked{Colors.RESET}")
+        # Update baseline to include job IDs
+        create_baseline(baseline_file)
+        return True
+    
+    all_good = True
+    total_lost_jobs = 0
+    
+    print(f"\n{Colors.BLUE}Checking for lost job IDs...{Colors.RESET}")
+    
+    # Check each file for lost job IDs
+    for filename, baseline_ids in baseline.get('job_ids', {}).items():
+        filepath = f"../data/{filename}"
+        if os.path.exists(filepath) and baseline_ids:
+            try:
+                df = pd.read_parquet(filepath)
+                
+                # Get current job IDs using same column detection
+                current_ids = []
+                if 'usajobsControlNumber' in df.columns:
+                    current_ids = set(df['usajobsControlNumber'].dropna().unique())
+                elif 'usajobs_control_number' in df.columns:
+                    current_ids = set(df['usajobs_control_number'].dropna().unique())
+                elif 'PositionID' in df.columns:
+                    current_ids = set(df['PositionID'].dropna().unique())
+                
+                if current_ids:
+                    baseline_set = set(baseline_ids)
+                    lost_ids = baseline_set - current_ids
+                    
+                    if lost_ids:
+                        print(f"{Colors.RED}❌ CRITICAL FAIL{Colors.RESET} {filename} LOST {len(lost_ids)} job IDs!")
+                        print(f"     First 10 lost IDs: {list(lost_ids)[:10]}")
+                        total_lost_jobs += len(lost_ids)
+                        all_good = False
+                    else:
+                        new_ids = current_ids - baseline_set
+                        if new_ids:
+                            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} {filename} - No jobs lost (+{len(new_ids)} new)")
+                        else:
+                            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} {filename} - No jobs lost (unchanged)")
+                
+            except Exception as e:
+                print(f"{Colors.RED}❌ FAIL{Colors.RESET} Could not check job IDs in {filename}: {e}")
+                all_good = False
+    
+    if total_lost_jobs > 0:
+        print(f"\n{Colors.RED}⚠️  CRITICAL: {total_lost_jobs} total job IDs lost across all files!{Colors.RESET}")
+        print(f"{Colors.RED}This should NEVER happen with historical data!{Colors.RESET}")
+    
+    return all_good
+
 def create_baseline(filepath):
     """Create baseline snapshot of current data"""
     baseline = {
         'created_at': datetime.now().isoformat(),
-        'row_counts': {}
+        'row_counts': {},
+        'job_ids': {}  # Track all job IDs per file
     }
     
     # Get all parquet files
@@ -150,6 +217,15 @@ def create_baseline(filepath):
             try:
                 df = pd.read_parquet(os.path.join(data_dir, filename))
                 baseline['row_counts'][filename] = len(df)
+                
+                # Store job IDs based on available columns
+                if 'usajobsControlNumber' in df.columns:
+                    baseline['job_ids'][filename] = list(df['usajobsControlNumber'].dropna().unique())
+                elif 'usajobs_control_number' in df.columns:
+                    baseline['job_ids'][filename] = list(df['usajobs_control_number'].dropna().unique())
+                elif 'PositionID' in df.columns:
+                    baseline['job_ids'][filename] = list(df['PositionID'].dropna().unique())
+                    
             except Exception as e:
                 print(f"Could not read {filename}: {e}")
     
@@ -229,8 +305,14 @@ def run_tests():
     if not check_no_data_loss():
         all_passed = False
     
-    # Test 5: Data consistency
-    print_header("5. DATA CONSISTENCY")
+    # Test 5: CRITICAL - No job ID loss
+    print_header("5. CRITICAL TEST - NO JOB ID LOSS")
+    if not check_no_job_id_loss():
+        all_passed = False
+        print(f"{Colors.RED}CRITICAL: Job IDs were lost! This must be fixed immediately!{Colors.RESET}")
+    
+    # Test 6: Data consistency
+    print_header("6. DATA CONSISTENCY")
     if not check_data_consistency():
         all_passed = False
     
@@ -239,6 +321,12 @@ def run_tests():
     if all_passed:
         print(f"{Colors.GREEN}✅ ALL TESTS PASSED!{Colors.RESET}")
         print("Data integrity verified.")
+        
+        # Update baseline with new data (including job IDs)
+        print(f"\n{Colors.BLUE}Updating baseline with current data...{Colors.RESET}")
+        create_baseline('data_baseline.json')
+        print(f"{Colors.GREEN}✅ Baseline updated for next run{Colors.RESET}")
+        
         return 0
     else:
         print(f"{Colors.RED}❌ SOME TESTS FAILED!{Colors.RESET}")

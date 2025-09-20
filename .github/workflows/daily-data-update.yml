@@ -76,8 +76,10 @@ jobs:
       run: |
         cd update
         python test_data_integrity.py
+        # If tests fail, the script returns non-zero and this step will fail
 
     - name: Commit and push to data-updates branch
+      # Only runs if tests pass
       run: |
         # Check if there are changes
         if [ -n "$(git status --porcelain)" ]; then

@@ -84,9 +84,10 @@ jobs:
       run: |
         cd questionnaires
         python test_questionnaire_artifacts.py
+        # If tests fail, this step will fail and stop the workflow
 
     - name: Commit and push to questionnaire-updates branch
-      if: always()  # Always run this step
+      # Only commit if tests passed
       run: |
         # Check if there are changes
         if [ -n "$(git status --porcelain)" ]; then

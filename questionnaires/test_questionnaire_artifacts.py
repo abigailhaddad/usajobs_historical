@@ -124,6 +124,50 @@ def check_questionnaire_sources():
     
     return all_good
 
+def check_no_job_id_loss():
+    """CRITICAL: Check that no job IDs have been lost from analysis data"""
+    baseline_file = 'test_questionnaire_baseline.json'
+    
+    if not os.path.exists(baseline_file):
+        return True  # Can't check without baseline
+    
+    with open(baseline_file, 'r') as f:
+        baseline = json.load(f)
+    
+    if 'job_ids' not in baseline:
+        print(f"{Colors.YELLOW}⚠️  Old baseline format - updating...{Colors.RESET}")
+        create_baseline(baseline_file)
+        return True
+    
+    baseline_job_ids = set(baseline['job_ids'])
+    current_job_ids = set()
+    
+    # Collect current job IDs from analysis data
+    try:
+        with open('analysis/analysis_data.json', 'r') as f:
+            analysis_data = json.load(f)
+            if 'job_postings' in analysis_data:
+                for job in analysis_data['job_postings']:
+                    if 'usajobs_link' in job:
+                        current_job_ids.add(str(job['usajobs_link']))
+    except Exception:
+        pass
+    
+    # Check for lost IDs
+    lost_ids = baseline_job_ids - current_job_ids
+    
+    if lost_ids:
+        print(f"{Colors.RED}❌ CRITICAL FAIL{Colors.RESET} Lost {len(lost_ids)} job IDs from analysis data!")
+        print(f"     First 10 lost IDs: {list(lost_ids)[:10]}")
+        return False
+    else:
+        new_ids = current_job_ids - baseline_job_ids
+        if new_ids:
+            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} No job IDs lost (+{len(new_ids)} new)")
+        else:
+            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} No job IDs lost (unchanged)")
+        return True
+
 def check_no_data_loss():
     """Check that questionnaire counts haven't decreased"""
     baseline_file = 'test_questionnaire_baseline.json'
@@ -200,7 +244,8 @@ def create_baseline(filepath):
         'monster_count': 0,
         'usastaffing_count': 0,
         'links_count': 0,
-        'jobs_count': 0
+        'jobs_count': 0,
+        'job_ids': []  # Track all job IDs
     }
     
     try:
@@ -216,6 +261,20 @@ def create_baseline(filepath):
         
         with open('all_jobs_clean.csv', 'r', encoding='utf-8') as f:
             baseline['jobs_count'] = sum(1 for _ in csv.reader(f)) - 1
+        
+        # Collect all job IDs from analysis data
+        job_ids_set = set()
+        try:
+            with open('analysis/analysis_data.json', 'r') as f:
+                analysis_data = json.load(f)
+                if 'job_postings' in analysis_data:
+                    for job in analysis_data['job_postings']:
+                        if 'usajobs_link' in job:
+                            job_ids_set.add(str(job['usajobs_link']))
+        except Exception as e:
+            print(f"Error reading analysis data: {e}")
+        
+        baseline['job_ids'] = list(job_ids_set)
         
         # Save baseline
         with open(filepath, 'w') as f:
@@ -437,13 +496,19 @@ def run_tests():
     if not check_analysis_data():
         all_passed = False
     
-    # Test 6: Regression testing - ensure no data loss
-    print_header("6. REGRESSION TESTS - NO DATA LOSS")
+    # Test 6: CRITICAL - No job ID loss
+    print_header("6. CRITICAL TEST - NO JOB ID LOSS")
+    if not check_no_job_id_loss():
+        all_passed = False
+        print(f"{Colors.RED}CRITICAL: Job IDs were lost! This must be fixed immediately!{Colors.RESET}")
+    
+    # Test 7: Regression testing - ensure no data loss
+    print_header("7. REGRESSION TESTS - NO DATA LOSS")
     if not check_no_data_loss():
         all_passed = False
     
-    # Test 7: Specific content checks
-    print_header("7. SPECIFIC CONTENT CHECKS")
+    # Test 8: Specific content checks
+    print_header("8. SPECIFIC CONTENT CHECKS")
     
     try:
         # Check that we have recent questionnaires
@@ -470,6 +535,12 @@ def run_tests():
     if all_passed:
         print(f"{Colors.GREEN}✅ ALL TESTS PASSED!{Colors.RESET}")
         print("Your questionnaire artifacts are properly generated.")
+        
+        # Update baseline with current data
+        print(f"\n{Colors.BLUE}Updating baseline with current data...{Colors.RESET}")
+        create_baseline('test_questionnaire_baseline.json')
+        print(f"{Colors.GREEN}✅ Baseline updated for next run{Colors.RESET}")
+        
         return 0
     else:
         print(f"{Colors.RED}❌ SOME TESTS FAILED!{Colors.RESET}")
