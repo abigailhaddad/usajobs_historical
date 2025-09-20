@@ -13,7 +13,7 @@ BASE_DIR = Path('..')
 DATA_DIR = BASE_DIR / 'data'
 
 def extract_fields_from_job(row):
-    """Extract fields from MatchedObjectDescriptor JSON"""
+    """Extract fields from MatchedObjectDescriptor JSON or direct columns"""
     fields = {
         'service_type': None,
         'position_location': None,
@@ -24,6 +24,67 @@ def extract_fields_from_job(row):
         'high_grade': None
     }
     
+    # First, check if we have direct columns (historical data)
+    if pd.notna(row.get('serviceType')):
+        fields['service_type'] = row.get('serviceType')
+    else:
+        # Set a default for null service types
+        fields['service_type'] = 'Not Specified'
+    
+    # Handle PositionLocations for historical data
+    if pd.notna(row.get('PositionLocations')):
+        try:
+            if isinstance(row['PositionLocations'], str):
+                locations = json.loads(row['PositionLocations'])
+            else:
+                locations = row['PositionLocations']
+            
+            if isinstance(locations, list) and len(locations) > 0:
+                loc = locations[0]
+                city = loc.get('positionLocationCity', '')
+                state = loc.get('positionLocationState', '')
+                if city and state:
+                    if state.lower() in city.lower():
+                        fields['position_location'] = city
+                    else:
+                        fields['position_location'] = f"{city}, {state}"
+                elif city:
+                    fields['position_location'] = city
+                elif state:
+                    fields['position_location'] = state
+        except:
+            pass
+    
+    # Handle grades for historical data
+    if pd.notna(row.get('minimumGrade')):
+        low_grade = str(row.get('minimumGrade'))
+        high_grade = str(row.get('maximumGrade', low_grade))
+        grade_prefix = row.get('payScale', '')
+        
+        if grade_prefix and low_grade:
+            if high_grade and low_grade != high_grade:
+                fields['grade_code'] = f"{grade_prefix}-{low_grade}/{high_grade}"
+            else:
+                fields['grade_code'] = f"{grade_prefix}-{low_grade}"
+        
+        fields['low_grade'] = low_grade
+        fields['high_grade'] = high_grade
+    
+    # Handle JobCategories for historical data
+    if pd.notna(row.get('JobCategories')):
+        try:
+            if isinstance(row['JobCategories'], str):
+                categories = json.loads(row['JobCategories'])
+            else:
+                categories = row['JobCategories']
+            
+            if isinstance(categories, list) and len(categories) > 0:
+                if 'series' in categories[0]:
+                    fields['occupation_series'] = str(categories[0]['series']).zfill(4)
+        except:
+            pass
+    
+    # Then check MatchedObjectDescriptor for current data
     if pd.notna(row.get('MatchedObjectDescriptor')):
         try:
             mod = json.loads(row['MatchedObjectDescriptor'])
@@ -113,7 +174,7 @@ def main():
         fields = extract_fields_from_job(row)
         fields['usajobs_control_number'] = row.get('usajobsControlNumber')
         fields['position_title'] = row.get('positionTitle')
-        fields['hiring_agency'] = row.get('hiringAgencyName')
+        fields['hiring_agency'] = row.get('hiringDepartmentName')
         fields['position_open_date'] = row.get('positionOpenDate')
         fields['position_close_date'] = row.get('positionCloseDate')
         extracted_fields.append(fields)

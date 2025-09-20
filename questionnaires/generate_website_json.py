@@ -187,36 +187,36 @@ def main():
     scraped_df_in_current['occupation_full'] = scraped_df_in_current['occupation_series'].astype(str).str.zfill(4) + ' - ' + scraped_df_in_current['occupation_name'].fillna('Unknown')
     
     # Service Type Analysis
-    if 'service_type' in scraped_df_in_current.columns and 'service_type' in all_jobs_df.columns:
-        service_stats = calculate_eo_stats(all_jobs_df, scraped_df_in_current, 'service_type', column_name='Service Type')
+    if 'service_type' in scraped_df.columns and 'service_type' in all_jobs_df.columns:
+        service_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'service_type', column_name='Service Type')
         analysis_data['service_analysis'] = service_stats.to_dict('records')
     else:
         analysis_data['service_analysis'] = []
     
     # Grade Level Analysis
-    if 'grade_level' in scraped_df_in_current.columns and 'grade_level' in all_jobs_df.columns:
-        grade_stats = calculate_eo_stats(all_jobs_df, scraped_df_in_current, 'grade_level', top_n=None, column_name='Grade Level')
+    if 'grade_level' in scraped_df.columns and 'grade_level' in all_jobs_df.columns:
+        grade_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'grade_level', top_n=None, column_name='Grade Level')
         analysis_data['grade_analysis'] = grade_stats.to_dict('records')
     else:
         analysis_data['grade_analysis'] = []
     
     # Location Analysis
-    if 'position_location' in scraped_df_in_current.columns and 'position_location' in all_jobs_df.columns:
-        location_stats = calculate_eo_stats(all_jobs_df, scraped_df_in_current, 'position_location', top_n=None, column_name='Location')
+    if 'position_location' in scraped_df.columns and 'position_location' in all_jobs_df.columns:
+        location_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'position_location', top_n=None, column_name='Location')
         analysis_data['location_analysis'] = location_stats.to_dict('records')
     else:
         analysis_data['location_analysis'] = []
     
     # Agency Analysis
     if 'hiring_agency' in all_jobs_df.columns:
-        agency_stats = calculate_eo_stats(all_jobs_df, scraped_df_in_current, 'hiring_agency', top_n=None, column_name='Agency')
+        agency_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'hiring_agency', top_n=None, column_name='Agency')
         analysis_data['agency_analysis'] = agency_stats.to_dict('records')
     else:
         analysis_data['agency_analysis'] = []
     
     # Occupation Analysis
     if 'occupation_full' in all_jobs_df.columns:
-        occupation_stats = calculate_eo_stats(all_jobs_df, scraped_df_in_current, 'occupation_full', top_n=None, column_name='Occupation Series')
+        occupation_stats = calculate_eo_stats(all_jobs_df, scraped_df, 'occupation_full', top_n=None, column_name='Occupation Series')
         analysis_data['occupation_analysis'] = occupation_stats.to_dict('records')
     else:
         analysis_data['occupation_analysis'] = []
