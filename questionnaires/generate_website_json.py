@@ -20,6 +20,12 @@ DATA_DIR = BASE_DIR / 'data'
 
 def calculate_eo_stats(all_jobs_df, scraped_df, group_column, top_n=None, column_name=None):
     """Calculate EO question statistics for any grouping column"""
+    # Fill NaN values with a placeholder to ensure they're included in groupby
+    all_jobs_df = all_jobs_df.copy()
+    scraped_df = scraped_df.copy()
+    all_jobs_df[group_column] = all_jobs_df[group_column].fillna('Not Specified')
+    scraped_df[group_column] = scraped_df[group_column].fillna('Not Specified')
+    
     # Get total job counts from the full dataset
     total_stats = all_jobs_df.groupby(group_column).size().reset_index(name='Total Jobs')
     
