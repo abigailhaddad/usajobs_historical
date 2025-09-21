@@ -473,9 +473,14 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
         existing_urls = set(existing_df['questionnaire_url'].values)
         print(f"  Contains {len(existing_urls)} unique URLs")
     
-    # Find all current job parquet files
+    # Find all job parquet files - both current and historical
     current_job_files = sorted(Path(data_dir).glob('current_jobs_*.parquet'))
-    print(f"\nFound {len(current_job_files)} current job parquet files to check")
+    historical_job_files = sorted(Path(data_dir).glob('historical_jobs_*.parquet'))
+    all_job_files = current_job_files + historical_job_files
+    
+    print(f"\nFound {len(current_job_files)} current job parquet files")
+    print(f"Found {len(historical_job_files)} historical job parquet files")
+    print(f"Total: {len(all_job_files)} parquet files to check")
     print(f"Filtering for jobs posted on or after {cutoff_date}")
     
     # Process all files and collect links
@@ -487,7 +492,11 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
     total_jobs_processed = 0
     jobs_with_monster_links = 0
     
-    for parquet_file in current_job_files:
+    # Track processed job control numbers to avoid duplicates
+    processed_jobs = set()
+    duplicate_jobs_count = 0
+    
+    for parquet_file in all_job_files:
         file_size_mb = parquet_file.stat().st_size / (1024 * 1024)
         print(f"\nProcessing {parquet_file.name} ({file_size_mb:.1f} MB)...")
         
@@ -511,6 +520,13 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
         for idx, row in df.iterrows():
             if idx % 1000 == 0:
                 print(f"  Processing job {idx}/{len(df)} ({jobs_with_links} with links, {new_links_in_file} new)...", end='\r')
+            
+            # Skip if we've already processed this job
+            control_number = row.get('usajobsControlNumber')
+            if control_number in processed_jobs:
+                duplicate_jobs_count += 1
+                continue
+            processed_jobs.add(control_number)
             
             # Extract links and other fields from this job
             links, occupation_series, occupation_name, position_location, grade_code, position_schedule, service_type, low_grade, high_grade, has_monster_link = extract_questionnaire_links_from_job(row)
@@ -591,8 +607,9 @@ def extract_all_links_to_csv(data_dir='../data', cutoff_date='2025-06-01'):
     # Print Monster statistics (don't save to file)
     percentage_with_monster = (jobs_with_monster_links / total_jobs_processed * 100) if total_jobs_processed > 0 else 0
     
-    print(f"\n\nMonster Link Statistics:")
-    print(f"  Total jobs processed: {total_jobs_processed:,}")
+    print(f"\n\nProcessing Summary:")
+    print(f"  Total unique jobs processed: {len(processed_jobs):,}")
+    print(f"  Duplicate jobs skipped: {duplicate_jobs_count:,}")
     print(f"  Jobs with Monster links: {jobs_with_monster_links:,}")
     print(f"  Percentage with Monster links: {percentage_with_monster:.2f}%")
     
