@@ -311,6 +311,49 @@ def validate_aggregation_totals(data, aggregation_name, display_name, total_jobs
     
     return all_good
 
+def check_for_error_pages():
+    """Check that no questionnaire files contain error pages"""
+    error_patterns = [
+        "We're sorry, we encountered an unexpected error",
+        "404",
+        "Page not found", 
+        "This page cannot be displayed",
+        "Access Denied",
+        "Forbidden",
+        "The page you requested is unavailable"
+    ]
+    
+    error_files = []
+    small_files_checked = 0
+    
+    try:
+        # Check all files under 2KB as they're most likely to be errors
+        for txt_file in Path('raw_questionnaires').glob('*.txt'):
+            if txt_file.stat().st_size < 2000:
+                small_files_checked += 1
+                with open(txt_file, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                    
+                for pattern in error_patterns:
+                    if pattern.lower() in content.lower():
+                        error_files.append((txt_file.name, txt_file.stat().st_size, pattern))
+                        break
+        
+        if error_files:
+            print(f"{Colors.RED}❌ FAIL{Colors.RESET} Found {len(error_files)} error pages in questionnaire files!")
+            for filename, size, pattern in error_files[:10]:  # Show first 10
+                print(f"     {filename} ({size} bytes) - contains '{pattern}'")
+            if len(error_files) > 10:
+                print(f"     ... and {len(error_files) - 10} more")
+            return False
+        else:
+            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} No error pages found (checked {small_files_checked} small files)")
+            return True
+            
+    except Exception as e:
+        print(f"{Colors.RED}❌ FAIL{Colors.RESET} Error checking for error pages: {e}")
+        return False
+
 def check_analysis_data():
     """Check the analysis data JSON structure and validate all counts"""
     try:
@@ -507,8 +550,14 @@ def run_tests():
     if not check_no_data_loss():
         all_passed = False
     
-    # Test 8: Specific content checks
-    print_header("8. SPECIFIC CONTENT CHECKS")
+    # Test 8: Check for error pages
+    print_header("8. ERROR PAGE DETECTION")
+    if not check_for_error_pages():
+        all_passed = False
+        print(f"{Colors.RED}CRITICAL: Error pages found in questionnaires!{Colors.RESET}")
+    
+    # Test 9: Specific content checks
+    print_header("9. SPECIFIC CONTENT CHECKS")
     
     try:
         # Check that we have recent questionnaires
