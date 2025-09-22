@@ -195,12 +195,29 @@ def scrape_questionnaire(url, output_dir, timeout_seconds=60, headless=True, ses
                 text_content = re.sub(r'<[^>]+>', ' ', text_content)
                 text_content = ' '.join(text_content.split())
                 
+                # Content validation - check for error pages
+                error_indicators = [
+                    "We're sorry, we encountered an unexpected error",
+                    "404", 
+                    "Page not found",
+                    "This page cannot be displayed",
+                    "Access Denied",
+                    "Forbidden",
+                    "The page you requested is unavailable"
+                ]
+                
+                content_lower = text_content.lower()
+                for error_text in error_indicators:
+                    if error_text.lower() in content_lower:
+                        print(f"    ❌ ERROR PAGE DETECTED: Contains '{error_text}'")
+                        return None  # Return None to trigger retry
+                
                 # Check if content is too small (likely an error)
                 if len(text_content) < 1000:
                     print(f"    ⚠️  Content too small ({len(text_content)} chars) - likely an error")
                     return None  # Return None to trigger retry
                 
-                # Save text file only if content is substantial
+                # Save text file only if content passes validation
                 with open(txt_path, 'w', encoding='utf-8') as f:
                     f.write(text_content)
                 
@@ -352,13 +369,31 @@ def scrape_questionnaire(url, output_dir, timeout_seconds=60, headless=True, ses
                     browser.close()
                     return None
                 
+                # Content validation - check for error pages
+                error_indicators = [
+                    "We're sorry, we encountered an unexpected error",
+                    "404", 
+                    "Page not found",
+                    "This page cannot be displayed",
+                    "Access Denied",
+                    "Forbidden",
+                    "The page you requested is unavailable"
+                ]
+                
+                content_lower = page_text.lower()
+                for error_text in error_indicators:
+                    if error_text.lower() in content_lower:
+                        print(f"    ❌ ERROR PAGE DETECTED: Contains '{error_text}'")
+                        browser.close()
+                        return None  # Return None to trigger retry
+                
                 # Check if content is too small (likely an error)
                 if len(page_text) < 1000:
                     print(f"    ⚠️  Content too small ({len(page_text)} chars) - likely an error")
                     browser.close()
                     return None  # Return None to trigger retry
                 
-                # Save text file only if content is substantial
+                # Save text file only if content passes validation
                 with open(txt_path, 'w', encoding='utf-8') as f:
                     f.write(page_text)
                 
