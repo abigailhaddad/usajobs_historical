@@ -663,7 +663,9 @@ async function updateTableData() {
                 const occupationFilter = $('#mainOccupationFilter').val();
                 if (occupationFilter) {
                     // Check if any of the job's occupation series match the filter
-                    if (!job.occupation_series || !job.occupation_series.includes(occupationFilter)) {
+                    if (!job.occupation_series || !job.occupation_series.some(series => 
+                        series.startsWith(occupationFilter + ' - ') || series === occupationFilter
+                    )) {
                         return false;
                     }
                 }
