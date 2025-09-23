@@ -1163,7 +1163,9 @@
                     $('#statusFilter').on('change', function() {
                         const selectedStatus = $(this).val();
                         if (selectedStatus) {
-                            api.column(9).search('^' + selectedStatus + '$', true, false).draw();
+                            // Escape regex special characters
+                            const escapedStatus = selectedStatus.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            api.column(9).search('^' + escapedStatus + '$', true, false).draw();
                         } else {
                             api.column(9).search('').draw();
                         }
