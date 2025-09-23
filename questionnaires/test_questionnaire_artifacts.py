@@ -11,6 +11,7 @@ import json
 import csv
 import sys
 from datetime import datetime
+from pathlib import Path
 
 class Colors:
     GREEN = '\033[92m'
