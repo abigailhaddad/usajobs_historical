@@ -316,29 +316,37 @@ def check_for_error_pages():
     """Check that no questionnaire files contain error pages"""
     error_patterns = [
         "We're sorry, we encountered an unexpected error",
-        "404",
+        "404 - Page Not Found",
+        "404 Error",
+        "Error 404",
+        "HTTP 404",
         "Page not found", 
         "This page cannot be displayed",
         "Access Denied",
         "Forbidden",
-        "The page you requested is unavailable"
+        "The page you requested is unavailable",
+        "An official website of the United States government Here's how you know"  # Login page indicator
     ]
     
     error_files = []
     small_files_checked = 0
     
     try:
-        # Check all files under 2KB as they're most likely to be errors
-        for txt_file in Path('raw_questionnaires').glob('*.txt'):
-            if txt_file.stat().st_size < 2000:
-                small_files_checked += 1
-                with open(txt_file, 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.read()
-                    
-                for pattern in error_patterns:
-                    if pattern.lower() in content.lower():
-                        error_files.append((txt_file.name, txt_file.stat().st_size, pattern))
-                        break
+        # Check ALL questionnaire files for error pages
+        all_txt_files = list(Path('raw_questionnaires').glob('*.txt'))
+        total_files = len(all_txt_files)
+        
+        for i, txt_file in enumerate(all_txt_files):
+            if i % 1000 == 0 and i > 0:
+                print(f"     Checking file {i}/{total_files}...")
+                
+            with open(txt_file, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+                
+            for pattern in error_patterns:
+                if pattern.lower() in content.lower():
+                    error_files.append((txt_file.name, txt_file.stat().st_size, pattern))
+                    break
         
         if error_files:
             print(f"{Colors.RED}❌ FAIL{Colors.RESET} Found {len(error_files)} error pages in questionnaire files!")
@@ -348,7 +356,7 @@ def check_for_error_pages():
                 print(f"     ... and {len(error_files) - 10} more")
             return False
         else:
-            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} No error pages found (checked {small_files_checked} small files)")
+            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} No error pages found (checked ALL {total_files} files)")
             return True
             
     except Exception as e:
