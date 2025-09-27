@@ -928,7 +928,7 @@
                                 return data ? 'https://www.usajobs.gov/job/' + data : '';
                             }
                             if (data) {
-                                return '<a href="https://www.usajobs.gov/job/' + data + '" target="_blank">View Job</a>';
+                                return '<a href="https://www.usajobs.gov/job/' + data + '" target="_blank" class="external-link" data-link-type="usajobs">View Job</a>';
                             }
                             return '';
                         }
@@ -940,7 +940,7 @@
                                 return data || '';
                             }
                             if (data) {
-                                return '<a href="' + data + '" target="_blank">View Questions</a>';
+                                return '<a href="' + data + '" target="_blank" class="external-link" data-link-type="questionnaire">View Questions</a>';
                             }
                             return '';
                         }
@@ -953,6 +953,20 @@
                 dom: 'lfrtip',
                 orderCellsTop: true,
                 fixedHeader: true,
+                order: function (settings, order) {
+                    // Track table sorting
+                    if (order && order.length > 0 && typeof gtag !== 'undefined') {
+                        const columnIdx = order[0][0];
+                        const direction = order[0][1];
+                        const columnName = $(settings.aoColumns[columnIdx].nTh).text();
+                        
+                        gtag('event', 'sort_table', {
+                            'event_category': 'engagement',
+                            'event_label': columnName,
+                            'value': direction
+                        });
+                    }
+                },
                 drawCallback: function() {
                     // Update counts based on filtered data
                     const api = this.api();
@@ -1071,6 +1085,15 @@
                                 this.value = ''; // Clear input
                                 applyColumnFilter(colIdx);
                                 updateFilterDisplay();
+                                
+                                // Track column search usage
+                                if (typeof gtag !== 'undefined') {
+                                    gtag('event', 'search', {
+                                        'event_category': 'engagement',
+                                        'event_label': columnNames[colIdx],
+                                        'search_term': searchValue
+                                    });
+                                }
                             }
                             return;
                         }
@@ -1197,6 +1220,15 @@
         
         // CSV download function
         function downloadCSV() {
+            // Track CSV download
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'download', {
+                    'event_category': 'engagement',
+                    'event_label': 'all_federal_jobs_csv',
+                    'value': allJobsData.length
+                });
+            }
+            
             const headers = ['USAJobs ID', 'Position Title', 'Occupation', 'Agency', 'Location', 'Grade', 'Service Type', 'Open Date', 'Close Date', 'Questionnaire Status', 'USAJobs Link', 'Questionnaire Link'];
             const csvContent = [
                 headers.join(','),
@@ -1240,12 +1272,38 @@
             // Add event listener for CSV download button
             document.getElementById('downloadCSV').addEventListener('click', downloadCSV);
             
+            // Track external link clicks
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('external-link')) {
+                    const linkType = e.target.getAttribute('data-link-type');
+                    const href = e.target.getAttribute('href');
+                    
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'click', {
+                            'event_category': 'outbound',
+                            'event_label': linkType,
+                            'transport_type': 'beacon',
+                            'value': href
+                        });
+                    }
+                }
+            });
+            
             // Add event listeners for "Show All" buttons
             document.addEventListener('click', function(e) {
                 if (e.target.classList.contains('show-all-btn')) {
                     const tableId = e.target.getAttribute('data-table');
                     const tableContainer = document.getElementById(tableId);
                     const hiddenRows = tableContainer.querySelectorAll('.hidden-row');
+                    
+                    // Track "Show All" usage
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'show_all_data', {
+                            'event_category': 'engagement',
+                            'event_label': tableId,
+                            'value': hiddenRows.length
+                        });
+                    }
                     
                     if (e.target.textContent.includes('Show All')) {
                         // Show all rows
