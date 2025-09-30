@@ -953,20 +953,7 @@
                 dom: 'lfrtip',
                 orderCellsTop: true,
                 fixedHeader: true,
-                order: function (settings, order) {
-                    // Track table sorting
-                    if (order && order.length > 0 && typeof gtag !== 'undefined') {
-                        const columnIdx = order[0][0];
-                        const direction = order[0][1];
-                        const columnName = $(settings.aoColumns[columnIdx].nTh).text();
-                        
-                        gtag('event', 'sort_table', {
-                            'event_category': 'engagement',
-                            'event_label': columnName,
-                            'value': direction
-                        });
-                    }
-                },
+                order: [[7, 'desc']], // Sort by open date descending by default
                 drawCallback: function() {
                     // Update counts based on filtered data
                     const api = this.api();
@@ -978,6 +965,20 @@
                     // Update shown count (current page end, but not more than total filtered)
                     const shownCount = Math.min(info.end, info.recordsDisplay);
                     document.getElementById('jobsShown').textContent = shownCount;
+                    
+                    // Track sorting
+                    const order = api.order();
+                    if (order && order.length > 0 && typeof gtag !== 'undefined') {
+                        const columnIdx = order[0][0];
+                        const direction = order[0][1];
+                        const columnName = $(api.column(columnIdx).header()).text();
+                        
+                        gtag('event', 'sort_table', {
+                            'event_category': 'engagement',
+                            'event_label': columnName,
+                            'value': direction
+                        });
+                    }
                 },
                 initComplete: function() {
                     // Setup column search

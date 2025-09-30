@@ -198,7 +198,10 @@ def scrape_questionnaire(url, output_dir, timeout_seconds=60, headless=True, ses
                 # Content validation - check for error pages
                 error_indicators = [
                     "We're sorry, we encountered an unexpected error",
-                    "404", 
+                    "404 - Page Not Found",
+                    "404 Error",
+                    "Error 404",
+                    "HTTP 404",
                     "Page not found",
                     "This page cannot be displayed",
                     "Access Denied",
@@ -372,7 +375,10 @@ def scrape_questionnaire(url, output_dir, timeout_seconds=60, headless=True, ses
                 # Content validation - check for error pages
                 error_indicators = [
                     "We're sorry, we encountered an unexpected error",
-                    "404", 
+                    "404 - Page Not Found",
+                    "404 Error",
+                    "Error 404",
+                    "HTTP 404",
                     "Page not found",
                     "This page cannot be displayed",
                     "Access Denied",
