@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   render-quarto:
@@ -55,24 +56,38 @@ jobs:
         cd analysis/national_park_service
         quarto render national_park_service_analysis.qmd
 
-    - name: Commit and push rendered files
+    - name: Create and push to branch
       run: |
         git config --local user.email "actions@github.com"
         git config --local user.name "GitHub Actions Bot"
+        
+        # Create a new branch for the changes
+        BRANCH_NAME="quarto-stage"
+        git checkout -b $BRANCH_NAME
+        
+        # Add and commit changes
         git add -A
         if ! git diff --staged --quiet; then
           git commit -m "Monthly Quarto render - $(date +'%B %Y')"
-          git push
-          echo "CHANGES_MADE=true" >> $GITHUB_ENV
+          git push origin $BRANCH_NAME
+          
+          # Create PR using GitHub CLI
+          echo "Creating pull request..."
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} gh pr create \
+            --title "Monthly Quarto render - $(date +'%B %Y')" \
+            --body "This automated PR contains the monthly Quarto render for the National Park Service analysis.
+            
+Generated on: $(date)" \
+            --base main \
+            --head $BRANCH_NAME
         else
           echo "No changes to commit"
-          echo "CHANGES_MADE=false" >> $GITHUB_ENV
         fi
-    
+        
     - name: Push to prod-nps branch
-      if: env.CHANGES_MADE == 'true'
       run: |
-        # Create or update prod-nps branch
-        git checkout -B prod-nps
+        # Create or update prod-nps branch from main
+        git fetch origin main
+        git checkout -B prod-nps origin/main
         git push -f origin prod-nps
-        echo "✅ Deployed to prod-nps branch"
+        echo "✅ Deployed main to prod-nps branch"
