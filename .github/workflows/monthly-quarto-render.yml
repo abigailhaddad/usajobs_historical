@@ -106,9 +106,8 @@ jobs:
         fi
         
     - name: Push to prod-nps branch
+      if: env.CHANGES_MADE == 'true'
       run: |
-        # Create or update prod-nps branch from main
-        git fetch origin main
-        git checkout -B prod-nps origin/main
-        git push -f origin prod-nps
-        echo "✅ Deployed main to prod-nps branch"
+        # Push the quarto-updates branch (with actual changes) to prod-nps
+        git push -f origin quarto-updates:prod-nps
+        echo "✅ Deployed quarto-updates to prod-nps branch"
