@@ -51,37 +51,56 @@ jobs:
         sudo dpkg -i quarto-1.4.551-linux-amd64.deb
         rm quarto-1.4.551-linux-amd64.deb
 
+    - name: Create or switch to quarto-updates branch
+      run: |
+        # Fetch all branches
+        git fetch --all
+        
+        # Make sure we're on main and up to date
+        git checkout main
+        git pull origin main
+        
+        # Create a fresh quarto-updates branch from main
+        # This ensures we always have the latest code and data
+        git checkout -B quarto-updates
+        echo "Created fresh quarto-updates branch from main"
+
     - name: Render National Park Service Analysis
       run: |
         cd analysis/national_park_service
         quarto render national_park_service_analysis.qmd
 
-    - name: Create and push to branch
+    - name: Commit and push to quarto-updates branch
       run: |
         git config --local user.email "actions@github.com"
         git config --local user.name "GitHub Actions Bot"
         
-        # Create a new branch for the changes
-        BRANCH_NAME="quarto-stage"
-        git checkout -b $BRANCH_NAME
-        
-        # Add and commit changes
-        git add -A
-        if ! git diff --staged --quiet; then
-          git commit -m "Monthly Quarto render - $(date +'%B %Y')"
-          git push origin $BRANCH_NAME
-          
-          # Create PR using GitHub CLI
-          echo "Creating pull request..."
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} gh pr create \
-            --title "Monthly Quarto render - $(date +'%B %Y')" \
-            --body "This automated PR contains the monthly Quarto render for the National Park Service analysis.
-            
-Generated on: $(date)" \
-            --base main \
-            --head $BRANCH_NAME
-        else
+        # Check if there are changes
+        if git diff --exit-code > /dev/null && git diff --cached --exit-code > /dev/null; then
           echo "No changes to commit"
+          echo "CHANGES_MADE=false" >> $GITHUB_ENV
+        else
+          git add -A
+          git commit -m "Monthly Quarto render - $(date +'%B %Y')"
+          git push -f origin quarto-updates
+          echo "CHANGES_MADE=true" >> $GITHUB_ENV
+        fi
+
+    - name: Create or update pull request
+      if: env.CHANGES_MADE == 'true'
+      run: |
+        # Check if PR already exists
+        PR_EXISTS=$(gh pr list --base main --head quarto-updates --state open --json number --jq length)
+        
+        if [ "$PR_EXISTS" -eq "0" ]; then
+          echo "Creating new PR..."
+          gh pr create \
+            --base main \
+            --head quarto-updates \
+            --title "Monthly Quarto render - $(date +'%B %Y')" \
+            --body "Automated monthly Quarto render for the National Park Service analysis"
+        else
+          echo "PR already exists, no action needed"
         fi
         
     - name: Push to prod-nps branch
