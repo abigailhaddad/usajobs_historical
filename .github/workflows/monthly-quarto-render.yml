@@ -88,6 +88,8 @@ jobs:
 
     - name: Create or update pull request
       if: env.CHANGES_MADE == 'true'
+      env:
+        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
         # Check if PR already exists
         PR_EXISTS=$(gh pr list --base main --head quarto-updates --state open --json number --jq length)
