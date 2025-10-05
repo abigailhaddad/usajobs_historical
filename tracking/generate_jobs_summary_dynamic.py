@@ -22,7 +22,7 @@ except:
 # Load agency to department mapping
 agency_to_dept_map = {}
 try:
-    with open('tracking/agency_to_department_mapping.json', 'r') as f:
+    with open('agency_to_department_mapping.json', 'r') as f:
         agency_to_dept_map = json.load(f)
 except:
     print("Warning: Could not load agency to department mapping")
@@ -30,7 +30,7 @@ except:
 # Load agency code to name mapping
 agency_code_to_name_map = {}
 try:
-    with open('tracking/agency_code_to_name_mapping.json', 'r') as f:
+    with open('agency_code_to_name_mapping.json', 'r') as f:
         agency_code_to_name_map = json.load(f)
 except:
     print("Warning: Could not load agency code to name mapping")
@@ -208,6 +208,9 @@ def load_year_data(year, start_date, end_date):
         
         # Fill missing agencies using department
         df_filtered['hiringAgencyName'] = df_filtered.apply(fill_missing_agency, axis=1)
+        
+        # Replace any remaining NaN departments with 'Unknown'
+        df_filtered['hiringDepartmentName'] = df_filtered['hiringDepartmentName'].fillna('Unknown')
         
         # Extract occupation series
         df_filtered['occupation_series'] = df_filtered['JobCategories'].apply(extract_occupation_series)
