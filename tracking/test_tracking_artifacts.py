@@ -426,8 +426,57 @@ def run_tests():
         print(f"{Colors.RED}❌ FAIL{Colors.RESET} Could not check field names: {e}")
         all_passed = False
     
-    # Test 9: Specific content checks
-    print_header("9. SPECIFIC CONTENT CHECKS")
+    # Test 9: No missing departments or agencies
+    print_header("9. NO MISSING DEPARTMENTS OR AGENCIES")
+    
+    try:
+        with open('public/data/job_listings_summary.json', 'r') as f:
+            data = json.load(f)
+        
+        missing_dept = []
+        missing_agency = []
+        unknown_dept = []
+        
+        for idx, row in enumerate(data):
+            # Check department
+            dept = row.get('Department', '').strip()
+            if not dept:
+                missing_dept.append((idx, row))
+            elif dept == 'Unknown':
+                unknown_dept.append((idx, row))
+            
+            # Check agency
+            if not row.get('Agency', '').strip():
+                missing_agency.append((idx, row))
+        
+        # Report findings
+        if missing_dept:
+            print(f"{Colors.RED}❌ FAIL{Colors.RESET} Found {len(missing_dept)} entries with missing departments")
+            all_passed = False
+        else:
+            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} All entries have department names")
+        
+        if unknown_dept:
+            if len(unknown_dept) < 100:  # Allow some unknowns
+                print(f"{Colors.YELLOW}⚠️  WARN{Colors.RESET} Found {len(unknown_dept)} entries with 'Unknown' department (threshold: 100)")
+            else:
+                print(f"{Colors.RED}❌ FAIL{Colors.RESET} Too many 'Unknown' departments: {len(unknown_dept)} (threshold: 100)")
+                all_passed = False
+        else:
+            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} No 'Unknown' departments found")
+        
+        if missing_agency:
+            print(f"{Colors.RED}❌ FAIL{Colors.RESET} Found {len(missing_agency)} entries with missing agencies")
+            all_passed = False
+        else:
+            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} All entries have agency names")
+            
+    except Exception as e:
+        print(f"{Colors.RED}❌ FAIL{Colors.RESET} Could not check departments/agencies: {e}")
+        all_passed = False
+    
+    # Test 10: Specific content checks
+    print_header("10. SPECIFIC CONTENT CHECKS")
     
     # Check that Internships appointment type exists
     try:

@@ -19,6 +19,42 @@ try:
 except:
     print("Warning: Could not load occupation series mapping")
 
+# Load agency to department mapping
+agency_to_dept_map = {}
+try:
+    with open('tracking/agency_to_department_mapping.json', 'r') as f:
+        agency_to_dept_map = json.load(f)
+except:
+    print("Warning: Could not load agency to department mapping")
+
+# Load agency code to name mapping
+agency_code_to_name_map = {}
+try:
+    with open('tracking/agency_code_to_name_mapping.json', 'r') as f:
+        agency_code_to_name_map = json.load(f)
+except:
+    print("Warning: Could not load agency code to name mapping")
+
+def fill_missing_department(row):
+    """Fill missing department using agency mapping"""
+    if pd.isna(row['hiringDepartmentName']) and pd.notna(row['hiringAgencyName']):
+        agency = row['hiringAgencyName']
+        if agency in agency_to_dept_map:
+            return agency_to_dept_map[agency]['department']
+    return row['hiringDepartmentName']
+
+def fill_missing_agency(row):
+    """Fill missing agency using agency code or department"""
+    if pd.isna(row['hiringAgencyName']):
+        # First try to use agency code
+        agency_code = row.get('hiringAgencyCode')
+        if agency_code and agency_code in agency_code_to_name_map:
+            return agency_code_to_name_map[agency_code]
+        # Otherwise use department if available
+        elif pd.notna(row['hiringDepartmentName']):
+            return row['hiringDepartmentName']
+    return row['hiringAgencyName']
+
 def normalize_appointment_type(appt_type):
     """Normalize appointment type to handle case variations"""
     if pd.isna(appt_type):
@@ -128,30 +164,30 @@ def load_year_data(year, start_date, end_date):
     script_dir = Path(__file__).parent
     data_dir = script_dir.parent / 'data'
     
+    # Load current data FIRST to prefer it over historical
+    current_file = data_dir / f'current_jobs_{year}.parquet'
+    if current_file.exists():
+        print(f"    Current {year}: ", end='')
+        df_curr = pd.read_parquet(current_file)
+        print(f"{len(df_curr):,} jobs")
+        all_data.append(df_curr)
+    
     # Load historical data
     historical_file = data_dir / f'historical_jobs_{year}.parquet'
     if historical_file.exists():
         print(f"    Historical {year}: ", end='')
         df_hist = pd.read_parquet(historical_file)
         print(f"{len(df_hist):,} jobs")
-        all_data.append(df_hist)
-    
-    # Load current data
-    current_file = data_dir / f'current_jobs_{year}.parquet'
-    if current_file.exists():
-        print(f"    Current {year}: ", end='')
-        df_curr = pd.read_parquet(current_file)
-        print(f"{len(df_curr):,} jobs")
         
         if all_data:
-            # Deduplicate against historical data
+            # Deduplicate against current data (prefer current over historical)
             existing_ids = set(all_data[0]['usajobsControlNumber'])
-            df_curr_unique = df_curr[~df_curr['usajobsControlNumber'].isin(existing_ids)]
-            print(f"    Current {year} unique: {len(df_curr_unique):,} jobs (after deduplication)")
-            if len(df_curr_unique) > 0:
-                all_data.append(df_curr_unique)
+            df_hist_unique = df_hist[~df_hist['usajobsControlNumber'].isin(existing_ids)]
+            print(f"    Historical {year} unique: {len(df_hist_unique):,} jobs (after deduplication)")
+            if len(df_hist_unique) > 0:
+                all_data.append(df_hist_unique)
         else:
-            all_data.append(df_curr)
+            all_data.append(df_hist)
     
     if all_data:
         # Combine all data
@@ -166,6 +202,12 @@ def load_year_data(year, start_date, end_date):
         mask = (df_combined['positionOpenDate'] >= start_date) & \
                (df_combined['positionOpenDate'] <= end_date)
         df_filtered = df_combined[mask].copy()
+        
+        # Fill missing departments using agency mapping
+        df_filtered['hiringDepartmentName'] = df_filtered.apply(fill_missing_department, axis=1)
+        
+        # Fill missing agencies using department
+        df_filtered['hiringAgencyName'] = df_filtered.apply(fill_missing_agency, axis=1)
         
         # Extract occupation series
         df_filtered['occupation_series'] = df_filtered['JobCategories'].apply(extract_occupation_series)
@@ -417,17 +459,37 @@ def generate_summary():
     (output_dir / 'raw_jobs').mkdir(exist_ok=True)
     
     # Generate department summaries and raw jobs
-    departments = set(df_previous['hiringDepartmentName'].dropna().unique()) | set(df_current['hiringDepartmentName'].dropna().unique())
+    # Get all unique departments including NaN values
+    depts_prev = set(df_previous['hiringDepartmentName'].unique())
+    depts_curr = set(df_current['hiringDepartmentName'].unique())
+    departments = depts_prev | depts_curr
+    # Replace NaN with 'Unknown' for processing
+    departments = {dept if pd.notna(dept) else 'Unknown' for dept in departments}
     
     print(f"\nGenerating {len(departments)} department files...")
     dept_metadata = []
     
     for dept in sorted(departments):
-        if pd.isna(dept):
-            continue
             
         dept_summary_df = generate_department_summary(df_previous, df_current, dept, previous_year, current_year)
-        dept_summary_df = dept_summary_df.sort_values(f'listings{previous_year}Value', ascending=False)
+        # Sort by the actual column name that was created
+        sort_col = f'listings{previous_year}Value'
+        if sort_col in dept_summary_df.columns:
+            dept_summary_df = dept_summary_df.sort_values(sort_col, ascending=False)
+        else:
+            # Fallback to any listings*Value column
+            value_cols = [col for col in dept_summary_df.columns if col.endswith('Value') and 'listings' in col]
+            if value_cols:
+                dept_summary_df = dept_summary_df.sort_values(value_cols[0], ascending=False)
+        
+        # Calculate metadata before renaming columns
+        unique_subagencies = int(dept_summary_df['Subagency'].nunique()) if 'Subagency' in dept_summary_df.columns else 0
+        
+        # Use the actual column names that exist
+        prev_col = f'listings{previous_year}Value'
+        curr_col = f'listings{current_year}Value'
+        total_prev = int(dept_summary_df[prev_col].sum()) if prev_col in dept_summary_df.columns else 0
+        total_curr = int(dept_summary_df[curr_col].sum()) if curr_col in dept_summary_df.columns else 0
         
         # Update column names for consistency with JS expectations
         dept_summary_df = dept_summary_df.rename(columns={
@@ -451,19 +513,18 @@ def generate_summary():
         with open(raw_filepath, 'w') as f:
             json.dump(raw_jobs, f, separators=(',', ':'))  # Minified
         
-        # Track metadata
         dept_metadata.append({
             'department': dept,
             'filename': filename,
             'raw_jobs_filename': raw_filename,
             'rows': len(dept_summary_df),
-            'unique_subagencies': int(dept_summary_df['Subagency'].nunique()),
-            'total_2024': int(dept_summary_df['listings2024Value'].sum()),
-            'total_2025': int(dept_summary_df['listings2025Value'].sum()),
+            'unique_subagencies': unique_subagencies,
+            'total_2024': total_prev,
+            'total_2025': total_curr,
             'raw_jobs_count': len(raw_jobs)
         })
         
-        print(f"  {dept}: {len(dept_summary_df):,} rows, {dept_summary_df['Subagency'].nunique()} subagencies, {len(raw_jobs):,} raw jobs")
+        print(f"  {dept}: {len(dept_summary_df):,} rows, {unique_subagencies} subagencies, {len(raw_jobs):,} raw jobs")
     
     # Save department metadata
     metadata_file = output_dir / 'department_metadata.json'
@@ -512,4 +573,38 @@ def generate_summary():
     print(f"  Unique agencies: {stats['unique_counts']['agencies']}")
 
 if __name__ == '__main__':
+    import subprocess
+    import sys
+    
+    script_dir = Path(__file__).parent
+    
+    # First fetch agency codes from USAJobs if we don't have them
+    codes_file = script_dir / 'usajobs_agency_codes.json'
+    if not codes_file.exists():
+        print("Fetching agency codes from USAJobs API...")
+        fetch_script = script_dir / 'fetch_agency_codes.py'
+        result = subprocess.run([sys.executable, str(fetch_script)], 
+                              capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            print("Warning: Could not fetch agency codes")
+            print(result.stderr)
+        else:
+            print("Agency codes fetched successfully")
+    
+    # Generate agency mappings
+    mapping_script = script_dir / 'generate_agency_mappings.py'
+    
+    print("Generating agency mappings...")
+    result = subprocess.run([sys.executable, str(mapping_script)], 
+                          capture_output=True, text=True)
+    
+    if result.returncode != 0:
+        print("Error generating mappings:")
+        print(result.stderr)
+        sys.exit(1)
+    
+    print("Mappings generated successfully\n")
+    
+    # Now generate the summary
     generate_summary()

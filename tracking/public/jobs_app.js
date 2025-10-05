@@ -397,7 +397,7 @@ function updateDependentFilters() {
         agencyFilterData = agencyFilterData.filter(row => row.Department === selectedDepartment);
     }
     const agencies = [...new Set(agencyFilterData
-        .filter(row => row.Agency && row.Agency !== row.Department)
+        .filter(row => row.Agency)
         .map(row => row.Agency)
     )].sort();
     
