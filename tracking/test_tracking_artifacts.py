@@ -168,7 +168,7 @@ def check_no_job_id_loss():
                     jobs_data = json.load(f)
                 for job in jobs_data:
                     if 'control_number' in job:
-                        current_job_ids.add(job['control_number'])
+                        current_job_ids.add(str(job['control_number']))
             except Exception:
                 pass
     
