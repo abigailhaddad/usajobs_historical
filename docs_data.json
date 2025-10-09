@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-10-08T07:17:53.083749",
-  "total_jobs": 3061460,
+  "generated_at": "2025-10-09T07:17:17.763113",
+  "total_jobs": 3062400,
   "total_fields": 43,
-  "file_size": "762MB",
-  "latest_job_date": "2025-10-08",
+  "file_size": "767MB",
+  "latest_job_date": "2025-10-09",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 182178,
-      "jobs_opened": 182178,
-      "jobs_closed": 180009,
-      "coverage": "Current through October 08, 2025"
+      "total_jobs": 183118,
+      "jobs_opened": 183118,
+      "jobs_closed": 180865,
+      "coverage": "Current through October 09, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1550\"}, {\"series\": \"0854\"}, {\"series\": \"0855\"}], [{\"series\": \"1520\"}, {\"series\": \"0855\"}, {\"series\": \"1310\"}, {\"series\": \"0850\"}, {\"series\": \"0801\"}], [{\"series\": \"0110\"}, {\"series\": \"0401\"}, {\"series\": \"0819\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}], [{\"series\": \"0830\"}, {\"series\": \"0810\"}, {\"series\": \"1350\"}, {\"series\": \"0808\"}, {\"series\": \"0850\"}] (4424 unique)",
+      "examples": "[{\"series\": \"1301\"}, {\"series\": \"0810\"}, {\"series\": \"1370\"}, {\"series\": \"1373\"}], [{\"series\": \"0850\"}, {\"series\": \"0801\"}, {\"series\": \"0830\"}], [{\"series\": \"0344\"}], [{\"series\": \"1301\"}, {\"series\": \"0810\"}, {\"series\": \"0830\"}, {\"series\": \"0850\"}, {\"series\": \"0808\"}, {\"series\": \"0801\"}, {\"series\": \"0819\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Air Force\\Air Force Public Affairs Agency, Judicial Branch\\U.S. Tax Court, Department of Housing and Urban Development\\Assistant Secretary for Community Planning and Development, Administrative Conference of the United States (542 unique)",
+      "examples": "Department of Labor\\Bureau of Labor Statistics, Civil Rights Cold Case Review Board (CRCCRB), Department of Labor\\Office of Workers' Compensation Programs, Department of Justice\\Office of Justice Programs (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "42-AFPC-12569778-579664-RRB, MXR-2024-0257, MW-1544-CUVA-24-12402579-IN, JCS-24-12416155-MP (363810 unique)",
+      "examples": "ST-12290891-24-JLB, 24-12317115P-SBB-1169-5T9, CAZM-12423648-24-AC, SharedCert-2024-0018 (363810 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363810
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Seasonal, Recent graduates, Intermittent, Detail (16 unique)",
+      "examples": "Summer, Temporary Promotion, Temporary, Permanent (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "IN08, AF3Q, AG30, SB00 (528 unique)",
+      "examples": "DNFE, DNWP, GQ00, TR93 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Office of the Inspector General, USPS, Office of General Counsel, U.S. Mint, Headquarters, AMC (502 unique)",
+      "examples": "International Boundary and Water Commission: United States and Mexico, National Assessment Governing Board, Office of the Deputy Secretary of Education, Office of the Chief of the National Guard Bureau (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "ZV, NU, HE, QQ (122 unique)",
+      "examples": "AM, LL, JL, ZS (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Health and Human Services, Department of Defense, National Foundation on the Arts and the Humanities, Department of the Interior (26 unique)",
+      "examples": "Department of Transportation, Legislative Branch, General Services Administration, Department of Agriculture (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "NASHVILLE PUBLIC AFFAIRS OFFICE, Office of the Chief Banking Offier, National Institute Of Environmental Health Science (NIEHS), Infrastructure Operations (59972 unique)",
+      "examples": "459 MAINTENANCE SQ, Response and Recovery, Response Directorate, Operations Cadre, Office of the Chief Information Officer (OCIO) / BMPMO, Northwestern Division - Military Integration Division (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-20T11:53:10.044069, 2025-09-20T11:44:06.400048, 2025-09-20T11:40:47.473592, 2025-09-20T12:24:39.424172 (367186 unique)",
+      "examples": "2025-09-20T12:30:19.927880, 2025-09-20T12:36:50.120163, 2025-09-20T12:32:20.462086, 2025-09-20T12:08:55.257455 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -237,7 +237,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-20T11:30:21.476948, 2025-09-20T12:07:01.858108, 2025-09-20T11:49:34.630725, 2025-07-05T13:50:17.178269 (367186 unique)",
+      "examples": "2025-09-20T12:13:57.792561, 2025-09-20T11:32:13.141264, 2025-09-20T11:49:34.564284, 2025-09-20T12:13:57.798769 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -245,7 +245,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "43, 44, 0, GI (127 unique)",
+      "examples": "96, L, IH, HL (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -261,7 +261,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "JK, SL, 05, HH (125 unique)",
+      "examples": "08, 15, 97, 28 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -277,7 +277,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "BL, FS, NX, KE (191 unique)",
+      "examples": "KG, OR, EE, VP (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -285,7 +285,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-12-07, 2024-03-23, 2025-02-04, 2024-05-27 (671 unique)",
+      "examples": "2024-06-08, 2025-03-04, 2024-01-07, 2024-12-26 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -293,7 +293,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-03-18, 2024-11-21, 2024-08-07, 2024-01-04 (596 unique)",
+      "examples": "2024-08-23, 2024-02-15, 2024-01-16, 2023-09-15 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -301,7 +301,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-11-06, 2024-05-23, 2024-04-05, 2024-10-08 (365 unique)",
+      "examples": "2024-03-12, 2024-02-18, 2024-10-06, 2024-09-21 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -317,7 +317,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "CLINICAL SPECIALIST- COMMUNITY COUNSELING PROGRAM MIP NF4, Community Affairs Specialist, CG-301-13, Physician-Deputy Chief of Staff, Police Officer (CLEO) (77988 unique)",
+      "examples": "Management and Program Analyst (Project Manager) - Temp/NTE 1 Year, MBE up to 5 years, MBMP, Supervisory Recreation Specialist (Aquatics/Fitness), Accountant Systems, (Systems Accountant), WELLNESS EDUCATOR, NF-03/RFT, CAMP FOSTER (77988 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77988
@@ -325,7 +325,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "30, 5, 39, DISES (115 unique)",
+      "examples": "na, MC, 15, PB5 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -389,7 +389,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "221, 114, Few, FEW (157 unique)",
+      "examples": "575, 228, 01, 69 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
