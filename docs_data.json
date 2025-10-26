@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-10-25T07:17:56.852363",
-  "total_jobs": 3071748,
+  "generated_at": "2025-10-26T07:18:21.572153",
+  "total_jobs": 3071767,
   "total_fields": 43,
   "file_size": "816MB",
-  "latest_job_date": "2025-10-25",
+  "latest_job_date": "2025-10-26",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 192466,
-      "jobs_opened": 192466,
-      "jobs_closed": 189376,
-      "coverage": "Current through October 25, 2025"
+      "total_jobs": 192485,
+      "jobs_opened": 192485,
+      "jobs_closed": 189394,
+      "coverage": "Current through October 26, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0819\"}, {\"series\": \"1301\"}, {\"series\": \"0020\"}, {\"series\": \"0401\"}], [{\"series\": \"0801\"}, {\"series\": \"1520\"}, {\"series\": \"1515\"}, {\"series\": \"1550\"}, {\"series\": \"1310\"}], [{\"series\": \"0850\"}, {\"series\": \"0830\"}, {\"series\": \"0855\"}], [{\"series\": \"0810\"}, {\"series\": \"0150\"}] (4424 unique)",
+      "examples": "[{\"series\": \"1350\"}, {\"series\": \"1313\"}], [{\"series\": \"1515\"}, {\"series\": \"0801\"}, {\"series\": \"1550\"}, {\"series\": \"1310\"}], [{\"series\": \"1550\"}, {\"series\": \"1520\"}, {\"series\": \"1560\"}, {\"series\": \"1515\"}, {\"series\": \"0801\"}], [{\"series\": \"0808\"}, {\"series\": \"0830\"}, {\"series\": \"0850\"}, {\"series\": \"0819\"}, {\"series\": \"0810\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of Veterans Affairs\\Veterans Affairs, Inspector General, Department of the Air Force\\Headquarters, Air Force Space Command, Morris K. Udall Scholarship and Excellence in National Environmental Policy Foundation, Department of the Treasury\\Bureau of the Fiscal Service (542 unique)",
+      "examples": "Department of the Treasury\\U.S. Mint, Department of the Interior\\Bureau of Land Management, Department of Agriculture\\Agriculture, Rural Development, Department of the Army\\Field Operating Offices of the Office of the Secretary of the Army (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "9S-AFPC-12612092-643720-KLP, AFMC-12275819-282233-8L-NEM, C2SCNAFCY-24-12358338, DECA-24-12523947-DE (363810 unique)",
+      "examples": "WI-12486668-Air-24-376, 24-ADDP-12303104-DHA-TP, OAR GFDL-24-12378820-DHA, 4V-AFPC-12387735-392610-NW (363810 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363810
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Temporary Promotion, Intermittent, Temporary, Summer (16 unique)",
+      "examples": "Detail, Temporary, Temporary Promotion, Recent graduates (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "EDEO, DJ10, NV18, AF02 (528 unique)",
+      "examples": "ARXG, NU00, DLWH, CM62 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "U.S. Fish and Wildlife Service, U.S. Air Forces, Europe, Civilian Protection Center Of Excellence (CP CoE), Commodity Futures Trading Commission (502 unique)",
+      "examples": "Assistant Secretary for Fair Housing and Equal Opportunity, Non-DOD And Other Support, United States Army Europe and Africa, Naval Systems Management Activity (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "GS, SZ, ZG, EO (122 unique)",
+      "examples": "SM, NN, BW, OS (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "General Services Administration, Department of Health and Human Services, Court Services and Offender Supervision Agency for DC, National Foundation on the Arts and the Humanities (26 unique)",
+      "examples": "Department of Justice, Department of the Interior, Department of Health and Human Services, Department of Agriculture (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "USAG Stuttgart, D, FMWR/BOD - Community Operations, Panzer Kaserne, Stuttgart, Germany, United States Africa Command (US AFRICOM), Operations, J3, The supervisor for this position is COL Wenzel., Offices in the National Capital Region (59972 unique)",
+      "examples": "CIRCUIT - READING, PA, 51 FIGHTER WG, AVS, Compliance & Airworthiness Division, Operational Safety Branch, AIR-721, Office of the Chief Data Officer (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-20T12:07:01.869152, 2025-07-05T13:59:26.138600, 2025-09-20T11:46:05.930960, 2025-09-20T12:17:31.810671 (367186 unique)",
+      "examples": "2025-09-20T11:40:47.489934, 2025-09-20T11:58:45.369680, 2025-07-05T13:02:09.552268, 2025-09-20T11:49:34.630397 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -237,7 +237,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-07-05T13:55:05.396945, 2025-07-05T13:59:26.139327, 2025-09-20T12:32:20.463133, 2025-09-20T12:13:57.795378 (367186 unique)",
+      "examples": "2025-09-20T12:17:31.803273, 2025-07-05T13:59:26.139409, 2025-09-20T12:07:01.852709, 2025-09-20T12:03:23.680230 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -245,7 +245,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "70, CM, NA, 15 (127 unique)",
+      "examples": "AH, AA, 07, II (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -261,7 +261,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "EJ, I, JJ, K (125 unique)",
+      "examples": "30, 12, 04, HS3 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -277,7 +277,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "DE, IT, PT, KA (191 unique)",
+      "examples": "WN, KX, MA, DL (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -285,7 +285,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-06-02, 2024-03-04, 2024-02-25, 2025-03-25 (671 unique)",
+      "examples": "2024-07-25, 2025-12-23, 2024-01-06, 2024-10-07 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -293,7 +293,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-01-13, 2023-12-28, 2023-09-14, 2023-12-29 (596 unique)",
+      "examples": "2024-06-11, 2025-07-02, 2023-12-06, 2025-01-02 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -301,7 +301,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-10-22, 2024-11-21, 2024-07-27, 2024-02-21 (365 unique)",
+      "examples": "2024-10-03, 2024-06-09, 2024-05-27, 2024-05-03 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -317,7 +317,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Physician (Interventional Cardiologist), AERO CLUB MANAGER, Tax Law Specialist - 12 Month Roster, TRANSITION READINESS PROGRAM ADMINISTRATOR (77988 unique)",
+      "examples": "Electrician (Marine), DRUG DEMAND REDUCTION PROGRAM MANAGER, Financial Economist (Market RAD), NB-0110-V.2 (Full Performance Level NB-VI), RECREATION EQUIPMENT REPAIRER (77988 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77988
@@ -325,7 +325,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "GS13, 98, DISL, 36 (115 unique)",
+      "examples": "22, 20, No, 0 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -389,7 +389,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "23, 275, 68, 136 (157 unique)",
+      "examples": "14, 13, 128, 43 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
