@@ -102,7 +102,7 @@
     <div class="container">
         <h1>USAJobs Historical API Data</h1>
         
-        <p><strong>Data collection last run: 2025-10-26</strong></p>
+        <p><strong>Data collection last run: 2025-10-27</strong></p>
         <p><strong>⚠️ This is not an official USAJobs project</strong></p>
         
         <div class="resources">
@@ -114,7 +114,7 @@
             </ul>
         </div>
         <div class="stats">
-            <strong>Dataset:</strong> 3,071,767 total job postings | <strong>Coverage:</strong> | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
+            <strong>Dataset:</strong> 3,072,029 total job postings | <strong>Coverage:</strong> | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
         </div>
 
         <h2>Table of Contents</h2>
@@ -148,7 +148,7 @@
                 <tr><td>2022</td><td>441,604</td><td>419,295</td><td>✅ Complete year</td></tr>
                 <tr><td>2023</td><td>454,652</td><td>434,527</td><td>✅ Complete year</td></tr>
                 <tr><td>2024</td><td>367,770</td><td>352,299</td><td>✅ Complete year</td></tr>
-                <tr><td>2025</td><td>192,485</td><td>189,394</td><td>Current through October 26, 2025</td></tr>
+                <tr><td>2025</td><td>192,747</td><td>189,643</td><td>Current through October 27, 2025</td></tr>
             </tbody>
         </table>
 
@@ -173,7 +173,7 @@
                 <tr>
                     <td><code class="field-name">JobCategories</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"series": "1350"}, {"series": "1313"}], [{"series": "1515"}, {"series": "0801"}, {"series": "1550"}, {"series": "1310"}], [{"series": "1550"}, {"series": "1520"}, {"series": "1560"}, {"series": "1515"}, {"series": "0801"}], [{"series": "0808"}, {"series": "0830"}, {"series": "0850"}, {"series": "0819"}, {"series": "0810"}] (4424 unique)</td>
+                    <td class="examples">[{"series": "1310"}, {"series": "0801"}, {"series": "1520"}, {"series": "1515"}, {"series": "1550"}], [{"series": "0854"}, {"series": "0850"}, {"series": "0855"}, {"series": "1550"}], [{"series": "1320"}], [{"series": "0180"}, {"series": "1750"}] (4424 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -191,7 +191,7 @@
                 <tr>
                     <td><code class="field-name">agencyLevelSort</code></td>
                     <td>String</td>
-                    <td class="examples">Department of the Treasury\U.S. Mint, Department of the Interior\Bureau of Land Management, Department of Agriculture\Agriculture, Rural Development, Department of the Army\Field Operating Offices of the Office of the Secretary of the Army (542 unique)</td>
+                    <td class="examples">General Services Administration\Office of the Chief Financial Officer, Legislative Branch\Government Accountability Office, General Services Administration\Office of Small Business Utilization, Department of the Air Force\Air Force Audit Agency (542 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -209,13 +209,13 @@
                 <tr>
                     <td><code class="field-name">announcementNumber</code></td>
                     <td>String</td>
-                    <td class="examples">WI-12486668-Air-24-376, 24-ADDP-12303104-DHA-TP, OAR GFDL-24-12378820-DHA, 4V-AFPC-12387735-392610-NW (363810 unique)</td>
+                    <td class="examples">ARS-RA24PWA-12512985-mds, ST-12361302-24-CW, EUJU241171340401, 24-CEC-85 (363810 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">appointmentType</code></td>
                     <td>String</td>
-                    <td class="examples">Detail, Temporary, Temporary Promotion, Recent graduates (16 unique)</td>
+                    <td class="examples">Intermittent, Temporary promotion, Temporary, Summer (16 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -233,49 +233,49 @@
                 <tr>
                     <td><code class="field-name">hiringAgencyCode</code></td>
                     <td>String</td>
-                    <td class="examples">ARXG, NU00, DLWH, CM62 (528 unique)</td>
+                    <td class="examples">ARXG, EDEE, NV14, AFZS (528 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringAgencyName</code></td>
                     <td>String</td>
-                    <td class="examples">Assistant Secretary for Fair Housing and Equal Opportunity, Non-DOD And Other Support, United States Army Europe and Africa, Naval Systems Management Activity (502 unique)</td>
+                    <td class="examples">Air Force Office of Special Investigations, Office of the Secretary, Defense Threat Reduction Agency, Office of Budget and Program Analysis (502 unique)</td>
                     <td class="completeness good">99%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringDepartmentCode</code></td>
                     <td>String</td>
-                    <td class="examples">SM, NN, BW, OS (122 unique)</td>
+                    <td class="examples">SB, NL, CE, IB (122 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringDepartmentName</code></td>
                     <td>String</td>
-                    <td class="examples">Department of Justice, Department of the Interior, Department of Health and Human Services, Department of Agriculture (26 unique)</td>
+                    <td class="examples">Department of the Army, Executive Office of the President, General Services Administration, Department of the Treasury (26 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringSubelementName</code></td>
                     <td>String</td>
-                    <td class="examples">CIRCUIT - READING, PA, 51 FIGHTER WG, AVS, Compliance & Airworthiness Division, Operational Safety Branch, AIR-721, Office of the Chief Data Officer (59972 unique)</td>
+                    <td class="examples">Regional Office, Region Nine, Mitigation Division, Environmental & Historic Preservation Branch, USAG Directorate of Public Works, Louisville District Operations Division, Nolin River Lake, VA Midwest Health Care Network (VISN 23), Nebraska Western Iowa VA Health Care System (59972 unique)</td>
                     <td class="completeness poor">62%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">inserted_at</code></td>
                     <td>String</td>
-                    <td class="examples">2025-09-20T11:40:47.489934, 2025-09-20T11:58:45.369680, 2025-07-05T13:02:09.552268, 2025-09-20T11:49:34.630397 (367186 unique)</td>
+                    <td class="examples">2025-09-20T11:40:47.493152, 2025-09-20T12:38:44.575974, 2025-09-20T12:28:37.518904, 2025-09-20T12:15:51.672198 (367186 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">last_seen</code></td>
                     <td>String</td>
-                    <td class="examples">2025-09-20T12:17:31.803273, 2025-07-05T13:59:26.139409, 2025-09-20T12:07:01.852709, 2025-09-20T12:03:23.680230 (367186 unique)</td>
+                    <td class="examples">2025-09-20T11:51:24.351711, 2025-09-20T11:55:10.931460, 2025-09-20T11:51:24.364146, 2025-07-05T14:04:05.195295 (367186 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">maximumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">AH, AA, 07, II (127 unique)</td>
+                    <td class="examples">35, JL, 00, GJ (127 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -287,7 +287,7 @@
                 <tr>
                     <td><code class="field-name">minimumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">30, 12, 04, HS3 (125 unique)</td>
+                    <td class="examples">GJ, 07, 11, 18 (125 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -299,25 +299,25 @@
                 <tr>
                     <td><code class="field-name">payScale</code></td>
                     <td>String</td>
-                    <td class="examples">WN, KX, MA, DL (191 unique)</td>
+                    <td class="examples">GM, DO, IR, CU (191 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionCloseDate</code></td>
                     <td>String</td>
-                    <td class="examples">2024-07-25, 2025-12-23, 2024-01-06, 2024-10-07 (671 unique)</td>
+                    <td class="examples">2024-01-19, 2024-11-07, 2025-12-18, 2024-01-03 (671 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionExpireDate</code></td>
                     <td>String</td>
-                    <td class="examples">2024-06-11, 2025-07-02, 2023-12-06, 2025-01-02 (596 unique)</td>
+                    <td class="examples">2024-02-10, 2023-07-26, 2024-06-19, 2025-05-05 (596 unique)</td>
                     <td class="completeness poor">9%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionOpenDate</code></td>
                     <td>String</td>
-                    <td class="examples">2024-10-03, 2024-06-09, 2024-05-27, 2024-05-03 (365 unique)</td>
+                    <td class="examples">2024-08-18, 2024-06-08, 2024-06-24, 2024-04-29 (365 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -329,13 +329,13 @@
                 <tr>
                     <td><code class="field-name">positionTitle</code></td>
                     <td>String</td>
-                    <td class="examples">Electrician (Marine), DRUG DEMAND REDUCTION PROGRAM MANAGER, Financial Economist (Market RAD), NB-0110-V.2 (Full Performance Level NB-VI), RECREATION EQUIPMENT REPAIRER (77988 unique)</td>
+                    <td class="examples">Civil Engineer, Agricultural Engineer, SUPERVISORY RECREATION SPECIALIST (COMMUNITY RECREATION), Nurse Prac- Acute Care, Senior IT Specialist (INFOSEC), CG-2210-15 (77988 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">promotionPotential</code></td>
                     <td>String</td>
-                    <td class="examples">22, 20, No, 0 (115 unique)</td>
+                    <td class="examples">3, FG09, 45, 0 (115 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -383,7 +383,7 @@
                 <tr>
                     <td><code class="field-name">totalOpenings</code></td>
                     <td>String</td>
-                    <td class="examples">14, 13, 128, 43 (157 unique)</td>
+                    <td class="examples">64, 294, 23, 35 (157 unique)</td>
                     <td class="completeness warning">90%</td>
                 </tr>
                 <tr>
