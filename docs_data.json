@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-11-08T07:16:27.556155",
-  "total_jobs": 3079701,
+  "generated_at": "2025-11-09T07:16:41.522182",
+  "total_jobs": 3079706,
   "total_fields": 43,
   "file_size": "860MB",
-  "latest_job_date": "2025-11-08",
+  "latest_job_date": "2025-11-09",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 200419,
-      "jobs_opened": 200419,
-      "jobs_closed": 196853,
-      "coverage": "Current through November 08, 2025"
+      "total_jobs": 200424,
+      "jobs_opened": 200424,
+      "jobs_closed": 196858,
+      "coverage": "Current through November 09, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0810\"}, {\"series\": \"0850\"}, {\"series\": \"0893\"}, {\"series\": \"0808\"}, {\"series\": \"0830\"}, {\"series\": \"0896\"}], [{\"series\": \"1310\"}, {\"series\": \"0801\"}, {\"series\": \"1515\"}], [{\"series\": \"0830\"}, {\"series\": \"0810\"}, {\"series\": \"0850\"}, {\"series\": \"1350\"}, {\"series\": \"0807\"}, {\"series\": \"0808\"}, {\"series\": \"1301\"}], [{\"series\": \"0850\"}, {\"series\": \"0819\"}, {\"series\": \"0801\"}, {\"series\": \"0830\"}, {\"series\": \"0810\"}, {\"series\": \"0808\"}] (4424 unique)",
+      "examples": "[{\"series\": \"0470\"}, {\"series\": \"0471\"}, {\"series\": \"0401\"}], [{\"series\": \"0819\"}, {\"series\": \"0810\"}, {\"series\": \"0801\"}, {\"series\": \"0808\"}, {\"series\": \"0830\"}, {\"series\": \"0020\"}], [{\"series\": \"0819\"}, {\"series\": \"1301\"}, {\"series\": \"1320\"}], [{\"series\": \"0440\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Judicial Branch\\U. S. Sentencing Commission, Office of Government Ethics, Department of Health and Human Services\\Administration for Strategic Preparedness and Response, Department of Labor\\Office of Workers' Compensation Programs (542 unique)",
+      "examples": "Federal Labor Relations Authority, Executive Office of the President\\Office of Management and Budget, Legislative Branch\\United States-China Economic and Security Review Commission, Department of Homeland Security\\Customs and Border Protection (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "IO-24-ST-12535923, EPA-LA-MPC-2025-0002, MS-25-DAL-VETS-12622988-CAF, IN-12606326-25 (363810 unique)",
+      "examples": "EUJU240710781879, LOM-2025-0020, CARZ-12611870-25-AKJ, OISM-180-24-12440502-MP (363810 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363810
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Presidential Management Fellows, Internships, Temporary promotion, Permanent (16 unique)",
+      "examples": "Multiple, Telework, Recent graduates, Detail (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "SM02, IN10, AG42, HE70 (528 unique)",
+      "examples": "FT00, VABH, HUKK, ARMC (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Lyndon B. Johnson Space Center, Arlington National Cemetery, National Endowment for the Humanities, Defense Finance and Accounting Service (502 unique)",
+      "examples": "Office of Congressional Workplace Rights, Materiel Acquisition Activities, Office of the Chief of Staff of the Army, Customs and Border Protection (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "IF, BG, FC, FJ (122 unique)",
+      "examples": "AH, TN, TB, MA (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "General Services Administration, Judicial Branch, Department of Labor, Department of the Air Force (26 unique)",
+      "examples": "Court Services and Offender Supervision Agency for DC, National Foundation on the Arts and the Humanities, Department of Labor, Legislative Branch (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Immediate Office of the Executive Assistant Commissioner, Nashville Operations Division Western Kentucky Area Office Lake Barkley, Veterans Health Administration/Durham VA Medical Center, AVS, Flight Standards Service, GA Safety Assurance Office, AFG-400, Cincinnati FSDO, GLSD05 (59972 unique)",
+      "examples": "California - Great Basin Region, Division of Environmental Affairs, 7TH U.S. ARMY TRAINING COMMAND JOINT, U.S. Health Clinic, Vilseck, National Weather Service (NWS), Office of Weather Prediction (OWP). (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-20T12:07:01.857546, 2025-09-20T12:08:55.199806, 2025-09-20T11:37:32.391756, 2025-07-05T13:57:17.399410 (367186 unique)",
+      "examples": "2025-09-20T12:24:39.420026, 2025-07-05T13:57:17.424892, 2025-09-20T12:13:57.794035, 2025-09-20T12:30:19.940057 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -237,7 +237,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-20T11:49:34.587602, 2025-09-20T11:57:01.741108, 2025-07-05T13:55:05.396961, 2025-09-19T23:01:37.141845 (367186 unique)",
+      "examples": "2025-09-20T11:28:24.525499, 2025-09-20T11:32:13.141207, 2025-09-20T11:30:21.469909, 2025-09-20T12:11:56.952973 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -245,7 +245,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "KI, C, 14, EL (127 unique)",
+      "examples": "35, 0, 61, JK (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -261,7 +261,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "I, 51, 11, LJ (125 unique)",
+      "examples": "10, 11, 98, 27 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -277,7 +277,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "GM, IE, CU, NR (191 unique)",
+      "examples": "TP, NP, PB, KS (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -285,7 +285,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-04-06, 2024-10-07, 2025-07-12, 2024-04-07 (671 unique)",
+      "examples": "2025-01-07, 2024-08-25, 2025-10-21, 2025-09-08 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -293,7 +293,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-02-13, 2024-09-21, 2024-03-30, 2024-03-27 (596 unique)",
+      "examples": "2024-10-23, 2024-08-02, 2024-06-13, 2025-09-11 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -301,7 +301,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-07-11, 2024-05-29, 2024-06-26, 2024-01-31 (365 unique)",
+      "examples": "2024-09-02, 2024-08-06, 2024-05-15, 2024-06-29 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -317,7 +317,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Emergency Management Specialist for Preparedness, Licensed Professional Mental Health Counselor (Care Coordinator), Web Accessibility Specialist, Executive Director, Flight Operations (77988 unique)",
+      "examples": "INDUSTRIAL MECHANICAL INSPECTOR (SHIPS), Assistant Nurse Manager (Medical ICU), Technical Writer- Editor, LEGISLATIVE ANALYST (77988 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77988
@@ -325,7 +325,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "NA, 43, 70, 11 (115 unique)",
+      "examples": "none, FE, 6, CM (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -389,7 +389,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "99999, 1498, 1806, 68 (157 unique)",
+      "examples": "34, 29, 125, 24 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
