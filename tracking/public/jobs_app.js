@@ -9,6 +9,7 @@ let subagencyData = [];
 let departmentMetadata = {};
 let aggregationLevel = 'department'; // 'individual', 'agency', 'department', 'subagency', or 'raw'
 let occupationSeriesMap = {};
+let appointmentTypesMap = {};
 let currentDepartmentData = null; // Store department-specific data when loaded
 let currentRawJobsData = null; // Store raw jobs data when loaded
 let globalStats = null; // Store stats data globally for date ranges
@@ -106,15 +107,23 @@ function formatPercentage(value) {
 // Load occupation series mapping
 async function loadOccupationMap() {
     try {
-        // Try to load the data-generated map first
-        let response = await fetch('occupation_series_from_data.json');
+        // Try to load the API-generated map first
+        let response = await fetch('occupation_series_from_api.json');
+        if (response.ok) {
+            occupationSeriesMap = await response.json();
+            console.log('Loaded occupation map from API with', Object.keys(occupationSeriesMap).length, 'entries');
+            return;
+        }
+        
+        // Fall back to data-generated map if API map isn't available
+        response = await fetch('occupation_series_from_data.json');
         if (response.ok) {
             occupationSeriesMap = await response.json();
             console.log('Loaded occupation map from data with', Object.keys(occupationSeriesMap).length, 'entries');
             return;
         }
         
-        // Fall back to the original map if the new one isn't available
+        // Final fallback to the original map
         response = await fetch('occupation_series_complete.json');
         if (response.ok) {
             occupationSeriesMap = await response.json();
@@ -125,6 +134,36 @@ async function loadOccupationMap() {
     } catch (error) {
         console.log('Could not load occupation series map, using codes only:', error);
     }
+}
+
+// Load appointment types mapping
+async function loadAppointmentTypesMap() {
+    try {
+        let response = await fetch('appointment_types_from_api.json');
+        if (response.ok) {
+            appointmentTypesMap = await response.json();
+            console.log('Loaded appointment types map from API with', Object.keys(appointmentTypesMap).length, 'entries');
+        } else {
+            console.log('Failed to load appointment types map, status:', response.status);
+        }
+    } catch (error) {
+        console.log('Could not load appointment types map:', error);
+    }
+}
+
+// Format appointment type using API mapping
+function formatAppointmentType(appointmentType) {
+    if (!appointmentType || appointmentType === 'All') {
+        return appointmentType;
+    }
+    
+    // Check if it's a numeric code that we have in our API mapping
+    if (appointmentTypesMap[appointmentType]) {
+        return appointmentTypesMap[appointmentType];
+    }
+    
+    // Otherwise return as-is
+    return appointmentType;
 }
 
 // Update date display from stats
@@ -206,8 +245,9 @@ async function loadRawJobsData(departmentName) {
 // Load CSV data
 async function loadData() {
     try {
-        // Load occupation map first
+        // Load occupation map and appointment types map first
         await loadOccupationMap();
+        await loadAppointmentTypesMap();
         
         // Load department metadata
         const metaResponse = await fetch('data/department_metadata.json');
@@ -338,6 +378,12 @@ function aggregateAgencyData() {
 
 // Update summary statistics
 function updateSummaryStats() {
+    // Only update summary stats if not in raw jobs mode
+    // Raw jobs mode has its own stats calculation in updateFilteredStats()
+    if ($('#showRawJobs').is(':checked')) {
+        return;
+    }
+    
     const total2024 = jobListingsData.reduce((sum, row) => sum + row.listings2024Value, 0);
     const total2025 = jobListingsData.reduce((sum, row) => sum + row.listings2025Value, 0);
     const overallPercentage = total2024 > 0 ? (total2025 / total2024 * 100) : 0;
@@ -413,10 +459,11 @@ function updateDependentFilters() {
     const appointmentTypeMap = new Map();
     appointmentFilterData.forEach(row => {
         const apptType = row.Appointment_Type;
-        const upperType = apptType ? apptType.toUpperCase() : '';
+        const formattedType = formatAppointmentType(apptType);
+        const upperType = formattedType ? formattedType.toUpperCase() : '';
         // Exclude "All" and empty values
-        if (!appointmentTypeMap.has(upperType) && apptType && apptType !== 'All') {
-            appointmentTypeMap.set(upperType, apptType);
+        if (!appointmentTypeMap.has(upperType) && formattedType && formattedType !== 'All') {
+            appointmentTypeMap.set(upperType, formattedType);
         }
     });
     const appointmentTypes = Array.from(appointmentTypeMap.values()).sort();
@@ -507,7 +554,12 @@ function initializeRawJobsDataTable() {
             { data: 'department' },
             { data: 'agency' },
             { data: 'subagency' },
-            { data: 'appointment_type' },
+            { 
+                data: 'appointment_type',
+                render: function(data, type, row) {
+                    return formatAppointmentType(data);
+                }
+            },
             { 
                 data: 'hiring_paths',
                 render: function(data, type, row) {
@@ -727,7 +779,7 @@ async function updateTableData() {
             if (agencyFilter && row.Agency !== agencyFilter) return false;
             
             const apptFilter = $('#mainAppointmentFilter').val();
-            if (apptFilter && row.Appointment_Type !== apptFilter) return false;
+            if (apptFilter && formatAppointmentType(row.Appointment_Type) !== apptFilter) return false;
             
             const occupationFilter = $('#mainOccupationFilter').val();
             if (occupationFilter && row.Occupation_Series !== occupationFilter) return false;
@@ -1029,7 +1081,7 @@ function getFilteredDepartmentData() {
         if (agencyFilter && row.Agency !== agencyFilter) return false;
         
         const apptFilter = $('#mainAppointmentFilter').val();
-        if (apptFilter && row.Appointment_Type !== apptFilter) return false;
+        if (apptFilter && formatAppointmentType(row.Appointment_Type) !== apptFilter) return false;
         
         const occupationFilter = $('#mainOccupationFilter').val();
         if (occupationFilter && row.Occupation_Series !== occupationFilter) return false;
@@ -1077,7 +1129,7 @@ function getFilteredSubagencyData() {
         if (agencyFilter && row.Agency !== agencyFilter) return false;
         
         const apptFilter = $('#mainAppointmentFilter').val();
-        if (apptFilter && row.Appointment_Type !== apptFilter) return false;
+        if (apptFilter && formatAppointmentType(row.Appointment_Type) !== apptFilter) return false;
         
         const occupationFilter = $('#mainOccupationFilter').val();
         if (occupationFilter && row.Occupation_Series !== occupationFilter) return false;
@@ -1122,7 +1174,7 @@ function getFilteredAgencyData() {
         if (agencyFilter && row.Agency !== agencyFilter) return false;
         
         const apptFilter = $('#mainAppointmentFilter').val();
-        if (apptFilter && row.Appointment_Type !== apptFilter) return false;
+        if (apptFilter && formatAppointmentType(row.Appointment_Type) !== apptFilter) return false;
         
         const occupationFilter = $('#mainOccupationFilter').val();
         if (occupationFilter && row.Occupation_Series !== occupationFilter) return false;
@@ -1477,29 +1529,29 @@ function initializeEventHandlers() {
 
 // Update filtered statistics
 function updateFilteredStats() {
-    // Get the current table data (already filtered)
-    const tableData = dataTable.data();
     const showRawJobs = $('#showRawJobs').is(':checked');
     
     if (showRawJobs) {
-        // For raw jobs, just count the records
+        // For raw jobs, get only the filtered/visible data
+        const filteredData = dataTable.rows({ search: 'applied' }).data();
         let count2024 = 0;
         let count2025 = 0;
         
-        tableData.each(function(row) {
+        filteredData.each(function(row) {
             if (row.year === 2024) count2024++;
             else if (row.year === 2025) count2025++;
         });
         
+        const totalCount = count2024 + count2025;
         const percentage = count2024 > 0 ? (count2025 / count2024 * 100) : 0;
         
         $('#total2024').text(formatNumber(count2024));
         $('#total2025').text(formatNumber(count2025));
         $('#overallPercentage').text(formatPercentage(percentage));
-        $('#entityCount').text(tableData.count());
+        $('#entityCount').text(formatNumber(totalCount));
         
         // Announce to screen readers
-        const announcement = `Showing ${tableData.count()} job listings. ${count2024} in 2024, ${count2025} in 2025.`;
+        const announcement = `Showing ${totalCount} job listings. ${count2024} in 2024, ${count2025} in 2025.`;
         $('#ariaLiveRegion').text(announcement);
     } else {
         // For aggregated views

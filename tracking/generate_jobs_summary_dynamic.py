@@ -11,13 +11,11 @@ from pathlib import Path
 import numpy as np
 from datetime import datetime, timedelta
 
-# Load occupation series mapping
+# Initialize occupation series mapping (will be loaded after API fetch)
 occupation_series_map = {}
-try:
-    with open('public/occupation_series_from_data.json', 'r') as f:
-        occupation_series_map = json.load(f)
-except:
-    print("Warning: Could not load occupation series mapping")
+
+# Initialize appointment types mapping (will be loaded after API fetch) 
+appointment_types_map = {}
 
 # Load agency to department mapping
 agency_to_dept_map = {}
@@ -56,11 +54,36 @@ def fill_missing_agency(row):
     return row['hiringAgencyName']
 
 def normalize_appointment_type(appt_type):
-    """Normalize appointment type to handle case variations"""
+    """Normalize appointment type using API mapping and handle variations"""
+    global appointment_types_map
+    
     if pd.isna(appt_type):
         return 'All'
+    
+    # Convert to string and strip whitespace
+    appt_str = str(appt_type).strip()
+    
+    # Check if it's a numeric code that maps to an API value
+    if appt_str in appointment_types_map:
+        return appointment_types_map[appt_str]
+    
+    # Handle common variations and clean up text
+    appt_clean = appt_str.lower()
+    if 'telework' in appt_clean and 'eligible' in appt_clean:
+        return 'Telework Eligible'
+    elif 'temporary promotion' in appt_clean:
+        return 'Temporary Promotion'
+    elif 'recent graduate' in appt_clean:
+        return 'Recent Graduates'
+    elif 'presidential management' in appt_clean:
+        return 'Presidential Management Fellows'
+    elif 'ictap' in appt_clean:
+        return 'ICTAP Only'
+    elif 'agency employees' in appt_clean:
+        return 'Agency Employees Only'
+    
     # Convert to title case for consistency
-    return appt_type.strip().title()
+    return appt_str.title()
 
 def extract_occupation_series(job_categories_json):
     """Extract occupational series from JobCategories JSON field"""
@@ -221,6 +244,42 @@ def load_year_data(year, start_date, end_date):
         return df_filtered
     else:
         return pd.DataFrame()
+
+def load_occupation_series_mapping():
+    """Load occupation series mapping from API file or fallback to data file"""
+    global occupation_series_map
+    
+    # Define script directory to match other file loading patterns
+    script_dir = Path(__file__).parent
+    
+    try:
+        api_file = script_dir / 'occupation_series_from_api.json'
+        with open(api_file, 'r') as f:
+            occupation_series_map = json.load(f)
+            print("Using official occupation series mapping from USAJobs API")
+    except:
+        try:
+            fallback_file = script_dir / 'public' / 'occupation_series_from_data.json'
+            with open(fallback_file, 'r') as f:
+                occupation_series_map = json.load(f)
+            print("Warning: Using fallback occupation series mapping from data")
+        except:
+            print("Error: Could not load occupation series mapping from either API or data file")
+
+def load_appointment_types_mapping():
+    """Load appointment types mapping from API file"""
+    global appointment_types_map
+    
+    # Define script directory to match other file loading patterns
+    script_dir = Path(__file__).parent
+    
+    try:
+        api_file = script_dir / 'appointment_types_from_api.json'
+        with open(api_file, 'r') as f:
+            appointment_types_map = json.load(f)
+            print("Using official appointment types mapping from USAJobs API")
+    except:
+        print("Warning: Could not load appointment types mapping from API file")
 
 def sanitize_filename(name):
     """Convert department name to safe filename"""
@@ -595,6 +654,49 @@ if __name__ == '__main__':
         else:
             print("Agency codes fetched successfully")
     
+    # First fetch occupation series from USAJobs API
+    occupation_script = script_dir / 'fetch_occupation_series.py'
+    print("Fetching occupation series from USAJobs API...")
+    result = subprocess.run([sys.executable, str(occupation_script)], 
+                          capture_output=True, text=True)
+    
+    if result.returncode != 0:
+        print("Warning: Could not fetch occupation series from API")
+        print(result.stderr)
+        print("Will use fallback data file")
+    else:
+        print("Occupation series fetched successfully")
+    
+    # Fetch appointment types from USAJobs API
+    appointment_script = script_dir / 'fetch_appointment_types.py'
+    print("Fetching appointment types from USAJobs API...")
+    result = subprocess.run([sys.executable, str(appointment_script)], 
+                          capture_output=True, text=True)
+    
+    if result.returncode != 0:
+        print("Warning: Could not fetch appointment types from API")
+        print(result.stderr)
+    else:
+        print("Appointment types fetched successfully")
+    
+    # Load the mappings after fetching from API
+    load_occupation_series_mapping()
+    load_appointment_types_mapping()
+    
+    # Copy API files to public directory for website use
+    import shutil
+    api_file = script_dir / 'occupation_series_from_api.json'
+    public_api_file = script_dir / 'public' / 'occupation_series_from_api.json'
+    if api_file.exists():
+        shutil.copy2(api_file, public_api_file)
+        print("Copied API occupation series file to public directory")
+    
+    appointment_api_file = script_dir / 'appointment_types_from_api.json'
+    public_appointment_file = script_dir / 'public' / 'appointment_types_from_api.json'
+    if appointment_api_file.exists():
+        shutil.copy2(appointment_api_file, public_appointment_file)
+        print("Copied API appointment types file to public directory")
+
     # Generate agency mappings
     mapping_script = script_dir / 'generate_agency_mappings.py'
     
