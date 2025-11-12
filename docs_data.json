@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-11-11T07:17:58.523604",
-  "total_jobs": 3080287,
+  "generated_at": "2025-11-12T07:17:41.553827",
+  "total_jobs": 3080417,
   "total_fields": 43,
-  "file_size": "864MB",
-  "latest_job_date": "2025-11-11",
+  "file_size": "865MB",
+  "latest_job_date": "2025-11-12",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 201005,
-      "jobs_opened": 201005,
-      "jobs_closed": 197412,
-      "coverage": "Current through November 11, 2025"
+      "total_jobs": 201135,
+      "jobs_opened": 201135,
+      "jobs_closed": 197537,
+      "coverage": "Current through November 12, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0803\"}, {\"series\": \"0896\"}, {\"series\": \"0690\"}], [{\"series\": \"0150\"}, {\"series\": \"0401\"}, {\"series\": \"0819\"}, {\"series\": \"1301\"}, {\"series\": \"1350\"}], [{\"series\": \"1520\"}, {\"series\": \"0850\"}, {\"series\": \"0801\"}, {\"series\": \"0855\"}, {\"series\": \"1301\"}], [{\"series\": \"1515\"}, {\"series\": \"1550\"}, {\"series\": \"0854\"}] (4424 unique)",
+      "examples": "[{\"series\": \"0810\"}, {\"series\": \"1301\"}, {\"series\": \"0819\"}], [{\"series\": \"1301\"}, {\"series\": \"0101\"}, {\"series\": \"0401\"}, {\"series\": \"0810\"}], [{\"series\": \"0405\"}, {\"series\": \"0415\"}, {\"series\": \"1320\"}], [{\"series\": \"1550\"}, {\"series\": \"0854\"}, {\"series\": \"0801\"}, {\"series\": \"0830\"}, {\"series\": \"1310\"}, {\"series\": \"0855\"}, {\"series\": \"0850\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Navy\\Naval Supply Systems Command, Department of Health and Human Services\\Centers for Disease Control and Prevention, Department of Labor\\Office of Disability Employment Policy, Legislative Branch\\Government Publishing Office (542 unique)",
+      "examples": "Consumer Financial Protection Bureau, Department of Defense\\Office of Inspector General, Department of the Army\\U.S. Army North, General Services Administration\\Office of the Customer Experience (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "ML-12626999-25-AM, ERS-M24Y-12551835-NW, 24-FO-MP-12343496-JM, CAZM-12536674-24-AM (363810 unique)",
+      "examples": "R8-24-12537301-SJ-MP, 4V-AFPC-12593536-615260-KN, CBTE-12656715-25-LW, CASH-12311628-24-JP (363810 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363810
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "ICTAP Only, Intermittent, Permanent, Agency Employees Only (16 unique)",
+      "examples": "Multiple, Internships, Term, Presidential Management Fellows (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "NV33, IN05, SM02, CM54 (528 unique)",
+      "examples": "TRAI, GS32, AG30, UJ00 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Department of Defense Test Resource Management Center, Bureau of Ocean Energy Management, Office of the Deputy Secretary of Education, Defense Media Activity (502 unique)",
+      "examples": "Immediate Office of the Secretary of Education, U.S. Fish and Wildlife Service, Environmental Protection Agency, Bonneville Power Administration (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "SE, GG, FL, CF (122 unique)",
+      "examples": "DN, HU, SB, BT (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Court Services and Offender Supervision Agency for DC, Department of Energy, National Foundation on the Arts and the Humanities, Department of Education (26 unique)",
+      "examples": "Other Agencies and Independent Organizations, Department of the Army, National Foundation on the Arts and the Humanities, Department of Labor (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Region Nine, Mitigation Division, Planning & Implementation Branch, Center for New Media and Promotion, ATO, Western Service Center, Resource Mgmnt Group, Mgmnt and Admin Support Team, AJV-W640, USAG Fort Sill Personnel Control Facility (59972 unique)",
+      "examples": "U.S. Army Legal Services Agency, Office of the Soldier's Counsel (OSC), Fort Campbell, KY, CIRCUIT - MOOREFIELD,WV, Program Complaints Division, National Oceanic and Atmospheric Administration (NOAA), National Weather Service (NWS) (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-19T22:59:09.266948, 2025-09-20T12:30:19.943822, 2025-07-05T13:08:00.677658, 2025-07-05T13:59:26.181329 (367186 unique)",
+      "examples": "2025-07-05T14:04:05.224964, 2025-09-20T11:51:24.362337, 2025-07-05T13:02:09.564110, 2025-07-05T13:02:09.568958 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -237,7 +237,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-20T11:46:05.956104, 2025-09-20T11:37:32.385709, 2025-09-20T12:17:31.775935, 2025-09-20T12:30:19.954506 (367186 unique)",
+      "examples": "2025-09-20T11:40:47.447470, 2025-09-20T11:28:24.535311, 2025-09-20T12:32:20.488679, 2025-09-20T12:13:57.793726 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -245,7 +245,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "39, 42, 52, J (127 unique)",
+      "examples": "GL, 01, 14, IL (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -261,7 +261,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "EK, 22, 24, LK (125 unique)",
+      "examples": "IL, ES, 0, 29 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -277,7 +277,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "SL, TP, FS, WO (191 unique)",
+      "examples": "LL, DJ, WJ, EP (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -285,7 +285,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-08-11, 2024-04-13, 2024-02-08, 2024-07-11 (671 unique)",
+      "examples": "2025-11-17, 2025-06-12, 2024-12-24, 2025-03-18 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -293,7 +293,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-08-17, 2024-07-19, 2024-03-08, 2025-09-10 (596 unique)",
+      "examples": "2024-01-14, 2024-11-29, 2024-12-09, 2024-04-10 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -301,7 +301,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-08-07, 2024-12-22, 2024-11-21, 2024-02-14 (365 unique)",
+      "examples": "2024-04-06, 2024-07-01, 2024-10-08, 2024-03-14 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -317,7 +317,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Lead Human Resources Specialist (Information Systems), Financial Economist (Regulatory Economist), Exceptional Family Member Program Case Liaison, RETAIL ASSISTANT MANAGER NF3 (BRIDGEPORT) (77988 unique)",
+      "examples": "Material Examiner & Identifier, Nurse (DEPUTY DIRECTOR, CLINICAL QUALITY PROGRAM SPECIALIST), SUPERVISORY IT SPECIALIST (INFOSEC) (TITLE 32), SUPERVISORY JOINT OPERATIONS CENTER TECHNICIAN - TITLE 32 (77988 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77988
@@ -325,7 +325,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "31, 42, G, None (115 unique)",
+      "examples": "23, 29, 15, F (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -389,7 +389,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "49, 39, 23, 96 (157 unique)",
+      "examples": "130, 128, 318, 150 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
