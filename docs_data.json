@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-11-15T07:18:04.485284",
-  "total_jobs": 3082131,
+  "generated_at": "2025-11-16T07:17:17.489497",
+  "total_jobs": 3082140,
   "total_fields": 43,
   "file_size": "878MB",
-  "latest_job_date": "2025-11-15",
+  "latest_job_date": "2025-11-16",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 202849,
-      "jobs_opened": 202849,
-      "jobs_closed": 199100,
-      "coverage": "Current through November 15, 2025"
+      "total_jobs": 202858,
+      "jobs_opened": 202858,
+      "jobs_closed": 199107,
+      "coverage": "Current through November 16, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0854\"}, {\"series\": \"0830\"}, {\"series\": \"0801\"}, {\"series\": \"0850\"}, {\"series\": \"1520\"}, {\"series\": \"0855\"}, {\"series\": \"1550\"}], [{\"series\": \"1550\"}, {\"series\": \"1501\"}, {\"series\": \"0801\"}, {\"series\": \"1515\"}, {\"series\": \"1301\"}], [{\"series\": \"0303\"}], [{\"series\": \"1301\"}, {\"series\": \"0401\"}, {\"series\": \"1315\"}] (4424 unique)",
+      "examples": "[{\"series\": \"0193\"}], [{\"series\": \"5042\"}], [{\"series\": \"5419\"}], [{\"series\": \"0861\"}, {\"series\": \"0801\"}, {\"series\": \"0855\"}, {\"series\": \"0854\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Navy\\Chief of Naval Education and Training, National Gallery of Art, Department of Veterans Affairs\\Deputy Assistant Secretary for FMBTS, Department of the Treasury\\Treasury, Financial Crimes Enforcement Network (542 unique)",
+      "examples": "Department of the Army\\Army Installation Management Command, Department of Education\\Office of the General Counsel, Administrative Conference of the United States, Department of Agriculture\\Economic Research Service (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "CBTF-12197062-24-PB, EUJN249439542005, HHS-DAB-MP-24-12432065, CBTC-12409685-24-JML (363810 unique)",
+      "examples": "CBSW-12582195-25-MV, NCDE240001004004, O2NAFAV-24-12363409, CBSR-12327631-24-SB (363810 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363810
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Temporary, Intermittent, Recent graduates, Seasonal (16 unique)",
+      "examples": "Multiple, Temporary, Recent graduates, Temporary Promotion (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "AG13, DLMS, ARXC, DN03 (528 unique)",
+      "examples": "ARAS, DLOW, VABK, AG22 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Office of Budget and Program Analysis, Forest Service, Chief of Naval Education and Training, Office of the Secretary of Transportation (502 unique)",
+      "examples": "Defense Logistics Agency, Missile Defense Agency, Federal Maritime Commission, Federal Aviation Administration (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "LC, NM, VA, HB (122 unique)",
+      "examples": "CC, XP, MC, DN (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Other Agencies and Independent Organizations, Legislative Branch, National Foundation on the Arts and the Humanities, Court Services and Offender Supervision Agency for DC (26 unique)",
+      "examples": "Department of Education, Department of Justice, Department of Labor, Legislative Branch (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "DFAS-Civilian Pay Operations, FIELD OPERATIONS, DIRECTORATE OFFICE OF FIELD OPERATIONS, DISTRICT 21, Human Capital and Talent Management, 125th CMN FT, Jacksonville, FL (59972 unique)",
+      "examples": "Veterans Health Administration, Ambulatory Care Service(Home Base Primary Care), Veteran Benefits Office, New Jersey Regional Office, MWR Animal Kennels in Halawa, Honolulu Hawaii, United States Africa Command (US AFRICOM), J1 (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-19T23:01:37.128358, 2025-09-20T12:17:31.815440, 2025-07-05T12:59:13.245254, 2025-07-05T13:57:17.393955 (367186 unique)",
+      "examples": "2025-09-20T11:51:24.307802, 2025-09-20T11:55:10.875931, 2025-07-05T13:08:00.698736, 2025-09-20T12:21:27.966147 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -237,7 +237,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-07-05T13:50:17.191120, 2025-09-20T12:08:55.201425, 2025-09-20T11:32:13.160245, 2025-09-20T12:08:55.266370 (367186 unique)",
+      "examples": "2025-09-20T12:21:27.939689, 2025-07-05T13:02:09.588761, 2025-09-20T11:33:50.053996, 2025-09-20T11:33:50.076266 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -245,7 +245,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "HL, 72, 28, 20 (127 unique)",
+      "examples": "JL, JJ, 14, 53 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -261,7 +261,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "JL, 10, 24, LI (125 unique)",
+      "examples": "GJ, E, 02, LJ (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -277,7 +277,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "WB, MA, ES, CP (191 unique)",
+      "examples": "CP, VH, WM, AT (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -285,7 +285,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-10-23, 2024-12-25, 2024-12-28, 2025-10-16 (671 unique)",
+      "examples": "2025-12-02, 2024-12-08, 2024-05-26, 2024-11-12 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -293,7 +293,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-04-24, 2024-02-16, 2025-01-14, 2025-05-07 (596 unique)",
+      "examples": "2024-09-25, 2025-02-12, 2025-02-25, 2024-07-17 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -301,7 +301,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-06-20, 2024-03-12, 2024-07-17, 2024-11-26 (365 unique)",
+      "examples": "2024-09-01, 2024-10-06, 2024-11-16, 2024-03-30 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -317,7 +317,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Hearing Examiner, Deputy Executive Director for Appellate Operations, Registered Nurse - Women's Health PACT, CYP CHILD AND YOUTH PROGRAM ASSISTANT- FLEX ((MULTILEVEL) (77988 unique)",
+      "examples": "HEALTH TECHNICIAN (TELEHEALTH, Transitional Teacher (Special Education-Elementary), Continuity and Protection Plans Manager, Auto Mechanic (77988 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77988
@@ -325,7 +325,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "14, no, 0, 22 (115 unique)",
+      "examples": "81, Note, 90090, 41 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -389,7 +389,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "47, 28, 65, 125 (157 unique)",
+      "examples": "118, 05, 275, 00 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
