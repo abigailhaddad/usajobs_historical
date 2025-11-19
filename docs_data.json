@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-11-18T07:18:05.911364",
-  "total_jobs": 3082987,
+  "generated_at": "2025-11-19T07:29:57.290763",
+  "total_jobs": 3083655,
   "total_fields": 43,
-  "file_size": "885MB",
-  "latest_job_date": "2025-11-18",
+  "file_size": "890MB",
+  "latest_job_date": "2025-11-19",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 203705,
-      "jobs_opened": 203705,
-      "jobs_closed": 199896,
-      "coverage": "Current through November 18, 2025"
+      "total_jobs": 204373,
+      "jobs_opened": 204373,
+      "jobs_closed": 200510,
+      "coverage": "Current through November 19, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"3602\"}], [{\"series\": \"2185\"}], [{\"series\": \"0801\"}, {\"series\": \"0850\"}, {\"series\": \"0808\"}, {\"series\": \"0810\"}, {\"series\": \"0830\"}, {\"series\": \"0819\"}], [{\"series\": \"0810\"}, {\"series\": \"0855\"}, {\"series\": \"0830\"}, {\"series\": \"0801\"}, {\"series\": \"0850\"}] (4424 unique)",
+      "examples": "[{\"series\": \"0801\"}, {\"series\": \"1301\"}, {\"series\": \"1515\"}, {\"series\": \"1550\"}], [{\"series\": \"0819\"}, {\"series\": \"0808\"}, {\"series\": \"0020\"}, {\"series\": \"0150\"}, {\"series\": \"0401\"}, {\"series\": \"0810\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}], [{\"series\": \"1520\"}, {\"series\": \"0801\"}, {\"series\": \"1301\"}], [{\"series\": \"0855\"}, {\"series\": \"0801\"}, {\"series\": \"0850\"}, {\"series\": \"0830\"}, {\"series\": \"0871\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Federal Mediation and Conciliation Service, National Credit Union Administration, Department of Education\\National Assessment Governing Board, Federal Maritime Commission (542 unique)",
+      "examples": "Department of Agriculture\\Office of the Chief Information Officer, General Services Administration\\GSA, Office of Mission Assurance, Office of Inspector General, Department of Veterans Affairs\\Office of Enterprise Operations (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "ST-12430061-24-MLV, HSM1240547342397HM, HHS-CDC-DMI-DH-24-12290585, CERD245387142552 (363810 unique)",
+      "examples": "TMCO - HRMS-24-12334860-MP, 325-24-KB-12530834-NBU, EL-733-24-12463599-DH, SDDE244249054609 (363810 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363810
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Presidential Management Fellows, Summer, Temporary Promotion, Permanent (16 unique)",
+      "examples": "Summer, Temporary Promotion, Telework, Intermittent (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "VABG, ARE3, HUKK, DD10 (528 unique)",
+      "examples": "CM63, NF00, AR2A, HUJJ (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Commodity Futures Trading Commission, GSA, Office of Mission Assurance, Marine Mammal Commission, Office of Enterprise Integration (502 unique)",
+      "examples": "Office of the Chief Procurement Officer, National Endowment for the Arts, Office of Congressional Workplace Rights, Assistant Secretary for Public Affairs (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "LF, VA, TV, AB (122 unique)",
+      "examples": "LP, RO, SK, NM (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Transportation, Other Agencies and Independent Organizations, Department of Labor, General Services Administration (26 unique)",
+      "examples": "Judicial Branch, Executive Office of the President, Department of Transportation, General Services Administration (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "IT DIR OFFICE, IT ENTERPRISE SERVICES, TECHNICAL SUPPORT, WEB SERVICES, ZTADC, G4 (DCSLOG), SMMO, CAMP BLANDING, FL, Joint Systems Manufacturing Center - Lima, USA RIA JOINT MFG & TECHNOLOGY CENTER (JMTC) - RECOIL BRANCH (59972 unique)",
+      "examples": "Financial Services Center; Chief Management Officer, Medical Readiness Command, Pacific, Materiel Systems Organization Acquisition and Industrial Base Directorate (AIBD), Logistics Center Sourcing Directorate (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-20T12:34:34.252187, 2025-09-20T11:33:50.038115, 2025-09-20T11:44:06.409310, 2025-09-20T11:44:06.431287 (367186 unique)",
+      "examples": "2025-07-05T13:55:05.426995, 2025-07-05T14:04:05.197729, 2025-07-05T13:08:00.747523, 2025-07-05T14:04:05.190082 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -237,7 +237,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-20T12:32:20.428640, 2025-09-20T12:07:01.888632, 2025-07-05T13:45:23.257881, 2025-09-20T11:53:10.081014 (367186 unique)",
+      "examples": "2025-09-20T11:40:47.477231, 2025-07-05T12:59:13.262901, 2025-09-20T12:00:40.207916, 2025-09-20T12:21:27.944345 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -245,7 +245,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "10, 53, 34, 27 (127 unique)",
+      "examples": "D, IH, 13, 5 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -261,7 +261,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "43, 52, 06, 27 (125 unique)",
+      "examples": "E, 08, JL, H (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -277,7 +277,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "KA, CX, NB, ZP (191 unique)",
+      "examples": "FV, DC, LE, KX (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -285,7 +285,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-04-06, 2025-08-15, 2025-07-30, 2024-09-17 (671 unique)",
+      "examples": "2024-11-05, 2024-10-02, 2024-06-23, 2025-05-24 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -293,7 +293,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-09-05, 2024-11-26, 2025-06-18, 2024-05-07 (596 unique)",
+      "examples": "2024-12-08, 2023-10-16, 2025-09-18, 2025-06-05 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -301,7 +301,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-01-30, 2024-05-29, 2024-03-07, 2024-08-20 (365 unique)",
+      "examples": "2024-08-16, 2024-05-30, 2024-12-19, 2024-07-26 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -317,7 +317,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Medical Technologist - Core Laboratory, SUPERVISORY OPERATIONS PLANNING SPECIALIST (INSTRUCTOR), Nursing Assistant (Phlebotomy), Supervisory Program & Management Analyst (77988 unique)",
+      "examples": "Health System Specialist (Family Member Travel Screening Exceptional Family Member Program), TOOL ROOM MECHANIC LEADER, SCIENCE AND TECHNOLOGY ENGAGEMENT SPECIALIST (CCMD), Civil Engineer (Hydraulics) - Cloud Application Development Expert (77988 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77988
@@ -325,7 +325,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "9, no, PB3, Yes (115 unique)",
+      "examples": "03, DISL, GS14, 06 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -389,7 +389,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "125, 35, 50, 0 (157 unique)",
+      "examples": "45, 300, 38, 003 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
