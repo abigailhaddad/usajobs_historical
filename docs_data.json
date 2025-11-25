@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-11-24T07:19:42.673454",
-  "total_jobs": 3085884,
+  "generated_at": "2025-11-25T07:20:03.255723",
+  "total_jobs": 3086563,
   "total_fields": 43,
-  "file_size": "907MB",
-  "latest_job_date": "2025-11-24",
+  "file_size": "913MB",
+  "latest_job_date": "2025-11-25",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 206602,
-      "jobs_opened": 206602,
-      "jobs_closed": 202597,
-      "coverage": "Current through November 24, 2025"
+      "total_jobs": 207281,
+      "jobs_opened": 207281,
+      "jobs_closed": 203217,
+      "coverage": "Current through November 25, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1320\"}, {\"series\": \"0893\"}, {\"series\": \"0415\"}, {\"series\": \"0401\"}, {\"series\": \"1301\"}], [{\"series\": \"0807\"}, {\"series\": \"0810\"}, {\"series\": \"0808\"}, {\"series\": \"0801\"}, {\"series\": \"0401\"}, {\"series\": \"0850\"}, {\"series\": \"0486\"}, {\"series\": \"0830\"}, {\"series\": \"0460\"}], [{\"series\": \"0644\"}], [{\"series\": \"0803\"}] (4424 unique)",
+      "examples": "[{\"series\": \"5317\"}], [{\"series\": \"1015\"}, {\"series\": \"0193\"}, {\"series\": \"0170\"}], [{\"series\": \"0184\"}, {\"series\": \"1530\"}, {\"series\": \"0180\"}], [{\"series\": \"0801\"}, {\"series\": \"0830\"}, {\"series\": \"0850\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Air Force\\Air Force Materiel Command, Department of the Army\\United States Army Futures Command, Department of Labor\\Office of Public Affairs, Department of Agriculture\\National Agricultural Statistics Service (542 unique)",
+      "examples": "Federal Trade Commission, Department of the Navy\\Naval Systems Management Activity, Executive Office of the President\\Office of the U.S. Trade Representative, Department of the Army\\Joint Activities (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "OCA-CBSY-12324397-FY24-CLM, JP-24-136, FSA-24-12271692-MP-HI-MC, HSJA242958898181HW (363810 unique)",
+      "examples": "CERD244357571217, 101 - HCS -12270420-24-KJ, 24-12349381K-WIX-0501-12, NCDE240073465947 (363810 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363810
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Summer, Telework, Seasonal, Permanent (16 unique)",
+      "examples": "Temporary, Intermittent, Temporary promotion, Multiple (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "IB00, NV15, HE36, ARSE (528 unique)",
+      "examples": "AF6T, PJ00, EDEZ, CC00 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Drug Enforcement Administration, Army Tank-Automotive and Armament Command (TACOM), Office of Labor-Management Standards, Air Force Manpower Analysis Agency (502 unique)",
+      "examples": "Office of the U.S. Trade Representative, Pension Benefit Guaranty Corporation, Office of the Assistant Secretary for Policy, Administrative Office of the U.S. Courts (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "5L, NP, LA, PU (122 unique)",
+      "examples": "RF, ST, SK, MA (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Transportation, Executive Office of the President, Department of Energy, Department of the Army (26 unique)",
+      "examples": "Department of Housing and Urban Development, Other Agencies and Independent Organizations, Department of Defense, Department of Veterans Affairs (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "NAF - 49th FSS Marketing Department, Western Regional Office, 21st Theater Sustainment Command (TSC) HHC Command Group, Chief of Staff Support Operations, Government Contracting & Business Development - HQ (59972 unique)",
+      "examples": "Directorate of Production Management, 51V2, Environment and Natural Resources Division - Office of Litigation Support, NATIONAL MUSEUM of the UNITED STATES NAVY., U.S. Navy Program Executive Officer (PEO) for Unmanned and Small Combatants (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-19T22:59:09.232082, 2025-07-05T13:02:09.585230, 2025-09-20T11:42:34.284049, 2025-09-20T11:53:10.041025 (367186 unique)",
+      "examples": "2025-09-20T12:00:40.212065, 2025-09-20T11:39:03.881424, 2025-09-20T11:47:38.292955, 2025-07-05T14:04:05.177832 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -237,7 +237,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-19T23:01:37.148216, 2025-07-05T13:02:09.590274, 2025-07-05T13:45:23.231494, 2025-09-20T11:33:50.092401 (367186 unique)",
+      "examples": "2025-07-05T13:50:17.156414, 2025-09-20T11:46:05.941103, 2025-07-05T13:08:00.693778, 2025-07-05T13:55:05.404138 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -245,7 +245,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "38, M, FJ, B (127 unique)",
+      "examples": "ES, 19, G, 29 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -261,7 +261,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "17, HL, H, 16 (125 unique)",
+      "examples": "40, 02, DJ, 51 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -277,7 +277,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "TE, NM, GS, KO (191 unique)",
+      "examples": "NT, FE, PA, WL (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -285,7 +285,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-12-23, 2024-01-17, 2025-03-05, 2025-07-25 (671 unique)",
+      "examples": "2024-03-01, 2024-07-18, 2025-07-18, 2024-02-04 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -293,7 +293,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-04-08, 2025-01-09, 2025-02-08, 2024-09-20 (596 unique)",
+      "examples": "2025-03-12, 2024-07-02, 2024-06-04, 2025-07-02 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -301,7 +301,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-06-19, 2024-02-07, 2024-08-11, 2024-03-06 (365 unique)",
+      "examples": "2024-09-13, 2024-12-19, 2024-10-08, 2024-08-06 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -317,7 +317,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "INFORMATION TECHNOLOGY (IT) PROJECT MANAGER (SYSTEMS ANALYSIS), CRANE OPERATIONS MANAGER, WRITER EDITOR, LEAD CIVIL ENGINEER (HYDRAULICS) (77988 unique)",
+      "examples": "Social Worker (Local Recovery Program Coordinator), Tools and Equipment Repairer, Program Manager Temporary NTE 1 year, MBE up to 5 years, MBP, Supervisory Investigative Analyst (Supervisory Criminal Analyst) (77988 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77988
@@ -325,7 +325,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "ES, 98, CM, 40 (115 unique)",
+      "examples": "H, 4, FG12, na (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -389,7 +389,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "21, 184, 1806, 346 (157 unique)",
+      "examples": "561, 7, 96, 30 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
