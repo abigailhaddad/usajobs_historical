@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-12-10T07:28:09.393836",
-  "total_jobs": 3093196,
+  "generated_at": "2025-12-11T07:20:30.491417",
+  "total_jobs": 3093882,
   "total_fields": 43,
-  "file_size": "965MB",
-  "latest_job_date": "2025-12-10",
+  "file_size": "970MB",
+  "latest_job_date": "2025-12-11",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 213914,
-      "jobs_opened": 213914,
-      "jobs_closed": 209175,
-      "coverage": "Current through December 10, 2025"
+      "total_jobs": 214600,
+      "jobs_opened": 214600,
+      "jobs_closed": 209748,
+      "coverage": "Current through December 11, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1630\"}], [{\"series\": \"0962\"}, {\"series\": \"0592\"}], [{\"series\": \"0801\"}, {\"series\": \"0830\"}, {\"series\": \"0810\"}, {\"series\": \"0850\"}, {\"series\": \"0896\"}, {\"series\": \"0808\"}], [{\"series\": \"1130\"}] (4424 unique)",
+      "examples": "[{\"series\": \"0020\"}, {\"series\": \"0810\"}, {\"series\": \"0896\"}, {\"series\": \"0801\"}, {\"series\": \"0808\"}], [{\"series\": \"1310\"}, {\"series\": \"1520\"}, {\"series\": \"1515\"}, {\"series\": \"0855\"}, {\"series\": \"0801\"}], [{\"series\": \"0855\"}, {\"series\": \"1550\"}, {\"series\": \"1515\"}], [{\"series\": \"1550\"}, {\"series\": \"1515\"}, {\"series\": \"1310\"}, {\"series\": \"1520\"}, {\"series\": \"0801\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of Veterans Affairs\\Vet Customer Experience (VCE), Legislative Branch\\Architect of the Capitol, Department of Education\\Office of the Under Secretary, Department of the Air Force\\Air Force Personnel Center (542 unique)",
+      "examples": "Department of Veterans Affairs\\Board of Veterans' Appeals, Woodrow Wilson International Center for Scholars, Department of the Navy\\Commander, Navy Installations, Department of the Treasury\\Bureau of Engraving and Printing (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "ST-12585949-25-BLF, BOR-LCB-24-DE-12460819-JRS, MDA-24-12536879-DH, CERH247436780880HWR (363810 unique)",
+      "examples": "ELRRPTLABORERNA0212614554, 12580696-ZNY-IMP-24, JOA-FL-12353392-AR-24-345, NY-12436113-AR-24-376 (363810 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363810
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Intermittent, Temporary Promotion, Detail, ICTAP Only (16 unique)",
+      "examples": "Summer, Term, Temporary promotion, Agency Employees Only (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -189,7 +189,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "NV24, VAEB, ARAE, ARCE (528 unique)",
+      "examples": "VALA, AF2Z, AF6K, EDEA (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Office of Partnerships and Public Engagement, U.S. Army Sustainment Command, National Geospatial-Intelligence Agency, Naval Systems Management Activity (502 unique)",
+      "examples": "Immediate Office of the Assistant Secretary for Information and Technology, U.S. Postal Service, Office of the Secretary of the Interior, Naval Medical Command (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "FW, FD, BT, GW (122 unique)",
+      "examples": "TD, HP, AB, NM (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Veterans Affairs, Department of Commerce, Department of Defense, Department of the Navy (26 unique)",
+      "examples": "Department of Agriculture, Department of the Navy, Department of Defense, General Services Administration (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "San Simon School, (NOT A TELELWORK/REMOTE POSITION), CNRNW NAVAL BASE KITSAP N91 - Fleet and Family Readiness, MATERIAL SYSTEMS ORGANIZATION SECURITY ASSISTANCE MANAGEMENT DIR, Office of the Chief Financial Officer, Governance and Policy, Internal Audit and Compliance (A8510) (59972 unique)",
+      "examples": "National Weather Service (NWS), Alaska Region (AR), Weather Service Office (WSO)., US Army Garrison Bavaria, Directorate of Human Resources, Military Personnel Division (Hohenfels), G6-JFHQ, Johnston, Iowa, NCIPC-OD-ODD-OFFICE OF SCIENCE (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -229,7 +229,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-20T12:07:01.876876, 2025-07-05T13:50:17.176646, 2025-09-20T12:19:27.074851, 2025-07-05T14:04:05.177587 (367186 unique)",
+      "examples": "2025-07-05T13:55:05.458471, 2025-07-05T13:52:56.641064, 2025-09-20T11:58:45.371199, 2025-09-20T12:00:40.177608 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -237,7 +237,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-20T12:36:50.131845, 2025-09-20T11:42:34.334697, 2025-07-05T13:52:56.596029, 2025-09-20T12:03:23.679097 (367186 unique)",
+      "examples": "2025-09-20T11:49:34.600865, 2025-09-20T12:36:50.078839, 2025-09-20T11:58:45.391731, 2025-07-05T13:55:05.433725 (367186 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367186
@@ -245,7 +245,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "DJ, GI, FL, CM (127 unique)",
+      "examples": "SL, 07, HK, LH (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -261,7 +261,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "38, HK, HL, 45 (125 unique)",
+      "examples": "GL, LH, 61, 53 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -277,7 +277,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "NR, KE, DO, WS (191 unique)",
+      "examples": "SW, DB, SY, NV (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -285,7 +285,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-07-31, 2024-11-19, 2025-03-09, 2024-10-30 (671 unique)",
+      "examples": "2025-02-10, 2025-05-23, 2025-12-15, 2025-09-30 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -293,7 +293,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2023-09-21, 2023-10-26, 2025-03-11, 2024-11-09 (596 unique)",
+      "examples": "2024-08-22, 2023-07-12, 2024-12-19, 2025-06-16 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -301,7 +301,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-12-24, 2024-03-13, 2024-06-06, 2024-11-13 (365 unique)",
+      "examples": "2024-04-20, 2024-09-14, 2024-11-08, 2024-07-17 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -317,7 +317,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Outdoor Recreation Planner (Partnerships), Supervisory Facilities Operations Specialist, NIM-WHT Deputy Director for Homeland and Polar Programs, PROGRAM ANALYST (Assessment, Monitoring & Evaluation) (77988 unique)",
+      "examples": "Senior Business Analyst, Transportation Assistant (Teller), Engineering Equipment Operator (Open Until Filled), STUDENT TRAINEE (HUMAN RESOURCES MANAGEMENT) (77988 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77988
@@ -325,7 +325,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "72, 9, 22, 16 (115 unique)",
+      "examples": "J, 20, 39, XX (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -389,7 +389,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "80, 34, 103, 76 (157 unique)",
+      "examples": "47, 800, FEW, 58 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
