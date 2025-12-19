@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Methodology - USAJobs Listings Tracker</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #003366;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #003366;
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #003366;
+        }
+
+        h3 {
+            color: #004488;
+            font-weight: 600;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        h4 {
+            color: #555;
+            font-weight: 600;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+        .back-link {
+            margin-bottom: 20px;
+        }
+
+        .back-link a {
+            color: #003366;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .content-card {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #003366;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .api-detail {
+            background-color: #f8f9fa;
+            border-left: 4px solid #003366;
+            padding: 15px 20px;
+            margin: 15px 0;
+        }
+
+        .api-detail strong {
+            color: #003366;
+        }
+
+        .highlight-row {
+            background-color: #fff3cd !important;
+            font-weight: 600;
+        }
+
+        a {
+            color: #0066cc;
+        }
+
+        .last-updated {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="back-link">
+            <a href="/">&larr; Back to Tracker</a>
+        </div>
+
+        <div class="content-card">
+            <h1>Methodology</h1>
+            <p class="last-updated">Last updated: December 2024</p>
+
+            <h2>Overview</h2>
+            <p>
+                This tracker collects federal job listing data from the official USAJobs APIs maintained by the
+                U.S. Office of Personnel Management. Data is collected daily and stored in a public repository
+                for transparency and reproducibility.
+            </p>
+            <p>
+                <strong>Repository:</strong> <a href="https://github.com/abigailhaddad/usajobs_historical" target="_blank">github.com/abigailhaddad/usajobs_historical</a>
+            </p>
+
+            <h2>Data Sources</h2>
+            <p>We collect from two complementary APIs:</p>
+
+            <h3>Historical Jobs API</h3>
+            <div class="api-detail">
+                <strong>Endpoint:</strong> <code>https://data.usajobs.gov/api/historicjoa</code><br>
+                <strong>Documentation:</strong> <a href="https://developer.usajobs.gov/API-Reference/GET-api-historicjoa" target="_blank">developer.usajobs.gov/API-Reference/GET-api-historicjoa</a><br>
+                <strong>Authentication:</strong> None required<br>
+                <strong>What it returns:</strong> Job postings from the past (open or closed)<br>
+                <strong>Our approach:</strong> Query one day at a time using <code>StartPositionOpenDate</code> and <code>EndPositionOpenDate</code> set to the same date<br>
+                <strong>Code:</strong> <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_data.py" target="_blank"><code>scripts/collect_data.py</code></a>
+            </div>
+
+            <h3>Current Jobs API</h3>
+            <div class="api-detail">
+                <strong>Endpoint:</strong> <code>https://data.usajobs.gov/api/Search</code><br>
+                <strong>Documentation:</strong> <a href="https://developer.usajobs.gov/API-Reference/GET-api-Search" target="_blank">developer.usajobs.gov/API-Reference/GET-api-Search</a><br>
+                <strong>Authentication:</strong> Requires API key (free from USAJobs)<br>
+                <strong>What it returns:</strong> Jobs currently open for applications<br>
+                <strong>Our approach:</strong> Query each occupational series separately (there are ~350) to work around the 10,000 result limit per query<br>
+                <strong>Code:</strong> <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_current_data.py" target="_blank"><code>scripts/collect_current_data.py</code></a>
+            </div>
+
+            <h2>Collection Schedule</h2>
+            <p>
+                Data is collected <strong>daily</strong> via GitHub Actions. Each run:
+            </p>
+            <ol>
+                <li>Queries the historical API for any new days since the last collection</li>
+                <li>Queries the current API to capture all currently-open positions</li>
+            </ol>
+            <p>
+                <strong>Code:</strong> <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/update/update_all.py" target="_blank"><code>update/update_all.py</code></a>
+            </p>
+
+            <h2>Deduplication</h2>
+            <p>
+                Each job posting has a unique identifier (<code>usajobsControlNumber</code>). When we collect data:
+            </p>
+            <ul>
+                <li><strong>New jobs</strong> are added to the dataset</li>
+                <li><strong>Existing jobs</strong> are updated with the latest information</li>
+                <li><strong>Jobs are never deleted</strong> from our historical record</li>
+            </ul>
+            <p>
+                Because both APIs capture the same jobs at different points in their lifecycle, there's built-in
+                redundancy: if we miss a job from one API on a given day, we'll likely catch it from the other.
+                Deduplication by control number ensures we don't double-count.
+            </p>
+
+            <h2>Appointment Types</h2>
+            <p>
+                Appointment type indicates whether a position is permanent, temporary, an internship, etc.
+            </p>
+
+            <h3>How We Get Appointment Types</h3>
+            <p>
+                The Current Jobs API returns numeric codes (e.g., <code>15328</code>). We translate these to
+                human-readable names by querying the official codelist:
+            </p>
+            <div class="api-detail">
+                <strong>Codelist endpoint:</strong> <code>https://data.usajobs.gov/api/codelist/positionofferingtypes</code><br>
+                <strong>Code:</strong> See <code>fetch_position_offering_types()</code> in <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/collect_current_data.py#L210" target="_blank"><code>scripts/collect_current_data.py</code></a>
+            </div>
+            <p>
+                The Historical Jobs API returns appointment types as text strings directly.
+            </p>
+
+            <h3>Appointment Type Values</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>15317</td>
+                        <td>Permanent</td>
+                        <td>Ongoing position with no set end date</td>
+                    </tr>
+                    <tr>
+                        <td>15318</td>
+                        <td>Temporary</td>
+                        <td>Short-term position, usually under 1 year</td>
+                    </tr>
+                    <tr>
+                        <td>15319</td>
+                        <td>Term</td>
+                        <td>Time-limited position, typically 1-4 years</td>
+                    </tr>
+                    <tr>
+                        <td>15322</td>
+                        <td>Seasonal</td>
+                        <td>Recurring position tied to a particular season</td>
+                    </tr>
+                    <tr>
+                        <td>15327</td>
+                        <td>Multiple</td>
+                        <td>Posting includes multiple appointment types</td>
+                    </tr>
+                    <tr class="highlight-row">
+                        <td>15328</td>
+                        <td>Internships</td>
+                        <td>Student internship positions</td>
+                    </tr>
+                    <tr>
+                        <td>15326</td>
+                        <td>Recent Graduates</td>
+                        <td>Pathways Recent Graduates program</td>
+                    </tr>
+                    <tr>
+                        <td>15522</td>
+                        <td>Intermittent</td>
+                        <td>Positions with irregular, as-needed schedules</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>To count internships:</strong> We filter for jobs where <code>appointmentType</code> equals
+                <code>"Internships"</code> (or code <code>15328</code> in raw current API data).
+            </p>
+
+            <h2>Filling Data Gaps</h2>
+            <p>
+                Job postings include both an agency name (<code>hiringAgencyName</code>) and a department name
+                (<code>hiringDepartmentName</code>), but occasionally one field is missing. When this happens:
+            </p>
+            <ul>
+                <li><strong>Missing department:</strong> Look up from the agency name using a mapping built from the data</li>
+                <li><strong>Missing agency name:</strong> Look up from the agency code</li>
+            </ul>
+            <p>
+                These mappings are generated automatically by analyzing which agency/department pairs appear
+                together most frequently across all job postings.
+            </p>
+            <p>
+                <strong>Code:</strong> <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/tracking/generate_agency_mappings.py" target="_blank"><code>tracking/generate_agency_mappings.py</code></a>
+            </p>
+
+            <h2>Data Storage</h2>
+            <p>
+                All data is stored in Apache Parquet format, grouped by year based on <code>positionOpenDate</code>.
+                The complete dataset is available in the repository under <a href="https://github.com/abigailhaddad/usajobs_historical/tree/main/data" target="_blank"><code>data/</code></a>.
+            </p>
+
+            <h2>Reproducing This Analysis</h2>
+            <pre><code># Clone the repository
+git clone https://github.com/abigailhaddad/usajobs_historical
+
+# Install dependencies
+pip install -r requirements.txt
+
+# See README for collection script details
+# Summary generation:
+python tracking/generate_jobs_summary_dynamic.py</code></pre>
+
+            <h2>Contact</h2>
+            <p>
+                Questions about methodology? Open an issue on <a href="https://github.com/abigailhaddad/usajobs_historical/issues" target="_blank">GitHub</a>.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
