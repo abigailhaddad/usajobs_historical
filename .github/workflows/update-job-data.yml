@@ -15,8 +15,20 @@ jobs:
   update-data:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    
+
     steps:
+    - name: Check if tracker is archived
+      run: |
+        # Stop running after December 31, 2025
+        ARCHIVE_DATE="2025-12-31"
+        CURRENT_DATE=$(date +%Y-%m-%d)
+        if [[ "$CURRENT_DATE" > "$ARCHIVE_DATE" ]]; then
+          echo "❌ Tracker archived as of $ARCHIVE_DATE. Skipping data collection."
+          echo "To disable this workflow, go to Actions -> Update Job Data Weekly -> ... -> Disable workflow"
+          exit 0
+        fi
+        echo "✅ Current date ($CURRENT_DATE) is before archive date ($ARCHIVE_DATE). Proceeding."
+
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
