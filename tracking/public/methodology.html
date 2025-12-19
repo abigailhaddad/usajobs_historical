@@ -182,9 +182,13 @@
                 Data is collected <strong>daily</strong> via GitHub Actions. Each run:
             </p>
             <ol>
-                <li>Queries the historical API for any new days since the last collection</li>
+                <li>Queries the historical API for the <strong>current day plus the previous 2 days</strong> (3-day overlap for redundancy)</li>
                 <li>Queries the current API to capture all currently-open positions</li>
             </ol>
+            <p>
+                The 3-day overlap ensures that if a job is missed on one day, it will be caught on subsequent runs.
+                Combined with the current API as a backup, each job has multiple opportunities to be captured.
+            </p>
             <p>
                 <strong>Code:</strong> <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/update/update_all.py" target="_blank"><code>update/update_all.py</code></a>
             </p>
