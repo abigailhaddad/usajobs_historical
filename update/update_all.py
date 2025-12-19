@@ -420,14 +420,20 @@ def main():
     # Calculate date range to collect
     today = datetime.now()
     today_str = today.strftime('%Y-%m-%d')
-    
-    # Start from last collection date (include overlap to ensure no gaps)
+
+    # Always fetch today + previous 2 days for redundancy
+    # This ensures we catch any jobs that might have been missed
+    two_days_ago = (today - timedelta(days=2)).strftime('%Y-%m-%d')
+
+    # Start from whichever is earlier: last collection date or 2 days ago
     if last_date:
-        start_date = last_date.strftime('%Y-%m-%d')  # Include the last day
+        last_date_start = last_date.strftime('%Y-%m-%d')
+        # Use the earlier of the two dates
+        start_date = min(last_date_start, two_days_ago)
     else:
-        start_date = last_date_str
-    
-    print(f"   Will collect: {start_date} to {today_str}")
+        start_date = two_days_ago
+
+    print(f"   Will collect: {start_date} to {today_str} (always includes last 3 days for redundancy)")
     print("\\n" + "=" * 50)
     
     # Initialize collection statistics
