@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-12-20T07:18:31.847667",
-  "total_jobs": 3110563,
+  "generated_at": "2025-12-21T07:19:09.414458",
+  "total_jobs": 3110570,
   "total_fields": 44,
   "file_size": "1010MB",
-  "latest_job_date": "2025-12-20",
+  "latest_job_date": "2025-12-21",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 231277,
-      "jobs_opened": 231277,
-      "jobs_closed": 224022,
-      "coverage": "Current through December 20, 2025"
+      "total_jobs": 231284,
+      "jobs_opened": 231284,
+      "jobs_closed": 224023,
+      "coverage": "Current through December 21, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0430\"}, {\"series\": \"0401\"}, {\"series\": \"0408\"}], [{\"series\": \"0850\"}, {\"series\": \"0855\"}, {\"series\": \"0810\"}], [{\"series\": \"0110\"}, {\"series\": \"1560\"}], [{\"series\": \"0854\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"1520\"}, {\"series\": \"0855\"}, {\"series\": \"1310\"}, {\"series\": \"1550\"}, {\"series\": \"1320\"}] (4424 unique)",
+      "examples": "[{\"series\": \"1301\"}, {\"series\": \"0020\"}, {\"series\": \"0819\"}, {\"series\": \"0401\"}, {\"series\": \"0801\"}], [{\"series\": \"0401\"}, {\"series\": \"1301\"}, {\"series\": \"0808\"}, {\"series\": \"0810\"}, {\"series\": \"0819\"}], [{\"series\": \"0603\"}, {\"series\": \"0670\"}, {\"series\": \"0610\"}, {\"series\": \"0685\"}], [{\"series\": \"0830\"}, {\"series\": \"0871\"}, {\"series\": \"0801\"}, {\"series\": \"1310\"}, {\"series\": \"0850\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "U.S. International Trade Commission, Department of Agriculture\\Civil Rights, Department of the Treasury\\Office of the Comptroller of the Currency, Department of Homeland Security\\Customs and Border Protection (542 unique)",
+      "examples": "Department of the Army\\U.S. Army Reserve Command, Department of Defense\\Defense Threat Reduction Agency, Department of Health and Human Services\\Agency for Toxic Substances and Disease Registry, Department of Housing and Urban Development\\Assistant Secretary for Housing-Federal Housing Commissioner (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "OMAO-25-12622250-ST, ST-12409412-24-KMB, PA-12295585-AR-24-045, 24-JE-00018-12537394-DE (363814 unique)",
+      "examples": "CERI248372077930HS, NTIA-OSM-ST-24-12459876, CBTD-12325352-24-MV, O5NAFJJ-24-12623213 (363814 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363814
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Recent graduates, Summer, ICTAP Only, Presidential Management Fellows (16 unique)",
+      "examples": "Detail, Term, Summer, ICTAP Only (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "AF1M, DD80, NV41, HUFF (528 unique)",
+      "examples": "AF0R, HP00, NP00, ARX6 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Field Operating Offices of the Office of the Secretary of the Army, Institute of Education Sciences, Office of National Drug Control Policy, Federal Energy Regulatory Commission (502 unique)",
+      "examples": "Washington Headquarters Services, U.S. Army, Pacific, Air Force Operational Test and Evaluation Center, Homeland Security Staff (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "FI, NV, DN, FJ (122 unique)",
+      "examples": "TC, SB, 5L, SS (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Court Services and Offender Supervision Agency for DC, Department of the Army, Department of Commerce, Executive Office of the President (26 unique)",
+      "examples": "Department of Homeland Security, Department of the Navy, Judicial Branch, Department of Transportation (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -229,7 +229,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Western Region Human Resources-Portland Area, Colville Service Unit Pharmacy Department., S1P, DCBFM / Office of Facilities and Logistics Management (OFLM), Army Aviation Support Facility (59972 unique)",
+      "examples": "JFHQ-G1, ATO, Western Service Area (North), Seattle District, Seattle ARTCC, TWSE1-ZSE, CNRMA Naval Air Station Oceana & Dam Neck Annex N926, HUTCHINSON AREA OFFICE (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -237,7 +237,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-20T12:15:51.659398, 2025-09-20T11:37:32.347581, 2025-09-20T12:28:37.518155, 2025-07-05T13:05:06.375959 (367190 unique)",
+      "examples": "2025-07-05T13:45:23.217266, 2025-09-19T23:01:37.118397, 2025-09-20T12:19:27.108214, 2025-09-20T11:44:06.397994 (367190 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367190
@@ -245,7 +245,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-19T22:59:09.211768, 2025-09-20T12:38:44.582353, 2025-09-20T11:49:34.600995, 2025-09-20T12:21:27.918777 (367190 unique)",
+      "examples": "2025-09-20T11:44:06.388015, 2025-09-20T12:03:23.721092, 2025-07-05T13:02:09.584088, 2025-07-05T14:01:38.980866 (367190 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367190
@@ -253,7 +253,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "F, 32, 51, 27 (127 unique)",
+      "examples": "28, KL, KH, 10 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -269,7 +269,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "36, FJ, 32, 5 (125 unique)",
+      "examples": "35, FL, FI, 20 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -285,7 +285,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "NC, BB, VH, NJ (191 unique)",
+      "examples": "CU, FS, CS, NN (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -293,7 +293,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-10-04, 2025-10-03, 2025-10-16, 2024-02-28 (671 unique)",
+      "examples": "2025-04-10, 2025-06-18, 2024-01-13, 2025-11-05 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -301,7 +301,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-03-26, 2024-11-26, 2024-01-31, 2023-12-21 (596 unique)",
+      "examples": "2024-10-16, 2024-06-19, 2025-02-21, 2024-02-25 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -309,7 +309,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-05-16, 2024-08-27, 2024-12-08, 2024-04-01 (365 unique)",
+      "examples": "2024-05-04, 2024-04-18, 2024-03-29, 2024-12-15 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -325,7 +325,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Contract Specialist, GS-1102-9/11/12 - Direct Hire Authority, CONGRESSIONAL TRAVEL COORDINATOR, Alcohol & Tobacco Tax Specialist, PATHWAYS STUDENT INTERN (Environmental Specialist) (77991 unique)",
+      "examples": "Examination Specialist (Emerging Technology), CG-0570-13/14 (Temp Promotion NTE 1 year), WORK PACKAGING COORDINATOR, Registered Nurse - Head Nurse, Home & Community Based Care, HR Assistant (Perf Mgt/HR Dev/OA) (77991 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77991
@@ -333,7 +333,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "61, Contigent, 1, K (115 unique)",
+      "examples": "B, Contingent, H, 81 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -397,7 +397,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "39, 07, 20, 43 (157 unique)",
+      "examples": "20, 65, 382, 86 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
