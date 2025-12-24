@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-12-23T07:20:20.392815",
-  "total_jobs": 3111446,
+  "generated_at": "2025-12-24T07:20:07.526045",
+  "total_jobs": 3111903,
   "total_fields": 44,
-  "file_size": "1017MB",
-  "latest_job_date": "2025-12-23",
+  "file_size": "1021MB",
+  "latest_job_date": "2025-12-24",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,10 @@
     },
     {
       "year": 2025,
-      "total_jobs": 232160,
-      "jobs_opened": 232160,
-      "jobs_closed": 224269,
-      "coverage": "Current through December 23, 2025"
+      "total_jobs": 232617,
+      "jobs_opened": 232617,
+      "jobs_closed": 224346,
+      "coverage": "Current through December 24, 2025"
     }
   ],
   "all_fields": [
@@ -109,7 +109,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1320\"}, {\"series\": \"1301\"}, {\"series\": \"0403\"}, {\"series\": \"0415\"}], [{\"series\": \"0682\"}], [{\"series\": \"0801\"}, {\"series\": \"1501\"}, {\"series\": \"1515\"}, {\"series\": \"1301\"}], [{\"series\": \"0454\"}, {\"series\": \"0470\"}, {\"series\": \"0457\"}, {\"series\": \"0471\"}] (4424 unique)",
+      "examples": "[{\"series\": \"0890\"}, {\"series\": \"0457\"}, {\"series\": \"0401\"}], [{\"series\": \"0830\"}, {\"series\": \"0801\"}, {\"series\": \"0850\"}, {\"series\": \"0808\"}, {\"series\": \"0810\"}], [{\"series\": \"1173\"}], [{\"series\": \"0808\"}, {\"series\": \"0801\"}, {\"series\": \"0804\"}, {\"series\": \"0810\"}, {\"series\": \"0850\"}, {\"series\": \"0830\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -133,7 +133,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of Justice\\Executive Office for U.S. Attorneys and the Office of the U.S. Attorneys, Department of Housing and Urban Development\\Assistant Secretary for Fair Housing and Equal Opportunity, National Science Foundation, Department of Homeland Security (542 unique)",
+      "examples": "National Foundation on the Arts and the Humanities\\National Endowment for the Arts, Department of the Treasury\\Internal Revenue Service, Farm Credit Administration, National Foundation on the Arts and the Humanities\\National Endowment for the Humanities (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +157,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "CERA248436648862, NCDE248283775335, MCAD241595330129, DHA-12420819-24 ROI 004 (363814 unique)",
+      "examples": "ST-12442965-24-MC, OR-TEMP-25-12571968-DLH, 245VFSR301606, SDSC242848075130 (363814 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363814
@@ -165,7 +165,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Seasonal, Detail, Telework, Temporary (16 unique)",
+      "examples": "Presidential Management Fellows, Temporary, Recent graduates, Temporary Promotion (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -197,7 +197,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "AFGS, EDEC, IN28, NQ00 (528 unique)",
+      "examples": "HURR, GS18, ARXQ, HE32 (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Defense Threat Reduction Agency, Defense Information Systems Agency, Executive Director, Office of Acquisition and Logistics, U.S. Coast Guard (502 unique)",
+      "examples": "Defense Security Cooperation Agency, Morris K. Udall Scholarship and Excellence in National Environmental Policy Foundation, Langley Research Center, HQDA Field Operating Agencies and Staff Support Agencies (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "GW, EB, HD, KS (122 unique)",
+      "examples": "DJ, EW, VD, SE (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Veterans Affairs, Department of the Interior, Department of Energy, Department of Homeland Security (26 unique)",
+      "examples": "Department of the Navy, Department of Health and Human Services, Department of Education, Department of Agriculture (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -229,7 +229,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "INSTALL SUPT & PRGMS MGMT DIRECTORATE PROGRAMS SUPPORT DIV, Veterans Benefits Administration, Atlanta Regional Office, outbased in Nashville, TN., ENTERPRISE SOLUTIONS AND STANDARDS (JJAPB), Program Executive Office, Intelligence, Electronic Warfare and Sensors (PEO-IEW&S) (59972 unique)",
+      "examples": "Whiteriver Service Unit, Clinical Laboratory Services, HQ U.S. ARMY CONTRACTING COMMAND DEPUTY CHIEF OF STAFF, GB FINANCIAL OPERATIONS DIV, HR Solutions, Center for Leadership Development, USA Learning System Development Office, Veterans Health Administration, Specialty Care (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -237,7 +237,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-20T11:58:45.370129, 2025-09-19T22:59:09.275916, 2025-09-20T11:28:24.495214, 2025-09-20T11:44:06.416719 (367190 unique)",
+      "examples": "2025-09-20T12:34:34.247423, 2025-09-20T11:42:34.320392, 2025-09-20T12:24:39.455793, 2025-09-20T11:47:38.262162 (367190 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367190
@@ -245,7 +245,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-07-05T13:50:17.192321, 2025-09-20T11:28:24.520676, 2025-07-05T13:55:05.421450, 2025-09-20T12:00:40.219454 (367190 unique)",
+      "examples": "2025-07-05T13:55:05.465538, 2025-09-20T11:57:01.715868, 2025-07-05T13:05:06.357945, 2025-07-05T13:57:17.424427 (367190 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367190
@@ -253,7 +253,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "K, AA, 39, LH (127 unique)",
+      "examples": "51, B, 32, 14 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -269,7 +269,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "KL, 16, 12, 53 (125 unique)",
+      "examples": "22, JI, 40, JK (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -285,7 +285,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "CX, XF, PD, FS (191 unique)",
+      "examples": "LL, BN, WL, EJ (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -293,7 +293,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-09-30, 2024-06-09, 2025-12-19, 2024-11-02 (671 unique)",
+      "examples": "2024-11-06, 2024-04-05, 2024-01-23, 2025-01-12 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -301,7 +301,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-08-17, 2024-04-13, 2024-12-26, 2024-12-25 (596 unique)",
+      "examples": "2023-08-31, 2024-06-22, 2024-01-23, 2025-08-15 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -309,7 +309,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-04-25, 2024-10-03, 2024-05-20, 2024-08-04 (365 unique)",
+      "examples": "2024-08-06, 2024-03-02, 2024-02-23, 2024-03-28 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -325,7 +325,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Correctional Treatment Specialist (Specialty Treatment Program Specialist - ACL), Die Finishing Specialist Leader, Director for Digital Transformation, License Practical Nurse - BHIP (77991 unique)",
+      "examples": "Supervisory Wildland Firefighter (FUELS/IHC/VETERANS HAND CREWS)(DHA HIRING EVENT), Assistant General Counsel (Enforcement & Intelligence), Biological Science Lab Technician (Housekeeping/Janitorial), Clinical Pharmacy Specialist - Acute Care (77991 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77991
@@ -333,7 +333,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "G, 8, 41, 25 (115 unique)",
+      "examples": "22, 9, ES, 12 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -397,7 +397,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "2, 13, Many, 128 (157 unique)",
+      "examples": "120, 160, 1407, 50 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
