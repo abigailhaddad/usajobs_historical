@@ -1,9 +1,9 @@
 {
-  "generated_at": "2025-12-31T07:20:20.340829",
-  "total_jobs": 3113074,
+  "generated_at": "2026-01-01T07:20:08.691713",
+  "total_jobs": 3113406,
   "total_fields": 44,
   "file_size": "1.0GB",
-  "latest_job_date": "2025-12-31",
+  "latest_job_date": "2026-01-01",
   "data_coverage": [
     {
       "year": 2013,
@@ -91,10 +91,17 @@
     },
     {
       "year": 2025,
-      "total_jobs": 233788,
-      "jobs_opened": 233788,
+      "total_jobs": 234062,
+      "jobs_opened": 234062,
       "jobs_closed": 224368,
-      "coverage": "Current through December 31, 2025"
+      "coverage": "Current through January 01, 2026"
+    },
+    {
+      "year": 2026,
+      "total_jobs": 58,
+      "jobs_opened": 58,
+      "jobs_closed": 58,
+      "coverage": "Closing dates only"
     }
   ],
   "all_fields": [
@@ -109,7 +116,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"2223\"}], [{\"series\": \"0899\"}, {\"series\": \"1399\"}, {\"series\": \"0499\"}, {\"series\": \"0699\"}], [{\"series\": \"1301\"}, {\"series\": \"1560\"}, {\"series\": \"1315\"}, {\"series\": \"0801\"}, {\"series\": \"1350\"}, {\"series\": \"0150\"}, {\"series\": \"1515\"}], [{\"series\": \"1560\"}, {\"series\": \"1550\"}, {\"series\": \"0854\"}] (4424 unique)",
+      "examples": "[{\"series\": \"1515\"}, {\"series\": \"0855\"}, {\"series\": \"0854\"}], [{\"series\": \"0405\"}, {\"series\": \"0110\"}, {\"series\": \"1530\"}, {\"series\": \"0080\"}, {\"series\": \"2210\"}, {\"series\": \"0260\"}, {\"series\": \"0660\"}, {\"series\": \"1082\"}, {\"series\": \"0854\"}, {\"series\": \"1001\"}, {\"series\": \"0391\"}, {\"series\": \"1560\"}, {\"series\": \"0803\"}, {\"series\": \"0602\"}, {\"series\": \"0685\"}, {\"series\": \"0905\"}, {\"series\": \"0341\"}, {\"series\": \"0201\"}, {\"series\": \"0644\"}, {\"series\": \"0340\"}, {\"series\": \"1109\"}, {\"series\": \"0301\"}, {\"series\": \"0101\"}, {\"series\": \"1801\"}, {\"series\": \"0501\"}, {\"series\": \"1101\"}, {\"series\": \"0107\"}, {\"series\": \"0858\"}, {\"series\": \"0801\"}, {\"series\": \"0343\"}, {\"series\": \"0601\"}, {\"series\": \"0511\"}, {\"series\": \"0560\"}, {\"series\": \"0610\"}, {\"series\": \"0308\"}, {\"series\": \"1301\"}, {\"series\": \"1035\"}, {\"series\": \"0510\"}, {\"series\": \"1102\"}], [{\"series\": \"0801\"}, {\"series\": \"1301\"}, {\"series\": \"1320\"}, {\"series\": \"1350\"}, {\"series\": \"0810\"}, {\"series\": \"0830\"}, {\"series\": \"0819\"}, {\"series\": \"0850\"}, {\"series\": \"0808\"}], [{\"series\": \"0830\"}, {\"series\": \"0850\"}, {\"series\": \"0861\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -133,7 +140,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Army\\United States Army Print and Media Distribution Center, Department of Defense\\Defense Counterintelligence and Security Agency, Department of Veterans Affairs\\General Counsel, Department of Education\\Office of Legislation and Congressional Affairs (542 unique)",
+      "examples": "Department of the Air Force\\Air National Guard Units, Department of Agriculture\\Risk Management Agency, Department of Health and Human Services, Department of Defense\\Defense Acquisition University (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -157,7 +164,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "DECA-24-12556908-DE, AFMC-12536024-564575-8L-LMS, MI-12587239-T5-AR-24-267, ST-12501404-24-KSG (363814 unique)",
+      "examples": "HHS-CDC-MP-24-12280333, OTD-DE-12443215-KAA, CBST-12309703-24-KMS, SE-1618-SERO-24-12415985-MP (363814 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363814
@@ -165,7 +172,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Recent graduates, Telework, Summer, Temporary Promotion (16 unique)",
+      "examples": "ICTAP Only, Summer, Temporary Promotion, Telework (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -197,7 +204,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "IN22, DD07, AF5D, AR2A (528 unique)",
+      "examples": "AH02, TD12, GS20, ARXP (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -205,7 +212,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Office of Public Affairs, Commander, Naval Information Warfare Systems Command (NAVWARSYSCOM), Program Support Center, Office of the Chief Financial Officer (502 unique)",
+      "examples": "National Endowment for the Humanities, Federal Mine Safety and Health Review Commission, Headquarters, AMC, United States Army Criminal Investigation Division (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -213,7 +220,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "AM, FD, CM, TN (122 unique)",
+      "examples": "CE, DJ, SK, WU (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -221,7 +228,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Judicial Branch, Department of Agriculture, Department of Homeland Security, National Aeronautics and Space Administration (26 unique)",
+      "examples": "Department of the Air Force, General Services Administration, Department of the Interior, Department of Health and Human Services (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -229,7 +236,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Office of ARP, Airports Financial Assistance Division, Airports BIL Branch, APP-540, Grand Junction Regional Airport / Walker Field (GJT), Division of Nursing Services - Outpatient Department, Chinle Service Unit, Chinle AZ, DEFENSE HEALTH AGENCY INDO PACIFIC MARKET HAWAII REGION (59972 unique)",
+      "examples": "Office of the Chief Executive Officer (CEO), Directorate of Morale Welfare & Recreation/Army Community Services Division/Family Advocacy Program, ATO, Technical Operations, Western Service District, Anchorage District, COMM SSC WWQ24-ZAN, FINDLAY AREA 1 OFFICE (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -237,7 +244,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T13:02:09.565898, 2025-09-20T12:00:40.225197, 2025-09-20T11:37:32.377280, 2025-07-05T13:45:23.192402 (367190 unique)",
+      "examples": "2025-07-05T12:59:13.235555, 2025-09-20T11:32:13.094033, 2025-09-20T11:55:10.891763, 2025-09-20T11:49:34.593746 (367190 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367190
@@ -245,7 +252,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-07-05T13:45:23.193078, 2025-07-05T13:05:06.375276, 2025-09-19T22:59:09.260863, 2025-09-20T12:28:37.508283 (367190 unique)",
+      "examples": "2025-09-20T11:35:43.388869, 2025-07-05T12:59:13.236307, 2025-09-20T12:08:55.256550, 2025-09-20T12:00:40.233613 (367190 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367190
@@ -253,7 +260,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "27, 16, HL, 40 (127 unique)",
+      "examples": "E, 13, 98, FL (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -269,7 +276,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "DJ, AH, 04, 14 (125 unique)",
+      "examples": "2, 04, G, 14 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -285,7 +292,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "PB, RS, EP, SW (191 unique)",
+      "examples": "IR, EV, NY, KP (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -293,7 +300,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-01-29, 2025-11-11, 2024-08-01, 2025-06-20 (671 unique)",
+      "examples": "2025-05-06, 2025-11-19, 2024-05-20, 2024-08-02 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -301,7 +308,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-05-20, 2024-12-13, 2024-09-17, 2023-06-15 (596 unique)",
+      "examples": "2025-05-28, 2024-09-21, 2025-03-31, 2025-08-06 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -309,7 +316,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-09-13, 2024-02-01, 2024-11-18, 2024-12-09 (365 unique)",
+      "examples": "2024-08-22, 2024-07-23, 2024-06-24, 2024-12-27 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -325,7 +332,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Business Operations / Corporate COTR, COUNSELING & ADVOCACY PROGRAM TECHNICIAN, Registered Nurse - PACT St. Joseph CBOC, Psychologist - Mental Health (77991 unique)",
+      "examples": "HOUSING MANAGER (INSPECTOR), Import Policy Analyst (Public Notice Flyer/Schedule A), FUEL DISTRIBUTION SYSTEM WORKER (D1143000), Social Worker - Homeless Referral Specialist (77991 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77991
@@ -333,7 +340,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "00, PB5, G, Contigent (115 unique)",
+      "examples": "29, 98, 11, GS12 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -397,7 +404,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "1, 001, 120, 01 (157 unique)",
+      "examples": "382, 800, 12, 34 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
