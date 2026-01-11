@@ -421,19 +421,19 @@ def main():
     today = datetime.now()
     today_str = today.strftime('%Y-%m-%d')
 
-    # Always fetch today + previous 2 days for redundancy
-    # This ensures we catch any jobs that might have been missed
-    two_days_ago = (today - timedelta(days=2)).strftime('%Y-%m-%d')
+    # Always fetch today + previous 14 days for redundancy
+    # This ensures we catch any jobs that might have been missed during API outages
+    two_weeks_ago = (today - timedelta(days=14)).strftime('%Y-%m-%d')
 
-    # Start from whichever is earlier: last collection date or 2 days ago
+    # Start from whichever is earlier: last collection date or 2 weeks ago
     if last_date:
         last_date_start = last_date.strftime('%Y-%m-%d')
         # Use the earlier of the two dates
-        start_date = min(last_date_start, two_days_ago)
+        start_date = min(last_date_start, two_weeks_ago)
     else:
-        start_date = two_days_ago
+        start_date = two_weeks_ago
 
-    print(f"   Will collect: {start_date} to {today_str} (always includes last 3 days for redundancy)")
+    print(f"   Will collect: {start_date} to {today_str} (always includes last 2 weeks for redundancy)")
     print("\\n" + "=" * 50)
     
     # Initialize collection statistics
