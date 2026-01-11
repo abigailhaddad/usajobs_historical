@@ -583,7 +583,14 @@ def main():
             continue
     
     if not all_flattened_jobs:
-        print("\n❌ No jobs fetched")
+        print("\n❌ No jobs fetched from current API!")
+        # Write a warning file that the workflow can check
+        warning_file = os.path.join(args.data_dir, "..", "logs", "CURRENT_API_EMPTY_WARNING.txt")
+        os.makedirs(os.path.dirname(warning_file), exist_ok=True)
+        with open(warning_file, 'w') as f:
+            f.write(f"WARNING: Current API returned 0 jobs on {datetime.now().isoformat()}\n")
+            f.write("This may indicate an API issue or authentication problem.\n")
+        print(f"⚠️  Warning file written to {warning_file}")
         return
     
     # Group jobs by year based on positionOpenDate

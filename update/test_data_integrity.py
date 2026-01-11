@@ -235,9 +235,19 @@ def create_baseline(filepath):
 def check_data_consistency():
     """Check for data consistency issues"""
     try:
-        # Check current year files
-        current_2025 = pd.read_parquet('../data/current_jobs_2025.parquet')
-        historical_2025 = pd.read_parquet('../data/historical_jobs_2025.parquet')
+        # Check current year files - use dynamic year
+        current_year = datetime.now().year
+        current_file = f'../data/current_jobs_{current_year}.parquet'
+        historical_file = f'../data/historical_jobs_{current_year}.parquet'
+
+        # Fall back to 2025 if current year files don't exist
+        if not os.path.exists(current_file):
+            current_file = '../data/current_jobs_2025.parquet'
+        if not os.path.exists(historical_file):
+            historical_file = '../data/historical_jobs_2025.parquet'
+
+        current_2025 = pd.read_parquet(current_file)
+        historical_2025 = pd.read_parquet(historical_file)
         
         # Current should be subset of or equal to historical for same year
         current_ids = set(current_2025['PositionID'].unique()) if 'PositionID' in current_2025.columns else set()
@@ -273,12 +283,16 @@ def run_tests():
     
     # Test 1: Current data files exist and are valid
     print_header("1. CURRENT DATA FILES")
-    
+
+    current_year = datetime.now().year
     current_files = [
         ('current_jobs_2024.parquet', 100, ['positionTitle'], 'Current jobs 2024'),
-        ('current_jobs_2025.parquet', 100, ['positionTitle'], 'Current jobs 2025')
+        ('current_jobs_2025.parquet', 100, ['positionTitle'], 'Current jobs 2025'),
     ]
-    
+    # Add current year if it's 2026 or later
+    if current_year >= 2026:
+        current_files.append((f'current_jobs_{current_year}.parquet', 1, ['positionTitle'], f'Current jobs {current_year}'))
+
     for filename, min_rows, cols, desc in current_files:
         if not check_parquet_file(f'../data/{filename}', min_rows, cols, desc):
             all_passed = False
@@ -295,10 +309,16 @@ def run_tests():
     
     # Test 3: Data recency
     print_header("3. DATA RECENCY")
-    
-    # Current data should be no more than 7 days old
-    if not check_data_recency('../data/current_jobs_2025.parquet', 7, 'Current 2025 data recency'):
-        all_passed = False
+
+    # Current data should be no more than 7 days old - check current year's file
+    current_year_file = f'../data/current_jobs_{current_year}.parquet'
+    if os.path.exists(current_year_file):
+        if not check_data_recency(current_year_file, 7, f'Current {current_year} data recency'):
+            all_passed = False
+    else:
+        # Fall back to 2025 if current year file doesn't exist
+        if not check_data_recency('../data/current_jobs_2025.parquet', 7, 'Current 2025 data recency'):
+            all_passed = False
     
     # Test 4: No data loss
     print_header("4. REGRESSION TEST - NO DATA LOSS")

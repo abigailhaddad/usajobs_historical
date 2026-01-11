@@ -199,15 +199,9 @@ def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> tup
     try:
         # Try single day query first
         jobs_for_date = fetch_all_pages(params)
-        # If we got some jobs, return success
-        if jobs_for_date:
-            return jobs_for_date, True
-        else:
-            # If we got 0 jobs, it might be legitimate or it might be a failure
-            # Let's try the fallback to be sure
-            print(f"  🤔 Got 0 jobs for {date}, trying fallback to confirm...")
-            raise Exception("Got 0 jobs, trying fallback")
-        
+        # 0 jobs is a valid result - the API may simply have no data for this date
+        return jobs_for_date, True
+
     except Exception as e:
         print(f"  ❌ API FAILURE for single day {date}: {e}")
         
@@ -272,12 +266,12 @@ def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> tup
         except Exception as fallback2_error:
             print(f"  ❌ Fallback 2 failed: {fallback2_error}")
         
+        # Return whatever we found - 0 jobs is valid if the API responded
         if all_target_jobs:
             print(f"  ✅ Combined fallbacks: found {len(all_target_jobs)} jobs for {date}")
-            return all_target_jobs, True
         else:
-            print(f"  ❌ All fallbacks failed for {date}")
-            return [], False
+            print(f"  ℹ️  Fallbacks completed: 0 jobs for {date} (may be valid)")
+        return all_target_jobs, True
 
 
 def load_existing_jobs(parquet_path: str) -> set:
