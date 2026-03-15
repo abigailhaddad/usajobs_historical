@@ -101,20 +101,26 @@
 <body>
     <div class="container">
         <h1>USAJobs Historical API Data</h1>
-        
-        <p><strong>Data collection last run: 2026-01-08</strong></p>
+
+        <p><strong>Data collection last run: 2026-03-15</strong></p>
         <p><strong>⚠️ This is not an official USAJobs project</strong></p>
-        
+
+        <div class="stats" style="background: #d4edda; border-left: 4px solid #28a745; margin-bottom: 20px;">
+            <strong>Browse the data interactively:</strong> <a href="https://usajobs-historical.vercel.app" style="font-size: 1.1em; font-weight: bold;">usajobs-historical.vercel.app</a><br>
+            Interactive DataTable with filters, charts, multi-column sorting, and shareable filter URLs.
+        </div>
+
         <div class="resources">
             <h2>Resources</h2>
             <ul>
+                <li><a href="https://usajobs-historical.vercel.app"><strong>Live data explorer</strong></a> - Interactive search and visualizations</li>
                 <li><a href="https://github.com/abigailhaddad/usajobs_historical">GitHub repository</a></li>
                 <li><a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py">Example usage (examples.py)</a></li>
                 <li><a href="https://developer.usajobs.gov/">USAJobs API documentation</a> - Official U.S. government developer documentation for USAJOBS APIs</li>
             </ul>
         </div>
         <div class="stats">
-            <strong>Dataset:</strong> 3,115,988 total job postings | <strong>Coverage:</strong> | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
+            <strong>Dataset:</strong> ~2.85M job postings | <strong>Coverage:</strong> 2018-2026 | <strong>Storage:</strong> Cloudflare R2 | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
         </div>
 
         <h2>Table of Contents</h2>
@@ -551,14 +557,13 @@
 df_2024 = pd.read_parquet('data/historical_jobs_2024.parquet')
 print(f"✓ Successfully loaded {len(df_2024):,} job postings from 2024")</pre>
 
-        <h3>GitHub Download Example</h3>
+        <h3>Download from R2</h3>
+        <p>Data files are stored in Cloudflare R2. You can also browse the data interactively at <a href="https://usajobs-historical.vercel.app">usajobs-historical.vercel.app</a>.</p>
         <pre>import pandas as pd
-import requests
 
-# Download directly from GitHub
-url = 'https://github.com/abigailhaddad/usajobs_historical/raw/main/data/historical_jobs_2024.parquet'
-df = pd.read_parquet(url)
-print(f"✓ Downloaded {len(df):,} job postings")</pre>
+# Download directly from R2 (or use local files if you have them)
+df = pd.read_parquet('data/historical_jobs_2024.parquet')
+print(f"✓ Loaded {len(df):,} job postings")</pre>
 
         <div class="code-example">
             <strong>Output:</strong><br>
@@ -706,7 +711,7 @@ for i, (title, count) in enumerate(common_titles.items(), 1):
         </div>
 
         <div class="stats">
-            <strong>Access:</strong> Download Parquet files from /data/ directory | <strong>Full examples:</strong> Run examples.py for complete analysis patterns | <strong>Source:</strong> Data collected from USAJobs.gov APIs
+            <strong>Explore:</strong> <a href="https://usajobs-historical.vercel.app">Live interactive site</a> | <strong>Full examples:</strong> Run examples.py for complete analysis patterns | <strong>Source:</strong> Data collected from USAJobs.gov APIs, stored in Cloudflare R2
         </div>
     </div>
 </body>

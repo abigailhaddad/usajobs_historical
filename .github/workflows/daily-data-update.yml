@@ -24,7 +24,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0  # Need full history for git operations
-        lfs: true  # Pull Git LFS files
+        lfs: false  # Data lives in R2 now, not LFS
         ref: main  # Always start from main
 
     - name: Set up Python
@@ -57,9 +57,30 @@ jobs:
         git checkout -B data-updates
         echo "Created fresh data-updates branch from main"
 
-    - name: Pull Git LFS files
+    - name: Download data from R2
+      env:
+        R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+        R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
       run: |
-        git lfs pull
+        pip install boto3
+        python3 -c "
+        import boto3, os
+        s3 = boto3.client('s3',
+            endpoint_url=os.environ['R2_ENDPOINT_URL'],
+            aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
+            aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'],
+        )
+        os.makedirs('data', exist_ok=True)
+        paginator = s3.get_paginator('list_objects_v2')
+        for page in paginator.paginate(Bucket='usajobs-data', Prefix='data/'):
+            for obj in page.get('Contents', []):
+                key = obj['Key']
+                local = key  # data/filename.parquet
+                print(f'Downloading {key} ({obj[\"Size\"]/1024/1024:.1f} MB)')
+                s3.download_file('usajobs-data', key, local)
+        print('Done')
+        "
         echo "Checking data files:"
         ls -lh data/*.parquet | head -5
 
@@ -112,19 +133,61 @@ jobs:
         python test_data_integrity.py
         # If tests fail, the script returns non-zero and this step will fail
 
+    - name: Re-poll status for non-final jobs
+      env:
+        GITHUB_ACTIONS: true
+      run: |
+        # Determine which years to re-poll based on day of the week
+        # Always poll recent data (last 6 months): current year + previous year
+        CURRENT_YEAR=$(date +'%Y')
+        PREV_YEAR=$((CURRENT_YEAR - 1))
+        YEARS="$PREV_YEAR $CURRENT_YEAR"
+
+        # Rotate through older years across the workweek (Mon=1 .. Fri=5)
+        DOW=$(date +%u)
+        case $DOW in
+          1) YEARS="2013 2014 2015 2016 $YEARS" ;;  # Monday
+          2) YEARS="2017 2018 $YEARS" ;;              # Tuesday
+          3) YEARS="2019 2020 $YEARS" ;;              # Wednesday
+          4) YEARS="2021 2022 $YEARS" ;;              # Thursday
+          5) YEARS="2023 $YEARS" ;;                   # Friday
+          *) ;;  # Weekend: just recent years
+        esac
+
+        # Remove duplicates (e.g. if CURRENT_YEAR is already in the rotation)
+        YEARS=$(echo $YEARS | tr ' ' '\n' | sort -u | tr '\n' ' ')
+
+        echo "Day of week: $DOW"
+        echo "Re-polling years: $YEARS"
+        python scripts/repoll_status.py --years $YEARS
+
     - name: Commit and push to data-updates branch
       # Only runs if tests pass
       run: |
-        # Check if there are changes
-        if [ -n "$(git status --porcelain)" ]; then
-          git add .
+        # Check if there are changes (exclude parquet files — data lives in R2)
+        if [ -n "$(git status --porcelain -- ':!*.parquet')" ]; then
+          git add -- ':!*.parquet'
           git commit -m "Daily data update - $(date +'%Y-%m-%d')"
           git push -f origin data-updates
+          echo "CHANGES_MADE=true" >> $GITHUB_ENV
+        elif [ -n "$(git status --porcelain)" ]; then
+          # Parquet files changed but nothing else — still sync to R2
+          echo "Only data files changed (will sync to R2)"
           echo "CHANGES_MADE=true" >> $GITHUB_ENV
         else
           echo "No changes to commit"
           echo "CHANGES_MADE=false" >> $GITHUB_ENV
         fi
+
+    - name: Prep web data and sync to R2
+      if: env.CHANGES_MADE == 'true'
+      env:
+        R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+        R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+      run: |
+        python scripts/prep_web_data.py
+        python scripts/sync_to_r2.py
 
     - name: Create Pull Request
       if: env.CHANGES_MADE == 'true'
