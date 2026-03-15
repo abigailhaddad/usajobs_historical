@@ -1,19 +1,25 @@
 # USAJobs Data Pipeline
 
-**Data collection last run: 2026-01-08**
+**Data collection last run: 2026-03-15**
 
 **⚠️ This is not an official USAJobs project**
 
+## Explore the Data
+
+**[Browse the live site](https://usajobs-historical.vercel.app)** -- Interactive DataTable with filters, charts (jobs by month, top agencies, grade distribution), multi-column sorting, and shareable filter URLs.
+
 ## Resources
 
+- [Live data explorer](https://usajobs-historical.vercel.app) - Interactive search and visualizations
 - [Field documentation](https://abigailhaddad.github.io/usajobs_historical/) - Guide to data fields and statistics
 - [USAJobs API documentation](https://developer.usajobs.gov/) - Official U.S. government developer documentation for USAJOBS APIs
 
-**Job dataset with 3,115,988 job announcements from Historical + Current APIs**
+**~2.85M job announcements from 2018-2026 via the Historical + Current APIs**
 
-This repository provides USAJobs data combining both Historical and Current APIs, with deduplication and field rationalization. Data is available in two ways:
-1. **📁 Ready-to-use Parquet files** - Download and analyze immediately
-2. **⚙️ Full data pipeline** - Replicate the collection process yourself
+This repository provides USAJobs data combining both Historical and Current APIs, with deduplication and field rationalization. Data is available in three ways:
+1. **🌐 Live website** - [Browse and filter interactively](https://usajobs-historical.vercel.app)
+2. **📁 Ready-to-use Parquet files** - Download and analyze immediately
+3. **⚙️ Full data pipeline** - Replicate the collection process yourself
 
 ## 🚀 Quick Start Options
 
@@ -30,14 +36,14 @@ print(f"Loaded {len(df_2024):,} federal job postings from 2024")
 # See [examples.py](https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py) for more analysis patterns
 ```
 
-This provides 1.0GB of data across all years (the repository itself is ~176MB without the parquet files, which are managed by Git LFS). Individual year files are typically 50-80MB and work with Python, R, or any Parquet-compatible tool.
+Data files are stored in Cloudflare R2 and served to the [live site](https://usajobs-historical.vercel.app). Individual year files are typically 50-80MB Parquet and work with Python, R, or any Parquet-compatible tool.
 
 ### Option 2: Run the Pipeline Yourself
 The pipeline collects data from USAJobs APIs and saves to Parquet files. Note that the USAJobs API can be unreliable - expect some failed requests that require retries. The system logs all failures and provides specific retry commands.
 
 ## Data Coverage
 
-Data collection last run: 2026-01-08. Early years are incomplete, mostly consisting of jobs with closing dates years after the opening dates. Note: Some job postings may have future opening dates. 
+Data collection last run: 2026-03-15. Coverage spans 2018-2026 with approximately 2.85M job postings. Early years (pre-2017) are incomplete, mostly consisting of jobs with closing dates years after the opening dates. Note: Some job postings may have future opening dates.
 
 
 | Year | Jobs Opened | Jobs Closed |
@@ -96,24 +102,7 @@ Both APIs are rationalized to a common schema and stored in year-based Parquet f
 
 ## Setup
 
-1. **Install Git LFS (Large File Storage):**
-   This project uses Git LFS for parquet files. Install it before cloning:
-   ```bash
-   # macOS
-   brew install git-lfs
-   
-   # Ubuntu/Debian
-   apt-get install git-lfs
-   
-   # Windows
-   choco install git-lfs
-   ```
-   
-   After cloning the repository:
-   ```bash
-   git lfs install
-   git lfs pull
-   ```
+1. **Data files are stored in Cloudflare R2** (not in this Git repository). The [live site](https://usajobs-historical.vercel.app) reads data directly from R2. To work with the data locally, download the Parquet files or use the pipeline to collect your own.
 
 2. **Create virtual environment:**
    ```bash
@@ -201,7 +190,7 @@ python scripts/collect_data.py --start-date 2024-01-01 --end-date 2024-01-31 --d
 
 ## Data Storage
 
-- **Parquet Files**: Storage format
+- **Cloudflare R2**: Parquet files are stored in R2 and served to the [live site](https://usajobs-historical.vercel.app)
   - `historical_jobs_YEAR.parquet`: Historical job announcements by year
   - `current_jobs_YEAR.parquet`: Current job postings by year
 - **Logs**: Stored in `logs/` directory with aggressive data gap detection
