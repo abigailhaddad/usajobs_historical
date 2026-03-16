@@ -297,6 +297,16 @@ def main():
     total_changed = 0
     total_inserted = 0
     all_transitions = []
+    inserts_by_year = {}   # year -> count
+    changes_by_year = {}   # year -> count
+
+    # Snapshot file sizes before repoll
+    file_sizes_before = {}
+    for year, path in files.items():
+        file_sizes_before[year] = os.path.getsize(path)
+
+    # Snapshot row counts before repoll
+    row_counts_before = {year: len(ids) for year, ids in existing_ids.items()}
     dates_since_save = 0
     errors = 0
 
@@ -361,6 +371,8 @@ def main():
                     total_changed += changed
                     total_inserted += inserted
                     all_transitions.extend(trans)
+                    inserts_by_year[year] = inserts_by_year.get(year, 0) + inserted
+                    changes_by_year[year] = changes_by_year.get(year, 0) + changed
                     parts = []
                     if changed:
                         parts.append(f"{changed:,} statuses updated")
@@ -386,6 +398,8 @@ def main():
                 total_changed += changed
                 total_inserted += inserted
                 all_transitions.extend(trans)
+                inserts_by_year[year] = inserts_by_year.get(year, 0) + inserted
+                changes_by_year[year] = changes_by_year.get(year, 0) + changed
                 parts = []
                 if changed:
                     parts.append(f"{changed:,} statuses updated")
@@ -395,21 +409,52 @@ def main():
                     log(f"{year}: {', '.join(parts)}")
 
     elapsed_total = time.time() - start_time
-    log(f"\nDone! {dates_queried} dates in {elapsed_total/60:.1f} min")
-    log(f"API jobs seen: {api_jobs_seen:,}")
-    log(f"Statuses changed: {total_changed:,}")
-    log(f"New jobs inserted: {total_inserted:,}")
-    log(f"Errors: {errors}")
+    from collections import Counter
 
-    # Summary of status transitions
+    log(f"\n{'='*60}")
+    log(f"REPOLL SUMMARY")
+    log(f"{'='*60}")
+    log(f"Runtime: {elapsed_total/60:.1f} min | {dates_queried} dates | {api_jobs_seen:,} API jobs seen | {errors} errors")
+    log(f"Totals: {total_changed:,} statuses changed, {total_inserted:,} new jobs inserted")
+
+    # Per-year breakdown
+    log(f"\nPer-year breakdown:")
+    log(f"  {'Year':<6} {'Dates':>6} {'Before':>10} {'Inserted':>10} {'Changed':>10} {'After':>10} {'Size MB':>10}")
+    log(f"  {'-'*6} {'-'*6} {'-'*10} {'-'*10} {'-'*10} {'-'*10} {'-'*10}")
+    for year in sorted(files.keys()):
+        n_dates = len(dates_by_year.get(year, []))
+        before = row_counts_before.get(year, 0)
+        ins = inserts_by_year.get(year, 0)
+        chg = changes_by_year.get(year, 0)
+        after = before + ins
+        size_mb = os.path.getsize(files[year]) / 1_048_576
+        log(f"  {year:<6} {n_dates:>6} {before:>10,} {ins:>10,} {chg:>10,} {after:>10,} {size_mb:>10.1f}")
+
+    # Flag anything unusual
+    warnings = []
+    if total_inserted > 1000:
+        big_years = [f"{y}: {c:,}" for y, c in sorted(inserts_by_year.items()) if c > 100]
+        warnings.append(f"Large number of new insertions ({total_inserted:,}): {', '.join(big_years)}")
+    if errors > 5:
+        warnings.append(f"High error count: {errors}")
+    for year, count in inserts_by_year.items():
+        before = row_counts_before.get(year, 0)
+        if before > 0 and count / before > 0.05:
+            warnings.append(f"{year}: inserted {count:,} jobs ({100*count/before:.1f}% of existing {before:,}) — is R2 data stale?")
+
+    if warnings:
+        log(f"\n⚠️  WARNINGS:")
+        for w in warnings:
+            log(f"  - {w}")
+
+    # Status transitions
     if all_transitions:
-        from collections import Counter
         transition_counts = Counter((old, new) for _, old, new in all_transitions)
         log(f"\nStatus transitions:")
         for (old, new), count in transition_counts.most_common():
             log(f"  {old} -> {new}: {count:,}")
 
-        # Write detailed transitions to a file for review
+        # Write detailed transitions to CSV
         summary_path = os.path.join(os.path.dirname(__file__), '..', 'logs',
                                      f'status_transitions_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv')
         os.makedirs(os.path.dirname(summary_path), exist_ok=True)
@@ -417,7 +462,9 @@ def main():
             f.write('control_number,old_status,new_status\n')
             for cn, old, new in all_transitions:
                 f.write(f'{cn},{old},{new}\n')
-        log(f"Detailed transitions written to: {summary_path}")
+        log(f"  Detailed transitions: {summary_path}")
+
+    log(f"{'='*60}")
 
 
 if __name__ == "__main__":
