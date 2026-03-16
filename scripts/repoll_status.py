@@ -149,7 +149,7 @@ def main():
     parser = argparse.ArgumentParser(description="Re-poll status for non-final historical jobs")
     parser.add_argument("--years", nargs="*", type=int, help="Specific years to re-poll (default: all)")
     parser.add_argument("--dry-run", action="store_true", help="Just count dates, don't query API")
-    parser.add_argument("--workers", type=int, default=10, help="Parallel API workers (default: 10)")
+    parser.add_argument("--workers", type=int, default=15, help="Parallel API workers (default: 15)")
     args = parser.parse_args()
 
     # Find all historical parquet files
