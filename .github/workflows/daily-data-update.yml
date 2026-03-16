@@ -142,28 +142,29 @@ jobs:
         PREV_YEAR=$((CURRENT_YEAR - 1))
         YEARS="$PREV_YEAR $CURRENT_YEAR"
 
-        # Older years rotate on a biweekly schedule using ISO week number.
-        # Two groups alternate every other week:
+        # Older years rotate by day of week (1=Mon .. 7=Sun)
+        # so each day only repolls a small batch:
         #
-        # Odd weeks (1,3,5,...):  2013-2016 + 2019-2020  (~26 + 709 = ~735 dates)
-        #   - 2013-2016: tiny, ~257 dates total (mostly resolved)
-        #   - 2019-2020: ~709 dates, ~148k non-final jobs
+        # Mon: 2013-2016  (~257 dates, mostly resolved)
+        # Tue: 2017-2018  (~719 dates)
+        # Wed: 2019-2020  (~709 dates)
+        # Thu: 2021-2022  (~702 dates)
+        # Fri: 2023       (~352 dates)
+        # Sat/Sun: just current + previous year
         #
-        # Even weeks (2,4,6,...): 2017-2018 + 2021-2023  (~719 + 1054 = ~1773 dates)
-        #   - 2017-2018: ~719 dates, ~229k non-final jobs
-        #   - 2021-2023: ~1054 dates, ~120k non-final jobs
-        #
-        WEEK=$(date +%V)
-        if [ $((WEEK % 2)) -eq 1 ]; then
-          YEARS="2013 2014 2015 2016 2019 2020 $YEARS"
-        else
-          YEARS="2017 2018 2021 2022 2023 $YEARS"
-        fi
+        DOW=$(date +%u)
+        case $DOW in
+          1) YEARS="2013 2014 2015 2016 $YEARS" ;;
+          2) YEARS="2017 2018 $YEARS" ;;
+          3) YEARS="2019 2020 $YEARS" ;;
+          4) YEARS="2021 2022 $YEARS" ;;
+          5) YEARS="2023 $YEARS" ;;
+        esac
 
         # Remove duplicates
         YEARS=$(echo $YEARS | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
-        echo "ISO week: $WEEK ($([ $((WEEK % 2)) -eq 1 ] && echo 'odd' || echo 'even'))"
+        echo "Day of week: $DOW"
         echo "Re-polling years: $YEARS"
         python scripts/repoll_status.py --years $YEARS --skip-recent-days 14
 
