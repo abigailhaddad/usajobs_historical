@@ -148,10 +148,20 @@ def parse_filters(params):
                 )
                 bind_values.extend([p.lower() for p in parts])
         else:
-            # Text search with LIKE
-            clauses.append(
-                f'LOWER(COALESCE(CAST("{param_name}" AS VARCHAR), \'\')) LIKE ?'
-            )
-            bind_values.append(f'%{value.lower()}%')
+            # Text search with LIKE — comma-separated terms match any (OR)
+            terms = [t.strip() for t in value.split(',') if t.strip()] if ',' in value else [value]
+            if len(terms) > 1:
+                like_parts = []
+                for t in terms:
+                    like_parts.append(
+                        f'LOWER(COALESCE(CAST("{param_name}" AS VARCHAR), \'\')) LIKE ?'
+                    )
+                    bind_values.append(f'%{t.lower()}%')
+                clauses.append(f'({" OR ".join(like_parts)})')
+            else:
+                clauses.append(
+                    f'LOWER(COALESCE(CAST("{param_name}" AS VARCHAR), \'\')) LIKE ?'
+                )
+                bind_values.append(f'%{value.lower()}%')
 
     return clauses, bind_values
