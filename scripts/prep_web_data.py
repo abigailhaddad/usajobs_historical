@@ -503,6 +503,32 @@ def main():
 
     conn.close()
 
+    # Precompute filter dropdown options (multiselect fields only, not text search)
+    PRECOMPUTE_FIELDS = ['hiringAgencyName', 'hiringDepartmentName', 'grade',
+                         'appointmentType', 'serviceType', 'status', 'occupationalSeries']
+    MULTI_VALUE = {'occupationalSeries'}
+    filter_options = {}
+    for field in PRECOMPUTE_FIELDS:
+        if field in MULTI_VALUE:
+            frows = conn.execute(
+                f"SELECT DISTINCT TRIM(unnest(string_split(CAST(\"{field}\" AS VARCHAR), '; '))) AS val "
+                f"FROM read_parquet('{OUT_PATH}') WHERE \"{field}\" IS NOT NULL "
+                f"AND TRIM(CAST(\"{field}\" AS VARCHAR)) != '' ORDER BY val"
+            ).fetchall()
+        else:
+            frows = conn.execute(
+                f"SELECT DISTINCT TRIM(CAST(\"{field}\" AS VARCHAR)) AS val "
+                f"FROM read_parquet('{OUT_PATH}') WHERE \"{field}\" IS NOT NULL "
+                f"AND TRIM(CAST(\"{field}\" AS VARCHAR)) != '' ORDER BY val"
+            ).fetchall()
+        filter_options[field] = [r[0] for r in frows if r[0] and r[0].strip()]
+        print(f"    {field}: {len(filter_options[field])} options")
+
+    total_depts = conn.execute(
+        f"SELECT COUNT(DISTINCT COALESCE(CAST(\"hiringDepartmentName\" AS VARCHAR), 'Unknown')) "
+        f"FROM read_parquet('{OUT_PATH}')"
+    ).fetchone()[0]
+
     static_data = {
         'jobs': {
             'draw': 1,
@@ -513,12 +539,13 @@ def main():
         'month': month_data,
         'department': {
             'labels': [r[0] for r in dept_rows],
-            'datasets': {'count': [r[1] for r in dept_rows]},
+            'datasets': {'count': [r[1] for r in dept_rows], 'total_distinct': total_depts},
         },
         'grade': {
             'labels': [r[0] for r in grade_rows],
             'datasets': {'count': [r[1] for r in grade_rows]},
         },
+        'filter_options': filter_options,
     }
 
     static_path = os.path.join(os.path.dirname(OUT_PATH), 'static.json')

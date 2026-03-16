@@ -363,7 +363,7 @@ class ServerSideFilterManager {
 
         const content = '<div class="filter-popover">'
             + '<div class="filter-title">Filter: ' + escapeHtml(col.name) + '</div>'
-            + '<input type="text" class="filter-text-input filter-search" placeholder="Enter search term..." value="' + escapeHtml(currentValue) + '">'
+            + '<input type="text" class="filter-text-input filter-search" placeholder="Search (comma-separate for multiple)..." value="' + escapeHtml(currentValue) + '">'
             + '<div class="filter-buttons">'
             + '<button class="btn btn-clear">Clear</button>'
             + '<button class="btn btn-apply">Apply</button>'

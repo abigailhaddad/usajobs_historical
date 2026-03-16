@@ -467,6 +467,12 @@
                         if (staticData.jobs) {
                             document.getElementById('statTotal').textContent = formatNumber(staticData.jobs.recordsTotal);
                         }
+                        // Prepopulate filter options cache so dropdowns open instantly
+                        if (staticData.filter_options) {
+                            for (const [field, values] of Object.entries(staticData.filter_options)) {
+                                filterManager._optionsCache[field] = values;
+                            }
+                        }
                     })
                     .catch(() => {
                         // Fallback to live API
