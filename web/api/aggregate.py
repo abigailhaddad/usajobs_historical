@@ -7,62 +7,11 @@ import duckdb
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
 from data_loader import get_parquet_path
-
-VALID_COLUMNS = {
-    'positionTitle', 'hiringAgencyName', 'hiringDepartmentName',
-    'grade', 'minimumSalary', 'maximumSalary',
-    'openDate', 'closeDate',
-    'workSchedule', 'appointmentType',
-    'locations', 'usajobsControlNumber', 'status', 'occupationalSeries',
-}
-
-
-def _parse_filters(params):
-    """Parse filter_ prefixed query params into WHERE clauses and bind values."""
-    clauses = []
-    bind_values = []
-
-    for key, values in params.items():
-        if not key.startswith('filter_'):
-            continue
-
-        param_name = key[len('filter_'):]
-        value = values[0] if values else ''
-
-        if not value:
-            continue
-
-        if param_name.endswith('_min'):
-            col = param_name[:-4]
-            if col in VALID_COLUMNS:
-                clauses.append(f'CAST("{col}" AS DOUBLE) >= ?')
-                bind_values.append(float(value))
-            continue
-
-        if param_name.endswith('_max'):
-            col = param_name[:-4]
-            if col in VALID_COLUMNS:
-                clauses.append(f'CAST("{col}" AS DOUBLE) <= ?')
-                bind_values.append(float(value))
-            continue
-
-        if param_name not in VALID_COLUMNS:
-            continue
-
-        if '|' in value:
-            parts = [v.strip() for v in value.split('|') if v.strip()]
-            placeholders = ', '.join(['?'] * len(parts))
-            clauses.append(f'LOWER(CAST("{param_name}" AS VARCHAR)) IN ({placeholders})')
-            bind_values.extend([p.lower() for p in parts])
-        else:
-            clauses.append(f'LOWER(CAST("{param_name}" AS VARCHAR)) LIKE ?')
-            bind_values.append(f'%{value.lower()}%')
-
-    return clauses, bind_values
+from columns import parse_filters
 
 
 def _build_where(params):
-    clauses, bind_values = _parse_filters(params)
+    clauses, bind_values = parse_filters(params)
     where_sql = f'WHERE {" AND ".join(clauses)}' if clauses else ''
     return where_sql, bind_values
 
@@ -96,34 +45,44 @@ class handler(BaseHTTPRequestHandler):
             parquet_path = get_parquet_path()
 
             if group_by == 'month':
+                # Single CTE-based query: reads parquet once, computes all aggregations
                 query = (
-                    f"SELECT strftime(CAST(\"openDate\" AS DATE), '%Y-%m') AS month_label, "
-                    f"COUNT(*) AS cnt, "
-                    f"ROUND(AVG(CAST(\"maximumSalary\" AS DOUBLE)), 0) AS avg_sal "
-                    f"FROM read_parquet('{parquet_path}') "
-                    f"{where_sql} "
-                    f"AND \"openDate\" IS NOT NULL "
-                    f"GROUP BY month_label ORDER BY month_label"
-                ) if where_sql else (
-                    f"SELECT strftime(CAST(\"openDate\" AS DATE), '%Y-%m') AS month_label, "
-                    f"COUNT(*) AS cnt, "
-                    f"ROUND(AVG(CAST(\"maximumSalary\" AS DOUBLE)), 0) AS avg_sal "
-                    f"FROM read_parquet('{parquet_path}') "
-                    f"WHERE \"openDate\" IS NOT NULL "
-                    f"GROUP BY month_label ORDER BY month_label"
+                    f"WITH base AS ("
+                    f"  SELECT * FROM read_parquet('{parquet_path}') {where_sql}"
+                    f"), "
+                    f"monthly AS ("
+                    f"  SELECT strftime(CAST(\"openDate\" AS DATE), '%Y-%m') AS month_label, "
+                    f"  COUNT(*) AS cnt, "
+                    f"  ROUND(AVG(CAST(\"maximumSalary\" AS DOUBLE)), 0) AS avg_sal "
+                    f"  FROM base WHERE \"openDate\" IS NOT NULL "
+                    f"  GROUP BY month_label"
+                    f"), "
+                    f"dates AS ("
+                    f"  SELECT MIN(CAST(\"openDate\" AS DATE)) AS min_date, "
+                    f"  MAX(CAST(\"openDate\" AS DATE)) AS max_date "
+                    f"  FROM base WHERE \"openDate\" IS NOT NULL"
+                    f"), "
+                    f"series AS ("
+                    f"  SELECT COUNT(DISTINCT TRIM(s.v)) AS distinct_series "
+                    f"  FROM base, "
+                    f"  LATERAL (SELECT unnest(string_split(CAST(\"occupationalSeries\" AS VARCHAR), '; ')) AS v) s "
+                    f"  WHERE \"occupationalSeries\" IS NOT NULL"
+                    f") "
+                    f"SELECT m.month_label, m.cnt, m.avg_sal, "
+                    f"d.min_date, d.max_date, s.distinct_series "
+                    f"FROM monthly m CROSS JOIN dates d CROSS JOIN series s "
+                    f"ORDER BY m.month_label"
                 )
-
                 rows = conn.execute(query, bind_values).fetchall()
 
-                # Distinct occupational series count
-                series_where = where_sql if where_sql else ''
-                series_query = (
-                    f"SELECT COUNT(DISTINCT \"occupationalSeries\") "
-                    f"FROM read_parquet('{parquet_path}') "
-                    f"{series_where} "
-                    f"{'AND' if series_where else 'WHERE'} \"occupationalSeries\" IS NOT NULL"
-                )
-                series_count = conn.execute(series_query, bind_values).fetchone()[0]
+                if rows:
+                    min_date = str(rows[0][3]) if rows[0][3] else None
+                    max_date = str(rows[0][4]) if rows[0][4] else None
+                    series_count = rows[0][5]
+                else:
+                    min_date = None
+                    max_date = None
+                    series_count = 0
 
                 # Fill missing months so the X-axis is continuous
                 row_map = {r[0]: r for r in rows}
@@ -144,10 +103,12 @@ class handler(BaseHTTPRequestHandler):
                         'count': [row_map[mo][1] if mo in row_map else 0 for mo in all_months],
                         'avg_salary': [int(row_map[mo][2]) if mo in row_map and row_map[mo][2] is not None else 0 for mo in all_months],
                         'distinct_series': series_count,
+                        'min_date': min_date,
+                        'max_date': max_date,
                     }
                 else:
                     labels = []
-                    datasets = {'count': [], 'avg_salary': [], 'distinct_series': 0}
+                    datasets = {'count': [], 'avg_salary': [], 'distinct_series': 0, 'min_date': None, 'max_date': None}
 
             elif group_by == 'agency':
                 query = (
@@ -211,6 +172,7 @@ class handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Cache-Control', 'public, max-age=300')
             self.end_headers()
             self.wfile.write(json.dumps(response).encode('utf-8'))
 

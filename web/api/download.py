@@ -8,90 +8,9 @@ import duckdb
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
 from data_loader import get_parquet_path
-
-COLUMNS = [
-    'positionTitle',
-    'hiringDepartmentName',
-    'hiringAgencyName',
-    'grade',
-    'minimumSalary',
-    'maximumSalary',
-    'openDate',
-    'closeDate',
-    'appointmentType',
-    'serviceType',
-    'locations',
-    'status',
-    'usajobsControlNumber',
-]
-
-COLUMN_HEADERS = [
-    'Position Title',
-    'Department',
-    'Agency',
-    'Grade',
-    'Min Salary',
-    'Max Salary',
-    'Open Date',
-    'Close Date',
-    'Appointment Type',
-    'Service',
-    'Locations',
-    'Status',
-    'Control Number',
-]
+from columns import COLUMNS, COLUMN_HEADERS, parse_filters
 
 MAX_ROWS = 500000
-
-SORTABLE_COLUMNS = {i: col for i, col in enumerate(COLUMNS)}
-
-
-def _parse_filters(params):
-    """Parse filter_ prefixed query params into WHERE clauses and bind values."""
-    clauses = []
-    bind_values = []
-
-    for key, values in params.items():
-        if not key.startswith('filter_'):
-            continue
-
-        param_name = key[len('filter_'):]
-        value = values[0] if values else ''
-
-        if not value:
-            continue
-
-        # Range filters: filter_minimumSalary_min, filter_minimumSalary_max
-        if param_name.endswith('_min'):
-            col = param_name[:-4]
-            if col in SORTABLE_COLUMNS.values():
-                clauses.append(f'CAST("{col}" AS DOUBLE) >= ?')
-                bind_values.append(float(value))
-            continue
-
-        if param_name.endswith('_max'):
-            col = param_name[:-4]
-            if col in SORTABLE_COLUMNS.values():
-                clauses.append(f'CAST("{col}" AS DOUBLE) <= ?')
-                bind_values.append(float(value))
-            continue
-
-        # Column must be valid
-        if param_name not in SORTABLE_COLUMNS.values():
-            continue
-
-        # Pipe-separated multiselect
-        if '|' in value:
-            parts = [v.strip() for v in value.split('|') if v.strip()]
-            placeholders = ', '.join(['?'] * len(parts))
-            clauses.append(f'LOWER(COALESCE(CAST("{param_name}" AS VARCHAR), \'\')) IN ({placeholders})')
-            bind_values.extend([p.lower() for p in parts])
-        else:
-            # Text search with LIKE
-            clauses.append(f'LOWER(COALESCE(CAST("{param_name}" AS VARCHAR), \'\')) LIKE ?')
-            bind_values.append(f'%{value.lower()}%')
-
-    return clauses, bind_values
 
 
 def _get_conn():
@@ -113,14 +32,8 @@ class handler(BaseHTTPRequestHandler):
             params = parse_qs(parsed.query)
 
             # Build WHERE from filters
-            where_clauses = []
-            bind_values = []
-
-            filter_clauses, filter_values = _parse_filters(params)
-            where_clauses.extend(filter_clauses)
-            bind_values.extend(filter_values)
-
-            where_sql = f'WHERE {" AND ".join(where_clauses)}' if where_clauses else ''
+            filter_clauses, bind_values = parse_filters(params)
+            where_sql = f'WHERE {" AND ".join(filter_clauses)}' if filter_clauses else ''
 
             col_list = ', '.join([f'COALESCE(CAST("{c}" AS VARCHAR), \'\')' for c in COLUMNS])
 

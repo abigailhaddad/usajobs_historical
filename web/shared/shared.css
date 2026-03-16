@@ -277,7 +277,8 @@ a:hover {
 
 .add-filter-btn,
 .copy-link-btn,
-.csv-download-btn {
+.csv-download-btn,
+.clear-filters-btn {
     font-family: var(--font-heading);
     font-size: 0.8125rem;
     font-weight: 500;
@@ -292,7 +293,8 @@ a:hover {
 
 .add-filter-btn:hover,
 .copy-link-btn:hover,
-.csv-download-btn:hover {
+.csv-download-btn:hover,
+.clear-filters-btn:hover {
     border-color: var(--color-highlight);
 }
 
@@ -568,18 +570,6 @@ table.dataTable tbody tr:hover {
     padding: 0.25rem 0;
 }
 
-/* DataTables sorting arrows — override blue highlight */
-table.dataTable thead .sorting_asc,
-table.dataTable thead .sorting_desc {
-    color: var(--color-accent) !important;
-}
-
-/* DataTables Bootstrap 5 sort icon colors */
-table.dataTable > thead > tr > th.sorting_asc::after,
-table.dataTable > thead > tr > th.sorting_desc::after {
-    color: var(--color-accent) !important;
-    opacity: 1 !important;
-}
 
 /* DataTables processing indicator */
 .dataTables_processing {

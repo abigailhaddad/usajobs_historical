@@ -114,13 +114,11 @@ class ServerSideFilterManager {
         this.onFilterChange = options.onFilterChange || null;
         this.table = null;
         this.activeFilters = {};
-        this.activeSorts = []; // [{field, direction, name}]
         this._optionsCache = {};
 
-        // Parse URL filters and sorts early so they're available for the first DataTable AJAX call
+        // Parse URL filters early so they're available for the first DataTable AJAX call
         if (this.syncURL) {
             this._applyFiltersFromURL();
-            this._applySortsFromURL();
         }
     }
 
@@ -130,30 +128,10 @@ class ServerSideFilterManager {
             this._setupFilterBar();
         }
 
-        // Apply initial sort from URL before first draw
-        if (this.activeSorts.length > 0) {
-            const dtOrder = this.activeSorts.map(s => {
-                const col = this.columns.find(c => c.field === s.field);
-                return col ? [col.index, s.direction] : null;
-            }).filter(Boolean);
-            if (dtOrder.length > 0) {
-                this.table.order(dtOrder);
-            }
-        }
 
-        // Track sort state from DataTables order events
-        $(this.table.table().node()).on('order.dt', () => {
-            const dtOrder = this.table.order();
-            this.activeSorts = dtOrder.map(([colIdx, dir]) => {
-                const col = this.columns.find(c => c.index === colIdx);
-                return col ? { field: col.field, direction: dir, name: col.name } : null;
-            }).filter(Boolean);
-            this._updateFilterBar();
-            if (this.syncURL) this._updateURL();
-        });
 
         // Update filter bar UI (filters were already parsed in constructor)
-        if (Object.keys(this.activeFilters).length > 0 || this.activeSorts.length > 0) {
+        if (Object.keys(this.activeFilters).length > 0) {
             this._updateFilterBar();
         }
     }
@@ -171,11 +149,11 @@ class ServerSideFilterManager {
         for (const [field, filter] of Object.entries(this.activeFilters)) {
             if (filter.type === 'multiselect' && filter.values && filter.values.length > 0) {
                 params['filter_' + field] = filter.values.join('|');
-            } else if (filter.type === 'range') {
-                if (filter.min !== null && filter.min !== undefined) {
+            } else if (filter.type === 'range' || filter.type === 'daterange') {
+                if (filter.min !== null && filter.min !== undefined && filter.min !== '') {
                     params['filter_' + field + '_min'] = filter.min;
                 }
-                if (filter.max !== null && filter.max !== undefined) {
+                if (filter.max !== null && filter.max !== undefined && filter.max !== '') {
                     params['filter_' + field + '_max'] = filter.max;
                 }
             } else if (filter.type === 'text' && filter.value) {
@@ -213,6 +191,17 @@ class ServerSideFilterManager {
             buttonContainer.appendChild(addBtn);
         }
         addBtn.addEventListener('click', () => this._openFilterSelection());
+
+        let clearBtn = buttonContainer.querySelector('.clear-filters-btn');
+        if (!clearBtn) {
+            clearBtn = document.createElement('button');
+            clearBtn.className = 'clear-filters-btn';
+            clearBtn.textContent = 'Clear All';
+            clearBtn.title = 'Remove all filters';
+            clearBtn.style.display = 'none';
+            buttonContainer.appendChild(clearBtn);
+            clearBtn.addEventListener('click', () => this.clearAll());
+        }
 
         if (this.syncURL && this.showCopyLinkButton) {
             let copyBtn = buttonContainer.querySelector('.copy-link-btn');
@@ -272,6 +261,8 @@ class ServerSideFilterManager {
             this._openMultiselectDialog(col);
         } else if (col.filterType === 'range') {
             this._openRangeDialog(col);
+        } else if (col.filterType === 'daterange') {
+            this._openDateRangeDialog(col);
         } else if (col.filterType === 'text') {
             this._openTextDialog(col);
         }
@@ -456,6 +447,59 @@ class ServerSideFilterManager {
         });
     }
 
+    // ---- Date Range Dialog ----
+
+    _openDateRangeDialog(col) {
+        const currentFilter = this.activeFilters[col.field];
+        const currentMin = currentFilter?.min ?? '';
+        const currentMax = currentFilter?.max ?? '';
+
+        const content = '<div class="filter-popover">'
+            + '<div class="filter-title">Filter: ' + escapeHtml(col.name) + '</div>'
+            + '<div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">'
+            + '<input type="date" class="filter-date-min filter-search" value="' + escapeHtml(String(currentMin)) + '" style="flex:1;">'
+            + '<span style="color: var(--color-text-muted);">to</span>'
+            + '<input type="date" class="filter-date-max filter-search" value="' + escapeHtml(String(currentMax)) + '" style="flex:1;">'
+            + '</div>'
+            + '<div class="filter-buttons">'
+            + '<button class="btn btn-clear">Clear</button>'
+            + '<button class="btn btn-apply">Apply</button>'
+            + '</div></div>';
+
+        const modal = createModal({ content });
+        const $popover = $(modal).find('.filter-popover');
+
+        $popover.find('.filter-date-min').focus();
+
+        $popover.find('input[type="date"]').on('keypress', function (e) {
+            if (e.key === 'Enter') $popover.find('.btn-apply').click();
+        });
+
+        $popover.find('.btn-clear').on('click', () => {
+            delete this.activeFilters[col.field];
+            this._applyAndRedraw();
+            closeModal(modal);
+        });
+
+        $popover.find('.btn-apply').on('click', () => {
+            const minVal = $popover.find('.filter-date-min').val().trim();
+            const maxVal = $popover.find('.filter-date-max').val().trim();
+
+            if (minVal || maxVal) {
+                this.activeFilters[col.field] = {
+                    type: 'daterange',
+                    min: minVal || null,
+                    max: maxVal || null,
+                    name: col.name
+                };
+            } else {
+                delete this.activeFilters[col.field];
+            }
+            this._applyAndRedraw();
+            closeModal(modal);
+        });
+    }
+
     // ---- Apply Filters and Redraw ----
 
     _applyAndRedraw() {
@@ -475,17 +519,16 @@ class ServerSideFilterManager {
         if (!filterBar) return;
 
         filterBar.querySelectorAll('.filter-chip.column-filter-chip').forEach(c => c.remove());
-        filterBar.querySelectorAll('.filter-chip.sort-chip').forEach(c => c.remove());
         const existingLabel = filterBar.querySelector('.bar-label.filter-label');
         if (existingLabel) existingLabel.remove();
-        const existingSortLabel = filterBar.querySelector('.bar-label.sort-label');
-        if (existingSortLabel) existingSortLabel.remove();
 
         const hasFilters = Object.keys(this.activeFilters).length > 0;
-        const hasSorts = this.activeSorts.length > 0;
 
         const emptyMsg = filterBar.querySelector('.filters-bar-empty');
-        if (emptyMsg) emptyMsg.style.display = (hasFilters || hasSorts) ? 'none' : '';
+        if (emptyMsg) emptyMsg.style.display = hasFilters ? 'none' : '';
+
+        const clearBtn = document.querySelector('.clear-filters-btn');
+        if (clearBtn) clearBtn.style.display = hasFilters ? '' : 'none';
 
         if (hasFilters) {
             const label = document.createElement('span');
@@ -506,6 +549,12 @@ class ServerSideFilterManager {
                     if (filter.min !== null) parts.push(fmt(filter.min));
                     parts.push('\u2013');
                     if (filter.max !== null) parts.push(fmt(filter.max));
+                    displayValue = parts.join(' ');
+                } else if (filter.type === 'daterange') {
+                    const parts = [];
+                    if (filter.min) parts.push(filter.min);
+                    parts.push('\u2013');
+                    if (filter.max) parts.push(filter.max);
                     displayValue = parts.join(' ');
                 } else {
                     displayValue = filter.value;
@@ -534,45 +583,6 @@ class ServerSideFilterManager {
             });
         }
 
-        if (hasSorts) {
-            const sortLabel = document.createElement('span');
-            sortLabel.className = 'bar-label sort-label';
-            sortLabel.textContent = 'Sorted by:';
-            filterBar.appendChild(sortLabel);
-
-            this.activeSorts.forEach((sort, idx) => {
-                const chip = document.createElement('div');
-                chip.className = 'filter-chip sort-chip';
-
-                const arrow = sort.direction === 'desc' ? '\u2193' : '\u2191';
-
-                const chipValue = document.createElement('span');
-                chipValue.className = 'filter-chip-value';
-                chipValue.textContent = sort.name + ' ' + arrow;
-
-                const chipRemove = document.createElement('span');
-                chipRemove.className = 'filter-chip-remove';
-                chipRemove.textContent = '\u00d7';
-                chipRemove.addEventListener('click', () => {
-                    // Remove this sort and re-apply
-                    const remaining = this.activeSorts.filter((_, i) => i !== idx);
-                    if (remaining.length > 0) {
-                        const dtOrder = remaining.map(s => {
-                            const col = this.columns.find(c => c.field === s.field);
-                            return col ? [col.index, s.direction] : null;
-                        }).filter(Boolean);
-                        this.table.order(dtOrder).draw();
-                    } else {
-                        // Reset to default sort
-                        this.table.order([[6, 'desc']]).draw();
-                    }
-                });
-
-                chip.appendChild(chipValue);
-                chip.appendChild(chipRemove);
-                filterBar.appendChild(chip);
-            });
-        }
     }
 
     // ---- URL Sync ----
@@ -584,6 +594,10 @@ class ServerSideFilterManager {
         Object.entries(this.activeFilters).forEach(([field, filter]) => {
             if (filter.type === 'multiselect') {
                 url.searchParams.set(field, filter.values.join(','));
+            } else if (filter.type === 'daterange') {
+                const min = filter.min || '';
+                const max = filter.max || '';
+                url.searchParams.set(field, min + '~' + max);
             } else if (filter.type === 'range') {
                 const min = filter.min !== null ? filter.min : '';
                 const max = filter.max !== null ? filter.max : '';
@@ -592,17 +606,6 @@ class ServerSideFilterManager {
                 url.searchParams.set(field, filter.value);
             }
         });
-
-        // Persist sort state (skip if it's just the default sort)
-        const isDefaultSort = this.activeSorts.length === 1
-            && this.activeSorts[0].field === 'openDate'
-            && this.activeSorts[0].direction === 'desc';
-        if (this.activeSorts.length > 0 && !isDefaultSort) {
-            const sortParam = this.activeSorts
-                .map(s => s.field + ':' + s.direction)
-                .join(',');
-            url.searchParams.set('sort', sortParam);
-        }
 
         window.history.replaceState({}, '', url);
     }
@@ -630,6 +633,14 @@ class ServerSideFilterManager {
                     this.activeFilters[col.field] = { type: 'multiselect', values, name: col.name };
                     hasFilters = true;
                 }
+            } else if (col.filterType === 'daterange') {
+                const parts = value.split('~');
+                const min = parts[0] || null;
+                const max = parts.length > 1 && parts[1] ? parts[1] : null;
+                if (min || max) {
+                    this.activeFilters[col.field] = { type: 'daterange', min, max, name: col.name };
+                    hasFilters = true;
+                }
             } else if (col.filterType === 'range') {
                 const parts = value.split('-');
                 const min = parts[0] !== '' ? parseFloat(parts[0]) : null;
@@ -652,22 +663,6 @@ class ServerSideFilterManager {
         }
     }
 
-    _applySortsFromURL() {
-        const params = new URLSearchParams(window.location.search);
-        const sortParam = params.get('sort');
-        if (!sortParam) return;
-
-        const sorts = sortParam.split(',').map(part => {
-            const [field, dir] = part.split(':');
-            const col = this.columns.find(c => c.field === field);
-            if (!col || (dir !== 'asc' && dir !== 'desc')) return null;
-            return { field: col.field, direction: dir, name: col.name };
-        }).filter(Boolean);
-
-        if (sorts.length > 0) {
-            this.activeSorts = sorts;
-        }
-    }
 
     clearAll() {
         this.activeFilters = {};

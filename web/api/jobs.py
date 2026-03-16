@@ -7,89 +7,12 @@ import duckdb
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
 from data_loader import get_parquet_path
-
-COLUMNS = [
-    'positionTitle',
-    'hiringDepartmentName',
-    'hiringAgencyName',
-    'grade',
-    'minimumSalary',
-    'maximumSalary',
-    'openDate',
-    'closeDate',
-    'appointmentType',
-    'serviceType',
-    'locations',
-    'status',
-    'usajobsControlNumber',
-]
-
-SORTABLE_COLUMNS = {i: col for i, col in enumerate(COLUMNS)}
-
-# Text-searchable columns for global search
-TEXT_COLUMNS = [
-    'positionTitle',
-    'hiringDepartmentName',
-    'hiringAgencyName',
-    'grade',
-    'locations',
-    'appointmentType',
-    'serviceType',
-    'status',
-]
+from columns import COLUMNS, SORTABLE_COLUMNS, TEXT_SEARCH_COLUMNS, parse_filters
 
 
 def _get_conn():
     conn = duckdb.connect(':memory:', read_only=False)
     return conn
-
-
-def _parse_filters(params):
-    """Parse filter_ prefixed query params into WHERE clauses and bind values."""
-    clauses = []
-    bind_values = []
-
-    for key, values in params.items():
-        if not key.startswith('filter_'):
-            continue
-
-        param_name = key[len('filter_'):]
-        value = values[0] if values else ''
-
-        if not value:
-            continue
-
-        # Range filters: filter_minimumSalary_min, filter_minimumSalary_max
-        if param_name.endswith('_min'):
-            col = param_name[:-4]
-            if col in SORTABLE_COLUMNS.values():
-                clauses.append(f'CAST("{col}" AS DOUBLE) >= ?')
-                bind_values.append(float(value))
-            continue
-
-        if param_name.endswith('_max'):
-            col = param_name[:-4]
-            if col in SORTABLE_COLUMNS.values():
-                clauses.append(f'CAST("{col}" AS DOUBLE) <= ?')
-                bind_values.append(float(value))
-            continue
-
-        # Column must be valid
-        if param_name not in SORTABLE_COLUMNS.values():
-            continue
-
-        # Pipe-separated multiselect
-        if '|' in value:
-            parts = [v.strip() for v in value.split('|') if v.strip()]
-            placeholders = ', '.join(['?'] * len(parts))
-            clauses.append(f'LOWER(COALESCE(CAST("{param_name}" AS VARCHAR), \'\')) IN ({placeholders})')
-            bind_values.extend([p.lower() for p in parts])
-        else:
-            # Text search with LIKE
-            clauses.append(f'LOWER(COALESCE(CAST("{param_name}" AS VARCHAR), \'\')) LIKE ?')
-            bind_values.append(f'%{value.lower()}%')
-
-    return clauses, bind_values
 
 
 class handler(BaseHTTPRequestHandler):
@@ -135,13 +58,13 @@ class handler(BaseHTTPRequestHandler):
 
             if search_value:
                 search_parts = []
-                for col in TEXT_COLUMNS:
+                for col in TEXT_SEARCH_COLUMNS:
                     search_parts.append(f'LOWER(COALESCE(CAST("{col}" AS VARCHAR), \'\')) LIKE ?')
                     bind_values.append(f'%{search_value.lower()}%')
                 where_clauses.append(f'({" OR ".join(search_parts)})')
 
             # Custom filters
-            filter_clauses, filter_values = _parse_filters(params)
+            filter_clauses, filter_values = parse_filters(params)
             where_clauses.extend(filter_clauses)
             bind_values.extend(filter_values)
 
@@ -158,23 +81,14 @@ class handler(BaseHTTPRequestHandler):
             ).fetchone()
             records_total = total_result[0] if total_result else 0
 
-            # Filtered count
-            if where_clauses:
-                filtered_result = conn.execute(
-                    f"SELECT COUNT(*) FROM read_parquet('{parquet_path}') {where_sql}",
-                    bind_values,
-                ).fetchone()
-                records_filtered = filtered_result[0] if filtered_result else 0
-            else:
-                records_filtered = records_total
-
-            # Data query
+            # Data query with COUNT(*) OVER() to get filtered count for free
             order_clause = ", ".join(
                 f"COALESCE(CAST(\"{col}\" AS VARCHAR), '') {d}"
                 for col, d in order_parts
             )
             query = (
-                f'SELECT {col_list} FROM read_parquet(\'{parquet_path}\') '
+                f'SELECT {col_list}, COUNT(*) OVER() AS _total_filtered '
+                f'FROM read_parquet(\'{parquet_path}\') '
                 f'{where_sql} '
                 f'ORDER BY {order_clause} '
                 f'LIMIT ? OFFSET ?'
@@ -184,7 +98,12 @@ class handler(BaseHTTPRequestHandler):
 
             conn.close()
 
-            data = [list(row) for row in rows]
+            if rows:
+                records_filtered = rows[0][-1]
+                data = [list(row[:-1]) for row in rows]
+            else:
+                records_filtered = 0 if where_clauses else records_total
+                data = []
 
             response = {
                 'draw': draw,
