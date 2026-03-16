@@ -408,6 +408,11 @@ def main():
 
     out = combined[OUTPUT_COLUMNS].copy()
 
+    # Trim leading/trailing whitespace from all string columns
+    for col in out.columns:
+        if out[col].dtype == object:
+            out[col] = out[col].str.strip()
+
     # Write output
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     out.to_parquet(OUT_PATH, index=False, compression="snappy")
