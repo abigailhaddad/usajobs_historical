@@ -197,8 +197,28 @@ def update_and_insert(parquet_path: str, status_map: Dict[str, str],
         # Final safety: serialize any remaining list/dict values in ALL object columns
         for col in df.columns:
             if df[col].dtype == object:
-                df[col] = df[col].apply(lambda x: json.dumps(x) if isinstance(x, (list, dict)) else x)
-        df.to_parquet(parquet_path, index=False)
+                list_mask = df[col].apply(lambda x: isinstance(x, (list, dict)))
+                n_lists = list_mask.sum()
+                if n_lists > 0:
+                    print(f"  SANITIZE: {parquet_path} column '{col}' has {n_lists} list/dict values — converting to JSON")
+                    # Show a sample for debugging
+                    sample = df.loc[list_mask, col].iloc[0]
+                    print(f"    Sample value ({type(sample).__name__}): {str(sample)[:200]}")
+                    df[col] = df[col].apply(lambda x: json.dumps(x) if isinstance(x, (list, dict)) else x)
+        try:
+            df.to_parquet(parquet_path, index=False)
+        except Exception as e:
+            # Diagnostic dump on failure
+            print(f"  ERROR saving {parquet_path}: {e}")
+            for col in df.columns:
+                if df[col].dtype == object:
+                    types = df[col].apply(type).value_counts()
+                    if len(types) > 1:
+                        print(f"    Column '{col}' mixed types: {dict(types)}")
+                        for t, count in types.items():
+                            sample = df[df[col].apply(lambda x: type(x) == t)][col].iloc[0]
+                            print(f"      {t.__name__} (n={count}): {str(sample)[:150]}")
+            raise
 
     return changed, inserted, transitions
 
