@@ -6,7 +6,7 @@ import duckdb
 
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
-from data_loader import get_parquet_path
+from data_loader import get_parquet_path, get_conn
 from columns import DROPDOWN_FIELDS, MULTI_VALUE_FIELDS, parse_filters
 
 
@@ -38,7 +38,7 @@ class handler(BaseHTTPRequestHandler):
             clauses, bind_values = parse_filters(params)
             where_sql = f'WHERE {" AND ".join(clauses)}' if clauses else ''
 
-            conn = duckdb.connect(':memory:', read_only=False)
+            conn = get_conn()
             parquet_path = get_parquet_path()
 
             if field in MULTI_VALUE_FIELDS:
