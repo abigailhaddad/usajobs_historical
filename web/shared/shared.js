@@ -348,7 +348,8 @@ class ServerSideFilterManager {
         if (this._optionsCache[field]) {
             return this._optionsCache[field];
         }
-        const resp = await fetch('/api/filter_options?field=' + encodeURIComponent(field));
+        const base = window.API_BASE || '';
+        const resp = await fetch(base + '/api/filter_options?field=' + encodeURIComponent(field));
         const data = await resp.json();
         if (data.error) throw new Error(data.error);
         this._optionsCache[field] = data.values || [];
