@@ -114,6 +114,12 @@
     <script src="shared/shared.js"></script>
     <script>
         // ============================================
+        // API Configuration
+        // ============================================
+        const API_BASE = '';
+        window.API_BASE = API_BASE;
+
+        // ============================================
         // Column Configuration
         // ============================================
 
@@ -271,9 +277,9 @@
 
             try {
                 const [monthResp, agencyResp, gradeResp] = await Promise.all([
-                    fetch('/api/aggregate?group_by=month' + sep + qs).then(r => r.json()),
-                    fetch('/api/aggregate?group_by=department' + sep + qs).then(r => r.json()),
-                    fetch('/api/aggregate?group_by=grade' + sep + qs).then(r => r.json())
+                    fetch(API_BASE + '/api/aggregate?group_by=month' + sep + qs).then(r => r.json()),
+                    fetch(API_BASE + '/api/aggregate?group_by=department' + sep + qs).then(r => r.json()),
+                    fetch(API_BASE + '/api/aggregate?group_by=grade' + sep + qs).then(r => r.json())
                 ]);
 
                 // Jobs by Month
@@ -351,8 +357,12 @@
                 serverSide: true,
                 processing: true,
                 ajax: {
-                    url: '/api/jobs',
+                    url: API_BASE + '/api/jobs',
+                    timeout: 120000,  // 2 min timeout for cold start
                     data: function (d) {
+                        // Strip column metadata to keep URL short (server doesn't use it)
+                        delete d.columns;
+                        delete d.search;
                         // Merge filter params into DataTables request
                         const filterParams = filterManager.getServerParams();
                         Object.assign(d, filterParams);
@@ -360,7 +370,9 @@
                     },
                     error: function (xhr, error, thrown) {
                         console.error('Table data load failed:', error, thrown);
-                        showToast('Failed to load table data', true);
+                        showToast('Failed to load table data — retrying...', true);
+                        // Retry once after cold start
+                        setTimeout(() => table.ajax.reload(), 3000);
                     }
                 },
                 columns: [
@@ -442,7 +454,7 @@
             csvBtn.title = 'Download filtered data as CSV';
             csvBtn.addEventListener('click', function () {
                 const qs = filterManager.getFilterQueryString();
-                const url = '/api/download' + (qs ? '?' + qs : '');
+                const url = API_BASE + '/api/download' + (qs ? '?' + qs : '');
                 window.open(url, '_blank');
             });
             toolbarEl.appendChild(csvBtn);
@@ -458,7 +470,7 @@
             // Load precomputed static data for instant first render
             const hasFilters = Object.keys(filterManager.activeFilters).length > 0;
             if (!hasFilters) {
-                fetch('/api/static_data')
+                fetch(API_BASE + '/api/static_data')
                     .then(r => r.json())
                     .then(staticData => {
                         // Populate charts immediately from static data
