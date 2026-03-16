@@ -194,20 +194,31 @@ def update_and_insert(parquet_path: str, status_map: Dict[str, str],
             inserted = len(new_rows)
 
     if changed > 0 or inserted > 0:
+        import numpy as np
         # Nuclear fix: force known list-type columns to plain strings.
-        # pyarrow reads parquet list columns into ArrowDtype which pandas
-        # isinstance() checks miss entirely. Converting to object then
-        # serializing any remaining non-scalars catches everything.
+        # pyarrow reads parquet list columns into ArrowDtype. After
+        # .astype(object), these become numpy ndarrays (not Python lists)
+        # and pyarrow NA (not None). Must handle both.
         LIST_PRONE_COLS = ['hiringpaths', 'HiringPaths', 'jobcategories', 'JobCategories',
                            'positionlocations', 'PositionLocations']
+
+        def _to_json_str(x):
+            if x is None or (isinstance(x, float) and pd.isna(x)):
+                return None
+            try:
+                if pd.isna(x):
+                    return None
+            except (ValueError, TypeError):
+                pass
+            if isinstance(x, np.ndarray):
+                return json.dumps(x.tolist())
+            if isinstance(x, (list, dict)):
+                return json.dumps(x)
+            return x
+
         for col in LIST_PRONE_COLS:
             if col in df.columns:
-                # Force to Python objects first (escapes ArrowDtype)
-                df[col] = df[col].astype(object)
-                df[col] = df[col].apply(
-                    lambda x: json.dumps(x) if isinstance(x, (list, dict)) else x
-                )
-                print(f"  Forced {col} to string (dtype now: {df[col].dtype})")
+                df[col] = df[col].astype(object).apply(_to_json_str)
         df.to_parquet(parquet_path, index=False)
 
     return changed, inserted, transitions
