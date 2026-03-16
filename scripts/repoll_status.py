@@ -116,6 +116,14 @@ def update_and_insert(parquet_path: str, status_map: Dict[str, str],
 
     df = pd.read_parquet(parquet_path)
 
+    # Sanitize columns that may have mixed list/string types (fixes ArrowInvalid on save)
+    for col in ['hiringpaths', 'HiringPaths', 'jobcategories', 'JobCategories',
+                'positionlocations', 'PositionLocations']:
+        if col in df.columns and df[col].dtype == object:
+            has_lists = df[col].apply(lambda x: isinstance(x, (list, dict))).any()
+            if has_lists:
+                df[col] = df[col].apply(lambda x: json.dumps(x) if isinstance(x, (list, dict)) else x)
+
     # Build lookup key column
     if 'usajobsControlNumber' in df.columns:
         key_col = 'usajobsControlNumber'
