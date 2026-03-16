@@ -73,8 +73,11 @@ def analyze_data_coverage():
     
     all_years = set()
     for f in historical_files + current_files:
-        year = int(f.split('_')[-1].replace('.parquet', ''))
-        all_years.add(year)
+        part = f.split('_')[-1].replace('.parquet', '')
+        try:
+            all_years.add(int(part))
+        except ValueError:
+            continue  # skip backup files etc.
     
     for year in sorted(all_years):
         hist_file = f'../data/historical_jobs_{year}.parquet'
