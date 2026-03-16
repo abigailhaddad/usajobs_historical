@@ -194,6 +194,10 @@ def update_and_insert(parquet_path: str, status_map: Dict[str, str],
             inserted = len(new_rows)
 
     if changed > 0 or inserted > 0:
+        # Final safety: serialize any remaining list/dict values in ALL object columns
+        for col in df.columns:
+            if df[col].dtype == object:
+                df[col] = df[col].apply(lambda x: json.dumps(x) if isinstance(x, (list, dict)) else x)
         df.to_parquet(parquet_path, index=False)
 
     return changed, inserted, transitions
