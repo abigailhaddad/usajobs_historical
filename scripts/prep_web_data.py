@@ -457,8 +457,10 @@ def main():
     ).fetchone()[0]
 
     distinct_series = conn.execute(
-        f"SELECT COUNT(DISTINCT TRIM(unnest(string_split(CAST(\"occupationalSeries\" AS VARCHAR), '; ')))) "
-        f"FROM read_parquet('{OUT_PATH}') WHERE \"occupationalSeries\" IS NOT NULL"
+        f"SELECT COUNT(DISTINCT v) FROM ("
+        f"  SELECT TRIM(unnest(string_split(CAST(\"occupationalSeries\" AS VARCHAR), '; '))) AS v "
+        f"  FROM read_parquet('{OUT_PATH}') WHERE \"occupationalSeries\" IS NOT NULL"
+        f")"
     ).fetchone()[0]
 
     # Fill month gaps

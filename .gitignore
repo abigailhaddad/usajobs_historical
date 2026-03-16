@@ -10,9 +10,10 @@ data/duckdb/*.duckdb.wal
 *.duckdb.wal
 download/*.duckdb
 
-# Data files - Parquet (stored in Cloudflare R2, not in git)
+# Data files - Parquet and precomputed data (stored in Cloudflare R2, not in git)
 data/*.parquet
 web/data/*.parquet
+web/data/static.json
 
 # CSV exports (include in repo for sharing)
 # data/exports/*.csv
