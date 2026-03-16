@@ -415,7 +415,11 @@
                 language: {
                     processing: '<span class="loading-text">Loading...</span>',
                     emptyTable: 'No listings match these filters',
-                    zeroRecords: 'No listings match these filters'
+                    zeroRecords: 'No listings match these filters',
+                    thousands: ','
+                },
+                formatNumber: function (n) {
+                    return n.toLocaleString();
                 },
                 infoCallback: function (settings, start, end, max, total, pre) {
                     const fmt = (n) => n.toLocaleString();
@@ -423,6 +427,7 @@
                     if (total !== max) s += ' (filtered from ' + fmt(max) + ' total)';
                     return s;
                 },
+                pagingType: 'simple',
                 dom: '<"d-flex justify-content-between align-items-center"lip>rt<"d-flex justify-content-between align-items-center"lip>'
             });
 
