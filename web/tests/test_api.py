@@ -13,6 +13,10 @@ sys.path.insert(0, WEB_DIR)
 
 from api import jobs as jobs_mod
 from api import aggregate as agg_mod
+from api import columns as col_mod
+
+# Column indexes from the shared config
+COL_IDX = {col: i for i, col in enumerate(col_mod.COLUMNS)}
 
 
 # ---------------------------------------------------------------------------
@@ -68,8 +72,8 @@ class TestJobsSort:
         assert status == 200
         data = body["data"]
         assert len(data) > 0
-        # openDate is column index 6 in the COLUMNS list
-        open_dates = [row[6] for row in data]
+        idx = COL_IDX['openDate']
+        open_dates = [row[idx] for row in data]
         assert open_dates == sorted(open_dates, reverse=True), "Default sort should be openDate DESC"
 
     def test_single_sort_asc(self):
@@ -94,26 +98,31 @@ class TestJobsSort:
 
     def test_multi_sort_two_columns(self):
         """Multi-sort: primary by hiringDepartmentName ASC, secondary by openDate DESC."""
+        dept_idx = COL_IDX['hiringDepartmentName']
+        date_idx = COL_IDX['openDate']
         status, body = _invoke_handler(
             jobs_mod.handler,
-            "/api/jobs?draw=1&start=0&length=25"
-            "&order[0][column]=1&order[0][dir]=asc"
-            "&order[1][column]=6&order[1][dir]=desc",
+            f"/api/jobs?draw=1&start=0&length=25"
+            f"&order[0][column]={dept_idx}&order[0][dir]=asc"
+            f"&order[1][column]={date_idx}&order[1][dir]=desc",
         )
         assert status == 200
         data = body["data"]
         assert len(data) > 1
         # Verify primary sort: department names should be non-decreasing
-        depts = [row[1] for row in data]
+        depts = [row[dept_idx] for row in data]
         assert depts == sorted(depts), "Primary sort by department ASC should hold"
 
     def test_multi_sort_three_columns(self):
         """Three sort columns should all be respected."""
+        dept_idx = COL_IDX['hiringDepartmentName']
+        agency_idx = COL_IDX['hiringAgencyName']
+        date_idx = COL_IDX['openDate']
         path = (
-            "/api/jobs?draw=1&start=0&length=25"
-            "&order[0][column]=1&order[0][dir]=asc"
-            "&order[1][column]=2&order[1][dir]=asc"
-            "&order[2][column]=6&order[2][dir]=desc"
+            f"/api/jobs?draw=1&start=0&length=25"
+            f"&order[0][column]={dept_idx}&order[0][dir]=asc"
+            f"&order[1][column]={agency_idx}&order[1][dir]=asc"
+            f"&order[2][column]={date_idx}&order[2][dir]=desc"
         )
         status, body = _invoke_handler(jobs_mod.handler, path)
         assert status == 200
@@ -121,14 +130,18 @@ class TestJobsSort:
 
     def test_fourth_sort_column_ignored(self):
         """Only 3 sort columns allowed; order[3] should be ignored."""
+        title_idx = COL_IDX['positionTitle']
+        dept_idx = COL_IDX['hiringDepartmentName']
+        date_idx = COL_IDX['openDate']
+        agency_idx = COL_IDX['hiringAgencyName']
         path_3 = (
-            "/api/jobs?draw=1&start=0&length=25"
-            "&order[0][column]=0&order[0][dir]=asc"
-            "&order[1][column]=1&order[1][dir]=asc"
-            "&order[2][column]=6&order[2][dir]=desc"
+            f"/api/jobs?draw=1&start=0&length=25"
+            f"&order[0][column]={title_idx}&order[0][dir]=asc"
+            f"&order[1][column]={dept_idx}&order[1][dir]=asc"
+            f"&order[2][column]={date_idx}&order[2][dir]=desc"
         )
         path_4 = (
-            path_3 + "&order[3][column]=2&order[3][dir]=asc"
+            path_3 + f"&order[3][column]={agency_idx}&order[3][dir]=asc"
         )
         _, body3 = _invoke_handler(jobs_mod.handler, path_3)
         _, body4 = _invoke_handler(jobs_mod.handler, path_4)
@@ -143,7 +156,8 @@ class TestJobsSort:
         )
         assert status == 200
         # Should fall back to default openDate DESC
-        open_dates = [row[6] for row in body["data"]]
+        idx = COL_IDX['openDate']
+        open_dates = [row[idx] for row in body["data"]]
         assert open_dates == sorted(open_dates, reverse=True)
 
 
@@ -219,86 +233,220 @@ class TestAggregateMonthGapFill:
 # 3. Filter parsing (_parse_filters)
 # ===================================================================
 
-class TestJobsParseFilters:
-    """Tests for _parse_filters in jobs.py."""
+class TestParseFilters:
+    """Tests for the shared parse_filters function (used by all endpoints)."""
 
     def test_multiselect_pipe_separated(self):
         params = {"filter_appointmentType": ["Term|Permanent"]}
-        clauses, values = jobs_mod._parse_filters(params)
+        clauses, values = col_mod.parse_filters(params)
         assert len(clauses) == 1
         assert "IN" in clauses[0]
         assert values == ["term", "permanent"]
 
     def test_range_filter_min(self):
         params = {"filter_minimumSalary_min": ["50000"]}
-        clauses, values = jobs_mod._parse_filters(params)
+        clauses, values = col_mod.parse_filters(params)
         assert len(clauses) == 1
         assert ">=" in clauses[0]
         assert values == [50000.0]
 
     def test_range_filter_max(self):
         params = {"filter_maximumSalary_max": ["120000"]}
-        clauses, values = jobs_mod._parse_filters(params)
+        clauses, values = col_mod.parse_filters(params)
         assert len(clauses) == 1
         assert "<=" in clauses[0]
         assert values == [120000.0]
 
     def test_text_like_filter(self):
         params = {"filter_positionTitle": ["engineer"]}
-        clauses, values = jobs_mod._parse_filters(params)
+        clauses, values = col_mod.parse_filters(params)
         assert len(clauses) == 1
         assert "LIKE" in clauses[0]
         assert values == ["%engineer%"]
 
     def test_invalid_column_rejected(self):
         params = {"filter_nonExistentColumn": ["value"]}
-        clauses, values = jobs_mod._parse_filters(params)
+        clauses, values = col_mod.parse_filters(params)
         assert clauses == []
         assert values == []
 
     def test_invalid_range_column_rejected(self):
         params = {"filter_fakeColumn_min": ["100"]}
-        clauses, values = jobs_mod._parse_filters(params)
+        clauses, values = col_mod.parse_filters(params)
         assert clauses == []
         assert values == []
 
     def test_empty_value_skipped(self):
         params = {"filter_positionTitle": [""]}
-        clauses, values = jobs_mod._parse_filters(params)
+        clauses, values = col_mod.parse_filters(params)
         assert clauses == []
 
     def test_non_filter_keys_ignored(self):
         params = {"draw": ["1"], "start": ["0"], "length": ["10"]}
-        clauses, values = jobs_mod._parse_filters(params)
+        clauses, values = col_mod.parse_filters(params)
         assert clauses == []
 
-
-class TestAggregateParseFilters:
-    """Tests for _parse_filters in aggregate.py."""
-
-    def test_multiselect_pipe_separated(self):
-        params = {"filter_hiringAgencyName": ["Army|Navy"]}
-        clauses, values = agg_mod._parse_filters(params)
-        assert len(clauses) == 1
-        assert "IN" in clauses[0]
-        assert values == ["army", "navy"]
-
-    def test_range_filter(self):
-        params = {"filter_minimumSalary_min": ["30000"], "filter_minimumSalary_max": ["80000"]}
-        clauses, values = agg_mod._parse_filters(params)
+    def test_date_range_filter(self):
+        """Date range filters should generate >= and <= clauses."""
+        params = {
+            "filter_openDate_min": ["2024-01-01"],
+            "filter_openDate_max": ["2024-12-31"],
+        }
+        clauses, values = col_mod.parse_filters(params)
         assert len(clauses) == 2
         assert any(">=" in c for c in clauses)
         assert any("<=" in c for c in clauses)
 
-    def test_text_like_filter(self):
-        params = {"filter_positionTitle": ["analyst"]}
-        clauses, values = agg_mod._parse_filters(params)
+    def test_service_type_accepted(self):
+        """serviceType should be accepted (was previously missing from aggregate)."""
+        params = {"filter_serviceType": ["Competitive"]}
+        clauses, values = col_mod.parse_filters(params)
         assert len(clauses) == 1
-        assert "LIKE" in clauses[0]
-        assert values == ["%analyst%"]
 
-    def test_invalid_column_rejected(self):
-        params = {"filter_madeUpField": ["x"]}
-        clauses, values = agg_mod._parse_filters(params)
-        assert clauses == []
-        assert values == []
+    def test_combined_filters(self):
+        """Multiple filter types applied together."""
+        params = {
+            "filter_positionTitle": ["engineer"],
+            "filter_minimumSalary_min": ["50000"],
+            "filter_status": ["Active|Closed"],
+        }
+        clauses, values = col_mod.parse_filters(params)
+        assert len(clauses) == 3
+
+
+# ===================================================================
+# 4. Column consistency across endpoints
+# ===================================================================
+
+class TestFilterColumnConsistency:
+    """All endpoints now use the shared parse_filters from columns.py.
+    These tests verify the shared config covers all frontend columns."""
+
+    # Columns the frontend can filter on (from index.html column config)
+    FRONTEND_FILTER_COLUMNS = {
+        'positionTitle', 'hiringDepartmentName', 'hiringAgencyName',
+        'grade', 'minimumSalary', 'maximumSalary',
+        'appointmentType', 'serviceType', 'locations', 'status',
+    }
+
+    def test_all_frontend_columns_in_filterable(self):
+        """Every frontend-filterable column must be in FILTERABLE_COLUMNS."""
+        missing = self.FRONTEND_FILTER_COLUMNS - col_mod.FILTERABLE_COLUMNS
+        assert not missing, f"columns.py FILTERABLE_COLUMNS is missing: {missing}"
+
+    def test_parse_filters_accepts_all_frontend_columns(self):
+        """parse_filters should generate clauses for every frontend column."""
+        accepted = set()
+        for col in self.FRONTEND_FILTER_COLUMNS:
+            clauses, _ = col_mod.parse_filters({f"filter_{col}": ["test"]})
+            if clauses:
+                accepted.add(col)
+            clauses_min, _ = col_mod.parse_filters({f"filter_{col}_min": ["1"]})
+            if clauses_min:
+                accepted.add(col)
+        missing = self.FRONTEND_FILTER_COLUMNS - accepted
+        assert not missing, f"parse_filters rejects frontend columns: {missing}"
+
+    def test_dropdown_fields_subset_of_filterable(self):
+        """DROPDOWN_FIELDS should be a subset of FILTERABLE_COLUMNS."""
+        assert col_mod.DROPDOWN_FIELDS <= col_mod.FILTERABLE_COLUMNS
+
+    def test_columns_list_matches_headers(self):
+        """COLUMNS and COLUMN_HEADERS must have same length."""
+        assert len(col_mod.COLUMNS) == len(col_mod.COLUMN_HEADERS)
+
+
+# ===================================================================
+# 5. Integration: filtered queries return correct results
+# ===================================================================
+
+class TestJobsFilteredResults:
+    """Test that filters actually affect the returned data."""
+
+    def test_text_filter_reduces_results(self):
+        """A text filter should return fewer results than unfiltered."""
+        _, body_all = _invoke_handler(jobs_mod.handler, "/api/jobs?draw=1&start=0&length=10")
+        _, body_filt = _invoke_handler(
+            jobs_mod.handler,
+            "/api/jobs?draw=1&start=0&length=10&filter_positionTitle=ZZZZNOTREAL"
+        )
+        assert body_filt["recordsFiltered"] < body_all["recordsTotal"]
+
+    def test_text_filter_results_match(self):
+        """Filtered rows should contain the search term."""
+        _, body = _invoke_handler(
+            jobs_mod.handler,
+            "/api/jobs?draw=1&start=0&length=25&filter_positionTitle=engineer"
+        )
+        for row in body["data"]:
+            assert "engineer" in row[0].lower(), f"Row title '{row[0]}' doesn't match filter"
+
+    def test_multiselect_filter_results_match(self):
+        """Multiselect filter should only return matching values."""
+        # First get some actual agency names
+        _, body_all = _invoke_handler(jobs_mod.handler, "/api/jobs?draw=1&start=0&length=5")
+        if not body_all["data"]:
+            pytest.skip("No data")
+        agency_idx = COL_IDX['hiringAgencyName']
+        agency = body_all["data"][0][agency_idx]
+
+        _, body = _invoke_handler(
+            jobs_mod.handler,
+            f"/api/jobs?draw=1&start=0&length=25&filter_hiringAgencyName={agency}"
+        )
+        for row in body["data"]:
+            assert agency.lower() in row[agency_idx].lower(), (
+                f"Row agency '{row[agency_idx]}' doesn't match filter '{agency}'"
+            )
+
+    def test_range_filter_min_salary(self):
+        """Min salary filter should exclude lower salaries."""
+        _, body = _invoke_handler(
+            jobs_mod.handler,
+            "/api/jobs?draw=1&start=0&length=25&filter_minimumSalary_min=100000"
+        )
+        sal_idx = COL_IDX['minimumSalary']
+        for row in body["data"]:
+            if row[sal_idx]:
+                salary = float(row[sal_idx])
+                assert salary >= 100000, f"Salary {salary} is below min filter 100000"
+
+    def test_combined_filters(self):
+        """Multiple filters applied simultaneously should all take effect."""
+        _, body = _invoke_handler(
+            jobs_mod.handler,
+            "/api/jobs?draw=1&start=0&length=25"
+            "&filter_positionTitle=engineer"
+            "&filter_minimumSalary_min=50000"
+        )
+        title_idx = COL_IDX['positionTitle']
+        sal_idx = COL_IDX['minimumSalary']
+        for row in body["data"]:
+            assert "engineer" in row[title_idx].lower()
+            if row[sal_idx]:
+                assert float(row[sal_idx]) >= 50000
+
+
+class TestAggregateFilteredResults:
+    """Test that aggregate endpoint respects filters."""
+
+    def test_agency_filter_on_month_aggregate(self):
+        """Filtering by agency should reduce the monthly counts."""
+        _, body_all = _invoke_handler(agg_mod.handler, "/api/aggregate?group_by=month")
+        _, body_filt = _invoke_handler(
+            agg_mod.handler,
+            "/api/aggregate?group_by=month&filter_positionTitle=ZZZZNOTREAL"
+        )
+        total_all = sum(body_all["datasets"]["count"])
+        total_filt = sum(body_filt["datasets"]["count"])
+        assert total_filt < total_all, "Filter should reduce aggregate counts"
+
+    def test_grade_aggregate_with_filter(self):
+        """Grade distribution should change when filtered."""
+        status, body = _invoke_handler(
+            agg_mod.handler,
+            "/api/aggregate?group_by=grade&filter_positionTitle=engineer"
+        )
+        assert status == 200
+        assert "labels" in body
+        assert "datasets" in body

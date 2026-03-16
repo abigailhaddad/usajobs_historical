@@ -81,6 +81,7 @@
                 <thead>
                     <tr>
                         <th>Position Title</th>
+                        <th>Occ. Series</th>
                         <th>Department</th>
                         <th>Agency</th>
                         <th>Grade</th>
@@ -118,18 +119,19 @@
 
         const COLUMNS = [
             { name: 'Position Title', field: 'positionTitle', filterType: 'text', index: 0 },
-            { name: 'Department', field: 'hiringDepartmentName', filterType: 'multiselect', index: 1 },
-            { name: 'Agency', field: 'hiringAgencyName', filterType: 'multiselect', index: 2 },
-            { name: 'Grade', field: 'grade', filterType: 'text', index: 3 },
-            { name: 'Min Salary', field: 'minimumSalary', filterType: 'range', index: 4, format: 'currency' },
-            { name: 'Max Salary', field: 'maximumSalary', filterType: 'range', index: 5, format: 'currency' },
-            { name: 'Open Date', field: 'openDate', filterType: 'text', index: 6 },
-            { name: 'Close Date', field: 'closeDate', filterType: 'text', index: 7 },
-            { name: 'Appointment Type', field: 'appointmentType', filterType: 'multiselect', index: 8 },
-            { name: 'Service', field: 'serviceType', filterType: 'multiselect', index: 9 },
-            { name: 'Locations', field: 'locations', filterType: 'text', index: 10 },
-            { name: 'Status', field: 'status', filterType: 'multiselect', index: 11 },
-            { name: 'Link', field: 'usajobsControlNumber', filterType: null, index: 12 }
+            { name: 'Occ. Series', field: 'occupationalSeries', filterType: 'multiselect', index: 1 },
+            { name: 'Department', field: 'hiringDepartmentName', filterType: 'multiselect', index: 2 },
+            { name: 'Agency', field: 'hiringAgencyName', filterType: 'multiselect', index: 3 },
+            { name: 'Grade', field: 'grade', filterType: 'multiselect', index: 4 },
+            { name: 'Min Salary', field: 'minimumSalary', filterType: 'range', index: 5, format: 'currency' },
+            { name: 'Max Salary', field: 'maximumSalary', filterType: 'range', index: 6, format: 'currency' },
+            { name: 'Open Date', field: 'openDate', filterType: 'daterange', index: 7 },
+            { name: 'Close Date', field: 'closeDate', filterType: 'daterange', index: 8 },
+            { name: 'Appointment Type', field: 'appointmentType', filterType: 'multiselect', index: 9 },
+            { name: 'Service', field: 'serviceType', filterType: 'multiselect', index: 10 },
+            { name: 'Locations', field: 'locations', filterType: 'text', index: 11 },
+            { name: 'Status', field: 'status', filterType: 'multiselect', index: 12 },
+            { name: 'Link', field: 'usajobsControlNumber', filterType: null, index: 13 }
         ];
 
         // ============================================
@@ -302,13 +304,15 @@
 
                 // Update date range stat from month data
                 if (monthResp.labels && monthResp.labels.length > 0) {
-                    const first = monthResp.labels[0];
-                    const last = monthResp.labels[monthResp.labels.length - 1];
-                    const fmtMonth = (m) => {
-                        const [y, mo] = m.split('-');
-                        return `${parseInt(mo)}/${y.slice(2)}`;
+                    const minDate = monthResp.datasets.min_date;
+                    const maxDate = monthResp.datasets.max_date;
+                    const fmtDate = (d) => {
+                        const [y, mo, day] = d.split('-');
+                        return `${parseInt(mo)}/${parseInt(day)}/${y.slice(2)}`;
                     };
-                    document.getElementById('statDateRange').textContent = fmtMonth(first) + ' \u2013 ' + fmtMonth(last);
+                    if (minDate && maxDate) {
+                        document.getElementById('statDateRange').textContent = fmtDate(minDate) + ' \u2013 ' + fmtDate(maxDate);
+                    }
                 }
 
                 // Update distinct occupational series count
@@ -318,6 +322,7 @@
 
             } catch (err) {
                 console.error('Failed to update charts:', err);
+                showToast('Failed to load chart data', true);
             }
         }
 
@@ -352,22 +357,18 @@
                         const filterParams = filterManager.getServerParams();
                         Object.assign(d, filterParams);
                         return d;
+                    },
+                    error: function (xhr, error, thrown) {
+                        console.error('Table data load failed:', error, thrown);
+                        showToast('Failed to load table data', true);
                     }
                 },
                 columns: [
                     { data: 0 },  // Position Title
-                    { data: 1 },  // Department
-                    { data: 2 },  // Agency
-                    { data: 3 },  // Grade
-                    {
-                        data: 4,
-                        className: 'dt-right',
-                        render: function (data) {
-                            if (!data || data === '') return '';
-                            const num = parseFloat(data);
-                            return isNaN(num) ? data : '$' + Math.round(num).toLocaleString();
-                        }
-                    },  // Min Salary
+                    { data: 1 },  // Occ. Series
+                    { data: 2 },  // Department
+                    { data: 3 },  // Agency
+                    { data: 4 },  // Grade
                     {
                         data: 5,
                         className: 'dt-right',
@@ -376,22 +377,31 @@
                             const num = parseFloat(data);
                             return isNaN(num) ? data : '$' + Math.round(num).toLocaleString();
                         }
-                    },  // Max Salary
-                    { data: 6 },   // Open Date
-                    { data: 7 },   // Close Date
-                    { data: 8 },   // Appointment Type
-                    { data: 9 },   // Service
+                    },  // Min Salary
                     {
-                        data: 10,
+                        data: 6,
+                        className: 'dt-right',
+                        render: function (data) {
+                            if (!data || data === '') return '';
+                            const num = parseFloat(data);
+                            return isNaN(num) ? data : '$' + Math.round(num).toLocaleString();
+                        }
+                    },  // Max Salary
+                    { data: 7 },   // Open Date
+                    { data: 8 },   // Close Date
+                    { data: 9 },   // Appointment Type
+                    { data: 10 },  // Service
+                    {
+                        data: 11,
                         render: function (data) {
                             if (!data || data === '') return '';
                             var escaped = escapeHtml(data);
                             return '<span class="locations-cell" tabindex="0">' + escaped + '</span>';
                         }
                     },  // Locations
-                    { data: 11 },  // Status
+                    { data: 12 },  // Status
                     {
-                        data: 12,
+                        data: 13,
                         render: function (data) {
                             if (!data || data === '') return '';
                             var escaped = escapeHtml(data);
@@ -401,13 +411,17 @@
                 ],
                 pageLength: 25,
                 orderMulti: true,
-                order: [[6, 'desc']],  // Default sort by Open Date descending
+                order: [[7, 'desc']],  // Default sort by Open Date descending
                 language: {
-                    info: 'Showing _START_ to _END_ of _TOTAL_ listings',
-                    infoFiltered: '(filtered from _MAX_ total)',
                     processing: '<span class="loading-text">Loading...</span>',
                     emptyTable: 'No listings match these filters',
                     zeroRecords: 'No listings match these filters'
+                },
+                infoCallback: function (settings, start, end, max, total, pre) {
+                    const fmt = (n) => n.toLocaleString();
+                    let s = 'Showing ' + fmt(start) + ' to ' + fmt(end) + ' of ' + fmt(total) + ' listings';
+                    if (total !== max) s += ' (filtered from ' + fmt(max) + ' total)';
+                    return s;
                 },
                 dom: '<"d-flex justify-content-between align-items-center"lip>rt<"d-flex justify-content-between align-items-center"lip>'
             });
