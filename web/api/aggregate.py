@@ -128,11 +128,15 @@ class handler(BaseHTTPRequestHandler):
                     f"COUNT(*) AS cnt "
                     f"FROM read_parquet('{parquet_path}') "
                     f"{where_sql} "
-                    f"GROUP BY dept ORDER BY cnt DESC LIMIT 15"
+                    f"GROUP BY dept ORDER BY cnt DESC LIMIT 20"
                 )
                 rows = conn.execute(query, bind_values).fetchall()
+                total_depts = conn.execute(
+                    f"SELECT COUNT(DISTINCT COALESCE(CAST(\"hiringDepartmentName\" AS VARCHAR), 'Unknown')) "
+                    f"FROM read_parquet('{parquet_path}') {where_sql}", bind_values
+                ).fetchone()[0]
                 labels = [r[0] for r in rows]
-                datasets = {'count': [r[1] for r in rows]}
+                datasets = {'count': [r[1] for r in rows], 'total_distinct': total_depts}
 
             elif group_by == 'grade':
                 # grade column is like "GS-7", "GS-7/9", "GS-7/9/11", etc.

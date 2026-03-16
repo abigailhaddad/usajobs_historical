@@ -43,7 +43,7 @@
                 <div class="stat-value" id="statTotal">--</div>
             </div>
             <div class="stat-card">
-                <h3>Agencies</h3>
+                <h3>Departments</h3>
                 <div class="stat-value" id="statAgencies">--</div>
             </div>
             <div class="stat-card">
@@ -64,7 +64,7 @@
                     <canvas id="chartMonth"></canvas>
                 </div>
                 <div class="chart-card chart-tall">
-                    <h3>Top agencies</h3>
+                    <h3>Top departments</h3>
                     <canvas id="chartAgency"></canvas>
                 </div>
                 <div class="chart-card">
@@ -292,7 +292,7 @@
                     chartAgency.data.labels = agencyResp.labels;
                     chartAgency.data.datasets[0].data = agencyResp.datasets.count;
                     chartAgency.update();
-                    document.getElementById('statAgencies').textContent = formatNumber(agencyResp.labels.length);
+                    document.getElementById('statAgencies').textContent = formatNumber(agencyResp.datasets.total_distinct || agencyResp.labels.length);
                 }
 
                 // Grade Distribution
@@ -505,7 +505,7 @@
                 chartAgency.data.labels = agencyResp.labels;
                 chartAgency.data.datasets[0].data = agencyResp.datasets.count;
                 chartAgency.update();
-                document.getElementById('statAgencies').textContent = formatNumber(agencyResp.labels.length);
+                document.getElementById('statAgencies').textContent = formatNumber(agencyResp.datasets.total_distinct || agencyResp.labels.length);
             }
             if (gradeResp && gradeResp.labels) {
                 chartGrade.data.labels = gradeResp.labels.map(g => 'GS-' + g);
