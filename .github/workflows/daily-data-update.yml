@@ -165,7 +165,7 @@ jobs:
 
         echo "ISO week: $WEEK ($([ $((WEEK % 2)) -eq 1 ] && echo 'odd' || echo 'even'))"
         echo "Re-polling years: $YEARS"
-        python scripts/repoll_status.py --years $YEARS
+        python scripts/repoll_status.py --years $YEARS --skip-recent-days 14
 
     - name: Commit and push to data-updates branch
       # Only runs if tests pass
