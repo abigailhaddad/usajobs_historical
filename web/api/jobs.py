@@ -6,13 +6,8 @@ import duckdb
 
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
-from data_loader import get_parquet_path
+from data_loader import get_parquet_path, get_conn
 from columns import COLUMNS, SORTABLE_COLUMNS, TEXT_SEARCH_COLUMNS, parse_filters
-
-
-def _get_conn():
-    conn = duckdb.connect(':memory:', read_only=False)
-    return conn
 
 
 class handler(BaseHTTPRequestHandler):
@@ -72,7 +67,7 @@ class handler(BaseHTTPRequestHandler):
 
             col_list = ', '.join([f'COALESCE(CAST("{c}" AS VARCHAR), \'\')' for c in COLUMNS])
 
-            conn = _get_conn()
+            conn = get_conn()
             parquet_path = get_parquet_path()
 
             # Total records (unfiltered)

@@ -105,6 +105,13 @@ def main():
     else:
         print(f"Warning: web parquet not found at {args.web_parquet}", file=sys.stderr)
 
+    # Upload static.json for instant page load
+    static_path = os.path.join(os.path.dirname(args.web_parquet), "static.json")
+    if os.path.exists(static_path):
+        print(f"\nUploading static data:")
+        upload_file(client, static_path, "web/static.json")
+        uploaded += 1
+
     print(f"\nDone. {uploaded} file(s) uploaded to r2://{BUCKET}/")
 
 

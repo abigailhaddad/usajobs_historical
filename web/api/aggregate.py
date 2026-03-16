@@ -6,7 +6,7 @@ import duckdb
 
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
-from data_loader import get_parquet_path
+from data_loader import get_parquet_path, get_conn
 from columns import parse_filters
 
 
@@ -41,7 +41,7 @@ class handler(BaseHTTPRequestHandler):
                 return
 
             where_sql, bind_values = _build_where(params)
-            conn = duckdb.connect(':memory:', read_only=False)
+            conn = get_conn()
             parquet_path = get_parquet_path()
 
             if group_by == 'month':

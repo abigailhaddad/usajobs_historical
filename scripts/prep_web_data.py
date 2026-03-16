@@ -428,6 +428,104 @@ def main():
             if pd.notna(year):
                 print(f"    {int(year)}: {count:,}")
 
+    # --- Precompute static data for instant page load ---
+    print("\nPrecomputing static data for web viewer...")
+    import duckdb
+    conn = duckdb.connect(':memory:')
+
+    # First page of results (default sort: openDate DESC, 25 rows)
+    col_list = ', '.join([f'COALESCE(CAST("{c}" AS VARCHAR), \'\')' for c in OUTPUT_COLUMNS])
+    first_page = conn.execute(
+        f"SELECT {col_list} FROM read_parquet('{OUT_PATH}') "
+        f"ORDER BY COALESCE(CAST(\"openDate\" AS VARCHAR), '') DESC LIMIT 25"
+    ).fetchall()
+    records_total = conn.execute(f"SELECT COUNT(*) FROM read_parquet('{OUT_PATH}')").fetchone()[0]
+
+    # Monthly aggregation
+    month_rows = conn.execute(
+        f"SELECT strftime(CAST(\"openDate\" AS DATE), '%Y-%m') AS m, COUNT(*) AS cnt, "
+        f"ROUND(AVG(CAST(\"maximumSalary\" AS DOUBLE)), 0) AS avg_sal "
+        f"FROM read_parquet('{OUT_PATH}') WHERE \"openDate\" IS NOT NULL "
+        f"GROUP BY m ORDER BY m"
+    ).fetchall()
+
+    min_date = conn.execute(
+        f"SELECT MIN(CAST(\"openDate\" AS DATE)) FROM read_parquet('{OUT_PATH}') WHERE \"openDate\" IS NOT NULL"
+    ).fetchone()[0]
+    max_date = conn.execute(
+        f"SELECT MAX(CAST(\"openDate\" AS DATE)) FROM read_parquet('{OUT_PATH}') WHERE \"openDate\" IS NOT NULL"
+    ).fetchone()[0]
+
+    distinct_series = conn.execute(
+        f"SELECT COUNT(DISTINCT TRIM(unnest(string_split(CAST(\"occupationalSeries\" AS VARCHAR), '; ')))) "
+        f"FROM read_parquet('{OUT_PATH}') WHERE \"occupationalSeries\" IS NOT NULL"
+    ).fetchone()[0]
+
+    # Fill month gaps
+    month_map = {r[0]: r for r in month_rows}
+    all_months = []
+    if month_rows:
+        y, m = int(month_rows[0][0][:4]), int(month_rows[0][0][5:7])
+        end_y, end_m = int(month_rows[-1][0][:4]), int(month_rows[-1][0][5:7])
+        while (y, m) <= (end_y, end_m):
+            all_months.append(f'{y:04d}-{m:02d}')
+            m += 1
+            if m > 12:
+                m = 1
+                y += 1
+
+    month_data = {
+        'labels': all_months,
+        'datasets': {
+            'count': [month_map[mo][1] if mo in month_map else 0 for mo in all_months],
+            'avg_salary': [int(month_map[mo][2]) if mo in month_map and month_map[mo][2] is not None else 0 for mo in all_months],
+            'distinct_series': distinct_series,
+            'min_date': str(min_date) if min_date else None,
+            'max_date': str(max_date) if max_date else None,
+        }
+    }
+
+    # Top departments
+    dept_rows = conn.execute(
+        f"SELECT COALESCE(CAST(\"hiringDepartmentName\" AS VARCHAR), 'Unknown') AS dept, COUNT(*) AS cnt "
+        f"FROM read_parquet('{OUT_PATH}') GROUP BY dept ORDER BY cnt DESC LIMIT 20"
+    ).fetchall()
+
+    # Grade distribution
+    grade_rows = conn.execute(
+        f"WITH raw AS (SELECT CAST(\"grade\" AS VARCHAR) AS g FROM read_parquet('{OUT_PATH}') "
+        f"WHERE CAST(\"grade\" AS VARCHAR) LIKE 'GS-%'), "
+        f"min_max AS (SELECT CAST(regexp_extract(g, 'GS-(\\d+)', 1) AS INTEGER) AS lo, "
+        f"CAST(regexp_extract_all(g, '(\\d+)')[length(regexp_extract_all(g, '(\\d+)'))] AS INTEGER) AS hi FROM raw), "
+        f"expanded AS (SELECT unnest(generate_series(lo, hi)) AS gs_grade FROM min_max WHERE lo IS NOT NULL AND hi IS NOT NULL) "
+        f"SELECT gs_grade AS grade, COUNT(*) AS cnt FROM expanded WHERE gs_grade BETWEEN 1 AND 15 GROUP BY gs_grade ORDER BY gs_grade"
+    ).fetchall()
+
+    conn.close()
+
+    static_data = {
+        'jobs': {
+            'draw': 1,
+            'recordsTotal': records_total,
+            'recordsFiltered': records_total,
+            'data': [list(row) for row in first_page],
+        },
+        'month': month_data,
+        'department': {
+            'labels': [r[0] for r in dept_rows],
+            'datasets': {'count': [r[1] for r in dept_rows]},
+        },
+        'grade': {
+            'labels': [r[0] for r in grade_rows],
+            'datasets': {'count': [r[1] for r in grade_rows]},
+        },
+    }
+
+    static_path = os.path.join(os.path.dirname(OUT_PATH), 'static.json')
+    with open(static_path, 'w') as f:
+        json.dump(static_data, f)
+    print(f"  Static data: {static_path} ({os.path.getsize(static_path) / 1024:.0f} KB)")
+
 
 if __name__ == "__main__":
     main()

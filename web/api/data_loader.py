@@ -42,3 +42,9 @@ def get_parquet_path():
     s3.download_file(bucket_name, 'web/jobs_5yr.parquet', _TMP_PATH)
 
     return _TMP_PATH
+
+
+def get_conn():
+    """Return a DuckDB connection."""
+    import duckdb
+    return duckdb.connect(':memory:', read_only=False)
