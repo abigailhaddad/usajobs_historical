@@ -109,9 +109,10 @@ def get_nonfinal_dates(parquet_path: str) -> List[str]:
 def update_and_insert(parquet_path: str, status_map: Dict[str, str],
                       new_jobs: List[Dict]) -> tuple:
     """Update statuses for existing jobs and insert new jobs.
-    Returns (changed_count, inserted_count)."""
+    Returns (changed_count, inserted_count, status_transitions).
+    status_transitions is a list of (control_number, old_status, new_status)."""
     if not status_map and not new_jobs:
-        return 0, 0
+        return 0, 0, []
 
     df = pd.read_parquet(parquet_path)
 
@@ -121,12 +122,13 @@ def update_and_insert(parquet_path: str, status_map: Dict[str, str],
     elif 'usajobs_control_number' in df.columns:
         key_col = 'usajobs_control_number'
     else:
-        return 0, 0
+        return 0, 0, []
 
     keys = df[key_col].astype(str)
 
     # Update statuses for existing records
     changed = 0
+    transitions = []
     now = datetime.now().isoformat()
     for idx, key in keys.items():
         if key in status_map:
@@ -135,6 +137,7 @@ def update_and_insert(parquet_path: str, status_map: Dict[str, str],
             if old != new:
                 df.at[idx, 'positionOpeningStatus'] = new
                 df.at[idx, 'last_seen'] = now
+                transitions.append((key, str(old), str(new)))
                 changed += 1
 
     # Insert new jobs
@@ -173,13 +176,19 @@ def update_and_insert(parquet_path: str, status_map: Dict[str, str],
 
         if new_rows:
             new_df = pd.DataFrame(new_rows)
+            # Ensure all list/dict values are JSON strings to avoid mixed types
+            for col in new_df.columns:
+                if new_df[col].apply(lambda x: isinstance(x, (list, dict))).any():
+                    new_df[col] = new_df[col].apply(
+                        lambda x: json.dumps(x) if isinstance(x, (list, dict)) else x
+                    )
             df = pd.concat([df, new_df], ignore_index=True)
             inserted = len(new_rows)
 
     if changed > 0 or inserted > 0:
         df.to_parquet(parquet_path, index=False)
 
-    return changed, inserted
+    return changed, inserted, transitions
 
 
 def fetch_date_worker(date_str: str) -> tuple:
@@ -254,6 +263,7 @@ def main():
     api_jobs_seen = 0
     total_changed = 0
     total_inserted = 0
+    all_transitions = []
     dates_since_save = 0
     errors = 0
 
@@ -314,9 +324,10 @@ def main():
                 sm = year_status_maps.get(year, {})
                 nj = year_new_jobs.get(year, [])
                 if sm or nj:
-                    changed, inserted = update_and_insert(path, sm, nj)
+                    changed, inserted, trans = update_and_insert(path, sm, nj)
                     total_changed += changed
                     total_inserted += inserted
+                    all_transitions.extend(trans)
                     parts = []
                     if changed:
                         parts.append(f"{changed:,} statuses updated")
@@ -338,9 +349,10 @@ def main():
             sm = year_status_maps.get(year, {})
             nj = year_new_jobs.get(year, [])
             if sm or nj:
-                changed, inserted = update_and_insert(path, sm, nj)
+                changed, inserted, trans = update_and_insert(path, sm, nj)
                 total_changed += changed
                 total_inserted += inserted
+                all_transitions.extend(trans)
                 parts = []
                 if changed:
                     parts.append(f"{changed:,} statuses updated")
@@ -355,6 +367,24 @@ def main():
     log(f"Statuses changed: {total_changed:,}")
     log(f"New jobs inserted: {total_inserted:,}")
     log(f"Errors: {errors}")
+
+    # Summary of status transitions
+    if all_transitions:
+        from collections import Counter
+        transition_counts = Counter((old, new) for _, old, new in all_transitions)
+        log(f"\nStatus transitions:")
+        for (old, new), count in transition_counts.most_common():
+            log(f"  {old} -> {new}: {count:,}")
+
+        # Write detailed transitions to a file for review
+        summary_path = os.path.join(os.path.dirname(__file__), '..', 'logs',
+                                     f'status_transitions_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv')
+        os.makedirs(os.path.dirname(summary_path), exist_ok=True)
+        with open(summary_path, 'w') as f:
+            f.write('control_number,old_status,new_status\n')
+            for cn, old, new in all_transitions:
+                f.write(f'{cn},{old},{new}\n')
+        log(f"Detailed transitions written to: {summary_path}")
 
 
 if __name__ == "__main__":
