@@ -30,7 +30,7 @@ class handler(BaseHTTPRequestHandler):
             params = parse_qs(parsed.query)
 
             group_by = params.get('group_by', ['month'])[0]
-            if group_by not in ('month', 'agency', 'department', 'grade'):
+            if group_by not in ('month', 'agency', 'department', 'grade', 'series'):
                 self.send_response(400)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
@@ -164,6 +164,19 @@ class handler(BaseHTTPRequestHandler):
                     f"SELECT gs_grade AS grade, COUNT(*) AS cnt "
                     f"FROM expanded WHERE gs_grade BETWEEN 1 AND 15 "
                     f"GROUP BY gs_grade ORDER BY gs_grade"
+                )
+                rows = conn.execute(query, bind_values).fetchall()
+                labels = [r[0] for r in rows]
+                datasets = {'count': [r[1] for r in rows]}
+
+            elif group_by == 'series':
+                # Split semicolon-delimited series, count each individually
+                occ_not_null = f"AND \"occupationalSeries\" IS NOT NULL" if where_sql else f"WHERE \"occupationalSeries\" IS NOT NULL"
+                query = (
+                    f"SELECT val, COUNT(*) AS cnt FROM ("
+                    f"  SELECT TRIM(unnest(string_split(CAST(\"occupationalSeries\" AS VARCHAR), '; '))) AS val "
+                    f"  FROM read_parquet('{parquet_path}') {where_sql} {occ_not_null}"
+                    f") WHERE val != '' GROUP BY val ORDER BY cnt DESC LIMIT 10"
                 )
                 rows = conn.execute(query, bind_values).fetchall()
                 labels = [r[0] for r in rows]

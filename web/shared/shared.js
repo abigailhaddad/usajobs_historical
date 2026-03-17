@@ -360,11 +360,12 @@ class ServerSideFilterManager {
 
     _openTextDialog(col) {
         const currentFilter = this.activeFilters[col.field];
-        const currentValue = currentFilter?.value || '';
+        const currentTerms = currentFilter?.value ? currentFilter.value.split(',').map(t => t.trim()).filter(t => t) : [];
 
         const content = '<div class="filter-popover">'
             + '<div class="filter-title">Filter: ' + escapeHtml(col.name) + '</div>'
-            + '<input type="text" class="filter-text-input filter-search" placeholder="Search (comma-separate for multiple)..." value="' + escapeHtml(currentValue) + '">'
+            + '<div class="text-tags-container"></div>'
+            + '<input type="text" class="filter-text-input filter-search" placeholder="Type a term and press Enter...">'
             + '<div class="filter-buttons">'
             + '<button class="btn btn-clear">Clear</button>'
             + '<button class="btn btn-apply">Apply</button>'
@@ -373,11 +374,43 @@ class ServerSideFilterManager {
         const modal = createModal({ content });
         const $popover = $(modal).find('.filter-popover');
         const $input = $popover.find('.filter-text-input');
+        const $tags = $popover.find('.text-tags-container');
+        const terms = [...currentTerms];
 
+        function renderTags() {
+            $tags.empty();
+            terms.forEach((term, i) => {
+                const tag = $('<span class="text-tag">')
+                    .append($('<span class="text-tag-label">').text(term))
+                    .append($('<span class="text-tag-remove">').text('\u00d7').on('click', () => {
+                        terms.splice(i, 1);
+                        renderTags();
+                        $input.focus();
+                    }));
+                $tags.append(tag);
+            });
+        }
+
+        function addTerm() {
+            const val = $input.val().trim();
+            if (val && !terms.includes(val)) {
+                terms.push(val);
+                renderTags();
+            }
+            $input.val('').focus();
+        }
+
+        renderTags();
         $input.focus();
 
-        $input.on('keypress', function (e) {
-            if (e.key === 'Enter') $popover.find('.btn-apply').click();
+        $input.on('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTerm();
+            } else if (e.key === 'Backspace' && !$input.val() && terms.length > 0) {
+                terms.pop();
+                renderTags();
+            }
         });
 
         $popover.find('.btn-clear').on('click', () => {
@@ -387,9 +420,12 @@ class ServerSideFilterManager {
         });
 
         $popover.find('.btn-apply').on('click', () => {
-            const value = $input.val().trim();
-            if (value) {
-                this.activeFilters[col.field] = { type: 'text', value: value, name: col.name };
+            // Add any remaining text in input
+            const val = $input.val().trim();
+            if (val && !terms.includes(val)) terms.push(val);
+
+            if (terms.length > 0) {
+                this.activeFilters[col.field] = { type: 'text', value: terms.join(','), name: col.name };
             } else {
                 delete this.activeFilters[col.field];
             }
@@ -576,6 +612,16 @@ class ServerSideFilterManager {
                     delete this.activeFilters[field];
                     this._applyAndRedraw();
                 });
+
+                // Click chip label/value to edit the filter
+                const editHandler = () => {
+                    const col = this.columns.find(c => c.field === field);
+                    if (col) this._openFilterDialog(col);
+                };
+                chipLabel.style.cursor = 'pointer';
+                chipValue.style.cursor = 'pointer';
+                chipLabel.addEventListener('click', editHandler);
+                chipValue.addEventListener('click', editHandler);
 
                 chip.appendChild(chipLabel);
                 chip.appendChild(chipValue);

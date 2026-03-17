@@ -498,6 +498,14 @@ def main():
         f"FROM read_parquet('{OUT_PATH}') GROUP BY dept ORDER BY cnt DESC LIMIT 20"
     ).fetchall()
 
+    # Top occupational series (split semicolons, count each individually)
+    series_rows = conn.execute(
+        f"SELECT val, COUNT(*) AS cnt FROM ("
+        f"  SELECT TRIM(unnest(string_split(CAST(\"occupationalSeries\" AS VARCHAR), '; '))) AS val "
+        f"  FROM read_parquet('{OUT_PATH}') WHERE \"occupationalSeries\" IS NOT NULL"
+        f") WHERE val != '' GROUP BY val ORDER BY cnt DESC LIMIT 10"
+    ).fetchall()
+
     # Grade distribution
     grade_rows = conn.execute(
         f"WITH raw AS (SELECT CAST(\"grade\" AS VARCHAR) AS g FROM read_parquet('{OUT_PATH}') "
@@ -547,6 +555,10 @@ def main():
         'department': {
             'labels': [r[0] for r in dept_rows],
             'datasets': {'count': [r[1] for r in dept_rows], 'total_distinct': total_depts},
+        },
+        'series': {
+            'labels': [r[0] for r in series_rows],
+            'datasets': {'count': [r[1] for r in series_rows]},
         },
         'grade': {
             'labels': [r[0] for r in grade_rows],
