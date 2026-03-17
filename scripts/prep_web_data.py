@@ -283,6 +283,28 @@ def main():
     filled = mask.sum() - combined["locations"].isna().sum()
     print(f"  Filled {filled:,} missing locations from historical data")
 
+    # Fill missing serviceType from MatchedObjectDescriptor (current API stores code in UserArea.Details)
+    SERVICE_TYPE_MAP = {'01': 'Competitive', '02': 'Excepted', '03': 'Senior Executive'}
+    if "serviceType" not in combined.columns:
+        combined["serviceType"] = None
+    if "MatchedObjectDescriptor" in combined.columns:
+        mask = combined["serviceType"].isna() | (combined["serviceType"] == "")
+        def _extract_service_type(val):
+            if val is None or (isinstance(val, float) and pd.isna(val)):
+                return None
+            try:
+                obj = val if isinstance(val, dict) else json.loads(val) if isinstance(val, str) else None
+                if obj:
+                    code = obj.get("UserArea", {}).get("Details", {}).get("ServiceType")
+                    if code:
+                        return SERVICE_TYPE_MAP.get(str(code), str(code))
+            except:
+                pass
+            return None
+        combined.loc[mask, "serviceType"] = combined.loc[mask, "MatchedObjectDescriptor"].apply(_extract_service_type)
+        filled = mask.sum() - (combined["serviceType"].isna() | (combined["serviceType"] == "")).sum()
+        print(f"  Filled {filled:,} missing serviceType from MatchedObjectDescriptor")
+
     # Fill missing series codes from the lookup
     mask = combined["_series_codes"].isna()
     combined.loc[mask, "_series_codes"] = combined.loc[mask, "usajobsControlNumber"].map(series_lookup)
