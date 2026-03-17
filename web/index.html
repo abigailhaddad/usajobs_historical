@@ -405,7 +405,7 @@
             // DataTable in server-side mode
             const table = $('#jobsTable').DataTable({
                 serverSide: true,
-                processing: true,
+                processing: false,
                 ajax: {
                     url: API_BASE + '/api/jobs',
                     timeout: 120000,  // 2 min timeout for cold start
@@ -420,9 +420,6 @@
                     },
                     error: function (xhr, error, thrown) {
                         console.error('Table data load failed:', error, thrown);
-                        showToast('Failed to load table data — retrying...', true);
-                        // Retry once after cold start
-                        setTimeout(() => table.ajax.reload(), 3000);
                     }
                 },
                 columns: [
