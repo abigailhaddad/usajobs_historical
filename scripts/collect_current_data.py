@@ -104,7 +104,10 @@ def flatten_current_job(job_item: dict, appointment_type_map: dict, hiring_path_
     flattened["hiringDepartmentName"] = job.get("DepartmentName")
     flattened["hiringSubelementName"] = job.get("SubAgency")
     flattened["positionTitle"] = job.get("PositionTitle")
-    flattened["serviceType"] = job.get("ServiceType")
+    # ServiceType is a code in UserArea.Details, map to name
+    _service_code = user_area.get("ServiceType")
+    _service_map = {'01': 'Competitive', '02': 'Excepted', '03': 'Senior Executive'}
+    flattened["serviceType"] = _service_map.get(str(_service_code), str(_service_code)) if _service_code else None
     flattened["supervisoryStatus"] = job.get("SupervisoryStatus")
     flattened["travelRequirement"] = job.get("TravelCode")
     
