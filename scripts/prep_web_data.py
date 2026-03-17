@@ -508,8 +508,6 @@ def main():
         f"SELECT gs_grade AS grade, COUNT(*) AS cnt FROM expanded WHERE gs_grade BETWEEN 1 AND 15 GROUP BY gs_grade ORDER BY gs_grade"
     ).fetchall()
 
-    conn.close()
-
     # Precompute filter dropdown options (multiselect fields only, not text search)
     PRECOMPUTE_FIELDS = ['hiringAgencyName', 'hiringDepartmentName', 'grade',
                          'appointmentType', 'serviceType', 'status', 'occupationalSeries']
@@ -535,6 +533,8 @@ def main():
         f"SELECT COUNT(DISTINCT COALESCE(CAST(\"hiringDepartmentName\" AS VARCHAR), 'Unknown')) "
         f"FROM read_parquet('{OUT_PATH}')"
     ).fetchone()[0]
+
+    conn.close()
 
     static_data = {
         'jobs': {
