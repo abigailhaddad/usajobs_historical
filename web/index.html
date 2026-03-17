@@ -67,6 +67,11 @@
                     <h3>Top departments</h3>
                     <canvas id="chartAgency"></canvas>
                 </div>
+                <div class="chart-card chart-tall">
+                    <h3>Top occupational series</h3>
+                    <small class="text-muted">Jobs with multiple series are counted in each</small>
+                    <canvas id="chartSeries"></canvas>
+                </div>
                 <div class="chart-card">
                     <h3>Grade distribution (GS)</h3>
                     <small class="text-muted">Jobs with grade ranges (e.g. GS-7/9) are counted at each grade level</small>
@@ -173,6 +178,7 @@
 
         let chartMonth = null;
         let chartAgency = null;
+        let chartSeries = null;
         let chartGrade = null;
 
         function createCharts() {
@@ -233,7 +239,43 @@
                                 font: { size: 11 },
                                 callback: function(value) {
                                     const label = this.getLabelForValue(value);
-                                    return label.length > 35 ? label.substring(0, 32) + '...' : label;
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Top Occupational Series (horizontal bar)
+            chartSeries = new Chart(document.getElementById('chartSeries'), {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Listings', data: [], backgroundColor: CHART_COLORS.primary, borderWidth: 0 }] },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: CHART_TOOLTIP
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: CHART_COLORS.grid },
+                            ticks: {
+                                color: CHART_COLORS.tickLabel,
+                                callback: function(v) { return v >= 1000 ? (v / 1000) + 'K' : v; }
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: {
+                                color: CHART_COLORS.tickLabel,
+                                font: { size: 11 },
+                                callback: function(value) {
+                                    const label = this.getLabelForValue(value);
+                                    return label;
                                 }
                             }
                         }
@@ -276,9 +318,10 @@
             const sep = qs ? '&' : '';
 
             try {
-                const [monthResp, agencyResp, gradeResp] = await Promise.all([
+                const [monthResp, agencyResp, seriesResp, gradeResp] = await Promise.all([
                     fetch(API_BASE + '/api/aggregate?group_by=month' + sep + qs).then(r => r.json()),
                     fetch(API_BASE + '/api/aggregate?group_by=department' + sep + qs).then(r => r.json()),
+                    fetch(API_BASE + '/api/aggregate?group_by=series' + sep + qs).then(r => r.json()),
                     fetch(API_BASE + '/api/aggregate?group_by=grade' + sep + qs).then(r => r.json())
                 ]);
 
@@ -299,6 +342,13 @@
                     chartAgency.data.datasets[0].data = agencyResp.datasets.count;
                     chartAgency.update();
                     document.getElementById('statAgencies').textContent = formatNumber(agencyResp.datasets.total_distinct || agencyResp.labels.length);
+                }
+
+                // Top Occupational Series
+                if (seriesResp.labels) {
+                    chartSeries.data.labels = seriesResp.labels;
+                    chartSeries.data.datasets[0].data = seriesResp.datasets.count;
+                    chartSeries.update();
                 }
 
                 // Grade Distribution
@@ -474,7 +524,7 @@
                     .then(r => r.json())
                     .then(staticData => {
                         // Populate charts immediately from static data
-                        if (staticData.month) updateChartsFromData(staticData.month, staticData.department, staticData.grade);
+                        if (staticData.month) updateChartsFromData(staticData.month, staticData.department, staticData.series, staticData.grade);
                         // Populate stats
                         if (staticData.jobs) {
                             document.getElementById('statTotal').textContent = formatNumber(staticData.jobs.recordsTotal);
@@ -496,7 +546,7 @@
         });
 
         // Render charts from precomputed data (same logic as updateCharts but no fetch)
-        function updateChartsFromData(monthResp, agencyResp, gradeResp) {
+        function updateChartsFromData(monthResp, agencyResp, seriesResp, gradeResp) {
             if (monthResp && monthResp.labels) {
                 chartMonth.data.labels = monthResp.labels.map(m => {
                     const [y, mo] = m.split('-');
@@ -524,6 +574,11 @@
                 chartAgency.data.datasets[0].data = agencyResp.datasets.count;
                 chartAgency.update();
                 document.getElementById('statAgencies').textContent = formatNumber(agencyResp.datasets.total_distinct || agencyResp.labels.length);
+            }
+            if (seriesResp && seriesResp.labels) {
+                chartSeries.data.labels = seriesResp.labels;
+                chartSeries.data.datasets[0].data = seriesResp.datasets.count;
+                chartSeries.update();
             }
             if (gradeResp && gradeResp.labels) {
                 chartGrade.data.labels = gradeResp.labels.map(g => 'GS-' + g);
