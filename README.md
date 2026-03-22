@@ -15,22 +15,34 @@
 | Option | What you get | How |
 |--------|-------------|-----|
 | **[Live site](https://usajobs-historical.vercel.app)** | 14 key columns, interactive filtering/charts | Just visit the site |
-| **Full Parquet files** | All 40+ fields per job (nested JSON, qualifications, duty descriptions, all original API fields) | Open an issue or reach out -- files are in Cloudflare R2, ~50-80MB per year |
+| **Web dataset** | Same 14 columns as the site, one parquet file | `python download_data.py --web-only` |
+| **Full dataset** | All 40+ fields per job (nested JSON, qualifications, duty descriptions, all original API fields) | `python download_data.py` |
 | **Run the pipeline yourself** | Collect your own data from the USAJobs APIs | See [Setup](#setup) below |
 
-Once you have the full parquet files:
+```bash
+# Download everything (40+ fields, ~50-80MB per year file)
+python download_data.py
+
+# Just the web dataset (14 columns, single file, smaller)
+python download_data.py --web-only
+
+# Download and zip
+python download_data.py --zip
+```
 
 ```python
 import pandas as pd
 
-df_2024 = pd.read_parquet('historical_jobs_2024.parquet')
+# Full dataset
+df_2024 = pd.read_parquet('data/historical_jobs_2024.parquet')
 print(f"Loaded {len(df_2024):,} federal job postings from 2024")
 print(f"Columns: {len(df_2024.columns)}")  # 40+ fields
 
-# See examples.py for more analysis patterns
+# Or the web dataset (smaller, deduplicated, all years in one file)
+df_web = pd.read_parquet('data/jobs_5yr.parquet')
 ```
 
-Individual year files work with Python, R, or any Parquet-compatible tool.
+Files are Parquet format and work with Python, R, or any Parquet-compatible tool.
 
 ## Resources
 
@@ -89,7 +101,7 @@ Both APIs are rationalized to a common schema and stored in year-based Parquet f
 
 ## Setup
 
-1. **Data files are in Cloudflare R2** (not in this git repo). To work with the data locally, request the parquet files or run the pipeline to collect your own.
+1. **Data files are in Cloudflare R2** (not in this git repo). Run `python download_data.py` to download them, or run the pipeline to collect your own.
 
 2. **Create virtual environment:**
    ```bash
