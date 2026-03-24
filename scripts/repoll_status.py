@@ -297,6 +297,7 @@ def main():
     total_changed = 0
     total_inserted = 0
     all_transitions = []
+    all_new_jobs_details = []  # list of (year, date, control_number, title, agency, status)
     inserts_by_year = {}   # year -> count
     changes_by_year = {}   # year -> count
 
@@ -346,6 +347,11 @@ def main():
                         else:
                             year_new_jobs[year].append(job)
                             existing_ids.setdefault(year, set()).add(cn)
+                            title = job.get('positionTitle', 'Unknown')
+                            agency = job.get('hiringAgencyName', 'Unknown')
+                            open_date = job.get('positionOpenDate', 'Unknown')
+                            log(f"  🆕 New job: {cn} — {title} ({agency}) opened {open_date} [{status}]")
+                            all_new_jobs_details.append((year, open_date, cn, title, agency, status))
 
                 dates_queried += 1
                 dates_since_save += 1
@@ -446,6 +452,12 @@ def main():
         log(f"\n⚠️  WARNINGS:")
         for w in warnings:
             log(f"  - {w}")
+
+    # New jobs discovered
+    if all_new_jobs_details:
+        log(f"\nNew jobs discovered ({len(all_new_jobs_details)}):")
+        for year, open_date, cn, title, agency, status in sorted(all_new_jobs_details):
+            log(f"  {year} | {open_date} | {cn} | {title} | {agency} | {status}")
 
     # Status transitions
     if all_transitions:
