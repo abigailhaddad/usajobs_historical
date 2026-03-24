@@ -311,6 +311,35 @@ def main():
     filled = mask.sum() - combined["_series_codes"].isna().sum()
     print(f"  Filled {filled:,} missing occ series from cross-source lookup")
 
+    # Fix grade fields from MatchedObjectDescriptor for current API records.
+    # Older collect_current_data.py stored the pay plan code (e.g. "GS") in minimumGrade/maximumGrade
+    # instead of the numeric grade level. Re-extract from the stored JSON.
+    if "MatchedObjectDescriptor" in combined.columns:
+        def _extract_grade_fields(val):
+            if val is None or (isinstance(val, float) and pd.isna(val)):
+                return None, None, None
+            try:
+                obj = val if isinstance(val, dict) else json.loads(val) if isinstance(val, str) else None
+                if obj:
+                    details = obj.get("UserArea", {}).get("Details", {})
+                    low = details.get("LowGrade")
+                    high = details.get("HighGrade")
+                    grades = obj.get("JobGrade", [])
+                    pay_plan = grades[0].get("Code") if grades else None
+                    return low, high, pay_plan
+            except:
+                pass
+            return None, None, None
+
+        mod_col = combined["MatchedObjectDescriptor"]
+        has_mod = mod_col.notna() & (mod_col != "")
+        if has_mod.any():
+            extracted = mod_col[has_mod].apply(_extract_grade_fields)
+            combined.loc[has_mod, "minimumGrade"] = extracted.apply(lambda x: x[0])
+            combined.loc[has_mod, "maximumGrade"] = extracted.apply(lambda x: x[1])
+            combined.loc[has_mod, "payScale"] = extracted.apply(lambda x: x[2])
+            print(f"  Re-extracted grade fields from MatchedObjectDescriptor for {has_mod.sum():,} records")
+
     # Build derived columns
     # Vectorized grade formatting (avoids slow apply(axis=1))
     _ps = combined["payScale"].fillna("").astype(str).str.strip() if "payScale" in combined.columns else pd.Series("", index=combined.index)

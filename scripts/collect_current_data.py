@@ -126,10 +126,13 @@ def flatten_current_job(job_item: dict, appointment_type_map: dict, hiring_path_
     flattened["positionCloseDate"] = job.get("PositionEndDate")
     flattened["positionExpireDate"] = job.get("PositionExpireDate")
     
-    # Extract some complex fields
+    # Extract grade fields.
+    # JobGrade[].Code is the pay plan (e.g. "GS"), not the numeric grade level.
+    # The actual grade numbers are in UserArea.Details.LowGrade / HighGrade.
     grades = job.get("JobGrade", [])
-    flattened["minimumGrade"] = grades[0].get("Code") if grades else None
-    flattened["maximumGrade"] = grades[-1].get("Code") if len(grades) > 1 else flattened["minimumGrade"]
+    flattened["payScale"] = grades[0].get("Code") if grades else None
+    flattened["minimumGrade"] = user_area.get("LowGrade")
+    flattened["maximumGrade"] = user_area.get("HighGrade")
     
     # Convert salary fields to float to match historical data format
     remuneration = job.get("PositionRemuneration", [{}])
