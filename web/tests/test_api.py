@@ -441,6 +441,52 @@ class TestAggregateFilteredResults:
         total_filt = sum(body_filt["datasets"]["count"])
         assert total_filt < total_all, "Filter should reduce aggregate counts"
 
+    def test_grade_aggregate_returns_numeric_labels(self):
+        """Grade distribution labels must be integers (GS grade numbers), not empty."""
+        status, body = _invoke_handler(
+            agg_mod.handler,
+            "/api/aggregate?group_by=grade"
+        )
+        assert status == 200
+        assert len(body["labels"]) > 0, "Grade chart should not be empty"
+        assert all(isinstance(g, int) for g in body["labels"]), \
+            f"Grade labels should be integers, got: {body['labels'][:5]}"
+        assert all(1 <= g <= 15 for g in body["labels"]), \
+            f"Grade labels should be between 1-15, got: {body['labels']}"
+
+    def test_department_aggregate_returns_data(self):
+        """Department chart should return non-empty string labels."""
+        status, body = _invoke_handler(
+            agg_mod.handler, "/api/aggregate?group_by=department"
+        )
+        assert status == 200
+        assert len(body["labels"]) > 0, "Department chart should not be empty"
+        assert all(isinstance(l, str) and l for l in body["labels"]), \
+            "Department labels should be non-empty strings"
+        assert len(body["datasets"]["count"]) == len(body["labels"])
+
+    def test_agency_aggregate_returns_data(self):
+        """Agency chart should return non-empty string labels."""
+        status, body = _invoke_handler(
+            agg_mod.handler, "/api/aggregate?group_by=agency"
+        )
+        assert status == 200
+        assert len(body["labels"]) > 0, "Agency chart should not be empty"
+        assert all(isinstance(l, str) and l for l in body["labels"]), \
+            "Agency labels should be non-empty strings"
+        assert len(body["datasets"]["count"]) == len(body["labels"])
+
+    def test_series_aggregate_returns_data(self):
+        """Occupational series chart should return non-empty string labels."""
+        status, body = _invoke_handler(
+            agg_mod.handler, "/api/aggregate?group_by=series"
+        )
+        assert status == 200
+        assert len(body["labels"]) > 0, "Series chart should not be empty"
+        assert all(isinstance(l, str) and l for l in body["labels"]), \
+            "Series labels should be non-empty strings"
+        assert len(body["datasets"]["count"]) == len(body["labels"])
+
     def test_grade_aggregate_with_filter(self):
         """Grade distribution should change when filtered."""
         status, body = _invoke_handler(

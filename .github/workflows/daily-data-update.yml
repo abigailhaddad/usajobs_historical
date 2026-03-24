@@ -186,15 +186,26 @@ jobs:
           echo "CHANGES_MADE=false" >> $GITHUB_ENV
         fi
 
-    - name: Prep web data and sync to R2
+    - name: Prep web data
+      if: env.CHANGES_MADE == 'true'
+      env:
+        USAJOBS_API_TOKEN: ${{ secrets.USAJOBS_API_TOKEN }}
+      run: |
+        python scripts/prep_web_data.py
+
+    - name: Run API tests against new web data
+      if: env.CHANGES_MADE == 'true'
+      run: |
+        pip install pytest
+        python -m pytest web/tests/test_api.py -v
+
+    - name: Sync to R2
       if: env.CHANGES_MADE == 'true'
       env:
         R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
         R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
         R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
-        USAJOBS_API_TOKEN: ${{ secrets.USAJOBS_API_TOKEN }}
       run: |
-        python scripts/prep_web_data.py
         python scripts/sync_to_r2.py
 
     - name: Create Pull Request

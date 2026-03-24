@@ -143,6 +143,21 @@ def test_chart_month_no_decimal_y_labels(page: Page):
 # 8. Copy link button exists in toolbar
 # ------------------------------------------------------------------
 
+def test_charts_have_data(page: Page):
+    """Every chart should have non-empty labels (i.e. actual bars/points, not just axes)."""
+    page.goto(BASE_URL)
+    page.wait_for_selector("#chartMonth", timeout=30000)
+    page.wait_for_timeout(3000)
+
+    for chart_id in ["chartMonth", "chartAgency", "chartGrade"]:
+        label_count = page.evaluate(f"""() => {{
+            const chart = Chart.getChart('{chart_id}');
+            return chart ? chart.data.labels.length : null;
+        }}""")
+        assert label_count is not None, f"Could not access Chart.js instance for {chart_id}"
+        assert label_count > 0, f"{chart_id} has no data labels — chart is empty"
+
+
 def test_copy_link_button_exists(page: Page):
     page.goto(BASE_URL)
     page.wait_for_selector(".copy-link-btn", timeout=30000)
