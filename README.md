@@ -1,6 +1,6 @@
 # USAJobs Data Pipeline
 
-**Data collection last run: 2026-03-23**
+**Data collection last run: 2026-03-24**
 
 **This is not an official USAJobs project.**
 
@@ -52,7 +52,7 @@ Files are Parquet format and work with Python, R, or any Parquet-compatible tool
 
 ## Data Coverage
 
-Data collection last run: 2026-03-23. Coverage spans 2018-2026 with approximately 2.85M job postings. Early years (pre-2017) are incomplete, mostly consisting of jobs with closing dates years after the opening dates.
+Data collection last run: 2026-03-24. Coverage spans 2018-2026 with approximately 2.85M job postings. Early years (pre-2017) are incomplete, mostly consisting of jobs with closing dates years after the opening dates.
 
 | Year | Jobs Opened | Jobs Closed |
 |------|-------------|-------------|
@@ -69,7 +69,7 @@ Data collection last run: 2026-03-23. Coverage spans 2018-2026 with approximatel
 | 2023 | 454,652 | 434,527 |
 | 2024 | 367,776 | 352,305 |
 | 2025 | 239,166 | 228,615 |
-| 2026 | 80,220 | 79,716 |
+| 2026 | 81,256 | 80,742 |
 
 Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,633 closed that year). 2017 starts with limited data in January-February, then ramps up significantly from March onward. Some job postings may have future opening dates.
 
