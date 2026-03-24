@@ -17,6 +17,7 @@ import os
 import sys
 import json
 import pandas as pd
+import pyarrow.parquet as pq
 import glob
 import subprocess
 from datetime import datetime, timedelta
@@ -29,10 +30,10 @@ def get_last_collection_date():
     latest_date = None
     
     all_files = glob.glob('../data/historical_jobs_*.parquet') + glob.glob('../data/current_jobs_*.parquet')
-    
+
     for file in all_files:
         try:
-            df = pd.read_parquet(file)
+            df = pd.read_parquet(file, columns=['inserted_at'])
             if 'inserted_at' in df.columns:
                 df['inserted_at'] = pd.to_datetime(df['inserted_at'], errors='coerce')
                 file_latest = df['inserted_at'].max()
@@ -137,24 +138,28 @@ def record_initial_file_sizes():
     
     return initial_sizes
 
+def get_parquet_row_count(file_path):
+    """Get row count from parquet file metadata without loading data into memory"""
+    metadata = pq.read_metadata(file_path)
+    return metadata.num_rows
+
 def record_initial_job_counts():
     """Record initial job counts before data collection"""
     global initial_counts
     print("📊 Recording initial job counts...")
-    
+
     data_files = glob.glob('../data/current_jobs_*.parquet') + glob.glob('../data/historical_jobs_*.parquet')
     initial_counts = {}
-    
+
     for file in data_files:
         try:
-            df = pd.read_parquet(file)
-            count = len(df)
+            count = get_parquet_row_count(file)
             initial_counts[file] = count
             print(f"📝 {os.path.basename(file)}: {count:,} jobs")
         except Exception as e:
             print(f"⚠️  Could not read {file}: {e}")
             initial_counts[file] = 0  # Assume new file or error
-    
+
     return initial_counts
 
 def save_initial_snapshot(file_path):
@@ -250,29 +255,28 @@ def diagnose_shrinkage(file_path, initial_count):
 def calculate_job_additions(initial_counts):
     """Calculate how many jobs were added to each file"""
     print("📊 Calculating job additions...")
-    
+
     data_files = glob.glob('../data/current_jobs_*.parquet') + glob.glob('../data/historical_jobs_*.parquet')
     job_additions = {}
-    
+
     for file in data_files:
         try:
-            df = pd.read_parquet(file)
-            current_count = len(df)
+            current_count = get_parquet_row_count(file)
             initial_count = initial_counts.get(file, 0)
             added = current_count - initial_count
-            
+
             filename = os.path.basename(file)
             job_additions[filename] = added
-            
+
             if added > 0:
                 print(f"✅ {filename}: {added:,} jobs added (was {initial_count:,}, now {current_count:,})")
             else:
                 print(f"ℹ️  {filename}: no new jobs (still {current_count:,})")
-                
+
         except Exception as e:
             print(f"⚠️  Could not read {file}: {e}")
             job_additions[os.path.basename(file)] = 0
-    
+
     return job_additions
 
 def check_file_sizes_vs_initial(initial_sizes):
@@ -289,12 +293,11 @@ def check_file_sizes_vs_initial(initial_sizes):
         try:
             current_size = os.path.getsize(file)
             initial_size = initial_sizes.get(file, 0)
-            
-            # Also check job counts
-            current_df = pd.read_parquet(file)
-            current_count = len(current_df)
+
+            # Check job counts via metadata (no memory load)
+            current_count = get_parquet_row_count(file)
             initial_count = initial_counts.get(file, 0)
-            
+
             # Only check job counts - file size doesn't matter
             count_decreased = current_count < initial_count
             jobs_change = current_count - initial_count
