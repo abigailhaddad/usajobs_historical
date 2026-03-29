@@ -1,0 +1,52 @@
+name: Claude Job Review
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  fetch-and-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: pip install requests python-dotenv
+
+    - name: Fetch 1560-series jobs
+      env:
+        USAJOBS_API_TOKEN: ${{ secrets.USAJOBS_API_TOKEN }}
+      run: python scripts/fetch_recent_1560.py --output recent_jobs.json
+
+    - name: Commit updated jobs file
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add recent_jobs.json
+        git diff --cached --quiet && echo "No changes" || git commit -m "Update 1560-series jobs snapshot"
+        git push
+
+    - name: Comment on tracking issue
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        ISSUE_NUMBER=$(gh issue list --label "claude-job-review" --json number --jq '.[0].number')
+        if [ -z "$ISSUE_NUMBER" ]; then
+          ISSUE_NUMBER=$(gh issue create \
+            --title "Claude Job Review Tracker" \
+            --label "claude-job-review" \
+            --body "Tracking issue for Claude job recommendations." \
+            | grep -oE '[0-9]+$')
+        fi
+        gh issue comment "$ISSUE_NUMBER" --body "@claude Look at the recent_jobs.json file in this repo. These are current federal data scientist (1560-series) job postings. Recommend the top 3 jobs for someone who is an experienced data scientist interested in LLMs, AI/ML, and NLP. For each, explain briefly why it's a good fit based on the duties and qualifications. Keep it concise."
