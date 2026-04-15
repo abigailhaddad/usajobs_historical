@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-04-14T07:50:36.744253",
-  "total_jobs": 3719690,
+  "generated_at": "2026-04-15T07:49:51.020767",
+  "total_jobs": 3720789,
   "total_fields": 47,
   "file_size": "1.6GB",
-  "latest_job_date": "2026-04-14",
+  "latest_job_date": "2026-04-15",
   "data_coverage": [
     {
       "year": 2013,
@@ -94,13 +94,13 @@
       "total_jobs": 239170,
       "jobs_opened": 239170,
       "jobs_closed": 228618,
-      "coverage": "Current through April 14, 2026"
+      "coverage": "Current through April 15, 2026"
     },
     {
       "year": 2026,
-      "total_jobs": 97325,
-      "jobs_opened": 97325,
-      "jobs_closed": 96599,
+      "total_jobs": 98424,
+      "jobs_opened": 98424,
+      "jobs_closed": 97691,
       "coverage": "Closing dates only"
     }
   ],
@@ -116,7 +116,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1320\"}, {\"series\": \"1310\"}, {\"series\": \"1520\"}, {\"series\": \"1550\"}, {\"series\": \"0801\"}], [{\"series\": \"0810\"}, {\"series\": \"0801\"}, {\"series\": \"0808\"}], [{\"series\": \"0819\"}, {\"series\": \"0401\"}, {\"series\": \"1370\"}, {\"series\": \"0150\"}], [{\"series\": \"1530\"}, {\"series\": \"1529\"}] (4424 unique)",
+      "examples": "[{\"series\": \"0401\"}, {\"series\": \"0819\"}, {\"series\": \"0020\"}, {\"series\": \"0801\"}, {\"series\": \"1301\"}], [{\"series\": \"1560\"}, {\"series\": \"1550\"}, {\"series\": \"0830\"}, {\"series\": \"0896\"}, {\"series\": \"0893\"}, {\"series\": \"0801\"}], [{\"series\": \"0180\"}, {\"series\": \"0101\"}, {\"series\": \"0185\"}], [{\"series\": \"0819\"}, {\"series\": \"1301\"}, {\"series\": \"1350\"}, {\"series\": \"0401\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -140,7 +140,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of Veterans Affairs\\General Counsel, Occupational Safety and Health Review Commission, Department of the Navy\\Chief of Naval Education and Training, Department of the Army\\Joint Services and Activities Supported by the Office, Secretary of the Army (542 unique)",
+      "examples": "Department of Housing and Urban Development\\Assistant Secretary for Housing-Federal Housing Commissioner, Department of Defense\\Defense Advanced Research Projects Agency, Judicial Branch\\U. S. Sentencing Commission, Department of Justice\\Drug Enforcement Administration (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -164,7 +164,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "DFW-24-834962-01-12653587-I, LESC-IMP-12539410-KMW, OFAM-SMP-12361886-ALK, CBTF-12255856-24-HW-FOXTROT (363816 unique)",
+      "examples": "IMP-12442257-24-SLW, HSAA-24-007-01, EPA-LA-DE-2024-0038, EUJU246689941163 (363816 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363816
@@ -172,7 +172,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Internships, Telework, Presidential Management Fellows, Seasonal (16 unique)",
+      "examples": "Seasonal, Term, Intermittent, Internships (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -204,7 +204,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "ARAE, FM00, TD12, ARXK (528 unique)",
+      "examples": "DD80, NL00, IN29, VADG (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -212,7 +212,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Commander, Naval Information Warfare Systems Command (NAVWARSYSCOM), Joint Activities, Assistant Secretary for Congressional and Intergovernmental Relations, U.S. Army Joint Munitions Command (502 unique)",
+      "examples": "Commission on the People's Republic of China, Military Sealift Command, Alcohol and Tobacco Tax and Trade Bureau, Office of the Secretary of Housing and Urban Development (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -220,7 +220,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "GJ, NQ, BD, OM (122 unique)",
+      "examples": "IF, FT, ZG, BF (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -228,7 +228,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Other Agencies and Independent Organizations, Department of State, Court Services and Offender Supervision Agency for DC, National Aeronautics and Space Administration (26 unique)",
+      "examples": "Other Agencies and Independent Organizations, Judicial Branch, Department of Housing and Urban Development, Department of the Treasury (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -236,7 +236,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "USAADAS Joint C-sUAS University, Fires Center of Excellence (FCoE), Finger Lakes VA Health Care System (Canandaigua  Location), Hampton VA Medical Center VAMC, Albany VA Medical Center (59972 unique)",
+      "examples": "AFOSI SPECIAL PROJ OFFICE DET: 0012 OL:000B, 412 CIVIL ENGINEER SQ/CEOFE, May be used for like vacancies at Edwards AFB, Wm. Jennings Bryan Dorn Department of Veterans Affairs Medical Center (Sumter VA Clinic), Quality Assurance Office (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -252,7 +252,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-20T11:53:10.072035, 2025-09-20T12:21:27.963201, 2025-09-19T23:01:37.163534, 2025-09-19T22:59:09.255751 (367192 unique)",
+      "examples": "2025-07-05T13:52:56.654509, 2025-09-20T11:30:21.413524, 2025-09-20T12:03:23.702644, 2025-07-05T12:59:13.264684 (367192 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367192
@@ -268,7 +268,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-20T11:35:43.380527, 2025-09-20T12:11:56.961056, 2025-09-20T12:00:40.215019, 2025-09-20T12:34:34.281441 (362993 unique)",
+      "examples": "2025-07-05T13:47:41.907129, 2025-09-20T11:30:21.443269, 2025-09-20T11:51:24.339046, 2025-09-20T12:38:23.224965 (362993 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 362993
@@ -276,7 +276,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "07, 21, EI, 05 (127 unique)",
+      "examples": "IH, IJ, 21, KL (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -292,7 +292,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "07, JI, 39, 31 (125 unique)",
+      "examples": "M, HS3, I, 8 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -308,7 +308,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "JS, WM, PE, VH (191 unique)",
+      "examples": "DB, CE, WL, NM (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -316,7 +316,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-06-06, 2024-12-21, 2025-02-13, 2024-02-25 (671 unique)",
+      "examples": "2024-06-06, 2024-05-01, 2025-03-09, 2024-12-06 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -324,7 +324,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-05-08, 2024-06-23, 2024-01-13, 2023-01-25 (596 unique)",
+      "examples": "2024-09-09, 2024-05-04, 2024-08-18, 2024-02-15 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -332,7 +332,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-08-01, 2024-06-04, 2024-03-23, 2024-09-29 (365 unique)",
+      "examples": "2024-11-01, 2024-04-06, 2024-04-30, 2024-10-04 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -348,7 +348,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Medical Support Assistant (Internal VISN 6), Registered Nurse- Outpatient Staff RN- Specialty Care, National Bank Examiner/Bank Examiner (Market Risk Specialist), NB-0570-VI, Budget Analyst (Recent Graduate) (77992 unique)",
+      "examples": "Physical Therapist (Program Coordinator)  - Women Veterans, Registered Nurse- Mental Health Outpatient, COMMAND SUPPORT ASSISTANT, Nursing Assistant- 51 North (77992 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77992
@@ -364,7 +364,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "61, 2, 31, 20 (115 unique)",
+      "examples": "07, 05, GS14, 7 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -428,7 +428,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "5, MANY, 001, 49 (157 unique)",
+      "examples": "221, 54, 36, 146 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
