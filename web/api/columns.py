@@ -5,6 +5,8 @@ Every API endpoint imports from here so that column lists, filter types,
 and WHERE-clause generation stay consistent.
 """
 
+import re
+
 # Ordered list of columns returned by /api/jobs and /api/download.
 # The index in this list is the column index DataTables sends in order[] params.
 COLUMNS = [
@@ -78,6 +80,45 @@ DATE_COLUMNS = {'openDate', 'closeDate'}
 # Filters on these columns use substring matching (any value in the list)
 MULTI_VALUE_FIELDS = {'occupationalSeries'}
 
+# Pay-plan codes (e.g. GS, GL, NF) sometimes appear zero-padded ("GS-07")
+# and sometimes not ("GS-7"). Treat them as equivalent everywhere we compare
+# or display grades, so a user picking "GS-7" gets all GS-7 listings, not
+# just the agencies that happen to use the un-padded form.
+_GRADE_ZERO_PAD = re.compile(r'([-/])0([1-9])')
+
+# Same regex as a DuckDB-side expression so column values get normalized
+# inside the database before comparison.
+_GRADE_DUCKDB_REGEX = "([-/])0([1-9])"
+
+
+def canonical_grade(value):
+    """Strip leading zeros after '-' or '/' so GS-07 → GS-7, GS-07/09 → GS-7/9.
+
+    Leaves XX-00 ('ungraded') alone because the second digit is 0.
+    """
+    if not value:
+        return ''
+    return _GRADE_ZERO_PAD.sub(r'\1\2', value.lower())
+
+
+def _filter_col_expr(col):
+    """SQL expression for the column side of a filter comparison.
+
+    For 'grade', strips zero-padding on the column side so the comparison
+    matches the canonical_grade() form of the bind value.
+    """
+    base = f'LOWER(COALESCE(CAST("{col}" AS VARCHAR), \'\'))'
+    if col == 'grade':
+        return f"regexp_replace({base}, '{_GRADE_DUCKDB_REGEX}', '\\1\\2', 'g')"
+    return base
+
+
+def _normalize_filter_value(col, value):
+    """Bind-value side of a filter comparison."""
+    if col == 'grade':
+        return canonical_grade(value)
+    return value.lower()
+
 
 def parse_filters(params):
     """Parse filter_ prefixed query params into WHERE clauses and bind values.
@@ -128,6 +169,8 @@ def parse_filters(params):
         if param_name not in FILTERABLE_COLUMNS:
             continue
 
+        col_expr = _filter_col_expr(param_name)
+
         # Pipe-separated multiselect
         if '|' in value:
             parts = [v.strip() for v in value.split('|') if v.strip()]
@@ -136,32 +179,24 @@ def parse_filters(params):
                 # appears as a substring (matches individual items in the list)
                 like_parts = []
                 for p in parts:
-                    like_parts.append(
-                        f'LOWER(COALESCE(CAST("{param_name}" AS VARCHAR), \'\')) LIKE ?'
-                    )
-                    bind_values.append(f'%{p.lower()}%')
+                    like_parts.append(f'{col_expr} LIKE ?')
+                    bind_values.append(f'%{_normalize_filter_value(param_name, p)}%')
                 clauses.append(f'({" OR ".join(like_parts)})')
             else:
                 placeholders = ', '.join(['?'] * len(parts))
-                clauses.append(
-                    f'LOWER(COALESCE(CAST("{param_name}" AS VARCHAR), \'\')) IN ({placeholders})'
-                )
-                bind_values.extend([p.lower() for p in parts])
+                clauses.append(f'{col_expr} IN ({placeholders})')
+                bind_values.extend([_normalize_filter_value(param_name, p) for p in parts])
         else:
             # Text search with LIKE — comma-separated terms match any (OR)
             terms = [t.strip() for t in value.split(',') if t.strip()] if ',' in value else [value]
             if len(terms) > 1:
                 like_parts = []
                 for t in terms:
-                    like_parts.append(
-                        f'LOWER(COALESCE(CAST("{param_name}" AS VARCHAR), \'\')) LIKE ?'
-                    )
-                    bind_values.append(f'%{t.lower()}%')
+                    like_parts.append(f'{col_expr} LIKE ?')
+                    bind_values.append(f'%{_normalize_filter_value(param_name, t)}%')
                 clauses.append(f'({" OR ".join(like_parts)})')
             else:
-                clauses.append(
-                    f'LOWER(COALESCE(CAST("{param_name}" AS VARCHAR), \'\')) LIKE ?'
-                )
-                bind_values.append(f'%{value.lower()}%')
+                clauses.append(f'{col_expr} LIKE ?')
+                bind_values.append(f'%{_normalize_filter_value(param_name, value)}%')
 
     return clauses, bind_values

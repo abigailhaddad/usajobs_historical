@@ -7,7 +7,7 @@ import duckdb
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
 from data_loader import get_parquet_path, get_conn
-from columns import DROPDOWN_FIELDS, MULTI_VALUE_FIELDS, parse_filters
+from columns import DROPDOWN_FIELDS, MULTI_VALUE_FIELDS, parse_filters, canonical_grade
 
 
 class handler(BaseHTTPRequestHandler):
@@ -65,6 +65,20 @@ class handler(BaseHTTPRequestHandler):
             conn.close()
 
             values = [r[0] for r in rows if r[0] is not None and r[0].strip()]
+
+            if field == 'grade':
+                # Collapse zero-padded variants (GS-07 → GS-7) so the dropdown
+                # offers one canonical option per grade. Prefer the un-padded
+                # form for display when any variant collapses to it.
+                seen = {}
+                for v in values:
+                    key = canonical_grade(v)
+                    canon_display = key.upper()
+                    if v.upper() == canon_display:
+                        seen[key] = canon_display
+                    elif key not in seen:
+                        seen[key] = v
+                values = sorted(seen.values())
 
             response = {
                 'values': values,

@@ -14,6 +14,7 @@ sys.path.insert(0, WEB_DIR)
 from api import jobs as jobs_mod
 from api import aggregate as agg_mod
 from api import columns as col_mod
+from api import filter_options as fopt_mod
 
 # Column indexes from the shared config
 COL_IDX = {col: i for i, col in enumerate(col_mod.COLUMNS)}
@@ -496,3 +497,73 @@ class TestAggregateFilteredResults:
         assert status == 200
         assert "labels" in body
         assert "datasets" in body
+
+
+# ===================================================================
+# 7. Grade normalization (GS-7 ≡ GS-07)
+# ===================================================================
+
+class TestGradeNormalization:
+    """Pay-plan codes appear both zero-padded ('GS-07') and not ('GS-7') in
+    the data. Filtering on either should return identical results, and the
+    dropdown should offer only one canonical option per grade."""
+
+    def test_canonical_grade_helper(self):
+        cg = col_mod.canonical_grade
+        assert cg('GS-7') == 'gs-7'
+        assert cg('GS-07') == 'gs-7'
+        assert cg('gs-07') == 'gs-7'
+        assert cg('GS-09/11') == 'gs-9/11'
+        assert cg('GS-07/09') == 'gs-7/9'
+        # XX-00 means 'ungraded' — must NOT collapse to XX-0
+        assert cg('GS-00') == 'gs-00'
+        assert cg('VN-00') == 'vn-00'
+        # Already canonical, double-digit grades unchanged
+        assert cg('GS-13') == 'gs-13'
+        assert cg('GS-15') == 'gs-15'
+        assert cg('') == ''
+        assert cg(None) == ''
+
+    def _month_total(self, query):
+        status, body = _invoke_handler(agg_mod.handler, query)
+        assert status == 200
+        return sum(body["datasets"]["count"])
+
+    def test_filter_grade_padded_equals_unpadded_single(self):
+        """filter_grade=GS-7 and filter_grade=GS-07 must yield the same totals."""
+        a = self._month_total("/api/aggregate?group_by=month&filter_grade=GS-7")
+        b = self._month_total("/api/aggregate?group_by=month&filter_grade=GS-07")
+        assert a == b, f"GS-7 ({a}) and GS-07 ({b}) should match after normalization"
+        assert a > 0, "Filter should match at least one listing"
+
+    def test_filter_grade_padded_equals_unpadded_multiselect(self):
+        """Multiselect with mixed padding must agree with the un-padded form."""
+        a = self._month_total("/api/aggregate?group_by=month&filter_grade=GS-7|GS-13")
+        b = self._month_total("/api/aggregate?group_by=month&filter_grade=GS-07|GS-13")
+        assert a == b, f"Mixed-pad multiselect ({b}) must match un-padded ({a})"
+
+    def test_grade_dropdown_dedupes_zero_padded_variants(self):
+        """The grade filter dropdown should not surface BOTH GS-7 and GS-07."""
+        status, body = _invoke_handler(fopt_mod.handler, "/api/filter_options?field=grade")
+        assert status == 200
+        values = body["values"]
+        # Bucket every returned value by its canonical form; each bucket
+        # should have exactly one representative.
+        from collections import defaultdict
+        buckets = defaultdict(list)
+        for v in values:
+            buckets[col_mod.canonical_grade(v)].append(v)
+        dupes = {k: v for k, v in buckets.items() if len(v) > 1}
+        assert not dupes, f"Dropdown still contains zero-padded duplicates: {dupes}"
+        # Sanity: GS-7 should be present, GS-07 should not
+        assert 'GS-7' in values
+        assert 'GS-07' not in values
+
+    def test_grade_dropdown_keeps_ungraded(self):
+        """XX-00 ('ungraded') must survive deduplication — it is its own grade."""
+        status, body = _invoke_handler(fopt_mod.handler, "/api/filter_options?field=grade")
+        assert status == 200
+        values = body["values"]
+        # At least one of the common 'ungraded' codes should remain
+        assert any(v in values for v in ('GS-00', 'VN-00', 'AD-00', 'ES-00')), \
+            "Ungraded XX-00 codes should not be collapsed away"
