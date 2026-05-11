@@ -567,3 +567,55 @@ class TestGradeNormalization:
         # At least one of the common 'ungraded' codes should remain
         assert any(v in values for v in ('GS-00', 'VN-00', 'AD-00', 'ES-00')), \
             "Ungraded XX-00 codes should not be collapsed away"
+
+
+class TestExactMatchDropdownFilters:
+    """Single-value dropdown filters (agency, dept, grade, etc.) must use exact
+    string match. A value that contains a comma — e.g. an agency name like
+    'Treasury, Financial Crimes Enforcement Network' — must NOT be split into
+    OR'd substring searches, because that silently matches the wrong rows."""
+
+    def _filtered_total(self, query):
+        status, body = _invoke_handler(jobs_mod.handler, query)
+        assert status == 200
+        return body["recordsFiltered"]
+
+    def test_comma_in_agency_name_is_literal(self):
+        """An agency name with a comma should match itself, not 'OR'd substrings."""
+        # Pick a known agency value with a comma and ensure the filter behaves like
+        # an exact match. Non-matching agencies must NOT be returned.
+        comma_agency = 'Treasury, Financial Crimes Enforcement Network'
+        url = "/api/jobs?length=20&filter_hiringAgencyName=" + comma_agency.replace(' ', '%20')
+        status, body = _invoke_handler(jobs_mod.handler, url)
+        assert status == 200
+        ag_idx = COL_IDX['hiringAgencyName']
+        for row in body["data"]:
+            assert row[ag_idx] == comma_agency, (
+                f"Filter for {comma_agency!r} returned {row[ag_idx]!r} — "
+                f"comma-split substring bug regressed"
+            )
+
+    def test_exact_agency_does_not_match_substring(self):
+        """An agency name that is a substring of another agency must not match it."""
+        # 'Department of the Treasury' is a substring of (e.g.) 'Treasury, Departmental Offices'
+        # only via the buggy comma-split. With exact match, only literal matches return.
+        url = "/api/jobs?length=10&filter_hiringAgencyName=Department%20of%20the%20Treasury"
+        status, body = _invoke_handler(jobs_mod.handler, url)
+        assert status == 200
+        ag_idx = COL_IDX['hiringAgencyName']
+        for row in body["data"]:
+            assert row[ag_idx] == 'Department of the Treasury'
+
+    def test_freetext_position_title_still_substring(self):
+        """positionTitle is free-text — substring + comma-OR behavior must be preserved."""
+        # Run the same query two ways; substring match should still work.
+        a = self._filtered_total("/api/jobs?length=1&filter_positionTitle=engineer")
+        b = self._filtered_total("/api/jobs?length=1&filter_positionTitle=Engineer")
+        assert a == b > 0, "positionTitle substring search regressed"
+
+    def test_freetext_comma_or_still_works(self):
+        """Comma-separated terms in free-text fields should still OR-match."""
+        a = self._filtered_total("/api/jobs?length=1&filter_positionTitle=engineer")
+        b = self._filtered_total("/api/jobs?length=1&filter_positionTitle=scientist")
+        either = self._filtered_total("/api/jobs?length=1&filter_positionTitle=engineer,scientist")
+        assert either >= max(a, b), "Comma-OR search should match at least as many as either term alone"

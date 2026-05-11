@@ -80,6 +80,15 @@ DATE_COLUMNS = {'openDate', 'closeDate'}
 # Filters on these columns use substring matching (any value in the list)
 MULTI_VALUE_FIELDS = {'occupationalSeries'}
 
+# Columns whose values come from a known dropdown — match the literal value,
+# not as a substring. Without this, an agency name containing a comma
+# (e.g. "Treasury, Financial Crimes Enforcement Network") would get split
+# into an OR substring search and silently match the wrong rows.
+EXACT_MATCH_FIELDS = {
+    'hiringAgencyName', 'hiringDepartmentName', 'grade',
+    'appointmentType', 'serviceType', 'status',
+}
+
 # Pay-plan codes (e.g. GS, GL, NF) sometimes appear zero-padded ("GS-07")
 # and sometimes not ("GS-7"). Treat them as equivalent everywhere we compare
 # or display grades, so a user picking "GS-7" gets all GS-7 listings, not
@@ -186,8 +195,14 @@ def parse_filters(params):
                 placeholders = ', '.join(['?'] * len(parts))
                 clauses.append(f'{col_expr} IN ({placeholders})')
                 bind_values.extend([_normalize_filter_value(param_name, p) for p in parts])
+        elif param_name in EXACT_MATCH_FIELDS:
+            # Single value from a known-set dropdown — match exactly.
+            # Commas inside the value (e.g. "Treasury, FinCEN") are part of
+            # the value, not a separator.
+            clauses.append(f'{col_expr} = ?')
+            bind_values.append(_normalize_filter_value(param_name, value))
         else:
-            # Text search with LIKE — comma-separated terms match any (OR)
+            # Free-text search with LIKE — comma-separated terms match any (OR)
             terms = [t.strip() for t in value.split(',') if t.strip()] if ',' in value else [value]
             if len(terms) > 1:
                 like_parts = []
