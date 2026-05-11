@@ -277,21 +277,33 @@ def main():
     combined = combined.drop_duplicates(subset=["usajobsControlNumber"], keep="last")
     print(f"After dedup: {len(combined):,} rows")
 
-    # Retroactive fix for current-API records: hiringAgencyName was populated
-    # from DepartmentName (parent) instead of SubAgency. For records that have
-    # a non-empty SubAgency, prefer it. Historical records aren't touched.
-    if "hiringSubelementName" in combined.columns:
-        sub = combined["hiringSubelementName"].astype("string").str.strip()
-        sub_mask = sub.notna() & (sub != "") & (sub.str.lower() != "none")
-        # Only override when current value matches the dept (i.e. the bug's signature).
-        # Historical records that already have a correct sub-agency aren't disturbed.
-        if "hiringDepartmentName" in combined.columns:
-            ag = combined["hiringAgencyName"].astype("string").str.strip()
-            dept = combined["hiringDepartmentName"].astype("string").str.strip()
-            buggy = sub_mask & ag.notna() & dept.notna() & (ag.str.lower() == dept.str.lower())
-            n = int(buggy.sum())
-            combined.loc[buggy, "hiringAgencyName"] = sub[buggy]
-            print(f"  Reassigned {n:,} hiringAgencyName values from SubAgency (was =dept)")
+    # Retroactive fix: current-API records had hiringAgencyName populated from
+    # DepartmentName instead of OrganizationName, so every bureau (IRS, CBP,
+    # FEMA, etc.) was lumped into its parent dept. The bureau name is still
+    # available inside MatchedObjectDescriptor.OrganizationName — pull it out.
+    # Only touch records where the buggy signature applies (agency == dept) so
+    # historical records that already have correct bureau names stay untouched.
+    if "MatchedObjectDescriptor" in combined.columns:
+        def _extract_org_name(val):
+            if val is None or (isinstance(val, float) and pd.isna(val)):
+                return None
+            try:
+                obj = val if isinstance(val, dict) else json.loads(val) if isinstance(val, str) else None
+                if obj:
+                    return obj.get("OrganizationName")
+            except Exception:
+                pass
+            return None
+        ag = combined["hiringAgencyName"].astype("string").str.strip()
+        dept = combined["hiringDepartmentName"].astype("string").str.strip()
+        buggy_signature = ag.notna() & dept.notna() & (ag.str.lower() == dept.str.lower())
+        org_names = combined.loc[buggy_signature, "MatchedObjectDescriptor"].apply(_extract_org_name)
+        org_names = org_names.astype("string").str.strip()
+        usable = org_names.notna() & (org_names != "")
+        n_fixable = int(usable.sum())
+        idx = org_names[usable].index
+        combined.loc[idx, "hiringAgencyName"] = org_names[usable]
+        print(f"  Reassigned {n_fixable:,} hiringAgencyName values from OrganizationName")
 
     # Fill missing locations from the lookup
     mask = combined["locations"].isna() | (combined["locations"] == "")

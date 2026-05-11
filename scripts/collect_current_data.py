@@ -99,12 +99,14 @@ def flatten_current_job(job_item: dict, appointment_type_map: dict, hiring_path_
     
     flattened["usajobsControlNumber"] = numeric_control_number
     flattened["announcementNumber"] = job.get("PositionID")  # This is actually the announcement number 
-    # hiringAgencyName should be the sub-agency (e.g. "Internal Revenue Service"),
-    # falling back to the department only when no sub-agency is reported. The
-    # historical API exposes this distinction natively; the current API splits it
-    # into DepartmentName + SubAgency, so we recombine here. Without this fallback,
-    # every Treasury sub-bureau (IRS, FinCEN, etc.) gets mislabeled as the parent.
-    flattened["hiringAgencyName"] = job.get("SubAgency") or job.get("DepartmentName")
+    # The historical API returns hiringAgencyName at the bureau level
+    # (e.g. "Internal Revenue Service"). The current API splits it into
+    #   DepartmentName    — parent dept ("Department of the Treasury")
+    #   OrganizationName  — bureau ("Internal Revenue Service")  ← what we want
+    #   SubAgency         — office ("Office of Chief Counsel, ...") — too granular
+    # OrganizationName is the right match. Fall back to DepartmentName when
+    # a job is posted at the dept level with no bureau attribution.
+    flattened["hiringAgencyName"] = job.get("OrganizationName") or job.get("DepartmentName")
     flattened["hiringAgencyCode"] = job.get("OrganizationCodes", "").split(".")[0] if job.get("OrganizationCodes") else None
     flattened["hiringDepartmentName"] = job.get("DepartmentName")
     flattened["hiringSubelementName"] = job.get("SubAgency")
