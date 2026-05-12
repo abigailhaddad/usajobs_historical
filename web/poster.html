@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10">
+    <title>USAJobs postings by department — Poster</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared/shared.css">
+    <style>
+        body {
+            margin: 0;
+            background: #FAF5E8;
+            font-family: 'Source Sans 3', system-ui, sans-serif;
+            color: #1a1a1a;
+        }
+        .nav {
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid #e8e0c8;
+            display: flex;
+            gap: 1.25rem;
+            align-items: baseline;
+        }
+        .nav a {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .nav a:hover { text-decoration: underline; }
+        .intro {
+            max-width: 900px;
+            padding: 1.5rem 1.25rem 0;
+        }
+        .intro h1 {
+            font-family: 'DM Sans', sans-serif;
+            margin: 0 0 0.5rem;
+        }
+        .intro p {
+            margin: 0.5rem 0;
+            line-height: 1.5;
+            color: #444;
+        }
+        .poster-frame {
+            padding: 1rem 1.25rem 2rem;
+            text-align: center;
+        }
+        .poster-frame img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e8e0c8;
+            cursor: zoom-in;
+        }
+        .download-row {
+            margin-top: 0.75rem;
+            font-size: 0.95rem;
+            color: #555;
+        }
+        .download-row a {
+            color: #2d6e4e;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="index.html">← USAJobs Data viewer</a>
+    </nav>
+    <section class="intro">
+        <h1>USAJobs postings by department</h1>
+        <p>Monthly posting volume from 2020 through April 2026, one panel per cabinet department or branch, sorted by recovery (least to most). The dashed red line in each panel marks the federal hiring freeze (executive order signed Jan 20, 2025).</p>
+        <p><strong>Caveat:</strong> USAJobs is the federal government's public job board. Not all federal jobs are posted there (e.g. FBI, CIA, USPS use their own systems), and a single posting can result in 0, 1, or many actual hires.</p>
+    </section>
+    <div class="poster-frame">
+        <a href="dept-poster.png" target="_blank" rel="noopener">
+            <img src="dept-poster.png" alt="USAJobs postings by month, by department, 2020 – April 2026" loading="eager">
+        </a>
+        <div class="download-row">
+            <a href="dept-poster.png" download>Download full-resolution PNG</a>
+            &middot;
+            <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/make_dept_poster.py" target="_blank" rel="noopener">Generation script on GitHub</a>
+        </div>
+    </div>
+</body>
+</html>
