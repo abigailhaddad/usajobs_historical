@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10">
+    <title>Postings vs accessions, by department — Poster</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared/shared.css">
+    <style>
+        body { margin: 0; background: #FAF5E8; font-family: 'Source Sans 3', system-ui, sans-serif; color: #1a1a1a; }
+        .nav { padding: 0.75rem 1.25rem; border-bottom: 1px solid #e8e0c8; display: flex; gap: 1.25rem; align-items: baseline; }
+        .nav a { color: #1a1a1a; text-decoration: none; font-weight: 600; }
+        .nav a:hover { text-decoration: underline; }
+        .intro { max-width: 1100px; padding: 1.5rem 1.25rem 0.5rem; }
+        .intro h1 { font-family: 'DM Sans', sans-serif; font-size: 2.25rem; margin: 0 0 0.5rem; }
+        .intro p { margin: 0.5rem 0; line-height: 1.5; color: #444; }
+        .legend-row { font-size: 0.95rem; color: #444; margin: 0.75rem 0 0; display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
+        .legend-row .swatch { display: inline-block; width: 16px; height: 16px; vertical-align: middle; margin-right: 0.4rem; border-radius: 2px; }
+        .legend-row .line-swatch { display: inline-block; width: 22px; height: 0; border-top: 2.5px solid #C97D2A; vertical-align: middle; margin-right: 0.4rem; }
+        .meta-row { font-size: 0.95rem; color: #555; margin: 0.5rem 0 1rem; }
+        .meta-row a { color: #2d6e4e; font-weight: 600; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 0.75rem; padding: 0 1.25rem 2rem; }
+        .tile { background: #FAF5E8; border: 1px solid #e8e0c8; border-radius: 4px; padding: 0.75rem 0.85rem 0.5rem; display: flex; flex-direction: column; }
+        .tile h2 { font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem; color: #1a1a1a; }
+        .tile .canvas-wrap { position: relative; height: 200px; }
+        .loading { color: #777; text-align: center; padding: 2rem; }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="index.html">← USAJobs Data viewer</a>
+        <a href="poster.html">Postings poster</a>
+        <a href="accessions-poster.html">Accessions poster</a>
+    </nav>
+    <section class="intro">
+        <h1>Postings vs accessions</h1>
+        <p>Each panel overlays USAJobs <strong>postings</strong> (green bars, intent to hire) and OPM EHRI <strong>accessions</strong> (orange line, actual hires) for one cabinet department. Both share the same x-axis but use different y-axes because postings and hires are different magnitudes — postings on the left, accessions on the right.</p>
+        <p>The dashed red line marks the federal hiring freeze (executive order signed Jan 20, 2025). Postings collapsed almost immediately for most departments; accessions follow with a few months of lag because pipelines that started in Dec / Jan continued to close out.</p>
+        <div class="legend-row">
+            <span><span class="swatch" style="background:#2D6A4F;"></span>USAJobs postings (intent)</span>
+            <span><span class="line-swatch"></span>EHRI accessions (actual hires)</span>
+        </div>
+        <p class="meta-row">
+            Sources:
+            <a href="https://developer.usajobs.gov/" target="_blank" rel="noopener">USAJobs API</a>
+            and
+            <a href="https://huggingface.co/datasets/impactproject/opm-ehri-data" target="_blank" rel="noopener">OPM EHRI via Impact Project</a>
+            &middot;
+            <a href="https://github.com/abigailhaddad/usajobs_historical" target="_blank" rel="noopener">Code on GitHub</a>
+        </p>
+    </section>
+    <div id="grid" class="grid">
+        <div class="loading">Loading…</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        Chart.defaults.font.family = "'Source Sans 3', sans-serif";
+        Chart.defaults.color = '#7A6E62';
+
+        const COLORS = {
+            postings: '#2D6A4F',
+            accessions: '#C97D2A',
+            grid: '#E8DDD0',
+            tickLabel: '#7A6E62',
+            cliff: 'rgba(160, 60, 60, 0.85)',
+        };
+        const TOOLTIP = {
+            backgroundColor: '#2A211A',
+            titleColor: '#F5EDE0',
+            bodyColor: '#F5EDE0',
+            borderColor: '#3D2B1F',
+            borderWidth: 1,
+            cornerRadius: 6,
+            titleFont: { family: "'Source Sans 3', sans-serif", weight: 600 },
+            bodyFont: { family: "'Source Sans 3', sans-serif" },
+            padding: 10,
+        };
+
+        // Same dept order as accessions-poster.html
+        const DEPTS = [
+            ['Department of Veterans Affairs', 'Veterans Affairs'],
+            ['Department of the Army', 'Army'],
+            ['Department of the Navy', 'Navy'],
+            ['Department of the Air Force', 'Air Force'],
+            ['Department of Defense', 'Defense (DoD)'],
+            ['Department of Homeland Security', 'Homeland Security'],
+            ['Department of the Interior', 'Interior'],
+            ['Department of Health and Human Services', 'Health & Human Services'],
+            ['Department of Agriculture', 'Agriculture'],
+            ['Department of the Treasury', 'Treasury'],
+            ['Department of Justice', 'Justice'],
+            ['Department of Transportation', 'Transportation'],
+            ['Department of Commerce', 'Commerce'],
+            ['Department of Energy', 'Energy'],
+            ['General Services Administration', 'GSA'],
+            ['Department of State', 'State'],
+            ['Department of Labor', 'Labor'],
+            ['Department of Housing and Urban Development', 'Housing & Urban Dev'],
+        ];
+
+        const CLIFF_MONTH = '2025-02';     // postings format YYYY-MM
+        const ACC_CLIFF_MONTH = '202502';  // accessions format YYYYMM
+        const WINDOW_START = '2018-01';
+        const WINDOW_END = '2026-04';
+
+        const CLIFF_PLUGIN = {
+            id: 'cliffLine',
+            afterDatasetsDraw(chart) {
+                const labels = chart.data.labels;
+                const idx = labels.indexOf(CLIFF_MONTH);
+                if (idx === -1) return;
+                const x = chart.scales.x.getPixelForValue(idx);
+                const { top, bottom } = chart.chartArea;
+                const ctx = chart.ctx;
+                ctx.save();
+                ctx.strokeStyle = COLORS.cliff;
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(x, top);
+                ctx.lineTo(x, bottom);
+                ctx.stroke();
+                ctx.restore();
+            }
+        };
+        Chart.register(CLIFF_PLUGIN);
+
+        function formatMonthYYYYMM(label) {
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            const [y, m] = label.split('-');
+            return `${months[parseInt(m, 10) - 1]} ${y}`;
+        }
+
+        async function fetchPostings(dept) {
+            const qs = new URLSearchParams({
+                group_by: 'month',
+                filter_hiringDepartmentName: dept,
+            });
+            const resp = await fetch('/api/aggregate?' + qs);
+            const data = await resp.json();
+            return { labels: data.labels, counts: data.datasets.count };
+        }
+
+        // Align accessions data (YYYYMM) onto the postings labels (YYYY-MM)
+        function alignAccessions(postingsLabels, accMonths, accCounts) {
+            const map = {};
+            for (let i = 0; i < accMonths.length; i++) {
+                const m = accMonths[i];
+                const key = m.slice(0, 4) + '-' + m.slice(4, 6);
+                map[key] = accCounts[i];
+            }
+            return postingsLabels.map((l) => map[l] ?? null);
+        }
+
+        function postPrePctAcc(accMonths, accCounts) {
+            let pre = 0, npre = 0, post = 0, npost = 0;
+            for (let i = 0; i < accMonths.length; i++) {
+                if (accMonths[i] <= '202501') { pre += accCounts[i]; npre++; }
+                else { post += accCounts[i]; npost++; }
+            }
+            const preAvg = npre ? pre / npre : 0;
+            const postAvg = npost ? post / npost : 0;
+            return preAvg ? postAvg / preAvg : 0;
+        }
+
+        function filterWindow(labels, counts) {
+            const out_l = [], out_c = [];
+            for (let i = 0; i < labels.length; i++) {
+                if (labels[i] >= WINDOW_START && labels[i] <= WINDOW_END) {
+                    out_l.push(labels[i]);
+                    out_c.push(counts[i]);
+                }
+            }
+            return { labels: out_l, counts: out_c };
+        }
+
+        async function main() {
+            const accResp = await fetch('accessions-monthly.json');
+            const accData = await accResp.json();
+
+            const items = await Promise.all(DEPTS.map(async ([agency, short]) => {
+                const accCounts = accData.agencies[agency];
+                if (!accCounts) return null;
+                const postings = await fetchPostings(agency);
+                const filtered = filterWindow(postings.labels, postings.counts);
+                const accAligned = alignAccessions(filtered.labels, accData.months, accCounts);
+                return {
+                    agency, short,
+                    labels: filtered.labels,
+                    postings: filtered.counts,
+                    accessions: accAligned,
+                    pct: postPrePctAcc(accData.months, accCounts),
+                };
+            }));
+            const valid = items.filter(Boolean);
+            valid.sort((a, b) => a.pct - b.pct);
+
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            for (const item of valid) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                const h = document.createElement('h2');
+                h.textContent = item.short;
+                tile.appendChild(h);
+                const wrap = document.createElement('div');
+                wrap.className = 'canvas-wrap';
+                const canvas = document.createElement('canvas');
+                wrap.appendChild(canvas);
+                tile.appendChild(wrap);
+                grid.appendChild(tile);
+
+                new Chart(canvas, {
+                    data: {
+                        labels: item.labels,
+                        datasets: [
+                            {
+                                type: 'bar',
+                                label: 'Postings',
+                                data: item.postings,
+                                backgroundColor: COLORS.postings,
+                                borderWidth: 0,
+                                yAxisID: 'yPostings',
+                                order: 2,
+                                categoryPercentage: 1.0,
+                                barPercentage: 0.95,
+                            },
+                            {
+                                type: 'line',
+                                label: 'Accessions',
+                                data: item.accessions,
+                                borderColor: COLORS.accessions,
+                                backgroundColor: COLORS.accessions,
+                                borderWidth: 2.2,
+                                pointRadius: 0,
+                                pointHoverRadius: 4,
+                                tension: 0.25,
+                                spanGaps: false,
+                                yAxisID: 'yAccessions',
+                                order: 1,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                ...TOOLTIP,
+                                callbacks: {
+                                    title: (i) => formatMonthYYYYMM(i[0].label),
+                                    label: (ctx) => {
+                                        const v = ctx.parsed.y;
+                                        if (v == null) return null;
+                                        return `${ctx.dataset.label}: ${v.toLocaleString()}`;
+                                    },
+                                },
+                            },
+                        },
+                        scales: {
+                            yPostings: {
+                                position: 'left',
+                                beginAtZero: true,
+                                grid: { color: COLORS.grid },
+                                ticks: {
+                                    color: COLORS.postings,
+                                    precision: 0,
+                                    maxTicksLimit: 4,
+                                    callback: (v) => v >= 1000 ? (v / 1000) + 'K' : v,
+                                },
+                            },
+                            yAccessions: {
+                                position: 'right',
+                                beginAtZero: true,
+                                grid: { display: false },
+                                ticks: {
+                                    color: COLORS.accessions,
+                                    precision: 0,
+                                    maxTicksLimit: 4,
+                                    callback: (v) => v >= 1000 ? (v / 1000) + 'K' : v,
+                                },
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: {
+                                    color: COLORS.tickLabel,
+                                    autoSkip: false,
+                                    callback: function(_v, index) {
+                                        const lbl = this.getLabelForValue(index);
+                                        const [y, m] = lbl.split('-');
+                                        return (m === '01' && parseInt(y, 10) % 2 === 0) ? y : '';
+                                    },
+                                    maxRotation: 0,
+                                },
+                            },
+                        },
+                    },
+                });
+            }
+        }
+        main().catch((e) => {
+            document.getElementById('grid').innerHTML =
+                '<div class="loading">Failed to load: ' + e.message + '</div>';
+        });
+    </script>
+</body>
+</html>

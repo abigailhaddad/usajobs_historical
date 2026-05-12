@@ -3,101 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10">
-    <title>USAJobs postings by department — Poster</title>
+    <title>Federal accessions by department — Poster</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="shared/shared.css">
     <style>
-        body {
-            margin: 0;
-            background: #FAF5E8;
-            font-family: 'Source Sans 3', system-ui, sans-serif;
-            color: #1a1a1a;
-        }
-        .nav {
-            padding: 0.75rem 1.25rem;
-            border-bottom: 1px solid #e8e0c8;
-            display: flex;
-            gap: 1.25rem;
-            align-items: baseline;
-        }
-        .nav a {
-            color: #1a1a1a;
-            text-decoration: none;
-            font-weight: 600;
-        }
+        body { margin: 0; background: #FAF5E8; font-family: 'Source Sans 3', system-ui, sans-serif; color: #1a1a1a; }
+        .nav { padding: 0.75rem 1.25rem; border-bottom: 1px solid #e8e0c8; display: flex; gap: 1.25rem; align-items: baseline; }
+        .nav a { color: #1a1a1a; text-decoration: none; font-weight: 600; }
         .nav a:hover { text-decoration: underline; }
-        .intro {
-            max-width: 1100px;
-            padding: 1.5rem 1.25rem 0.5rem;
-        }
-        .intro h1 {
-            font-family: 'DM Sans', sans-serif;
-            font-size: 2.25rem;
-            margin: 0 0 0.5rem;
-        }
-        .intro p {
-            margin: 0.5rem 0;
-            line-height: 1.5;
-            color: #444;
-        }
-        .meta-row {
-            font-size: 0.95rem;
-            color: #555;
-            margin: 0.5rem 0 1rem;
-        }
+        .intro { max-width: 1100px; padding: 1.5rem 1.25rem 0.5rem; }
+        .intro h1 { font-family: 'DM Sans', sans-serif; font-size: 2.25rem; margin: 0 0 0.5rem; }
+        .intro p { margin: 0.5rem 0; line-height: 1.5; color: #444; }
+        .meta-row { font-size: 0.95rem; color: #555; margin: 0.5rem 0 1rem; }
         .meta-row a { color: #2d6e4e; font-weight: 600; }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-            gap: 0.75rem;
-            padding: 0 1.25rem 2rem;
-        }
-        .tile {
-            background: #FAF5E8;
-            border: 1px solid #e8e0c8;
-            border-radius: 4px;
-            padding: 0.75rem 0.85rem 0.5rem;
-            display: flex;
-            flex-direction: column;
-        }
-        .tile h2 {
-            font-family: 'DM Sans', sans-serif;
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin: 0 0 0.4rem;
-            color: #1a1a1a;
-        }
-        .tile .canvas-wrap {
-            position: relative;
-            height: 160px;
-        }
-        .loading {
-            color: #777;
-            text-align: center;
-            padding: 2rem;
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 0.75rem; padding: 0 1.25rem 2rem; }
+        .tile { background: #FAF5E8; border: 1px solid #e8e0c8; border-radius: 4px; padding: 0.75rem 0.85rem 0.5rem; display: flex; flex-direction: column; }
+        .tile h2 { font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem; color: #1a1a1a; }
+        .tile .canvas-wrap { position: relative; height: 160px; }
+        .loading { color: #777; text-align: center; padding: 2rem; }
     </style>
 </head>
 <body>
     <nav class="nav">
         <a href="index.html">← USAJobs Data viewer</a>
-        <a href="accessions-poster.html">Accessions poster</a>
+        <a href="poster.html">Postings poster</a>
         <a href="overlay-poster.html">Overlay poster</a>
     </nav>
     <section class="intro">
-        <h1>USAJobs postings by department</h1>
-        <p>Monthly posting volume from 2020 through April 2026, one panel per cabinet department or branch, sorted by recovery (least to most). The dashed red line in each panel marks the federal hiring freeze (executive order signed Jan 20, 2025). Hover any bar to see the exact month and count.</p>
-        <p><strong>Caveat:</strong> USAJobs is the federal government's public job board. Not all federal jobs are posted there (e.g. FBI, CIA, USPS use their own systems), and a single posting can result in 0, 1, or many actual hires.</p>
+        <h1>Federal accessions by department</h1>
+        <p>Monthly new federal hires (accessions) from January 2018 through March 2026, one panel per cabinet department, sorted by recovery (least to most). The dashed red line marks the federal hiring freeze (executive order signed Jan 20, 2025). Hover any bar to see the exact month and count.</p>
+        <p><strong>What this is:</strong> "Accessions" are people who were actually hired into the executive-branch federal workforce, from the OPM EHRI dataset (via <a href="https://huggingface.co/datasets/impactproject/opm-ehri-data" target="_blank" rel="noopener">Impact Project's HuggingFace mirror</a>). Includes new hires, conversions, and transfers in. Excludes the Postal Service and intelligence community. Data lags by 1–2 months from the most recent USAJobs postings.</p>
         <p class="meta-row">
-            <a href="dept-poster.png" target="_blank" rel="noopener">Static PNG version</a>
-            &middot;
-            <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/make_dept_poster.py" target="_blank" rel="noopener">Source script</a>
+            <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/aggregate_accessions.py" target="_blank" rel="noopener">Source script</a>
         </p>
     </section>
     <div id="grid" class="grid">
-        <div class="loading">Loading 20 departments…</div>
+        <div class="loading">Loading…</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -106,7 +49,7 @@
         Chart.defaults.color = '#7A6E62';
 
         const COLORS = {
-            primary: '#2D6A4F',
+            primary: '#C97D2A',     // orange — distinguishes accessions from postings green
             grid: '#E8DDD0',
             tickLabel: '#7A6E62',
             cliff: 'rgba(160, 60, 60, 0.85)',
@@ -123,6 +66,8 @@
             padding: 10,
         };
 
+        // Same dept order as the postings poster, minus the two USAJobs-only
+        // categories that have no EHRI equivalent.
         const DEPTS = [
             ['Department of Veterans Affairs', 'Veterans Affairs'],
             ['Department of the Army', 'Army'],
@@ -130,7 +75,6 @@
             ['Department of the Air Force', 'Air Force'],
             ['Department of Defense', 'Defense (DoD)'],
             ['Department of Homeland Security', 'Homeland Security'],
-            ['Other Agencies and Independent Organizations', 'Other Independent Agencies'],
             ['Department of the Interior', 'Interior'],
             ['Department of Health and Human Services', 'Health & Human Services'],
             ['Department of Agriculture', 'Agriculture'],
@@ -142,23 +86,18 @@
             ['General Services Administration', 'GSA'],
             ['Department of State', 'State'],
             ['Department of Labor', 'Labor'],
-            ['Legislative Branch', 'Legislative Branch'],
             ['Department of Housing and Urban Development', 'Housing & Urban Dev'],
         ];
 
-        const WINDOW_START = '2020-01';
-        const WINDOW_END = '2026-04';
-        const CLIFF_MONTH = '2025-02';
+        const CLIFF_MONTH = '202502';
 
-        // Plugin to draw the freeze cliff line on every chart.
         const CLIFF_PLUGIN = {
             id: 'cliffLine',
             afterDatasetsDraw(chart) {
                 const labels = chart.data.labels;
                 const idx = labels.indexOf(CLIFF_MONTH);
                 if (idx === -1) return;
-                const xScale = chart.scales.x;
-                const x = xScale.getPixelForValue(idx);
+                const x = chart.scales.x.getPixelForValue(idx);
                 const { top, bottom } = chart.chartArea;
                 const ctx = chart.ctx;
                 ctx.save();
@@ -174,61 +113,41 @@
         };
         Chart.register(CLIFF_PLUGIN);
 
-        async function fetchSeries(dept) {
-            const qs = new URLSearchParams({
-                group_by: 'month',
-                filter_hiringDepartmentName: dept,
-            });
-            const resp = await fetch('/api/aggregate?' + qs);
-            const data = await resp.json();
-            return { labels: data.labels, counts: data.datasets.count };
+        function formatMonth(label) {
+            const y = label.slice(0, 4), m = label.slice(4, 6);
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return `${months[parseInt(m, 10) - 1]} ${y}`;
         }
 
-        function filterWindow(labels, counts) {
-            const out_l = [], out_c = [];
-            for (let i = 0; i < labels.length; i++) {
-                if (labels[i] >= WINDOW_START && labels[i] <= WINDOW_END) {
-                    out_l.push(labels[i]);
-                    out_c.push(counts[i]);
-                }
-            }
-            return { labels: out_l, counts: out_c };
-        }
-
-        function postPrePct(labels, counts) {
+        function postPrePct(months, counts) {
             let pre = 0, npre = 0, post = 0, npost = 0;
-            for (let i = 0; i < labels.length; i++) {
-                if (labels[i] <= '2025-01') { pre += counts[i]; npre++; }
-                else if (labels[i] <= WINDOW_END) { post += counts[i]; npost++; }
+            for (let i = 0; i < months.length; i++) {
+                if (months[i] <= '202501') { pre += counts[i]; npre++; }
+                else { post += counts[i]; npost++; }
             }
             const preAvg = npre ? pre / npre : 0;
             const postAvg = npost ? post / npost : 0;
             return preAvg ? postAvg / preAvg : 0;
         }
 
-        // Format "2025-03" as "Mar 2025" for tooltip
-        function formatMonth(label) {
-            const [y, m] = label.split('-');
-            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-            return `${months[parseInt(m, 10) - 1]} ${y}`;
-        }
-
         async function main() {
+            const resp = await fetch('accessions-monthly.json');
+            const data = await resp.json();
+
+            const items = [];
+            for (const [agency, short] of DEPTS) {
+                const counts = data.agencies[agency];
+                if (!counts) {
+                    console.warn('No accessions data for', agency);
+                    continue;
+                }
+                items.push({ agency, short, months: data.months, counts, pct: postPrePct(data.months, counts) });
+            }
+            items.sort((a, b) => a.pct - b.pct);
+
             const grid = document.getElementById('grid');
-
-            // Fetch all departments in parallel
-            const all = await Promise.all(DEPTS.map(async ([dept, short]) => {
-                const { labels, counts } = await fetchSeries(dept);
-                const pct = postPrePct(labels, counts);
-                const filtered = filterWindow(labels, counts);
-                return { dept, short, ...filtered, pct };
-            }));
-
-            // Sort by recovery (least to most)
-            all.sort((a, b) => a.pct - b.pct);
-
             grid.innerHTML = '';
-            for (const item of all) {
+            for (const item of items) {
                 const tile = document.createElement('div');
                 tile.className = 'tile';
                 const h = document.createElement('h2');
@@ -244,9 +163,9 @@
                 new Chart(canvas, {
                     type: 'bar',
                     data: {
-                        labels: item.labels,
+                        labels: item.months,
                         datasets: [{
-                            label: 'Postings',
+                            label: 'Accessions',
                             data: item.counts,
                             backgroundColor: COLORS.primary,
                             borderWidth: 0,
@@ -262,8 +181,8 @@
                             tooltip: {
                                 ...TOOLTIP,
                                 callbacks: {
-                                    title: (items) => formatMonth(items[0].label),
-                                    label: (ctx) => `${ctx.parsed.y.toLocaleString()} postings`,
+                                    title: (i) => formatMonth(i[0].label),
+                                    label: (ctx) => `${ctx.parsed.y.toLocaleString()} accessions`,
                                 },
                             },
                         },
@@ -283,10 +202,9 @@
                                 ticks: {
                                     color: COLORS.tickLabel,
                                     autoSkip: false,
-                                    callback: function(_value, index) {
+                                    callback: function(_v, index) {
                                         const lbl = this.getLabelForValue(index);
-                                        const [y, m] = lbl.split('-');
-                                        return (m === '01' && parseInt(y, 10) % 2 === 0) ? y : '';
+                                        return (lbl.endsWith('01') && parseInt(lbl.slice(0, 4), 10) % 2 === 0) ? lbl.slice(0, 4) : '';
                                     },
                                     maxRotation: 0,
                                 },
