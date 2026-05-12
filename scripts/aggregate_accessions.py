@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Aggregate OPM EHRI accessions data from HuggingFace into a small JSON file
-suitable for client-side rendering.
+Aggregate OPM EHRI accessions or separations data from HuggingFace into a
+small JSON file suitable for client-side rendering.
 
-Output: web/accessions-monthly.json
+Output: web/{type}-monthly.json
     {
       "generated_at": "2026-05-12T...",
       "months": ["201801", "201802", ...],
@@ -11,8 +11,8 @@ Output: web/accessions-monthly.json
         "Department of Veterans Affairs": [count, count, ...],
         ...
       },
-      "categories": {              # accession_category breakdown for the
-        "<agency>": {              # whole window, used for context only
+      "categories": {              # {accession,separation}_category
+        "<agency>": {              # breakdown, for context only
           "<category>": <count>
         }
       }
@@ -23,6 +23,7 @@ The dataset is public — no auth needed.
 
 Usage:
     python scripts/aggregate_accessions.py
+    python scripts/aggregate_accessions.py --type separations
     python scripts/aggregate_accessions.py --since 202001 --output /tmp/agg.json
 """
 import argparse
@@ -81,12 +82,13 @@ AGENCY_NORMALIZE = {
 }
 
 
-def discover_accession_urls(since_yyyymm):
-    """Return [(yyyymm, url)] for the highest-versioned accessions parquet
-    in each month >= since_yyyymm. Mirrors the demo notebook's behavior."""
+def discover_urls(data_type, since_yyyymm):
+    """Return [(yyyymm, url)] for the highest-versioned <data_type> parquet
+    in each month >= since_yyyymm. Mirrors the demo notebook's behavior.
+    data_type is 'accessions' or 'separations'."""
     files = list_repo_files(HF_REPO, repo_type="dataset")
-    versioned = re.compile(r"^accessions/accessions_(\d{6})_v(\d+)\.parquet$")
-    legacy = re.compile(r"^accessions/accessions_(\d{6})\.parquet$")
+    versioned = re.compile(rf"^{data_type}/{data_type}_(\d{{6}})_v(\d+)\.parquet$")
+    legacy = re.compile(rf"^{data_type}/{data_type}_(\d{{6}})\.parquet$")
 
     best = {}
     for f in files:
@@ -109,9 +111,10 @@ def discover_accession_urls(since_yyyymm):
     return sorted((m, f"{HF_BASE}/{best[m][1]}") for m in best)
 
 
-def aggregate(since_yyyymm):
-    print(f"Discovering accessions files since {since_yyyymm}…")
-    pairs = discover_accession_urls(since_yyyymm)
+def aggregate(data_type, since_yyyymm):
+    category_col = f"{data_type[:-1]}_category"  # accession_category or separation_category
+    print(f"Discovering {data_type} files since {since_yyyymm}…")
+    pairs = discover_urls(data_type, since_yyyymm)
     print(f"  {len(pairs)} months found ({pairs[0][0]} → {pairs[-1][0]})")
 
     months = [m for m, _ in pairs]
@@ -121,7 +124,7 @@ def aggregate(since_yyyymm):
     file_list = ", ".join(f"'{u}'" for u in urls)
     print("Loading parquet files into DuckDB…")
     db.execute(
-        f"CREATE TABLE accessions AS "
+        f"CREATE TABLE data AS "
         f"SELECT * FROM read_parquet([{file_list}], union_by_name=True)"
     )
 
@@ -131,18 +134,18 @@ def aggregate(since_yyyymm):
             agency,
             personnel_action_effective_date_yyyymm AS month,
             SUM(CAST(count AS INTEGER)) AS total
-        FROM accessions
+        FROM data
         WHERE agency IS NOT NULL
         GROUP BY agency, month
     """).fetchall()
 
-    print("Computing accession_category breakdown by agency…")
-    cat_rows = db.execute("""
+    print(f"Computing {category_col} breakdown by agency…")
+    cat_rows = db.execute(f"""
         SELECT
             agency,
-            COALESCE(accession_category, '(unknown)') AS category,
+            COALESCE({category_col}, '(unknown)') AS category,
             SUM(CAST(count AS INTEGER)) AS total
-        FROM accessions
+        FROM data
         WHERE agency IS NOT NULL
         GROUP BY agency, category
     """).fetchall()
@@ -180,13 +183,14 @@ def aggregate(since_yyyymm):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
-    default_out = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        "web", "accessions-monthly.json",
+    parser.add_argument(
+        "--type", "-t", default="accessions",
+        choices=["accessions", "separations"],
+        help="Which EHRI dataset to aggregate (default: accessions)",
     )
     parser.add_argument(
-        "--output", "-o", default=default_out,
-        help=f"Output JSON path (default: {default_out})",
+        "--output", "-o", default=None,
+        help="Output JSON path (default: web/<type>-monthly.json)",
     )
     parser.add_argument(
         "--since", default="201801",
@@ -194,11 +198,16 @@ def main():
     )
     args = parser.parse_args()
 
-    data = aggregate(args.since)
-    with open(args.output, "w") as f:
+    output = args.output or os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "web", f"{args.type}-monthly.json",
+    )
+
+    data = aggregate(args.type, args.since)
+    with open(output, "w") as f:
         json.dump(data, f, separators=(",", ":"))
-    size_kb = os.path.getsize(args.output) / 1024
-    print(f"Saved: {args.output}  ({size_kb:.1f} KB)")
+    size_kb = os.path.getsize(output) / 1024
+    print(f"Saved: {output}  ({size_kb:.1f} KB)")
     print(f"  {len(data['months'])} months × {len(data['agencies'])} agencies")
 
 

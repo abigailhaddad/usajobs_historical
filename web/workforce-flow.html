@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10">
-    <title>Federal accessions by department — Poster</title>
+    <title>Federal workforce flow (accessions vs separations) — Poster</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,27 +16,35 @@
         .intro { max-width: 1100px; padding: 1.5rem 1.25rem 0.5rem; }
         .intro h1 { font-family: 'DM Sans', sans-serif; font-size: 2.25rem; margin: 0 0 0.5rem; }
         .intro p { margin: 0.5rem 0; line-height: 1.5; color: #444; }
+        .legend-row { font-size: 0.95rem; color: #444; margin: 0.75rem 0 0; display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
+        .legend-row .swatch { display: inline-block; width: 16px; height: 16px; vertical-align: middle; margin-right: 0.4rem; border-radius: 2px; }
         .meta-row { font-size: 0.95rem; color: #555; margin: 0.5rem 0 1rem; }
         .meta-row a { color: #2d6e4e; font-weight: 600; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 0.75rem; padding: 0 1.25rem 2rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 0.75rem; padding: 0 1.25rem 2rem; }
         .tile { background: #FAF5E8; border: 1px solid #e8e0c8; border-radius: 4px; padding: 0.75rem 0.85rem 0.5rem; display: flex; flex-direction: column; }
         .tile h2 { font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem; color: #1a1a1a; }
-        .tile .canvas-wrap { position: relative; height: 160px; }
+        .tile .canvas-wrap { position: relative; height: 200px; }
         .loading { color: #777; text-align: center; padding: 2rem; }
     </style>
 </head>
 <body>
     <nav class="nav">
         <a href="index.html">← USAJobs Data viewer</a>
-        <a href="poster.html">Postings</a>
-        <a href="workforce-flow.html">Workforce flow</a>
+        <a href="poster.html">Postings poster</a>
+        <a href="accessions-poster.html">Accessions only</a>
         <a href="overlay-poster.html">Postings vs accessions</a>
     </nav>
     <section class="intro">
-        <h1>Federal accessions by department</h1>
-        <p>Monthly new federal hires (accessions) from January 2018 through March 2026, one panel per cabinet department, sorted by recovery (least to most). The dashed red line marks the federal hiring freeze (executive order signed Jan 20, 2025). Hover any bar to see the exact month and count.</p>
-        <p><strong>What this is:</strong> "Accessions" are people who were actually hired into the executive-branch federal workforce, from the OPM EHRI dataset (via <a href="https://huggingface.co/datasets/impactproject/opm-ehri-data" target="_blank" rel="noopener">Impact Project's HuggingFace mirror</a>). Includes new hires, conversions, and transfers in. Excludes the Postal Service and intelligence community. Data lags by 1–2 months from the most recent USAJobs postings.</p>
+        <h1>Federal workforce flow</h1>
+        <p>Each panel shows monthly <strong>accessions</strong> (people hired in, green bars going up) and <strong>separations</strong> (people leaving, red bars going down) for one cabinet department. The dashed red line marks the federal hiring freeze (executive order signed Jan 20, 2025).</p>
+        <p>If the green bar is taller than the red bar, the workforce is growing that month; if red is taller, it's shrinking. Hover any month to see accessions, separations, and net change.</p>
+        <div class="legend-row">
+            <span><span class="swatch" style="background:#2D6A4F;"></span>Accessions (hires in)</span>
+            <span><span class="swatch" style="background:#A83232;"></span>Separations (departures)</span>
+        </div>
         <p class="meta-row">
+            Source: <a href="https://huggingface.co/datasets/impactproject/opm-ehri-data" target="_blank" rel="noopener">OPM EHRI via Impact Project (HuggingFace)</a>
+            &middot;
             <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/aggregate_accessions.py" target="_blank" rel="noopener">Source script</a>
         </p>
     </section>
@@ -50,7 +58,8 @@
         Chart.defaults.color = '#7A6E62';
 
         const COLORS = {
-            primary: '#C97D2A',     // orange — distinguishes accessions from postings green
+            accessions: '#2D6A4F',
+            separations: '#A83232',
             grid: '#E8DDD0',
             tickLabel: '#7A6E62',
             cliff: 'rgba(160, 60, 60, 0.85)',
@@ -67,8 +76,6 @@
             padding: 10,
         };
 
-        // Same dept order as the postings poster, minus the two USAJobs-only
-        // categories that have no EHRI equivalent.
         const DEPTS = [
             ['Department of Veterans Affairs', 'Veterans Affairs'],
             ['Department of the Army', 'Army'],
@@ -120,7 +127,8 @@
             return `${months[parseInt(m, 10) - 1]} ${y}`;
         }
 
-        function postPrePct(months, counts) {
+        function postPrePctAcc(months, counts) {
+            // Used for sort: accessions post-freeze ÷ pre-freeze average
             let pre = 0, npre = 0, post = 0, npost = 0;
             for (let i = 0; i < months.length; i++) {
                 if (months[i] <= '202501') { pre += counts[i]; npre++; }
@@ -132,19 +140,32 @@
         }
 
         async function main() {
-            const resp = await fetch('accessions-monthly.json');
-            const data = await resp.json();
+            const [accResp, sepResp] = await Promise.all([
+                fetch('accessions-monthly.json'),
+                fetch('separations-monthly.json'),
+            ]);
+            const accData = await accResp.json();
+            const sepData = await sepResp.json();
+
+            // Months should be the same set; use accessions as the canonical axis
+            const months = accData.months;
 
             const items = [];
             for (const [agency, short] of DEPTS) {
-                const counts = data.agencies[agency];
-                if (!counts) {
-                    console.warn('No accessions data for', agency);
-                    continue;
-                }
-                items.push({ agency, short, months: data.months, counts, pct: postPrePct(data.months, counts) });
+                const acc = accData.agencies[agency];
+                const sep = sepData.agencies[agency];
+                if (!acc || !sep) continue;
+                // Negate separations so they go below the x-axis
+                const sepNeg = sep.map((c) => c == null ? null : -c);
+                items.push({
+                    agency, short, months,
+                    accessions: acc,
+                    separations: sep,
+                    separationsNeg: sepNeg,
+                    sortKey: postPrePctAcc(months, acc),
+                });
             }
-            items.sort((a, b) => a.pct - b.pct);
+            items.sort((a, b) => a.sortKey - b.sortKey);
 
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
@@ -165,40 +186,73 @@
                     type: 'bar',
                     data: {
                         labels: item.months,
-                        datasets: [{
-                            label: 'Accessions',
-                            data: item.counts,
-                            backgroundColor: COLORS.primary,
-                            borderWidth: 0,
-                            categoryPercentage: 1.0,
-                            barPercentage: 0.95,
-                        }],
+                        datasets: [
+                            {
+                                label: 'Accessions',
+                                data: item.accessions,
+                                backgroundColor: COLORS.accessions,
+                                borderWidth: 0,
+                                categoryPercentage: 1.0,
+                                barPercentage: 0.95,
+                                stack: 'flow',
+                            },
+                            {
+                                label: 'Separations',
+                                data: item.separationsNeg,
+                                backgroundColor: COLORS.separations,
+                                borderWidth: 0,
+                                categoryPercentage: 1.0,
+                                barPercentage: 0.95,
+                                stack: 'flow',
+                            },
+                        ],
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { display: false },
                             tooltip: {
                                 ...TOOLTIP,
                                 callbacks: {
                                     title: (i) => formatMonth(i[0].label),
-                                    label: (ctx) => `${ctx.parsed.y.toLocaleString()} accessions`,
+                                    label: (ctx) => {
+                                        const v = ctx.parsed.y;
+                                        if (v == null) return null;
+                                        // Separations were negated for display — show absolute value
+                                        const display = ctx.dataset.label === 'Separations'
+                                            ? Math.abs(v) : v;
+                                        return `${ctx.dataset.label}: ${display.toLocaleString()}`;
+                                    },
+                                    afterBody: (items) => {
+                                        // Net = accessions + (-separations) = accessions - separations
+                                        const acc = items.find((i) => i.dataset.label === 'Accessions');
+                                        const sep = items.find((i) => i.dataset.label === 'Separations');
+                                        if (acc == null || sep == null) return '';
+                                        const net = (acc.parsed.y || 0) + (sep.parsed.y || 0);
+                                        const sign = net >= 0 ? '+' : '';
+                                        return `Net: ${sign}${net.toLocaleString()}`;
+                                    },
                                 },
                             },
                         },
                         scales: {
                             y: {
-                                beginAtZero: true,
-                                grid: { color: COLORS.grid },
+                                grid: { color: COLORS.grid, drawTicks: false },
                                 ticks: {
                                     color: COLORS.tickLabel,
                                     precision: 0,
-                                    maxTicksLimit: 4,
-                                    callback: (v) => v >= 1000 ? (v / 1000) + 'K' : v,
+                                    maxTicksLimit: 5,
+                                    callback: (v) => {
+                                        const a = Math.abs(v);
+                                        const s = a >= 1000 ? (a / 1000) + 'K' : a;
+                                        return v < 0 ? '-' + s : s;
+                                    },
                                 },
                             },
                             x: {
+                                stacked: true,
                                 grid: { display: false },
                                 ticks: {
                                     color: COLORS.tickLabel,
