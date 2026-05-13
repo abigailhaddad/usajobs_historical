@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10">
+    <title>How has federal hiring changed with new administrations? — Poster</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared/shared.css">
+    <style>
+        body { margin: 0; background: #FAF5E8; font-family: 'Source Sans 3', system-ui, sans-serif; color: #1a1a1a; }
+        .nav { padding: 0.75rem 1.25rem; border-bottom: 1px solid #e8e0c8; display: flex; gap: 1.25rem; align-items: baseline; flex-wrap: wrap; }
+        .nav a { color: #1a1a1a; text-decoration: none; font-weight: 600; }
+        .nav a:hover { text-decoration: underline; }
+        .intro { max-width: 1100px; padding: 1.5rem 1.25rem 0.5rem; }
+        .intro h1 { font-family: 'DM Sans', sans-serif; font-size: 2.25rem; margin: 0 0 0.5rem; }
+        .intro p { margin: 0.5rem 0; line-height: 1.5; color: #444; }
+        .intro .answer { background: #f4ecd5; border-left: 4px solid #2d6e4e; padding: 0.75rem 1rem; margin: 1rem 0; font-size: 1.02rem; }
+        .meta-row { font-size: 0.95rem; color: #555; margin: 0.5rem 0 1rem; }
+        .meta-row a { color: #2d6e4e; font-weight: 600; }
+        .main-chart-wrap { max-width: 1300px; padding: 0 1.25rem 0.5rem; }
+        .main-chart-box { background: #FAF5E8; border: 1px solid #e8e0c8; border-radius: 4px; padding: 1rem 1rem 0.75rem; }
+        .main-chart-box h2 { font-family: 'DM Sans', sans-serif; font-size: 1.15rem; margin: 0 0 0.5rem; }
+        .main-canvas-wrap { position: relative; height: 360px; }
+        .transition-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.5rem; margin: 0.75rem 0 0; }
+        .tcard { border: 1px solid #e8e0c8; border-radius: 4px; padding: 0.5rem 0.7rem; background: #FFFDF7; font-size: 0.9rem; line-height: 1.35; }
+        .tcard .tlabel { font-weight: 700; font-family: 'DM Sans', sans-serif; }
+        .tcard .ttag { display: inline-block; padding: 0.05rem 0.4rem; font-size: 0.75rem; border-radius: 3px; margin-left: 0.4rem; vertical-align: middle; }
+        .tcard .ttag.freeze { background: #f4d6d6; color: #7a1d1d; }
+        .tcard .ttag.nofreeze { background: #e0ead6; color: #2d4a1f; }
+        .tcard .tblurb { color: #555; margin-top: 0.2rem; }
+        .section-h { max-width: 1300px; padding: 1.5rem 1.25rem 0.25rem; }
+        .section-h h2 { font-family: 'DM Sans', sans-serif; font-size: 1.35rem; margin: 0 0 0.25rem; }
+        .section-h p { color: #555; margin: 0.25rem 0; line-height: 1.5; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 0.75rem; padding: 0 1.25rem 2rem; max-width: 1700px; }
+        .tile { background: #FAF5E8; border: 1px solid #e8e0c8; border-radius: 4px; padding: 0.75rem 0.85rem 0.5rem; display: flex; flex-direction: column; }
+        .tile h3 { font-family: 'DM Sans', sans-serif; font-size: 1.0rem; font-weight: 700; margin: 0 0 0.4rem; color: #1a1a1a; }
+        .tile .canvas-wrap { position: relative; height: 160px; }
+        .loading { color: #777; text-align: center; padding: 2rem; }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="index.html">← USAJobs Data viewer</a>
+        <a href="poster.html">Postings</a>
+        <a href="accessions-poster.html">Accessions</a>
+        <a href="workforce-flow.html">Workforce flow</a>
+        <a href="overlay-poster.html">Postings vs accessions</a>
+    </nav>
+    <section class="intro">
+        <h1>How has federal hiring changed with new administrations?</h1>
+        <p>Monthly federal accessions — new hires plus transfers in and conversions — across the four presidential transitions in the OPM EHRI data. Red dashed line = formal hiring freeze; gray = no freeze.</p>
+        <p class="meta-row">
+            Source: <a href="https://huggingface.co/datasets/impactproject/opm-ehri-data" target="_blank" rel="noopener">OPM EHRI via Impact Project (HuggingFace)</a>
+            &middot;
+            <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/aggregate_transitions.py" target="_blank" rel="noopener">Source script</a>
+        </p>
+    </section>
+
+    <div class="main-chart-wrap">
+        <div class="main-chart-box">
+            <div class="main-canvas-wrap"><canvas id="main-chart"></canvas></div>
+        </div>
+    </div>
+
+    <section class="section-h">
+        <h2>By cabinet department</h2>
+        <p>Sorted by largest drop in accessions after Jan 2025 vs the prior 12 months.</p>
+    </section>
+    <div id="grid" class="grid">
+        <div class="loading">Loading…</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        Chart.defaults.font.family = "'Source Sans 3', sans-serif";
+        Chart.defaults.color = '#7A6E62';
+
+        const COLORS = {
+            bar: '#2D6A4F',
+            grid: '#E8DDD0',
+            tickLabel: '#7A6E62',
+            freeze: 'rgba(160, 60, 60, 0.85)',
+            nofreeze: 'rgba(90, 90, 90, 0.55)',
+        };
+        const TOOLTIP = {
+            backgroundColor: '#2A211A',
+            titleColor: '#F5EDE0',
+            bodyColor: '#F5EDE0',
+            borderColor: '#3D2B1F',
+            borderWidth: 1,
+            cornerRadius: 6,
+            titleFont: { family: "'Source Sans 3', sans-serif", weight: 600 },
+            bodyFont: { family: "'Source Sans 3', sans-serif" },
+            padding: 10,
+        };
+
+        const DEPTS = [
+            ['Department of Veterans Affairs', 'Veterans Affairs'],
+            ['Department of the Army', 'Army'],
+            ['Department of the Navy', 'Navy'],
+            ['Department of the Air Force', 'Air Force'],
+            ['Department of Defense', 'Defense (DoD)'],
+            ['Department of Homeland Security', 'Homeland Security'],
+            ['Department of the Interior', 'Interior'],
+            ['Department of Health and Human Services', 'Health & Human Services'],
+            ['Department of Agriculture', 'Agriculture'],
+            ['Department of the Treasury', 'Treasury'],
+            ['Department of Justice', 'Justice'],
+            ['Department of Transportation', 'Transportation'],
+            ['Department of Commerce', 'Commerce'],
+            ['Department of Energy', 'Energy'],
+            ['General Services Administration', 'GSA'],
+            ['Department of State', 'State'],
+            ['Department of Labor', 'Labor'],
+            ['Department of Housing and Urban Development', 'Housing & Urban Dev'],
+            ['Department of Education', 'Education'],
+        ];
+
+        function formatMonth(label) {
+            const y = label.slice(0, 4), m = label.slice(4, 6);
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return `${months[parseInt(m, 10) - 1]} ${y}`;
+        }
+
+        // Plugin: draw vertical lines at transition months
+        function makeTransitionPlugin(transitions, showLabels) {
+            return {
+                id: 'transitionLines_' + (showLabels ? 'big' : 'small'),
+                afterDatasetsDraw(chart) {
+                    const labels = chart.data.labels;
+                    const ctx = chart.ctx;
+                    const { top, bottom } = chart.chartArea;
+                    ctx.save();
+                    ctx.lineWidth = 1.5;
+                    ctx.font = "600 11px 'Source Sans 3', sans-serif";
+                    for (const t of transitions) {
+                        const idx = labels.indexOf(t.month);
+                        if (idx === -1) continue;
+                        const x = chart.scales.x.getPixelForValue(idx);
+                        ctx.strokeStyle = t.freeze ? COLORS.freeze : COLORS.nofreeze;
+                        ctx.setLineDash(t.freeze ? [4, 4] : [2, 4]);
+                        ctx.beginPath();
+                        ctx.moveTo(x, top);
+                        ctx.lineTo(x, bottom);
+                        ctx.stroke();
+                        if (showLabels) {
+                            ctx.fillStyle = t.freeze ? '#7a1d1d' : '#444';
+                            const { right } = chart.chartArea;
+                            const labelWidth = ctx.measureText(t.label).width;
+                            const freezeWidth = t.freeze ? ctx.measureText('Freeze ' + t.freeze).width : 0;
+                            const maxWidth = Math.max(labelWidth, freezeWidth);
+                            const flipLeft = x + 4 + maxWidth > right;
+                            ctx.textAlign = flipLeft ? 'right' : 'left';
+                            const lx = flipLeft ? x - 4 : x + 4;
+                            ctx.fillText(t.label, lx, top + 12);
+                            if (t.freeze) {
+                                ctx.fillStyle = '#7a1d1d';
+                                ctx.font = "500 10px 'Source Sans 3', sans-serif";
+                                ctx.fillText('Freeze ' + t.freeze, lx, top + 26);
+                                ctx.font = "600 11px 'Source Sans 3', sans-serif";
+                            }
+                        }
+                    }
+                    ctx.restore();
+                }
+            };
+        }
+
+        // For dept sort: ratio of mean(months >= 202501) / mean(months 202401..202412)
+        function postFreezeRatio(months, counts) {
+            let pre = 0, npre = 0, post = 0, npost = 0;
+            for (let i = 0; i < months.length; i++) {
+                const m = months[i];
+                if (m >= '202401' && m <= '202412') { pre += counts[i]; npre++; }
+                else if (m >= '202501') { post += counts[i]; npost++; }
+            }
+            const preAvg = npre ? pre / npre : 0;
+            const postAvg = npost ? post / npost : 0;
+            return preAvg ? postAvg / preAvg : 1;
+        }
+
+        async function main() {
+            const resp = await fetch('transitions-data.json');
+            const data = await resp.json();
+            const months = data.months;
+            const transitions = data.transitions;
+
+            // Big chart
+            new Chart(document.getElementById('main-chart'), {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Accessions',
+                        data: data.total,
+                        backgroundColor: COLORS.bar,
+                        borderWidth: 0,
+                        categoryPercentage: 1.0,
+                        barPercentage: 1.0,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            ...TOOLTIP,
+                            callbacks: {
+                                title: (i) => formatMonth(i[0].label),
+                                label: (ctx) => `Accessions: ${ctx.parsed.y.toLocaleString()}`,
+                            },
+                        },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: COLORS.grid, drawTicks: false },
+                            ticks: {
+                                color: COLORS.tickLabel,
+                                precision: 0,
+                                maxTicksLimit: 6,
+                                callback: (v) => v >= 1000 ? (v / 1000) + 'K' : v,
+                            },
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: COLORS.tickLabel,
+                                autoSkip: false,
+                                callback: function(_v, index) {
+                                    const lbl = this.getLabelForValue(index);
+                                    return (lbl.endsWith('01') && parseInt(lbl.slice(0, 4), 10) % 2 === 0)
+                                        ? lbl.slice(0, 4) : '';
+                                },
+                                maxRotation: 0,
+                            },
+                        },
+                    },
+                },
+                plugins: [makeTransitionPlugin(transitions, true)],
+            });
+
+            // Per-dept small multiples
+            const items = [];
+            for (const [agency, short] of DEPTS) {
+                const counts = data.by_dept[agency];
+                if (!counts) continue;
+                items.push({
+                    agency, short, months,
+                    counts,
+                    sortKey: postFreezeRatio(months, counts),
+                });
+            }
+            items.sort((a, b) => a.sortKey - b.sortKey);
+
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            const deptPlugin = makeTransitionPlugin(transitions, false);
+            for (const item of items) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                const h = document.createElement('h3');
+                h.textContent = item.short;
+                tile.appendChild(h);
+                const wrap = document.createElement('div');
+                wrap.className = 'canvas-wrap';
+                const canvas = document.createElement('canvas');
+                wrap.appendChild(canvas);
+                tile.appendChild(wrap);
+                grid.appendChild(tile);
+
+                new Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels: item.months,
+                        datasets: [{
+                            label: 'Accessions',
+                            data: item.counts,
+                            backgroundColor: COLORS.bar,
+                            borderWidth: 0,
+                            categoryPercentage: 1.0,
+                            barPercentage: 1.0,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                ...TOOLTIP,
+                                callbacks: {
+                                    title: (i) => formatMonth(i[0].label),
+                                    label: (ctx) => `Accessions: ${ctx.parsed.y.toLocaleString()}`,
+                                },
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: COLORS.grid, drawTicks: false },
+                                ticks: {
+                                    color: COLORS.tickLabel,
+                                    precision: 0,
+                                    maxTicksLimit: 4,
+                                    callback: (v) => v >= 1000 ? (v / 1000) + 'K' : v,
+                                },
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: {
+                                    color: COLORS.tickLabel,
+                                    autoSkip: false,
+                                    callback: function(_v, index) {
+                                        const lbl = this.getLabelForValue(index);
+                                        // sparser ticks for small charts
+                                        return (lbl.endsWith('01') && parseInt(lbl.slice(0, 4), 10) % 4 === 0)
+                                            ? lbl.slice(0, 4) : '';
+                                    },
+                                    maxRotation: 0,
+                                },
+                            },
+                        },
+                    },
+                    plugins: [deptPlugin],
+                });
+            }
+        }
+
+        main().catch((e) => {
+            document.getElementById('grid').innerHTML =
+                '<div class="loading">Failed to load: ' + e.message + '</div>';
+        });
+    </script>
+</body>
+</html>
