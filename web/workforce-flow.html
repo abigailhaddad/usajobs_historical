@@ -20,6 +20,32 @@
         .legend-row .swatch { display: inline-block; width: 16px; height: 16px; vertical-align: middle; margin-right: 0.4rem; border-radius: 2px; }
         .meta-row { font-size: 0.95rem; color: #555; margin: 0.5rem 0 1rem; }
         .meta-row a { color: #2d6e4e; font-weight: 600; }
+        .filters { margin: 1rem 0 1.25rem; font-size: 0.95rem; color: #333; background: #F3EBD4; border: 1px solid #e8d8a8; border-radius: 6px; padding: 0.85rem 1rem 1rem; }
+        .filters-head { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700; margin: 0 0 0.5rem; color: #1a1a1a; }
+        .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 720px) { .filter-grid { grid-template-columns: 1fr; gap: 1rem; } }
+        .filter-group h3 { font-size: 0.95rem; font-weight: 700; margin: 0 0 0.55rem; color: #1a1a1a; display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid #e0d4a8; }
+        .filter-group h3 .swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+        .filter-group .actions { font-size: 0.78rem; margin-left: auto; font-weight: 600; display: flex; gap: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        .filter-group .actions button { background: #FAF5E8; border: 1px solid #d0bf85; color: #444; font: inherit; cursor: pointer; padding: 0.18rem 0.55rem; border-radius: 999px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+        .filter-group .actions button:hover { background: #fff; }
+        .filter-group .actions button[data-target="accessions"] { color: #2D6A4F; }
+        .filter-group .actions button[data-target="accessions"]:hover { border-color: #2D6A4F; }
+        .filter-group .actions button[data-target="separations"] { color: #A83232; }
+        .filter-group .actions button[data-target="separations"]:hover { border-color: #A83232; }
+        .filter-list { display: flex; flex-direction: column; gap: 0.3rem; }
+        .filter-list label { display: flex; align-items: center; gap: 0.55rem; cursor: pointer; padding: 0.15rem 0.25rem; border-radius: 3px; line-height: 1.3; }
+        .filter-list label:hover { background: rgba(0, 0, 0, 0.04); }
+        .filter-list input[type="checkbox"] { margin: 0; width: 15px; height: 15px; flex: 0 0 auto; }
+        #filters-accessions input[type="checkbox"] { accent-color: #2D6A4F; }
+        #filters-separations input[type="checkbox"] { accent-color: #A83232; }
+        .cat-group { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.1rem 0; }
+        .cat-group > .child { margin-left: 1.7rem; font-size: 0.85rem; color: #555; }
+        .cat-group > .parent { font-weight: 500; }
+        .top-tile { padding: 0 1.25rem; margin-bottom: 0.5rem; }
+        .top-tile .tile { padding: 1rem 1.1rem 0.75rem; }
+        .top-tile .tile h2 { font-size: 1.25rem; }
+        .top-tile .canvas-wrap { height: 320px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 0.75rem; padding: 0 1.25rem 2rem; }
         .tile { background: #FAF5E8; border: 1px solid #e8e0c8; border-radius: 4px; padding: 0.75rem 0.85rem 0.5rem; display: flex; flex-direction: column; }
         .tile h2 { font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem; color: #1a1a1a; }
@@ -37,7 +63,7 @@
     </nav>
     <section class="intro">
         <h1>Federal workforce flow</h1>
-        <p>Each panel shows monthly <strong>accessions</strong> (people hired in, green bars going up) and <strong>separations</strong> (people leaving, red bars going down) for one cabinet department. The dashed red line marks the federal hiring freeze (executive order signed Jan 20, 2025).</p>
+        <p>Each panel shows monthly <strong>accessions</strong> (people hired in, green bars going up) and <strong>separations</strong> (departures — quits, retirements, terminations, and transfers out to other agencies — red bars going down) for one cabinet department. The dashed red line marks the federal hiring freeze (executive order signed Jan 20, 2025).</p>
         <p>If the green bar is taller than the red bar, the workforce is growing that month; if red is taller, it's shrinking. Hover any month to see accessions, separations, and net change.</p>
         <div class="legend-row">
             <span><span class="swatch" style="background:#2D6A4F;"></span>Accessions (hires in)</span>
@@ -48,7 +74,35 @@
             &middot;
             <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/aggregate_accessions.py" target="_blank" rel="noopener">Source script</a>
         </p>
+        <section class="filters" id="filters" aria-label="Category filters">
+            <h2 class="filters-head">Filter by category</h2>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <h3>
+                        <span class="swatch" style="background:#2D6A4F;"></span>
+                        Accessions
+                        <span class="actions">
+                            <button type="button" data-action="all" data-target="accessions">Check all</button>
+                            <button type="button" data-action="none" data-target="accessions">Uncheck all</button>
+                        </span>
+                    </h3>
+                    <div class="filter-list" id="filters-accessions"></div>
+                </div>
+                <div class="filter-group">
+                    <h3>
+                        <span class="swatch" style="background:#A83232;"></span>
+                        Separations
+                        <span class="actions">
+                            <button type="button" data-action="all" data-target="separations">Check all</button>
+                            <button type="button" data-action="none" data-target="separations">Uncheck all</button>
+                        </span>
+                    </h3>
+                    <div class="filter-list" id="filters-separations"></div>
+                </div>
+            </div>
+        </section>
     </section>
+    <div id="top" class="top-tile"></div>
     <div id="grid" class="grid">
         <div class="loading">Loading…</div>
     </div>
@@ -140,6 +194,271 @@
             return preAvg ? postAvg / preAvg : 0;
         }
 
+        function prettify(cat) {
+            // "NEW HIRE - COMPETITIVE SERVICE APPOINTMENT" -> "New hire — competitive service appointment"
+            const lower = cat.toLowerCase().replace(/\s-\s/g, ' — ');
+            const sentence = lower.charAt(0).toUpperCase() + lower.slice(1);
+            // Preserve known acronyms.
+            return sentence.replace(/\b(rif|ses|drp)\b/gi, (m) => m.toUpperCase());
+        }
+
+        function collectCategories(data) {
+            // Return sorted unique categories across the agencies we display.
+            const set = new Set();
+            for (const [agency] of DEPTS) {
+                const byCat = data.categories_monthly && data.categories_monthly[agency];
+                if (!byCat) continue;
+                for (const c of Object.keys(byCat)) set.add(c);
+            }
+            // Stable order: largest total first across all displayed agencies
+            const totals = {};
+            for (const c of set) totals[c] = 0;
+            for (const [agency] of DEPTS) {
+                const byCat = data.categories_monthly && data.categories_monthly[agency];
+                if (!byCat) continue;
+                for (const [c, series] of Object.entries(byCat)) {
+                    for (const v of series) totals[c] += v || 0;
+                }
+            }
+            return [...set].sort((a, b) => totals[b] - totals[a]);
+        }
+
+        function sumSelected(byCat, months, selected) {
+            const out = new Array(months.length).fill(0);
+            if (!byCat) return out;
+            for (const cat of selected) {
+                const series = byCat[cat];
+                if (!series) continue;
+                for (let i = 0; i < series.length; i++) out[i] += series[i] || 0;
+            }
+            return out;
+        }
+
+        function aggregateByCat(catMaps, months) {
+            // Sum a list of {cat: [counts per month]} maps into a single one.
+            const out = {};
+            for (const m of catMaps) {
+                for (const [cat, series] of Object.entries(m)) {
+                    if (!out[cat]) out[cat] = new Array(months.length).fill(0);
+                    for (let i = 0; i < series.length; i++) out[cat][i] += series[i] || 0;
+                }
+            }
+            return out;
+        }
+
+        function aggregateByCatDrp(maps, months) {
+            // Sum {cat: {drp: [counts]}} maps across agencies.
+            const out = {};
+            for (const m of maps) {
+                if (!m) continue;
+                for (const [cat, drps] of Object.entries(m)) {
+                    const accCat = out[cat] || (out[cat] = {});
+                    for (const [d, series] of Object.entries(drps)) {
+                        if (!accCat[d]) accCat[d] = new Array(months.length).fill(0);
+                        for (let i = 0; i < series.length; i++) accCat[d][i] += series[i] || 0;
+                    }
+                }
+            }
+            return out;
+        }
+
+        function sumSelectedSepPairs(catDrpMap, byCat, months, pairs) {
+            // pairs is a list of [category, drpIndicator] tuples. If a
+            // (cat × drp) map is available, sum just those cells; otherwise
+            // fall back to plain cat-based sum (which ignores DRP).
+            if (catDrpMap) {
+                const out = new Array(months.length).fill(0);
+                for (const [cat, drp] of pairs) {
+                    const drps = catDrpMap[cat];
+                    if (!drps) continue;
+                    const series = drps[drp];
+                    if (!series) continue;
+                    for (let i = 0; i < series.length; i++) out[i] += series[i] || 0;
+                }
+                return out;
+            }
+            const cats = [...new Set(pairs.map((p) => p[0]))];
+            return sumSelected(byCat, months, cats);
+        }
+
+        function makeChart(canvas, months, acc, sep) {
+            return new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        { label: 'Accessions', data: acc, backgroundColor: COLORS.accessions, borderWidth: 0, categoryPercentage: 1.0, barPercentage: 0.95, stack: 'flow' },
+                        { label: 'Separations', data: sep.map((c) => -c), backgroundColor: COLORS.separations, borderWidth: 0, categoryPercentage: 1.0, barPercentage: 0.95, stack: 'flow' },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            ...TOOLTIP,
+                            callbacks: {
+                                title: (i) => formatMonth(i[0].label),
+                                label: (ctx) => {
+                                    const v = ctx.parsed.y;
+                                    if (v == null) return null;
+                                    const display = ctx.dataset.label === 'Separations' ? Math.abs(v) : v;
+                                    return `${ctx.dataset.label}: ${display.toLocaleString()}`;
+                                },
+                                afterBody: (items) => {
+                                    const a = items.find((i) => i.dataset.label === 'Accessions');
+                                    const s = items.find((i) => i.dataset.label === 'Separations');
+                                    if (a == null || s == null) return '';
+                                    const net = (a.parsed.y || 0) + (s.parsed.y || 0);
+                                    const sign = net >= 0 ? '+' : '';
+                                    return `Net: ${sign}${net.toLocaleString()}`;
+                                },
+                            },
+                        },
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: COLORS.grid, drawTicks: false },
+                            ticks: {
+                                color: COLORS.tickLabel,
+                                precision: 0,
+                                maxTicksLimit: 5,
+                                callback: (v) => {
+                                    const a = Math.abs(v);
+                                    const s = a >= 1000 ? (a / 1000) + 'K' : a;
+                                    return v < 0 ? '-' + s : s;
+                                },
+                            },
+                        },
+                        x: {
+                            stacked: true,
+                            grid: { display: false },
+                            ticks: {
+                                color: COLORS.tickLabel,
+                                autoSkip: false,
+                                callback: function(_v, index) {
+                                    const lbl = this.getLabelForValue(index);
+                                    return (lbl.endsWith('01') && parseInt(lbl.slice(0, 4), 10) % 2 === 0) ? lbl.slice(0, 4) : '';
+                                },
+                                maxRotation: 0,
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        function buildFilterUI(containerId, categories, onChange) {
+            // Flat filter UI for accessions: one checkbox per category.
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            for (const cat of categories) {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.checked = true;
+                input.value = cat;
+                input.addEventListener('change', onChange);
+                const span = document.createElement('span');
+                span.textContent = prettify(cat);
+                label.appendChild(input);
+                label.appendChild(span);
+                container.appendChild(label);
+            }
+        }
+
+        function buildSepFilterUI(containerId, categories, aggCatDrp, onChange) {
+            // Nested filter UI for separations: parent checkbox per category,
+            // with DRP/Non-DRP child checkboxes underneath when data exists.
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            const drpLabel = { Y: 'DRP', N: 'Non-DRP' };
+            for (const cat of categories) {
+                const group = document.createElement('div');
+                group.className = 'cat-group';
+
+                const parentLbl = document.createElement('label');
+                parentLbl.className = 'parent';
+                const parentInp = document.createElement('input');
+                parentInp.type = 'checkbox';
+                parentInp.checked = true;
+                parentInp.dataset.role = 'parent';
+                parentInp.dataset.category = cat;
+                const parentSpan = document.createElement('span');
+                parentSpan.textContent = prettify(cat);
+                parentLbl.appendChild(parentInp);
+                parentLbl.appendChild(parentSpan);
+                group.appendChild(parentLbl);
+
+                // Decide which DRP child rows to render. Always include 'N'
+                // (the default state); include 'Y' only when data exists.
+                const drps = (aggCatDrp[cat] && Object.keys(aggCatDrp[cat])) || [];
+                const showY = drps.includes('Y');
+                const order = showY ? ['Y', 'N'] : ['N'];
+                const children = [];
+                for (const d of order) {
+                    const lbl = document.createElement('label');
+                    lbl.className = 'child';
+                    const inp = document.createElement('input');
+                    inp.type = 'checkbox';
+                    inp.checked = true;
+                    inp.dataset.role = 'child';
+                    inp.dataset.category = cat;
+                    inp.dataset.drp = d;
+                    const s = document.createElement('span');
+                    s.textContent = drpLabel[d];
+                    lbl.appendChild(inp);
+                    lbl.appendChild(s);
+                    group.appendChild(lbl);
+                    children.push(inp);
+                }
+
+                parentInp.addEventListener('change', () => {
+                    for (const c of children) c.checked = parentInp.checked;
+                    parentInp.indeterminate = false;
+                    onChange();
+                });
+                for (const c of children) {
+                    c.addEventListener('change', () => {
+                        const checkedCount = children.filter((x) => x.checked).length;
+                        if (checkedCount === children.length) {
+                            parentInp.checked = true;
+                            parentInp.indeterminate = false;
+                        } else if (checkedCount === 0) {
+                            parentInp.checked = false;
+                            parentInp.indeterminate = false;
+                        } else {
+                            parentInp.indeterminate = true;
+                            parentInp.checked = false;
+                        }
+                        onChange();
+                    });
+                }
+
+                container.appendChild(group);
+            }
+        }
+
+        function getSelected(containerId) {
+            const inputs = document.querySelectorAll(`#${containerId} input[type="checkbox"]`);
+            return [...inputs].filter((i) => i.checked && !i.dataset.role).map((i) => i.value);
+        }
+
+        function getSelectedSepPairs(containerId) {
+            const inputs = document.querySelectorAll(`#${containerId} input[data-role="child"]`);
+            return [...inputs].filter((i) => i.checked).map((i) => [i.dataset.category, i.dataset.drp]);
+        }
+
+        function setAllCheckboxes(containerId, state) {
+            const inputs = document.querySelectorAll(`#${containerId} input[type="checkbox"]`);
+            for (const i of inputs) {
+                i.checked = state;
+                i.indeterminate = false;
+            }
+        }
+
         async function main() {
             const [accResp, sepResp] = await Promise.all([
                 fetch('accessions-monthly.json'),
@@ -151,25 +470,66 @@
             // Months should be the same set; use accessions as the canonical axis
             const months = accData.months;
 
+            const accCats = collectCategories(accData);
+            const sepCats = collectCategories(sepData);
+
+            const hasDrp = !!sepData.categories_drp_monthly;
+
             const items = [];
             for (const [agency, short] of DEPTS) {
                 const acc = accData.agencies[agency];
                 const sep = sepData.agencies[agency];
                 if (!acc || !sep) continue;
-                // Negate separations so they go below the x-axis
-                const sepNeg = sep.map((c) => c == null ? null : -c);
                 items.push({
                     agency, short, months,
-                    accessions: acc,
-                    separations: sep,
-                    separationsNeg: sepNeg,
+                    accByCat: accData.categories_monthly[agency] || {},
+                    sepByCat: sepData.categories_monthly[agency] || {},
+                    sepByCatDrp: hasDrp ? (sepData.categories_drp_monthly[agency] || null) : null,
+                    // sortKey uses the full (unfiltered) accessions so layout is stable across filter changes
                     sortKey: postPrePctAcc(months, acc),
                 });
             }
             items.sort((a, b) => a.sortKey - b.sortKey);
 
+            // Build the aggregate "all cabinet departments" tile up top.
+            const topHost = document.getElementById('top');
+            topHost.innerHTML = '';
+            const topTile = document.createElement('div');
+            topTile.className = 'tile';
+            const topH = document.createElement('h2');
+            topH.textContent = 'All cabinet departments combined';
+            topTile.appendChild(topH);
+            const topWrap = document.createElement('div');
+            topWrap.className = 'canvas-wrap';
+            const topCanvas = document.createElement('canvas');
+            topWrap.appendChild(topCanvas);
+            topTile.appendChild(topWrap);
+            topHost.appendChild(topTile);
+
+            const topItem = {
+                months,
+                accByCat: aggregateByCat(items.map((it) => it.accByCat), months),
+                sepByCat: aggregateByCat(items.map((it) => it.sepByCat), months),
+                sepByCatDrp: hasDrp ? aggregateByCatDrp(items.map((it) => it.sepByCatDrp), months) : null,
+            };
+
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
+            const charts = [];
+
+            // Initial separation selection = every (cat, drp) pair available.
+            const initialSepPairs = [];
+            for (const cat of sepCats) {
+                const drps = (topItem.sepByCatDrp && topItem.sepByCatDrp[cat] && Object.keys(topItem.sepByCatDrp[cat])) || ['N'];
+                for (const d of drps) initialSepPairs.push([cat, d]);
+            }
+
+            // Top aggregate chart
+            const topAcc = sumSelected(topItem.accByCat, months, accCats);
+            const topSep = sumSelectedSepPairs(topItem.sepByCatDrp, topItem.sepByCat, months, initialSepPairs);
+            const topChart = makeChart(topCanvas, months, topAcc, topSep);
+            charts.push({ item: topItem, chart: topChart });
+
             for (const item of items) {
                 const tile = document.createElement('div');
                 tile.className = 'tile';
@@ -183,92 +543,35 @@
                 tile.appendChild(wrap);
                 grid.appendChild(tile);
 
-                new Chart(canvas, {
-                    type: 'bar',
-                    data: {
-                        labels: item.months,
-                        datasets: [
-                            {
-                                label: 'Accessions',
-                                data: item.accessions,
-                                backgroundColor: COLORS.accessions,
-                                borderWidth: 0,
-                                categoryPercentage: 1.0,
-                                barPercentage: 0.95,
-                                stack: 'flow',
-                            },
-                            {
-                                label: 'Separations',
-                                data: item.separationsNeg,
-                                backgroundColor: COLORS.separations,
-                                borderWidth: 0,
-                                categoryPercentage: 1.0,
-                                barPercentage: 0.95,
-                                stack: 'flow',
-                            },
-                        ],
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        interaction: { mode: 'index', intersect: false },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                ...TOOLTIP,
-                                callbacks: {
-                                    title: (i) => formatMonth(i[0].label),
-                                    label: (ctx) => {
-                                        const v = ctx.parsed.y;
-                                        if (v == null) return null;
-                                        // Separations were negated for display — show absolute value
-                                        const display = ctx.dataset.label === 'Separations'
-                                            ? Math.abs(v) : v;
-                                        return `${ctx.dataset.label}: ${display.toLocaleString()}`;
-                                    },
-                                    afterBody: (items) => {
-                                        // Net = accessions + (-separations) = accessions - separations
-                                        const acc = items.find((i) => i.dataset.label === 'Accessions');
-                                        const sep = items.find((i) => i.dataset.label === 'Separations');
-                                        if (acc == null || sep == null) return '';
-                                        const net = (acc.parsed.y || 0) + (sep.parsed.y || 0);
-                                        const sign = net >= 0 ? '+' : '';
-                                        return `Net: ${sign}${net.toLocaleString()}`;
-                                    },
-                                },
-                            },
-                        },
-                        scales: {
-                            y: {
-                                grid: { color: COLORS.grid, drawTicks: false },
-                                ticks: {
-                                    color: COLORS.tickLabel,
-                                    precision: 0,
-                                    maxTicksLimit: 5,
-                                    callback: (v) => {
-                                        const a = Math.abs(v);
-                                        const s = a >= 1000 ? (a / 1000) + 'K' : a;
-                                        return v < 0 ? '-' + s : s;
-                                    },
-                                },
-                            },
-                            x: {
-                                stacked: true,
-                                grid: { display: false },
-                                ticks: {
-                                    color: COLORS.tickLabel,
-                                    autoSkip: false,
-                                    callback: function(_v, index) {
-                                        const lbl = this.getLabelForValue(index);
-                                        return (lbl.endsWith('01') && parseInt(lbl.slice(0, 4), 10) % 2 === 0) ? lbl.slice(0, 4) : '';
-                                    },
-                                    maxRotation: 0,
-                                },
-                            },
-                        },
-                    },
-                });
+                const acc = sumSelected(item.accByCat, months, accCats);
+                const sep = sumSelectedSepPairs(item.sepByCatDrp, item.sepByCat, months, initialSepPairs);
+                const chart = makeChart(canvas, months, acc, sep);
+                charts.push({ item, chart });
             }
+
+            function applyFilters() {
+                const accSel = getSelected('filters-accessions');
+                const sepPairs = getSelectedSepPairs('filters-separations');
+                for (const { item, chart } of charts) {
+                    const acc = sumSelected(item.accByCat, months, accSel);
+                    const sep = sumSelectedSepPairs(item.sepByCatDrp, item.sepByCat, months, sepPairs);
+                    chart.data.datasets[0].data = acc;
+                    chart.data.datasets[1].data = sep.map((c) => -c);
+                    chart.update('none');
+                }
+            }
+
+            buildFilterUI('filters-accessions', accCats, applyFilters);
+            buildSepFilterUI('filters-separations', sepCats, topItem.sepByCatDrp || {}, applyFilters);
+
+            document.querySelectorAll('#filters .actions button').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const action = btn.dataset.action;
+                    const target = `filters-${btn.dataset.target}`;
+                    setAllCheckboxes(target, action === 'all');
+                    applyFilters();
+                });
+            });
         }
         main().catch((e) => {
             document.getElementById('grid').innerHTML =

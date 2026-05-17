@@ -150,6 +150,18 @@ def aggregate(data_type, since_yyyymm):
         GROUP BY agency, category
     """).fetchall()
 
+    print(f"Computing monthly {category_col} breakdown by agency…")
+    cat_month_rows = db.execute(f"""
+        SELECT
+            agency,
+            COALESCE({category_col}, '(unknown)') AS category,
+            personnel_action_effective_date_yyyymm AS month,
+            SUM(CAST(count AS INTEGER)) AS total
+        FROM data
+        WHERE agency IS NOT NULL
+        GROUP BY agency, category, month
+    """).fetchall()
+
     # Pivot to {agency: [count for each month]} keyed on the months list
     by_agency = {}
     month_index = {m: i for i, m in enumerate(months)}
@@ -171,14 +183,66 @@ def aggregate(data_type, since_yyyymm):
             categories[normalized].get(category, 0) + int(total or 0)
         )
 
-    return {
+    categories_monthly = {}
+    for agency_raw, category, month, total in cat_month_rows:
+        if month not in month_index:
+            continue
+        normalized = AGENCY_NORMALIZE.get(agency_raw, agency_raw)
+        agency_cats = categories_monthly.setdefault(normalized, {})
+        series = agency_cats.setdefault(category, [0] * len(months))
+        series[month_index[month]] += int(total or 0)
+
+    # If the source has drp_indicator (separations only), emit a category×DRP
+    # cross-product so the front-end can filter on DRP status as well.
+    has_drp = db.execute(
+        "SELECT 1 FROM information_schema.columns "
+        "WHERE table_name = 'data' AND column_name = 'drp_indicator' LIMIT 1"
+    ).fetchone() is not None
+    categories_drp_monthly = None
+    if has_drp:
+        print(f"Computing monthly {category_col}×DRP breakdown by agency…")
+        drp_rows = db.execute(f"""
+            SELECT
+                agency,
+                COALESCE({category_col}, '(unknown)') AS category,
+                COALESCE(drp_indicator, 'N') AS drp,
+                personnel_action_effective_date_yyyymm AS month,
+                SUM(CAST(count AS INTEGER)) AS total
+            FROM data
+            WHERE agency IS NOT NULL
+            GROUP BY agency, category, drp, month
+        """).fetchall()
+        cdm = {}
+        for agency_raw, category, drp, month, total in drp_rows:
+            if month not in month_index:
+                continue
+            normalized = AGENCY_NORMALIZE.get(agency_raw, agency_raw)
+            agency_cats = cdm.setdefault(normalized, {})
+            cat_drps = agency_cats.setdefault(category, {})
+            series = cat_drps.setdefault(drp, [0] * len(months))
+            series[month_index[month]] += int(total or 0)
+        # Drop all-zero series to keep the file small.
+        for agency, cats in list(cdm.items()):
+            for cat, drps in list(cats.items()):
+                for d, s in list(drps.items()):
+                    if not any(s):
+                        del drps[d]
+                if not drps:
+                    del cats[cat]
+        categories_drp_monthly = dict(sorted(cdm.items()))
+
+    out = {
         "generated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
         "source": f"https://huggingface.co/datasets/{HF_REPO}",
         "since": since_yyyymm,
         "months": months,
         "agencies": dict(sorted(by_agency.items())),
         "categories": categories,
+        "categories_monthly": dict(sorted(categories_monthly.items())),
     }
+    if categories_drp_monthly is not None:
+        out["categories_drp_monthly"] = categories_drp_monthly
+    return out
 
 
 def main():
