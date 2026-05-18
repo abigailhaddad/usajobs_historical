@@ -34,12 +34,15 @@
         <a href="poster.html">Postings</a>
         <a href="accessions-poster.html">Accessions</a>
         <a href="workforce-flow.html">Workforce flow</a>
+        <a href="workforce-pathways.html">Pathways</a>
         <a href="transitions.html">Transitions</a>
     </nav>
     <section class="intro">
         <h1>Postings vs accessions</h1>
         <p>Each panel overlays USAJobs <strong>postings</strong> (green bars, intent to hire) and OPM EHRI <strong>accessions</strong> (orange line, actual hires) for one cabinet department. Both share the same x-axis but use different y-axes because postings and hires are different magnitudes — postings on the left, accessions on the right.</p>
         <p>The dashed red line marks the federal hiring freeze (executive order signed Jan 20, 2025). Postings collapsed almost immediately for most departments; accessions follow with a few months of lag because pipelines that started in Dec / Jan continued to close out.</p>
+        <p style="font-size:0.9rem;color:#666;">The accessions line shows actions whose <strong>effective date</strong> falls in that month, not when OPM processed them. Late-filed actions are correctly attributed to their effective month even if they appear in a later monthly publish. Postings are timestamped at posting open date.</p>
+        <p style="font-size:0.9rem;color:#666;">Showing all OPM agencies with accessions data. Postings data is only available for agencies that post on USAJobs — many smaller agencies will show a flat or empty postings bar.</p>
         <div class="legend-row">
             <span><span class="swatch" style="background:#2D6A4F;"></span>USAJobs postings (intent)</span>
             <span><span class="line-swatch"></span>EHRI accessions (actual hires)</span>
@@ -81,27 +84,60 @@
             padding: 10,
         };
 
-        // Same dept order as accessions-poster.html
-        const DEPTS = [
-            ['Department of Veterans Affairs', 'Veterans Affairs'],
-            ['Department of the Army', 'Army'],
-            ['Department of the Navy', 'Navy'],
-            ['Department of the Air Force', 'Air Force'],
-            ['Department of Defense', 'Defense (DoD)'],
-            ['Department of Homeland Security', 'Homeland Security'],
-            ['Department of the Interior', 'Interior'],
-            ['Department of Health and Human Services', 'Health & Human Services'],
-            ['Department of Agriculture', 'Agriculture'],
-            ['Department of the Treasury', 'Treasury'],
-            ['Department of Justice', 'Justice'],
-            ['Department of Transportation', 'Transportation'],
-            ['Department of Commerce', 'Commerce'],
-            ['Department of Energy', 'Energy'],
-            ['General Services Administration', 'GSA'],
-            ['Department of State', 'State'],
-            ['Department of Labor', 'Labor'],
-            ['Department of Housing and Urban Development', 'Housing & Urban Dev'],
-        ];
+        // Short labels for the cabinet departments + well-known agencies.
+        // Anything not in this map gets its full agency name displayed
+        // (title-cased if it arrives ALL CAPS from EHRI).
+        const SHORT_LABELS = {
+            'Department of Veterans Affairs': 'Veterans Affairs',
+            'Department of the Army': 'Army',
+            'Department of the Navy': 'Navy',
+            'Department of the Air Force': 'Air Force',
+            'Department of Defense': 'Defense (DoD)',
+            'Department of Homeland Security': 'Homeland Security',
+            'Department of the Interior': 'Interior',
+            'Department of Health and Human Services': 'Health & Human Services',
+            'Department of Agriculture': 'Agriculture',
+            'Department of the Treasury': 'Treasury',
+            'Department of Justice': 'Justice',
+            'Department of Transportation': 'Transportation',
+            'Department of Commerce': 'Commerce',
+            'Department of Energy': 'Energy',
+            'General Services Administration': 'GSA',
+            'Department of State': 'State',
+            'Department of Labor': 'Labor',
+            'Department of Housing and Urban Development': 'Housing & Urban Dev',
+            'Department of Education': 'Education',
+            'ENVIRONMENTAL PROTECTION AGENCY': 'EPA',
+            'SOCIAL SECURITY ADMINISTRATION': 'SSA',
+            'FEDERAL DEPOSIT INSURANCE CORPORATION': 'FDIC',
+            'NAT AERONAUTICS AND SPACE ADMINISTRATION': 'NASA',
+            'SECURITIES AND EXCHANGE COMMISSION': 'SEC',
+            'NUCLEAR REGULATORY COMMISSION': 'NRC',
+            'OFFICE OF PERSONNEL MANAGEMENT': 'OPM',
+            'U.S. AGENCY FOR INTERNATIONAL DEV': 'USAID',
+            'NATIONAL SCIENCE FOUNDATION': 'NSF',
+            'SMALL BUSINESS ADMINISTRATION': 'SBA',
+            'FEDERAL TRADE COMMISSION': 'FTC',
+            'NATIONAL CREDIT UNION ADMINISTRATION': 'NCUA',
+            'CONSUMER PRODUCT SAFETY COMMISSION': 'CPSC',
+            'PENSION BENEFIT GUARANTY CORPORATION': 'PBGC',
+            'FEDERAL HOUSING FINANCE AGENCY': 'FHFA',
+            'FEDERAL RESERVE SYSTEM': 'Federal Reserve',
+            'FARM CREDIT ADMINISTRATION': 'Farm Credit Admin',
+            'NAT ARCHIVES AND RECORDS ADMINISTRATION': 'National Archives',
+        };
+
+        function displayName(agency) {
+            if (SHORT_LABELS[agency]) return SHORT_LABELS[agency];
+            if (agency === agency.toUpperCase()) {
+                const small = new Set(['of','the','and','for','on','to','a','an','in']);
+                return agency.toLowerCase().split(/\s+/).map((w, i) => {
+                    if (i > 0 && small.has(w)) return w;
+                    return w.charAt(0).toUpperCase() + w.slice(1);
+                }).join(' ');
+            }
+            return agency;
+        }
 
         const CLIFF_MONTH = '2025-02';     // postings format YYYY-MM
         const ACC_CLIFF_MONTH = '202502';  // accessions format YYYYMM
@@ -137,13 +173,23 @@
         }
 
         async function fetchPostings(dept) {
+            // USAJobs has its own hiring-department taxonomy that doesn't
+            // cover every EHRI agency. For non-cabinet agencies the API
+            // typically returns an empty series; if anything throws, we
+            // treat it as "no postings data" and let the panel render with
+            // just the accessions line.
             const qs = new URLSearchParams({
                 group_by: 'month',
                 filter_hiringDepartmentName: dept,
             });
-            const resp = await fetch('/api/aggregate?' + qs);
-            const data = await resp.json();
-            return { labels: data.labels, counts: data.datasets.count };
+            try {
+                const resp = await fetch('/api/aggregate?' + qs);
+                if (!resp.ok) return { labels: [], counts: [] };
+                const data = await resp.json();
+                return { labels: data.labels || [], counts: (data.datasets && data.datasets.count) || [] };
+            } catch (_) {
+                return { labels: [], counts: [] };
+            }
         }
 
         // Align accessions data (YYYYMM) onto the postings labels (YYYY-MM)
@@ -183,14 +229,24 @@
             const accResp = await fetch('accessions-monthly.json');
             const accData = await accResp.json();
 
-            const items = await Promise.all(DEPTS.map(async ([agency, short]) => {
-                const accCounts = accData.agencies[agency];
-                if (!accCounts) return null;
+            // Build a "full" labels axis from accessions months — works even
+            // when postings come back empty for an agency.
+            const fullLabels = accData.months.map((m) => m.slice(0,4) + '-' + m.slice(4,6));
+            const filteredFull = filterWindow(fullLabels, fullLabels.map(() => 0));
+
+            const allAgencies = Object.entries(accData.agencies);
+            const items = await Promise.all(allAgencies.map(async ([agency, accCounts]) => {
+                const total = accCounts.reduce((a, b) => a + (b || 0), 0);
+                if (total === 0) return null;
                 const postings = await fetchPostings(agency);
-                const filtered = filterWindow(postings.labels, postings.counts);
+                // If postings is empty, fall back to the accessions-derived axis.
+                const labels = postings.labels.length ? postings.labels : fullLabels;
+                const counts = postings.labels.length ? postings.counts : new Array(labels.length).fill(null);
+                const filtered = filterWindow(labels, counts);
                 const accAligned = alignAccessions(filtered.labels, accData.months, accCounts);
                 return {
-                    agency, short,
+                    agency,
+                    short: displayName(agency),
                     labels: filtered.labels,
                     postings: filtered.counts,
                     accessions: accAligned,

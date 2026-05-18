@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10">
+    <title>Federal Pathways Program hiring — Poster</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared/shared.css">
+    <style>
+        body { margin: 0; background: #FAF5E8; font-family: 'Source Sans 3', system-ui, sans-serif; color: #1a1a1a; }
+        .nav { padding: 0.75rem 1.25rem; border-bottom: 1px solid #e8e0c8; display: flex; gap: 1.25rem; align-items: baseline; }
+        .nav a { color: #1a1a1a; text-decoration: none; font-weight: 600; }
+        .nav a:hover { text-decoration: underline; }
+        .intro { max-width: 1100px; padding: 1.5rem 1.25rem 0.5rem; }
+        .intro h1 { font-family: 'DM Sans', sans-serif; font-size: 2.25rem; margin: 0 0 0.5rem; }
+        .intro p { margin: 0.5rem 0; line-height: 1.5; color: #444; }
+        .legend-row { font-size: 0.95rem; color: #444; margin: 0.75rem 0 0; display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
+        .legend-row .swatch { display: inline-block; width: 16px; height: 16px; vertical-align: middle; margin-right: 0.4rem; border-radius: 2px; }
+        .meta-row { font-size: 0.95rem; color: #555; margin: 0.5rem 0 1rem; }
+        .meta-row a { color: #2d6e4e; font-weight: 600; }
+        .filters { margin: 1rem 0 1.25rem; font-size: 0.95rem; color: #333; background: #F3EBD4; border: 1px solid #e8d8a8; border-radius: 6px; padding: 0.85rem 1rem 1rem; }
+        .filters-head { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700; margin: 0 0 0.5rem; color: #1a1a1a; }
+        .filter-group h3 { font-size: 0.95rem; font-weight: 700; margin: 0 0 0.55rem; color: #1a1a1a; display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid #e0d4a8; }
+        .filter-group h3 .swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+        .filter-group .actions { font-size: 0.78rem; margin-left: auto; font-weight: 600; display: flex; gap: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        .filter-group .actions button { background: #FAF5E8; border: 1px solid #d0bf85; color: #444; font: inherit; cursor: pointer; padding: 0.18rem 0.55rem; border-radius: 999px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+        .filter-group .actions button:hover { background: #fff; }
+        .filter-group .actions button[data-target="pathways"] { color: #2D6A4F; }
+        .filter-group .actions button[data-target="pathways"]:hover { border-color: #2D6A4F; }
+        .filter-list { display: flex; flex-direction: column; gap: 0.3rem; }
+        .filter-list label { display: flex; align-items: center; gap: 0.55rem; cursor: pointer; padding: 0.15rem 0.25rem; border-radius: 3px; line-height: 1.3; }
+        .filter-list label:hover { background: rgba(0, 0, 0, 0.04); }
+        .filter-list input[type="checkbox"] { margin: 0; width: 15px; height: 15px; flex: 0 0 auto; }
+        #filters-pathways input[type="checkbox"] { accent-color: #2D6A4F; }
+        .top-tile { padding: 0 1.25rem; margin-bottom: 0.5rem; }
+        .top-tile .tile { padding: 1rem 1.1rem 0.75rem; }
+        .top-tile .tile h2 { font-size: 1.25rem; }
+        .top-tile .canvas-wrap { height: 320px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 0.75rem; padding: 0 1.25rem 2rem; }
+        .tile { background: #FAF5E8; border: 1px solid #e8e0c8; border-radius: 4px; padding: 0.75rem 0.85rem 0.5rem; display: flex; flex-direction: column; }
+        .tile h2 { font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem; color: #1a1a1a; }
+        .tile .canvas-wrap { position: relative; height: 200px; }
+        .loading { color: #777; text-align: center; padding: 2rem; }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="index.html">← USAJobs Data viewer</a>
+        <a href="workforce-flow.html">Workforce flow</a>
+        <a href="poster.html">Postings poster</a>
+        <a href="accessions-poster.html">Accessions only</a>
+        <a href="overlay-poster.html">Postings vs accessions</a>
+        <a href="transitions.html">Transitions</a>
+    </nav>
+    <section class="intro">
+        <h1>Federal Pathways Program hiring</h1>
+        <p>Each panel shows monthly federal hires brought in through the <strong>Pathways Programs</strong> — the formal early-career federal hiring pipelines: <strong>Intern</strong>, <strong>Student Trainee</strong>, <strong>Recent Grad</strong>, and <strong>PMF</strong> (Presidential Management Fellow). The dashed red line marks the federal hiring freeze (executive order signed Jan 20, 2025).</p>
+        <p style="font-size:0.9rem;color:#666;">Each bar shows actions whose <strong>effective date</strong> falls in that month, not when OPM processed them. Late-filed actions are correctly attributed to their effective month even if they appear in a later monthly publish.</p>
+        <div class="legend-row">
+            <span><span class="swatch" style="background:#2D6A4F;"></span>Pathways accessions</span>
+        </div>
+        <p class="meta-row">
+            Source: <a href="https://huggingface.co/datasets/impactproject/opm-ehri-data" target="_blank" rel="noopener">OPM EHRI via Impact Project (HuggingFace)</a>
+            &middot;
+            <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/aggregate_pathways.py" target="_blank" rel="noopener">Source script</a>
+            &middot;
+            <a href="#" id="download-csv">Download CSV</a>
+            <span style="color:#999;"> (month × agency × Pathways category)</span>
+        </p>
+        <section class="filters" id="filters" aria-label="Category filters">
+            <h2 class="filters-head">Filter by category</h2>
+            <div class="filter-group">
+                <h3>
+                    <span class="swatch" style="background:#2D6A4F;"></span>
+                    Pathways category
+                    <span class="actions">
+                        <button type="button" data-action="all" data-target="pathways">Check all</button>
+                        <button type="button" data-action="none" data-target="pathways">Uncheck all</button>
+                    </span>
+                </h3>
+                <div class="filter-list" id="filters-pathways"></div>
+            </div>
+        </section>
+    </section>
+    <div id="top" class="top-tile"></div>
+    <div id="grid" class="grid">
+        <div class="loading">Loading…</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        Chart.defaults.font.family = "'Source Sans 3', sans-serif";
+        Chart.defaults.color = '#7A6E62';
+
+        const COLORS = {
+            accessions: '#2D6A4F',
+            grid: '#E8DDD0',
+            tickLabel: '#7A6E62',
+            cliff: 'rgba(160, 60, 60, 0.85)',
+        };
+        const TOOLTIP = {
+            backgroundColor: '#2A211A',
+            titleColor: '#F5EDE0',
+            bodyColor: '#F5EDE0',
+            borderColor: '#3D2B1F',
+            borderWidth: 1,
+            cornerRadius: 6,
+            titleFont: { family: "'Source Sans 3', sans-serif", weight: 600 },
+            bodyFont: { family: "'Source Sans 3', sans-serif" },
+            padding: 10,
+        };
+
+        // Short labels for the cabinet departments + well-known agencies.
+        // Anything not in this map gets its full agency name displayed
+        // (title-cased if it arrives ALL CAPS from EHRI).
+        const SHORT_LABELS = {
+            'Department of Veterans Affairs': 'Veterans Affairs',
+            'Department of the Army': 'Army',
+            'Department of the Navy': 'Navy',
+            'Department of the Air Force': 'Air Force',
+            'Department of Defense': 'Defense (DoD)',
+            'Department of Homeland Security': 'Homeland Security',
+            'Department of the Interior': 'Interior',
+            'Department of Health and Human Services': 'Health & Human Services',
+            'Department of Agriculture': 'Agriculture',
+            'Department of the Treasury': 'Treasury',
+            'Department of Justice': 'Justice',
+            'Department of Transportation': 'Transportation',
+            'Department of Commerce': 'Commerce',
+            'Department of Energy': 'Energy',
+            'General Services Administration': 'GSA',
+            'Department of State': 'State',
+            'Department of Labor': 'Labor',
+            'Department of Housing and Urban Development': 'Housing & Urban Dev',
+            'Department of Education': 'Education',
+            // Common non-cabinet agencies that are well-known acronyms
+            'ENVIRONMENTAL PROTECTION AGENCY': 'EPA',
+            'SOCIAL SECURITY ADMINISTRATION': 'SSA',
+            'FEDERAL DEPOSIT INSURANCE CORPORATION': 'FDIC',
+            'NAT AERONAUTICS AND SPACE ADMINISTRATION': 'NASA',
+            'SECURITIES AND EXCHANGE COMMISSION': 'SEC',
+            'NUCLEAR REGULATORY COMMISSION': 'NRC',
+            'OFFICE OF PERSONNEL MANAGEMENT': 'OPM',
+            'U.S. AGENCY FOR INTERNATIONAL DEV': 'USAID',
+            'NATIONAL SCIENCE FOUNDATION': 'NSF',
+            'SMALL BUSINESS ADMINISTRATION': 'SBA',
+            'FEDERAL TRADE COMMISSION': 'FTC',
+            'NATIONAL CREDIT UNION ADMINISTRATION': 'NCUA',
+            'CONSUMER PRODUCT SAFETY COMMISSION': 'CPSC',
+            'PENSION BENEFIT GUARANTY CORPORATION': 'PBGC',
+            'FEDERAL HOUSING FINANCE AGENCY': 'FHFA',
+            'FEDERAL RESERVE SYSTEM': 'Federal Reserve',
+            'FARM CREDIT ADMINISTRATION': 'Farm Credit Admin',
+            'NAT ARCHIVES AND RECORDS ADMINISTRATION': 'National Archives',
+        };
+
+        function displayName(agency) {
+            if (SHORT_LABELS[agency]) return SHORT_LABELS[agency];
+            // Title-case ALL-CAPS names (most non-cabinet agencies arrive this way)
+            if (agency === agency.toUpperCase()) {
+                const small = new Set(['of','the','and','for','on','to','a','an','in']);
+                return agency.toLowerCase().split(/\s+/).map((w, i) => {
+                    if (i > 0 && small.has(w)) return w;
+                    return w.charAt(0).toUpperCase() + w.slice(1);
+                }).join(' ');
+            }
+            return agency;
+        }
+
+        const CLIFF_MONTH = '202502';
+
+        const CLIFF_PLUGIN = {
+            id: 'cliffLine',
+            afterDatasetsDraw(chart) {
+                const labels = chart.data.labels;
+                const idx = labels.indexOf(CLIFF_MONTH);
+                if (idx === -1) return;
+                const x = chart.scales.x.getPixelForValue(idx);
+                const { top, bottom } = chart.chartArea;
+                const ctx = chart.ctx;
+                ctx.save();
+                ctx.strokeStyle = COLORS.cliff;
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(x, top);
+                ctx.lineTo(x, bottom);
+                ctx.stroke();
+                ctx.restore();
+            }
+        };
+        Chart.register(CLIFF_PLUGIN);
+
+        function formatMonth(label) {
+            const y = label.slice(0, 4), m = label.slice(4, 6);
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return `${months[parseInt(m, 10) - 1]} ${y}`;
+        }
+
+        function prettify(cat) {
+            // "STUDENT TRAINEE" -> "Student trainee"; preserve PMF
+            const lower = cat.toLowerCase();
+            const sentence = lower.charAt(0).toUpperCase() + lower.slice(1);
+            return sentence.replace(/\bpmf\b/gi, 'PMF');
+        }
+
+        function collectCategories(data) {
+            // Walk every agency in the data, sum each category's volume,
+            // return categories sorted largest-first.
+            const totals = {};
+            for (const byCat of Object.values(data.categories_monthly || {})) {
+                for (const [c, series] of Object.entries(byCat)) {
+                    totals[c] = (totals[c] || 0);
+                    for (const v of series) totals[c] += v || 0;
+                }
+            }
+            return Object.keys(totals).sort((a, b) => totals[b] - totals[a]);
+        }
+
+        function sumSelected(byCat, months, selected) {
+            const out = new Array(months.length).fill(0);
+            if (!byCat) return out;
+            for (const cat of selected) {
+                const series = byCat[cat];
+                if (!series) continue;
+                for (let i = 0; i < series.length; i++) out[i] += series[i] || 0;
+            }
+            return out;
+        }
+
+        function aggregateByCat(catMaps, months) {
+            const out = {};
+            for (const m of catMaps) {
+                for (const [cat, series] of Object.entries(m)) {
+                    if (!out[cat]) out[cat] = new Array(months.length).fill(0);
+                    for (let i = 0; i < series.length; i++) out[cat][i] += series[i] || 0;
+                }
+            }
+            return out;
+        }
+
+        // Four greens with a wide luminance spread (≈0.05 → 0.21 → 0.45 → 0.72).
+        // Wide spread means the segments stay distinguishable even for users
+        // with green-deficient color vision, who see them mostly as
+        // grayscale. The named filter swatches + tooltip labels are the
+        // non-color fallback.
+        const CAT_PALETTE = ['#1B4332', '#40916C', '#74C69D', '#B7E4C7'];
+
+        // Categories → color lookup, populated once we know the category list.
+        const CAT_COLOR = {};
+
+        function makeChart(canvas, months, byCat, cats) {
+            // One stacked dataset per category.
+            const datasets = cats.map((cat) => ({
+                label: cat,
+                data: byCat[cat] || new Array(months.length).fill(0),
+                backgroundColor: CAT_COLOR[cat],
+                borderWidth: 0,
+                categoryPercentage: 1.0,
+                barPercentage: 0.95,
+                stack: 'pathways',
+            }));
+            return new Chart(canvas, {
+                type: 'bar',
+                data: { labels: months, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            ...TOOLTIP,
+                            callbacks: {
+                                title: (i) => formatMonth(i[0].label),
+                                label: (ctx) => {
+                                    const v = ctx.parsed.y || 0;
+                                    if (v === 0) return null;
+                                    return `${prettify(ctx.dataset.label)}: ${v.toLocaleString()}`;
+                                },
+                                footer: (items) => {
+                                    const total = items.reduce((s, it) => s + (it.parsed.y || 0), 0);
+                                    return `Total: ${total.toLocaleString()}`;
+                                },
+                            },
+                        },
+                    },
+                    scales: {
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            grid: { color: COLORS.grid, drawTicks: false },
+                            ticks: {
+                                color: COLORS.tickLabel,
+                                precision: 0,
+                                maxTicksLimit: 5,
+                                callback: (v) => v >= 1000 ? (v / 1000) + 'K' : v,
+                            },
+                        },
+                        x: {
+                            stacked: true,
+                            grid: { display: false },
+                            ticks: {
+                                color: COLORS.tickLabel,
+                                autoSkip: false,
+                                callback: function(_v, index) {
+                                    const lbl = this.getLabelForValue(index);
+                                    return (lbl.endsWith('01') && parseInt(lbl.slice(0, 4), 10) % 2 === 0) ? lbl.slice(0, 4) : '';
+                                },
+                                maxRotation: 0,
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        function buildFilterUI(containerId, categories, onChange) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            for (const cat of categories) {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.checked = true;
+                input.value = cat;
+                input.addEventListener('change', onChange);
+                const swatch = document.createElement('span');
+                swatch.style.cssText = 'display:inline-block;width:14px;height:14px;border-radius:2px;border:1px solid rgba(0,0,0,0.15);background:' + CAT_COLOR[cat] + ';';
+                const span = document.createElement('span');
+                span.textContent = prettify(cat);
+                label.appendChild(input);
+                label.appendChild(swatch);
+                label.appendChild(span);
+                container.appendChild(label);
+            }
+        }
+
+        function getSelected(containerId) {
+            const inputs = document.querySelectorAll(`#${containerId} input[type="checkbox"]`);
+            return [...inputs].filter((i) => i.checked).map((i) => i.value);
+        }
+
+        function setAllCheckboxes(containerId, state) {
+            const inputs = document.querySelectorAll(`#${containerId} input[type="checkbox"]`);
+            for (const i of inputs) i.checked = state;
+        }
+
+        async function main() {
+            const resp = await fetch('pathways-monthly.json');
+            const data = await resp.json();
+            const months = data.months;
+            const cats = collectCategories(data);
+
+            // Assign a green shade to each category in display order.
+            // Biggest category gets the darkest green and anchors the chart.
+            cats.forEach((c, i) => {
+                CAT_COLOR[c] = CAT_PALETTE[i % CAT_PALETTE.length];
+            });
+
+            const items = [];
+            for (const [agency, series] of Object.entries(data.agencies)) {
+                const total = series.reduce((a, b) => a + (b || 0), 0);
+                if (total === 0) continue;  // skip agencies with zero Pathways in the window
+                items.push({
+                    agency,
+                    short: displayName(agency),
+                    months,
+                    byCat: data.categories_monthly[agency] || {},
+                    sortKey: total,
+                });
+            }
+            // Largest absolute Pathways volume at the top.
+            items.sort((a, b) => b.sortKey - a.sortKey);
+
+            const topHost = document.getElementById('top');
+            topHost.innerHTML = '';
+            const topTile = document.createElement('div');
+            topTile.className = 'tile';
+            const topH = document.createElement('h2');
+            topH.textContent = 'All agencies combined';
+            topTile.appendChild(topH);
+            const topWrap = document.createElement('div');
+            topWrap.className = 'canvas-wrap';
+            const topCanvas = document.createElement('canvas');
+            topWrap.appendChild(topCanvas);
+            topTile.appendChild(topWrap);
+            topHost.appendChild(topTile);
+
+            const topItem = {
+                months,
+                byCat: aggregateByCat(items.map((it) => it.byCat), months),
+            };
+
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            const charts = [];
+
+            const topChart = makeChart(topCanvas, months, topItem.byCat, cats);
+            charts.push({ chart: topChart });
+
+            for (const item of items) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                const h = document.createElement('h2');
+                h.textContent = item.short;
+                tile.appendChild(h);
+                const wrap = document.createElement('div');
+                wrap.className = 'canvas-wrap';
+                const canvas = document.createElement('canvas');
+                wrap.appendChild(canvas);
+                tile.appendChild(wrap);
+                grid.appendChild(tile);
+
+                const chart = makeChart(canvas, months, item.byCat, cats);
+                charts.push({ chart });
+            }
+
+            function applyFilters() {
+                // Hide/show entire datasets in each chart based on which
+                // categories are checked. Chart.js redraws and rescales
+                // automatically.
+                const sel = new Set(getSelected('filters-pathways'));
+                for (const { chart } of charts) {
+                    for (const ds of chart.data.datasets) {
+                        ds.hidden = !sel.has(ds.label);
+                    }
+                    chart.update('none');
+                }
+            }
+
+            buildFilterUI('filters-pathways', cats, applyFilters);
+
+            document.querySelectorAll('#filters .actions button').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    setAllCheckboxes(`filters-${btn.dataset.target}`, btn.dataset.action === 'all');
+                    applyFilters();
+                });
+            });
+
+            // CSV download: preserves the filter granularity (one row per
+            // month × agency × pathways_group, with non-zero counts only).
+            document.getElementById('download-csv').addEventListener('click', (e) => {
+                e.preventDefault();
+                const rows = [['month', 'agency', 'pathways_group', 'count']];
+                for (const [agency, byCat] of Object.entries(data.categories_monthly || {})) {
+                    for (const [cat, series] of Object.entries(byCat)) {
+                        for (let i = 0; i < months.length; i++) {
+                            const c = series[i] || 0;
+                            if (c === 0) continue;
+                            rows.push([months[i], agency, cat, c]);
+                        }
+                    }
+                }
+                downloadCsv(rows, 'pathways-monthly.csv');
+            });
+        }
+
+        function csvEscape(v) {
+            const s = String(v);
+            return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+        }
+
+        function downloadCsv(rows, filename) {
+            const body = rows.map((r) => r.map(csvEscape).join(',')).join('\n');
+            const blob = new Blob([body], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        main().catch((e) => {
+            document.getElementById('grid').innerHTML =
+                '<div class="loading">Failed to load: ' + e.message + '</div>';
+        });
+    </script>
+</body>
+</html>

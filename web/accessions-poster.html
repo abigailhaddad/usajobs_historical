@@ -30,6 +30,7 @@
         <a href="index.html">← USAJobs Data viewer</a>
         <a href="poster.html">Postings</a>
         <a href="workforce-flow.html">Workforce flow</a>
+        <a href="workforce-pathways.html">Pathways</a>
         <a href="overlay-poster.html">Postings vs accessions</a>
         <a href="transitions.html">Transitions</a>
     </nav>
@@ -37,8 +38,12 @@
         <h1>Federal accessions by department</h1>
         <p>Monthly new federal hires (accessions) from January 2018 through March 2026, one panel per cabinet department, sorted by recovery (least to most). The dashed red line marks the federal hiring freeze (executive order signed Jan 20, 2025). Hover any bar to see the exact month and count.</p>
         <p><strong>What this is:</strong> "Accessions" are people who were actually hired into the executive-branch federal workforce, from the OPM EHRI dataset (via <a href="https://huggingface.co/datasets/impactproject/opm-ehri-data" target="_blank" rel="noopener">Impact Project's HuggingFace mirror</a>). Includes new hires, conversions, and transfers in. Excludes the Postal Service and intelligence community. Data lags by 1–2 months from the most recent USAJobs postings.</p>
+        <p style="font-size:0.9rem;color:#666;">Each bar shows actions whose <strong>effective date</strong> falls in that month, not when OPM processed them. Late-filed actions are correctly attributed to their effective month even if they appear in a later monthly publish.</p>
         <p class="meta-row">
             <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/aggregate_accessions.py" target="_blank" rel="noopener">Source script</a>
+            &middot;
+            <a href="#" id="download-csv">Download CSV</a>
+            <span style="color:#999;"> (month × agency × accession category)</span>
         </p>
     </section>
     <div id="grid" class="grid">
@@ -68,28 +73,60 @@
             padding: 10,
         };
 
-        // Same dept order as the postings poster, minus the two USAJobs-only
-        // categories that have no EHRI equivalent.
-        const DEPTS = [
-            ['Department of Veterans Affairs', 'Veterans Affairs'],
-            ['Department of the Army', 'Army'],
-            ['Department of the Navy', 'Navy'],
-            ['Department of the Air Force', 'Air Force'],
-            ['Department of Defense', 'Defense (DoD)'],
-            ['Department of Homeland Security', 'Homeland Security'],
-            ['Department of the Interior', 'Interior'],
-            ['Department of Health and Human Services', 'Health & Human Services'],
-            ['Department of Agriculture', 'Agriculture'],
-            ['Department of the Treasury', 'Treasury'],
-            ['Department of Justice', 'Justice'],
-            ['Department of Transportation', 'Transportation'],
-            ['Department of Commerce', 'Commerce'],
-            ['Department of Energy', 'Energy'],
-            ['General Services Administration', 'GSA'],
-            ['Department of State', 'State'],
-            ['Department of Labor', 'Labor'],
-            ['Department of Housing and Urban Development', 'Housing & Urban Dev'],
-        ];
+        // Short labels for the cabinet departments + well-known agencies.
+        // Anything not in this map gets its full agency name displayed
+        // (title-cased if it arrives ALL CAPS from EHRI).
+        const SHORT_LABELS = {
+            'Department of Veterans Affairs': 'Veterans Affairs',
+            'Department of the Army': 'Army',
+            'Department of the Navy': 'Navy',
+            'Department of the Air Force': 'Air Force',
+            'Department of Defense': 'Defense (DoD)',
+            'Department of Homeland Security': 'Homeland Security',
+            'Department of the Interior': 'Interior',
+            'Department of Health and Human Services': 'Health & Human Services',
+            'Department of Agriculture': 'Agriculture',
+            'Department of the Treasury': 'Treasury',
+            'Department of Justice': 'Justice',
+            'Department of Transportation': 'Transportation',
+            'Department of Commerce': 'Commerce',
+            'Department of Energy': 'Energy',
+            'General Services Administration': 'GSA',
+            'Department of State': 'State',
+            'Department of Labor': 'Labor',
+            'Department of Housing and Urban Development': 'Housing & Urban Dev',
+            'Department of Education': 'Education',
+            'ENVIRONMENTAL PROTECTION AGENCY': 'EPA',
+            'SOCIAL SECURITY ADMINISTRATION': 'SSA',
+            'FEDERAL DEPOSIT INSURANCE CORPORATION': 'FDIC',
+            'NAT AERONAUTICS AND SPACE ADMINISTRATION': 'NASA',
+            'SECURITIES AND EXCHANGE COMMISSION': 'SEC',
+            'NUCLEAR REGULATORY COMMISSION': 'NRC',
+            'OFFICE OF PERSONNEL MANAGEMENT': 'OPM',
+            'U.S. AGENCY FOR INTERNATIONAL DEV': 'USAID',
+            'NATIONAL SCIENCE FOUNDATION': 'NSF',
+            'SMALL BUSINESS ADMINISTRATION': 'SBA',
+            'FEDERAL TRADE COMMISSION': 'FTC',
+            'NATIONAL CREDIT UNION ADMINISTRATION': 'NCUA',
+            'CONSUMER PRODUCT SAFETY COMMISSION': 'CPSC',
+            'PENSION BENEFIT GUARANTY CORPORATION': 'PBGC',
+            'FEDERAL HOUSING FINANCE AGENCY': 'FHFA',
+            'FEDERAL RESERVE SYSTEM': 'Federal Reserve',
+            'FARM CREDIT ADMINISTRATION': 'Farm Credit Admin',
+            'NAT ARCHIVES AND RECORDS ADMINISTRATION': 'National Archives',
+        };
+
+        function displayName(agency) {
+            if (SHORT_LABELS[agency]) return SHORT_LABELS[agency];
+            if (agency === agency.toUpperCase()) {
+                const small = new Set(['of','the','and','for','on','to','a','an','in']);
+                return agency.toLowerCase().split(/\s+/).map((w, i) => {
+                    if (i > 0 && small.has(w)) return w;
+                    return w.charAt(0).toUpperCase() + w.slice(1);
+                }).join(' ');
+            }
+            return agency;
+        }
 
         const CLIFF_MONTH = '202502';
 
@@ -137,13 +174,16 @@
             const data = await resp.json();
 
             const items = [];
-            for (const [agency, short] of DEPTS) {
-                const counts = data.agencies[agency];
-                if (!counts) {
-                    console.warn('No accessions data for', agency);
-                    continue;
-                }
-                items.push({ agency, short, months: data.months, counts, pct: postPrePct(data.months, counts) });
+            for (const [agency, counts] of Object.entries(data.agencies)) {
+                const total = counts.reduce((a, b) => a + (b || 0), 0);
+                if (total === 0) continue;
+                items.push({
+                    agency,
+                    short: displayName(agency),
+                    months: data.months,
+                    counts,
+                    pct: postPrePct(data.months, counts),
+                });
             }
             items.sort((a, b) => a.pct - b.pct);
 
@@ -215,6 +255,40 @@
                     },
                 });
             }
+
+            // CSV download: preserves accession_category granularity.
+            document.getElementById('download-csv').addEventListener('click', (e) => {
+                e.preventDefault();
+                const rows = [['month', 'agency', 'accession_category', 'count']];
+                for (const [agency, byCat] of Object.entries(data.categories_monthly || {})) {
+                    for (const [cat, series] of Object.entries(byCat)) {
+                        for (let i = 0; i < data.months.length; i++) {
+                            const c = series[i] || 0;
+                            if (c === 0) continue;
+                            rows.push([data.months[i], agency, cat, c]);
+                        }
+                    }
+                }
+                downloadCsv(rows, 'accessions-monthly.csv');
+            });
+        }
+
+        function csvEscape(v) {
+            const s = String(v);
+            return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+        }
+
+        function downloadCsv(rows, filename) {
+            const body = rows.map((r) => r.map(csvEscape).join(',')).join('\n');
+            const blob = new Blob([body], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
         main().catch((e) => {
             document.getElementById('grid').innerHTML =

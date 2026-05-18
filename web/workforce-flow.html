@@ -56,6 +56,7 @@
 <body>
     <nav class="nav">
         <a href="index.html">← USAJobs Data viewer</a>
+        <a href="workforce-pathways.html">Pathways</a>
         <a href="poster.html">Postings poster</a>
         <a href="accessions-poster.html">Accessions only</a>
         <a href="overlay-poster.html">Postings vs accessions</a>
@@ -65,6 +66,7 @@
         <h1>Federal workforce flow</h1>
         <p>Each panel shows monthly <strong>accessions</strong> (people hired in, green bars going up) and <strong>separations</strong> (departures — quits, retirements, terminations, and transfers out to other agencies — red bars going down) for one cabinet department. The dashed red line marks the federal hiring freeze (executive order signed Jan 20, 2025).</p>
         <p>If the green bar is taller than the red bar, the workforce is growing that month; if red is taller, it's shrinking. Hover any month to see accessions, separations, and net change.</p>
+        <p style="font-size:0.9rem;color:#666;">Each bar shows actions whose <strong>effective date</strong> falls in that month, not when OPM processed them. Late-filed actions are correctly attributed to their effective month even if they appear in a later monthly publish.</p>
         <div class="legend-row">
             <span><span class="swatch" style="background:#2D6A4F;"></span>Accessions (hires in)</span>
             <span><span class="swatch" style="background:#A83232;"></span>Separations (departures)</span>
@@ -73,6 +75,9 @@
             Source: <a href="https://huggingface.co/datasets/impactproject/opm-ehri-data" target="_blank" rel="noopener">OPM EHRI via Impact Project (HuggingFace)</a>
             &middot;
             <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/scripts/aggregate_accessions.py" target="_blank" rel="noopener">Source script</a>
+            &middot;
+            <a href="#" id="download-csv">Download CSV</a>
+            <span style="color:#999;"> (month × agency × flow × category × DRP)</span>
         </p>
         <section class="filters" id="filters" aria-label="Category filters">
             <h2 class="filters-head">Filter by category</h2>
@@ -131,26 +136,60 @@
             padding: 10,
         };
 
-        const DEPTS = [
-            ['Department of Veterans Affairs', 'Veterans Affairs'],
-            ['Department of the Army', 'Army'],
-            ['Department of the Navy', 'Navy'],
-            ['Department of the Air Force', 'Air Force'],
-            ['Department of Defense', 'Defense (DoD)'],
-            ['Department of Homeland Security', 'Homeland Security'],
-            ['Department of the Interior', 'Interior'],
-            ['Department of Health and Human Services', 'Health & Human Services'],
-            ['Department of Agriculture', 'Agriculture'],
-            ['Department of the Treasury', 'Treasury'],
-            ['Department of Justice', 'Justice'],
-            ['Department of Transportation', 'Transportation'],
-            ['Department of Commerce', 'Commerce'],
-            ['Department of Energy', 'Energy'],
-            ['General Services Administration', 'GSA'],
-            ['Department of State', 'State'],
-            ['Department of Labor', 'Labor'],
-            ['Department of Housing and Urban Development', 'Housing & Urban Dev'],
-        ];
+        // Short labels for the cabinet departments + well-known agencies.
+        // Anything not in this map gets its full agency name displayed
+        // (title-cased if it arrives ALL CAPS from EHRI).
+        const SHORT_LABELS = {
+            'Department of Veterans Affairs': 'Veterans Affairs',
+            'Department of the Army': 'Army',
+            'Department of the Navy': 'Navy',
+            'Department of the Air Force': 'Air Force',
+            'Department of Defense': 'Defense (DoD)',
+            'Department of Homeland Security': 'Homeland Security',
+            'Department of the Interior': 'Interior',
+            'Department of Health and Human Services': 'Health & Human Services',
+            'Department of Agriculture': 'Agriculture',
+            'Department of the Treasury': 'Treasury',
+            'Department of Justice': 'Justice',
+            'Department of Transportation': 'Transportation',
+            'Department of Commerce': 'Commerce',
+            'Department of Energy': 'Energy',
+            'General Services Administration': 'GSA',
+            'Department of State': 'State',
+            'Department of Labor': 'Labor',
+            'Department of Housing and Urban Development': 'Housing & Urban Dev',
+            'Department of Education': 'Education',
+            'ENVIRONMENTAL PROTECTION AGENCY': 'EPA',
+            'SOCIAL SECURITY ADMINISTRATION': 'SSA',
+            'FEDERAL DEPOSIT INSURANCE CORPORATION': 'FDIC',
+            'NAT AERONAUTICS AND SPACE ADMINISTRATION': 'NASA',
+            'SECURITIES AND EXCHANGE COMMISSION': 'SEC',
+            'NUCLEAR REGULATORY COMMISSION': 'NRC',
+            'OFFICE OF PERSONNEL MANAGEMENT': 'OPM',
+            'U.S. AGENCY FOR INTERNATIONAL DEV': 'USAID',
+            'NATIONAL SCIENCE FOUNDATION': 'NSF',
+            'SMALL BUSINESS ADMINISTRATION': 'SBA',
+            'FEDERAL TRADE COMMISSION': 'FTC',
+            'NATIONAL CREDIT UNION ADMINISTRATION': 'NCUA',
+            'CONSUMER PRODUCT SAFETY COMMISSION': 'CPSC',
+            'PENSION BENEFIT GUARANTY CORPORATION': 'PBGC',
+            'FEDERAL HOUSING FINANCE AGENCY': 'FHFA',
+            'FEDERAL RESERVE SYSTEM': 'Federal Reserve',
+            'FARM CREDIT ADMINISTRATION': 'Farm Credit Admin',
+            'NAT ARCHIVES AND RECORDS ADMINISTRATION': 'National Archives',
+        };
+
+        function displayName(agency) {
+            if (SHORT_LABELS[agency]) return SHORT_LABELS[agency];
+            if (agency === agency.toUpperCase()) {
+                const small = new Set(['of','the','and','for','on','to','a','an','in']);
+                return agency.toLowerCase().split(/\s+/).map((w, i) => {
+                    if (i > 0 && small.has(w)) return w;
+                    return w.charAt(0).toUpperCase() + w.slice(1);
+                }).join(' ');
+            }
+            return agency;
+        }
 
         const CLIFF_MONTH = '202502';
 
@@ -203,24 +242,16 @@
         }
 
         function collectCategories(data) {
-            // Return sorted unique categories across the agencies we display.
-            const set = new Set();
-            for (const [agency] of DEPTS) {
-                const byCat = data.categories_monthly && data.categories_monthly[agency];
-                if (!byCat) continue;
-                for (const c of Object.keys(byCat)) set.add(c);
-            }
-            // Stable order: largest total first across all displayed agencies
+            // Walk every agency in the data, sum each category's volume,
+            // return categories sorted largest-first.
             const totals = {};
-            for (const c of set) totals[c] = 0;
-            for (const [agency] of DEPTS) {
-                const byCat = data.categories_monthly && data.categories_monthly[agency];
-                if (!byCat) continue;
+            for (const byCat of Object.values(data.categories_monthly || {})) {
                 for (const [c, series] of Object.entries(byCat)) {
+                    totals[c] = totals[c] || 0;
                     for (const v of series) totals[c] += v || 0;
                 }
             }
-            return [...set].sort((a, b) => totals[b] - totals[a]);
+            return Object.keys(totals).sort((a, b) => totals[b] - totals[a]);
         }
 
         function sumSelected(byCat, months, selected) {
@@ -475,16 +506,27 @@
 
             const hasDrp = !!sepData.categories_drp_monthly;
 
+            // Union of agencies that appear in either dataset.
+            const allAgencies = new Set([
+                ...Object.keys(accData.agencies),
+                ...Object.keys(sepData.agencies),
+            ]);
+
             const items = [];
-            for (const [agency, short] of DEPTS) {
-                const acc = accData.agencies[agency];
-                const sep = sepData.agencies[agency];
-                if (!acc || !sep) continue;
+            const zeros = new Array(months.length).fill(0);
+            for (const agency of allAgencies) {
+                const acc = accData.agencies[agency] || zeros;
+                const sep = sepData.agencies[agency] || zeros;
+                const totalActivity = acc.reduce((a, b) => a + (b || 0), 0)
+                                    + sep.reduce((a, b) => a + (b || 0), 0);
+                if (totalActivity === 0) continue;  // agency with no data at all
                 items.push({
-                    agency, short, months,
+                    agency,
+                    short: displayName(agency),
+                    months,
                     accByCat: accData.categories_monthly[agency] || {},
                     sepByCat: sepData.categories_monthly[agency] || {},
-                    sepByCatDrp: hasDrp ? (sepData.categories_drp_monthly[agency] || null) : null,
+                    sepByCatDrp: hasDrp ? ((sepData.categories_drp_monthly || {})[agency] || null) : null,
                     // sortKey uses the full (unfiltered) accessions so layout is stable across filter changes
                     sortKey: postPrePctAcc(months, acc),
                 });
@@ -572,6 +614,72 @@
                     applyFilters();
                 });
             });
+
+            // CSV download: preserves the filter granularity. Accessions
+            // rows have drp blank (no DRP indicator on accessions data).
+            // Separations rows have drp = 'Y' or 'N' when the category×DRP
+            // breakdown exists; otherwise drp is blank and count is the
+            // unsplit total.
+            document.getElementById('download-csv').addEventListener('click', (e) => {
+                e.preventDefault();
+                const rows = [['month', 'agency', 'flow', 'category', 'drp', 'count']];
+
+                // Accessions: month × agency × category
+                for (const [agency, byCat] of Object.entries(accData.categories_monthly || {})) {
+                    for (const [cat, series] of Object.entries(byCat)) {
+                        for (let i = 0; i < months.length; i++) {
+                            const c = series[i] || 0;
+                            if (c === 0) continue;
+                            rows.push([months[i], agency, 'accessions', cat, '', c]);
+                        }
+                    }
+                }
+
+                // Separations: prefer DRP-split rows when available, else the
+                // plain category × month totals.
+                const drpByAgency = sepData.categories_drp_monthly || {};
+                for (const [agency, byCat] of Object.entries(sepData.categories_monthly || {})) {
+                    const drpForAgency = drpByAgency[agency];
+                    for (const [cat, series] of Object.entries(byCat)) {
+                        const drps = drpForAgency && drpForAgency[cat];
+                        if (drps) {
+                            for (const [drp, drpSeries] of Object.entries(drps)) {
+                                for (let i = 0; i < months.length; i++) {
+                                    const c = drpSeries[i] || 0;
+                                    if (c === 0) continue;
+                                    rows.push([months[i], agency, 'separations', cat, drp, c]);
+                                }
+                            }
+                        } else {
+                            for (let i = 0; i < months.length; i++) {
+                                const c = series[i] || 0;
+                                if (c === 0) continue;
+                                rows.push([months[i], agency, 'separations', cat, '', c]);
+                            }
+                        }
+                    }
+                }
+
+                downloadCsv(rows, 'workforce-flow.csv');
+            });
+        }
+
+        function csvEscape(v) {
+            const s = String(v);
+            return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+        }
+
+        function downloadCsv(rows, filename) {
+            const body = rows.map((r) => r.map(csvEscape).join(',')).join('\n');
+            const blob = new Blob([body], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
         main().catch((e) => {
             document.getElementById('grid').innerHTML =
