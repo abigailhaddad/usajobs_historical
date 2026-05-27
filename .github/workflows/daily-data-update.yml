@@ -126,7 +126,43 @@ jobs:
               repo: context.repo.repo,
               title: 'Current API Empty - ' + today,
               body: body,
-              labels: ['bug', 'api-issue']
+              labels: ['bug', 'api-issue'],
+              assignees: ['abigailhaddad']
+            });
+
+            fs.unlinkSync(warningFile);
+          }
+
+    - name: Check for historical collection failure
+      if: always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const warningFile = 'logs/HISTORICAL_COLLECTION_FAILED.txt';
+
+          if (fs.existsSync(warningFile)) {
+            const content = fs.readFileSync(warningFile, 'utf8');
+            console.log('Warning: Historical data collection failed!');
+
+            const today = new Date().toISOString().split('T')[0];
+            const runUrl = context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId;
+
+            const body = '## Historical Data Collection Failed\n\n' +
+              content + '\n\n' +
+              '**What this means:** The workflow continued and current jobs were still collected, ' +
+              'but historical job data for the past ~2 weeks may be incomplete or missing.\n\n' +
+              '**Likely cause:** A type/schema mismatch in a parquet column (e.g. a list value ' +
+              'where a string is expected). Check the "Run daily data update" step logs.\n\n' +
+              '[View the workflow run](' + runUrl + ')';
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Historical Collection Failed - ' + today,
+              body: body,
+              labels: ['bug', 'data-issue'],
+              assignees: ['abigailhaddad']
             });
 
             fs.unlinkSync(warningFile);
@@ -238,13 +274,24 @@ jobs:
       run: |
         # Wait a moment for PR to be created
         sleep 10
-        
+
         # Find the PR number
         PR_NUMBER=$(gh pr list --base main --head data-updates --json number --jq '.[0].number')
-        
+
         if [ -n "$PR_NUMBER" ]; then
           echo "Auto-merging PR #$PR_NUMBER"
-          gh pr merge $PR_NUMBER --merge --auto
+          gh pr merge $PR_NUMBER --merge --auto || {
+            # Tolerate transient API errors (502, stream cancel, etc.)
+            # The merge may have gone through despite the error response
+            sleep 5
+            PR_STATE=$(gh pr view $PR_NUMBER --json state --jq '.state')
+            if [ "$PR_STATE" = "MERGED" ]; then
+              echo "PR #$PR_NUMBER is already merged despite API error — continuing"
+            else
+              echo "PR #$PR_NUMBER merge failed (state: $PR_STATE)"
+              exit 1
+            fi
+          }
         fi
       env:
         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
@@ -258,16 +305,17 @@ jobs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             title: `Daily Data Update Failed - ${new Date().toISOString().split('T')[0]}`,
-            body: `The daily data update workflow had issues. 
-            
+            body: `The daily data update workflow had issues.
+
             ${context.job.status === 'failure' ? 'The workflow failed to complete.' : 'Tests failed but a PR was created.'}
-            
+
             Test Results:
             - Data Integrity Tests: ${{ steps.data_tests.outcome }}
-            
+
             [View the workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
-            
+
             Please check the logs for details.`,
-            labels: ['bug', 'automated']
+            labels: ['bug', 'automated'],
+            assignees: ['abigailhaddad']
           };
           await github.rest.issues.create(issue);

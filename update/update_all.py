@@ -456,6 +456,12 @@ def main():
         else:
             print("❌ Historical data collection failed. Continuing with current jobs...")
             collection_errors.append("Historical data collection failed")
+            # Write a warning file so the workflow can create a GitHub issue
+            os.makedirs('../logs', exist_ok=True)
+            with open('../logs/HISTORICAL_COLLECTION_FAILED.txt', 'w') as f:
+                f.write(f"Historical data collection failed for {start_date} to {today_str}\n"
+                        f"The workflow continued with current jobs but historical data may be incomplete.\n"
+                        f"Check the workflow logs for the full error (likely a type/schema mismatch in a parquet column).\n")
     else:
         print("ℹ️  No new historical data to collect (already up to date)")
     

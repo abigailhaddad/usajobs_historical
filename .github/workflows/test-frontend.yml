@@ -45,6 +45,10 @@ jobs:
         s3.download_file('usajobs-data', 'web/jobs_5yr.parquet', 'web/data/jobs_5yr.parquet')
         size = os.path.getsize('web/data/jobs_5yr.parquet')
         print(f'Downloaded {size / 1024 / 1024:.1f} MB')
+        print('Downloading web/static.json ...')
+        s3.download_file('usajobs-data', 'web/static.json', 'web/data/static.json')
+        size = os.path.getsize('web/data/static.json')
+        print(f'Downloaded {size / 1024:.1f} KB')
         "
 
     - name: Start test server

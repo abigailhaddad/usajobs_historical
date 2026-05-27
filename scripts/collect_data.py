@@ -302,8 +302,9 @@ def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
     for job in jobs:
         processed_job = job.copy()
         
-        # Convert arrays to JSON strings
-        for field in ['HiringPaths', 'JobCategories', 'PositionLocations']:
+        # Convert arrays to JSON strings (handle both capitalized and lowercase field names)
+        for field in ['HiringPaths', 'hiringpaths', 'JobCategories', 'jobcategories',
+                      'PositionLocations', 'positionlocations']:
             if field in processed_job and isinstance(processed_job[field], (list, dict)):
                 processed_job[field] = json.dumps(processed_job[field])
         
@@ -378,6 +379,30 @@ def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
         combined_df = new_df
         print(f"    📊 Created {parquet_path} with {len(combined_df)} jobs")
     
+    # Sanitize any remaining list/dict values in list-prone columns before saving
+    # (guards against mixed types from existing parquet data that predate the JSON conversion)
+    import numpy as np
+    LIST_PRONE_COLS = ['hiringpaths', 'HiringPaths', 'jobcategories', 'JobCategories',
+                       'positionlocations', 'PositionLocations']
+
+    def _to_json_str(x):
+        if x is None or (isinstance(x, float) and pd.isna(x)):
+            return None
+        try:
+            if pd.isna(x):
+                return None
+        except (ValueError, TypeError):
+            pass
+        if isinstance(x, np.ndarray):
+            return json.dumps(x.tolist())
+        if isinstance(x, (list, dict)):
+            return json.dumps(x)
+        return x
+
+    for col in LIST_PRONE_COLS:
+        if col in combined_df.columns:
+            combined_df[col] = combined_df[col].apply(_to_json_str)
+
     # Save to parquet
     combined_df.to_parquet(parquet_path, index=False)
 
