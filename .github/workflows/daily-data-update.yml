@@ -17,6 +17,9 @@ permissions:
   issues: write
   pull-requests: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   update-data:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
