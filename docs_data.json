@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-06-13T08:24:43.950691",
-  "total_jobs": 3782970,
+  "generated_at": "2026-06-14T08:39:00.534506",
+  "total_jobs": 3782978,
   "total_fields": 47,
   "file_size": "1.9GB",
-  "latest_job_date": "2026-06-13",
+  "latest_job_date": "2026-06-14",
   "data_coverage": [
     {
       "year": 2013,
@@ -94,13 +94,13 @@
       "total_jobs": 239183,
       "jobs_opened": 239183,
       "jobs_closed": 228620,
-      "coverage": "Current through June 13, 2026"
+      "coverage": "Current through June 14, 2026"
     },
     {
       "year": 2026,
-      "total_jobs": 160592,
-      "jobs_opened": 160592,
-      "jobs_closed": 159394,
+      "total_jobs": 160600,
+      "jobs_opened": 160600,
+      "jobs_closed": 159402,
       "coverage": "Closing dates only"
     }
   ],
@@ -116,7 +116,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1550\"}, {\"series\": \"1520\"}, {\"series\": \"1515\"}, {\"series\": \"1310\"}, {\"series\": \"0801\"}], [{\"series\": \"0018\"}], [{\"series\": \"0861\"}, {\"series\": \"0801\"}, {\"series\": \"0854\"}, {\"series\": \"0850\"}, {\"series\": \"1550\"}, {\"series\": \"0855\"}], [{\"series\": \"0850\"}, {\"series\": \"0830\"}, {\"series\": \"0808\"}, {\"series\": \"0807\"}, {\"series\": \"0810\"}] (4424 unique)",
+      "examples": "[{\"series\": \"2102\"}], [{\"series\": \"0808\"}], [{\"series\": \"4616\"}], [{\"series\": \"1315\"}, {\"series\": \"0801\"}, {\"series\": \"0401\"}, {\"series\": \"0193\"}, {\"series\": \"0810\"}, {\"series\": \"0101\"}, {\"series\": \"1301\"}, {\"series\": \"0110\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -140,7 +140,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of Health and Human Services\\Office of the Assistant Secretary for Health, Department of Justice\\Drug Enforcement Administration, Appalachian Regional Commission, General Services Administration\\Office of Inspector General (542 unique)",
+      "examples": "Department of Veterans Affairs\\Executive Director for Security and Law Enforcement, Department of Commerce\\Commerce, International Trade Administration, Department of the Army\\U.S. Special Operations Command (Army), Department of Veterans Affairs\\Deputy Assistant Secretary for Labor Management Relations (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -164,7 +164,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "IM-1541-GLCA-25-12630958-DE, DE-12593464-25-ALK, JOA-FL-12405029-AR-24-422, MCGK243139771912 (363816 unique)",
+      "examples": "MCBK241370489125, 24300-2, 24-12552746O-TSM-0303-11, 24-6YFSW534997 (363816 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363816
@@ -172,7 +172,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Presidential Management Fellows, Recent graduates, Temporary, Temporary promotion (16 unique)",
+      "examples": "Telework, Seasonal, Multiple, Detail (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -204,7 +204,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "CM56, DJ02, HSBE, ARXB (528 unique)",
+      "examples": "CM56, ARAT, AF0D, ARTA (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -212,7 +212,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "National Air and Space Intelligence Center, Air Force Audit Agency, National Defense University, Civil Rights (502 unique)",
+      "examples": "Air Force Elements, U.S. Special Operations Command, National Institutes of Health, U.S. Census Bureau, Merit Systems Protection Board (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -220,7 +220,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "GS, GQ, DO, LL (122 unique)",
+      "examples": "EW, FL, FQ, NP (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -228,7 +228,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "National Aeronautics and Space Administration, Department of Defense, Executive Office of the President, Department of the Army (26 unique)",
+      "examples": "Department of Homeland Security, Executive Office of the President, Department of Veterans Affairs, Department of Commerce (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -236,7 +236,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Long Island National Cemetery, The Judge Advocate General's Legal Center and School, DCAA- HEADQUARTERS, CNRMA NAVAL STATION NORFOLK MWR PROGRAMS N922 (59972 unique)",
+      "examples": "National Marine Fisheries Service (NMFS), Pacific Islands Regional Office (PIRO), U.S. Army Field Support Center, MICECP Human Resources Team, HQ US Army Medical Command Army Public Health Center Clinical PH & Epidemiology Directorate, MMAC, Enterprise Services Center,  Financial Services and Task Automation Division, AMK-300 (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -252,7 +252,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T13:47:41.928322, 2025-09-20T11:37:32.386668, 2025-09-20T11:51:24.370214, 2025-09-20T12:00:40.187091 (367192 unique)",
+      "examples": "2025-09-20T11:32:13.135099, 2025-07-05T12:59:13.256102, 2025-09-20T12:13:57.795742, 2025-09-20T11:58:45.393816 (367192 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367192
@@ -268,7 +268,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-20T11:37:32.398434, 2025-09-20T11:57:01.731874, 2025-09-20T12:03:23.735035, 2025-09-20T12:00:40.177277 (362993 unique)",
+      "examples": "2025-09-20T12:24:39.445503, 2025-09-20T11:32:13.105613, 2025-09-20T11:49:34.593282, 2025-09-20T11:53:10.079188 (362993 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 362993
@@ -276,7 +276,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "KJ, 42, AA, B (127 unique)",
+      "examples": "KI, DL, 19, B (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -292,7 +292,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "0, B, GI, NA (125 unique)",
+      "examples": "38, GI, JL, 97 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -308,7 +308,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "DC, KG, FP, SE (191 unique)",
+      "examples": "DA, AA, RS, VM (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -316,7 +316,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-06-05, 2024-08-07, 2025-01-17, 2024-10-06 (671 unique)",
+      "examples": "2024-05-15, 2025-06-12, 2024-12-29, 2024-07-18 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -324,7 +324,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-02-21, 2024-06-01, 2025-07-08, 2024-05-21 (596 unique)",
+      "examples": "2023-12-05, 2024-10-26, 2024-07-04, 2024-02-29 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -332,7 +332,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-08-05, 2024-10-18, 2024-05-17, 2024-05-01 (365 unique)",
+      "examples": "2024-11-28, 2024-01-02, 2024-07-13, 2024-09-04 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -348,7 +348,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Social Worker (Intake Aftercare), Emergency Department Registered Nurse, Deputy, Associate Director for Patient Care Service, 2024-07 AWA Scoring Project B1 (0301-5/7/9 DOJ Standard, Essay B) REGULAR (77992 unique)",
+      "examples": "Transportation Assistant (QA Inspector/Counselor), FINANCIAL SPECIALIST-ACWA, Program Coordinator - FEDERAL EMPLOYEES and VEOA ONLY, FINANCIAL MANAGEMENT ANAYLYST (77992 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77992
@@ -364,7 +364,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "44, PB5, GS12, 14 (115 unique)",
+      "examples": "70, J, 5, Varies (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -428,7 +428,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "MANY, 39, 19, 114 (157 unique)",
+      "examples": "91, 204, 51, 134 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
