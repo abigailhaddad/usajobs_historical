@@ -91,6 +91,31 @@ Current API jobs generally also appear in the Historical API data, but we collec
 
 Both APIs are rationalized to a common schema and stored in year-based Parquet files in Cloudflare R2.
 
+### ⚠️ Known limitation: hiringAgencyName in current parquets
+
+When combining `historical_jobs_*.parquet` and `current_jobs_*.parquet`, be aware that `hiringAgencyName` can differ for the same job:
+
+- **Historical parquets** always have the specific bureau-level name (e.g. `"Executive Office for U.S. Attorneys and the Office of the U.S. Attorneys"`)
+- **Current parquets** sometimes have only the department-level name (e.g. `"Department of Justice"`) when the `OrganizationName` field is null in the current API response
+
+Naively unioning both and grouping by `hiringAgencyName` will **double-count** those jobs — once under the specific bureau name (from historical) and once under the department name (from current).
+
+**Correct approach:** Deduplicate by `usajobsControlNumber`, preferring the record where `hiringAgencyName != hiringDepartmentName`. The `scripts/parquet_utils.py` module provides ready-to-use helpers:
+
+```python
+# DuckDB (server-side, no download)
+from scripts.parquet_utils import build_deduped_query
+sql = build_deduped_query(hist_urls=[...], curr_urls=[...],
+                          where="hiringDepartmentName = 'Department of Justice'")
+df = duckdb.connect().execute(sql).df()
+
+# Pandas (local files)
+from scripts.parquet_utils import combine_and_fix
+result = combine_and_fix(hist_frames=[hist_df], curr_frames=[curr_df])
+```
+
+The `jobs_5yr.parquet` web dataset already has this fix applied — it is safe to query directly without deduplication.
+
 ## Data Storage
 
 - **Cloudflare R2**: All parquet files are stored in R2 (not in this git repo due to size)
