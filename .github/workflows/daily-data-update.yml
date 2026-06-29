@@ -10,6 +10,14 @@ on:
         description: "Skip collection/re-poll/integrity (just re-prep + sync existing R2 data)"
         type: boolean
         default: false
+      backfill_start_date:
+        description: "Override historical collection start date (YYYY-MM-DD). Skips auto-detection."
+        type: string
+        default: ""
+      backfill_end_date:
+        description: "Override historical collection end date (YYYY-MM-DD). Defaults to today."
+        type: string
+        default: ""
 
 # Needed for pushing changes back to repo and creating PRs
 permissions:
@@ -97,6 +105,8 @@ jobs:
       env:
         USAJOBS_API_TOKEN: ${{ secrets.USAJOBS_API_TOKEN }}
         GITHUB_ACTIONS: true
+        BACKFILL_START_DATE: ${{ inputs.backfill_start_date }}
+        BACKFILL_END_DATE: ${{ inputs.backfill_end_date }}
       run: |
         cd update
         python update_all.py

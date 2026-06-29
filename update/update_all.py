@@ -424,19 +424,27 @@ def main():
     today = datetime.now()
     today_str = today.strftime('%Y-%m-%d')
 
-    # Always fetch today + previous 14 days for redundancy
-    # This ensures we catch any jobs that might have been missed during API outages
-    two_weeks_ago = (today - timedelta(days=14)).strftime('%Y-%m-%d')
+    # Allow workflow_dispatch to override dates for manual backfills
+    backfill_start = os.environ.get('BACKFILL_START_DATE', '').strip()
+    backfill_end   = os.environ.get('BACKFILL_END_DATE', '').strip()
 
-    # Start from whichever is earlier: last collection date or 2 weeks ago
-    if last_date:
-        last_date_start = last_date.strftime('%Y-%m-%d')
-        # Use the earlier of the two dates
-        start_date = min(last_date_start, two_weeks_ago)
+    if backfill_start:
+        start_date = backfill_start
+        today_str  = backfill_end if backfill_end else today_str
+        print(f"   BACKFILL MODE: collecting {start_date} to {today_str}")
     else:
-        start_date = two_weeks_ago
+        # Always fetch today + previous 14 days for redundancy
+        # This ensures we catch any jobs that might have been missed during API outages
+        two_weeks_ago = (today - timedelta(days=14)).strftime('%Y-%m-%d')
 
-    print(f"   Will collect: {start_date} to {today_str} (always includes last 2 weeks for redundancy)")
+        # Start from whichever is earlier: last collection date or 2 weeks ago
+        if last_date:
+            last_date_start = last_date.strftime('%Y-%m-%d')
+            start_date = min(last_date_start, two_weeks_ago)
+        else:
+            start_date = two_weeks_ago
+
+        print(f"   Will collect: {start_date} to {today_str} (always includes last 2 weeks for redundancy)")
     print("\\n" + "=" * 50)
     
     # Initialize collection statistics
