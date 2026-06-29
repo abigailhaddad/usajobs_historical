@@ -155,15 +155,20 @@ def fetch_all_pages(params: Dict, description: str = "") -> List[Dict]:
     all_jobs = []
     next_url = None
     page_num = 1
-    
+    expected_total = None
+
     while True:
         try:
             data = get_job_data_page(params=params, next_url=next_url)
             page_jobs = data.get("data", [])
             all_jobs.extend(page_jobs)
-            
+
+            # Capture the expected total from the first page metadata
+            if page_num == 1:
+                expected_total = data.get("paging", {}).get("metadata", {}).get("totalCount")
+
             print(f"  📄 Page {page_num}: {len(page_jobs)} jobs (total so far: {len(all_jobs)})")
-            
+
             next_path = data.get("paging", {}).get("next")
             if next_path and next_path.strip():
                 # Handle both full URLs and relative paths
@@ -176,12 +181,20 @@ def fetch_all_pages(params: Dict, description: str = "") -> List[Dict]:
                 page_num += 1
             else:
                 break
-                
+
         except Exception as e:
             print(f"  ⚠️  Page {page_num} failed with error: {e}")
             print(f"  💾 Saving {len(all_jobs)} jobs collected so far and continuing...")
             break
-    
+
+    # Verify we collected everything the API said was available
+    if expected_total is not None and len(all_jobs) < expected_total:
+        msg = (f"🚨 PAGINATION UNDER-COLLECTION: API reported {expected_total} total jobs "
+               f"but only collected {len(all_jobs)} after {page_num} page(s). "
+               f"Check if continuationToken-based pagination broke.")
+        print(msg)
+        logging.getLogger(__name__).critical(msg)
+
     return all_jobs
 
 
