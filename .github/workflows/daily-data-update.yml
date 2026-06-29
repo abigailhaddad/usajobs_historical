@@ -146,6 +146,42 @@ jobs:
             fs.unlinkSync(warningFile);
           }
 
+    - name: Check for pagination under-collection
+      if: always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const alertFile = 'logs/PAGINATION_UNDER_COLLECTION.txt';
+
+          if (fs.existsSync(alertFile)) {
+            const content = fs.readFileSync(alertFile, 'utf8');
+            console.log('Warning: Pagination under-collection detected!');
+
+            const today = new Date().toISOString().split('T')[0];
+            const runUrl = context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId;
+
+            const body = '## Pagination Under-Collection Detected\n\n' +
+              '**The API reported more total jobs than we collected.** This means the ' +
+              'continuationToken-based pagination may have broken mid-run, and we silently ' +
+              'missed some jobs.\n\n' +
+              '**Affected date ranges:**\n```\n' + content + '\n```\n\n' +
+              '**Action required:** Check whether the API changed its pagination behavior. ' +
+              'The affected dates should be re-collected.\n\n' +
+              '[View the workflow run](' + runUrl + ')';
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Pagination Under-Collection - ' + today,
+              body: body,
+              labels: ['bug', 'data-issue'],
+              assignees: ['abigailhaddad']
+            });
+
+            fs.unlinkSync(alertFile);
+          }
+
     - name: Check for historical collection failure
       if: always()
       uses: actions/github-script@v7

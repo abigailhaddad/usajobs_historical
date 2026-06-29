@@ -194,6 +194,12 @@ def fetch_all_pages(params: Dict, description: str = "") -> List[Dict]:
                f"Check if continuationToken-based pagination broke.")
         print(msg)
         logging.getLogger(__name__).critical(msg)
+        # Write alert file so the workflow can create a GitHub issue
+        log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
+        os.makedirs(log_dir, exist_ok=True)
+        alert_path = os.path.join(log_dir, 'PAGINATION_UNDER_COLLECTION.txt')
+        with open(alert_path, 'a') as f:
+            f.write(f"{description}: expected {expected_total}, got {len(all_jobs)} ({page_num} pages)\n")
 
     return all_jobs
 
