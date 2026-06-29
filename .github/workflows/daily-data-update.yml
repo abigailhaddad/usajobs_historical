@@ -100,6 +100,39 @@ jobs:
         echo "Checking data files:"
         ls -lh data/*.parquet | head -5
 
+    - name: Validate downloaded data from R2
+      run: |
+        python3 -c "
+        import os, sys
+        import pyarrow.parquet as pq
+
+        data_dir = 'data'
+        missing = []
+        empty = []
+
+        # Every historical year from 2013 to current year must be present
+        import datetime
+        current_year = datetime.date.today().year
+        for year in range(2013, current_year + 1):
+            path = os.path.join(data_dir, f'historical_jobs_{year}.parquet')
+            if not os.path.exists(path):
+                missing.append(path)
+            else:
+                rows = pq.read_metadata(path).num_rows
+                if rows == 0:
+                    empty.append(f'{path} (0 rows)')
+
+        if missing:
+            print('MISSING files after R2 download:')
+            for f in missing: print(f'  {f}')
+        if empty:
+            print('EMPTY files after R2 download:')
+            for f in empty: print(f'  {f}')
+        if missing or empty:
+            sys.exit(1)
+        print(f'R2 download validated: all historical files present and non-empty')
+        "
+
     - name: Run daily data update
       if: inputs.skip_collection != true
       env:
@@ -217,13 +250,6 @@ jobs:
             fs.unlinkSync(warningFile);
           }
 
-    - name: Run data integrity tests
-      id: data_tests
-      run: |
-        cd update
-        python test_data_integrity.py
-        # If tests fail, the script returns non-zero and this step will fail
-
     - name: Re-poll status for non-final jobs
       env:
         GITHUB_ACTIONS: true
@@ -259,6 +285,12 @@ jobs:
         echo "Re-polling years: $YEARS"
         python scripts/repoll_status.py --years $YEARS --skip-recent-days 14
 
+    - name: Run data integrity tests
+      id: data_tests
+      run: |
+        cd update
+        python test_data_integrity.py
+
     - name: Commit and push to data-updates branch
       # Only runs if tests pass
       run: |
@@ -291,7 +323,7 @@ jobs:
         python -m pytest web/tests/test_api.py -v
 
     - name: Sync to R2
-      if: env.CHANGES_MADE == 'true'
+      if: env.CHANGES_MADE == 'true' && steps.data_tests.outcome == 'success'
       env:
         R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
         R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}

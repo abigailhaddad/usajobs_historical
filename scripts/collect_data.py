@@ -470,7 +470,7 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
     os.makedirs(data_dir, exist_ok=True)
     
     # Load existing jobs from all year files to avoid duplicates
-    for year in range(2015, 2030):  # Check reasonable year range
+    for year in range(2015, datetime.now().year + 2):  # Check reasonable year range
         parquet_path = f"{data_dir}/historical_jobs_{year}.parquet"
         if os.path.exists(parquet_path):
             existing = load_existing_jobs(parquet_path)
@@ -622,7 +622,7 @@ def main():
     
     # Show final parquet file summary
     print(f"\n📊 Parquet files in {args.data_dir}/:")
-    for year in range(2015, 2030):
+    for year in range(2015, datetime.now().year + 2):
         parquet_path = f"{args.data_dir}/historical_jobs_{year}.parquet"
         if os.path.exists(parquet_path):
             df = pd.read_parquet(parquet_path)

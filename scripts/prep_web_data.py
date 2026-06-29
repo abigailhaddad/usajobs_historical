@@ -20,9 +20,10 @@ import requests
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "jobs_5yr.parquet")
 
-# Source files to load
-HISTORICAL_FILES = [f"historical_jobs_{y}.parquet" for y in range(2018, 2027)]
-CURRENT_FILES = [f"current_jobs_{y}.parquet" for y in range(2024, 2027)]
+# Source files to load — dynamic so new years are included automatically
+_THIS_YEAR = __import__('datetime').date.today().year
+HISTORICAL_FILES = [f"historical_jobs_{y}.parquet" for y in range(2018, _THIS_YEAR + 1)]
+CURRENT_FILES = [f"current_jobs_{y}.parquet" for y in range(2024, _THIS_YEAR + 1)]
 
 
 def _extract_all_locations(value):
