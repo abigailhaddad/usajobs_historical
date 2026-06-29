@@ -214,28 +214,39 @@ def check_no_job_id_loss():
     return all_good
 
 def create_baseline(filepath):
-    """Create baseline snapshot of current data"""
+    """Create baseline snapshot of current data.
+
+    Stores only row counts (not full job ID lists) to keep the file small.
+    The no-data-loss check uses row counts; the no-job-ID-loss check uses a
+    small sentinel sample so we can detect corruption without a 70 MB JSON.
+    """
     baseline = {
         'created_at': datetime.now().isoformat(),
         'row_counts': {},
-        'job_ids': {}  # Track all job IDs per file
+        'job_ids': {}  # Sentinel sample only — first 500 IDs per file
     }
 
-    # Get all parquet files
     data_dir = '../data'
     for filename in os.listdir(data_dir):
         if filename.endswith('.parquet'):
             try:
-                df = pd.read_parquet(os.path.join(data_dir, filename))
-                baseline['row_counts'][filename] = len(df)
+                # Read only the ID column to avoid loading full parquet
+                path = os.path.join(data_dir, filename)
+                id_col = None
+                for col in ('usajobsControlNumber', 'usajobs_control_number', 'PositionID'):
+                    try:
+                        s = pd.read_parquet(path, columns=[col])[col]
+                        id_col = col
+                        ids = sorted(s.dropna().astype(str).unique())
+                        baseline['row_counts'][filename] = len(ids)
+                        baseline['job_ids'][filename] = ids[:500]  # sentinel sample
+                        break
+                    except Exception:
+                        continue
 
-                # Store job IDs based on available columns - convert to string to ensure JSON serializable
-                if 'usajobsControlNumber' in df.columns:
-                    baseline['job_ids'][filename] = [str(x) for x in df['usajobsControlNumber'].dropna().unique()]
-                elif 'usajobs_control_number' in df.columns:
-                    baseline['job_ids'][filename] = [str(x) for x in df['usajobs_control_number'].dropna().unique()]
-                elif 'PositionID' in df.columns:
-                    baseline['job_ids'][filename] = [str(x) for x in df['PositionID'].dropna().unique()]
+                if id_col is None:
+                    df = pd.read_parquet(path)
+                    baseline['row_counts'][filename] = len(df)
 
             except Exception as e:
                 print(f"Could not read {filename}: {e}")

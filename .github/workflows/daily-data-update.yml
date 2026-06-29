@@ -294,9 +294,10 @@ jobs:
     - name: Commit and push to data-updates branch
       # Only runs if tests pass
       run: |
-        # Check if there are changes (exclude parquet files — data lives in R2)
-        if [ -n "$(git status --porcelain -- ':!*.parquet')" ]; then
-          git add -- ':!*.parquet'
+        # Check if there are changes (exclude parquet files and workflow files)
+        # Workflow files are excluded because GITHUB_TOKEN lacks workflows permission to push them
+        if [ -n "$(git status --porcelain -- ':!*.parquet' ':!.github/')" ]; then
+          git add -- ':!*.parquet' ':!.github/'
           git commit -m "Daily data update - $(date +'%Y-%m-%d')"
           git push -f origin data-updates
           echo "CHANGES_MADE=true" >> $GITHUB_ENV
