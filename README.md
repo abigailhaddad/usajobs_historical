@@ -95,7 +95,7 @@ Both APIs are rationalized to a common schema and stored in year-based Parquet f
 
 When combining `historical_jobs_*.parquet` and `current_jobs_*.parquet`, be aware that `hiringAgencyName` can differ for the same job:
 
-- **Historical parquets** always have the specific bureau-level name (e.g. `"Executive Office for U.S. Attorneys and the Office of the U.S. Attorneys"`)
+- **Historical parquets** usually have the specific bureau-level name (e.g. `"Executive Office for U.S. Attorneys and the Office of the U.S. Attorneys"`), but this is not guaranteed — the historical API itself sometimes returns only the department-level name for certain records, particularly for periods where the underlying `OrganizationName` field was not populated at index time
 - **Current parquets** sometimes have only the department-level name (e.g. `"Department of Justice"`) when the `OrganizationName` field is null in the current API response
 
 Naively unioning both and grouping by `hiringAgencyName` will **double-count** those jobs — once under the specific bureau name (from historical) and once under the department name (from current).
