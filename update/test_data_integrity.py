@@ -232,6 +232,64 @@ def create_baseline(filepath):
     with open(filepath, 'w') as f:
         json.dump(baseline, f, indent=2)
 
+def check_historical_monthly_coverage(min_jobs_per_month=2000):
+    """Fail if any complete month in the last 13 months has suspiciously few historical records.
+
+    A full month should have tens of thousands of jobs.  Fewer than min_jobs_per_month
+    almost certainly means a collection gap, not a quiet month.
+
+    The most recent complete month gets a WARN instead of FAIL (gives the pipeline
+    one extra cycle to backfill before blocking R2 sync).
+    """
+    today = datetime.now()
+    all_good = True
+
+    # Load all historical parquets we might need (last 2 calendar years)
+    years_needed = sorted({today.year, today.year - 1})
+    dfs = {}
+    for yr in years_needed:
+        path = f'../data/historical_jobs_{yr}.parquet'
+        if os.path.exists(path):
+            try:
+                df = pd.read_parquet(path, columns=['positionOpenDate'])
+                df['positionOpenDate'] = pd.to_datetime(df['positionOpenDate'], errors='coerce')
+                df['month'] = df['positionOpenDate'].dt.to_period('M')
+                dfs[yr] = df
+            except Exception as e:
+                print(f"{Colors.YELLOW}⚠️  WARN{Colors.RESET} Could not load historical_{yr} for coverage check: {e}")
+
+    if not dfs:
+        print(f"{Colors.YELLOW}⚠️  WARN{Colors.RESET} No historical parquets found for monthly coverage check")
+        return True
+
+    combined = pd.concat(dfs.values(), ignore_index=True)
+
+    # Check each complete month from 2 months ago back to 13 months ago
+    # (skip month 1 = last complete month → warn only; skip month 0 = current partial month)
+    for months_ago in range(1, 14):
+        # Compute target month
+        target_month = today.month - months_ago
+        target_year  = today.year
+        while target_month <= 0:
+            target_month += 12
+            target_year  -= 1
+
+        period = pd.Period(f'{target_year}-{target_month:02d}', freq='M')
+        count  = (combined['month'] == period).sum()
+        label  = f'Historical coverage {target_year}-{target_month:02d}'
+
+        if count >= min_jobs_per_month:
+            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} {label} ({count:,} jobs)")
+        elif months_ago == 1:
+            # Most-recent complete month: warn only (still filling)
+            print(f"{Colors.YELLOW}⚠️  WARN{Colors.RESET} {label} only {count:,} jobs (threshold {min_jobs_per_month:,}) — may still be backfilling")
+        else:
+            print(f"{Colors.RED}❌ FAIL{Colors.RESET} {label} only {count:,} jobs (threshold {min_jobs_per_month:,}) — likely a collection gap")
+            all_good = False
+
+    return all_good
+
+
 def check_data_consistency():
     """Check for data consistency issues"""
     try:
@@ -300,10 +358,10 @@ def run_tests():
     # Test 2: Historical data files exist
     print_header("2. HISTORICAL DATA FILES")
     
-    for year in range(2013, 2026):
+    for year in range(2013, current_year + 1):
         filename = f'historical_jobs_{year}.parquet'
         min_rows = 5 if year < 2015 else 10 if year < 2017 else 1000  # Early years have less data
-        if not check_parquet_file(f'../data/{filename}', min_rows, 
+        if not check_parquet_file(f'../data/{filename}', min_rows,
                                    ['positionTitle'], f'Historical jobs {year}'):
             all_passed = False
     
@@ -316,10 +374,16 @@ def run_tests():
         if not check_data_recency(current_year_file, 7, f'Current {current_year} data recency'):
             all_passed = False
     else:
-        # Fall back to 2025 if current year file doesn't exist
-        if not check_data_recency('../data/current_jobs_2025.parquet', 7, 'Current 2025 data recency'):
+        # Fall back to previous year if current year file doesn't exist
+        if not check_data_recency(f'../data/current_jobs_{current_year - 1}.parquet', 7, f'Current {current_year - 1} data recency'):
             all_passed = False
-    
+
+    # Historical data should also be recent
+    hist_year_file = f'../data/historical_jobs_{current_year}.parquet'
+    if os.path.exists(hist_year_file):
+        if not check_data_recency(hist_year_file, 7, f'Historical {current_year} data recency'):
+            all_passed = False
+
     # Test 4: No data loss
     print_header("4. REGRESSION TEST - NO DATA LOSS")
     if not check_no_data_loss():
@@ -334,6 +398,11 @@ def run_tests():
     # Test 6: Data consistency
     print_header("6. DATA CONSISTENCY")
     if not check_data_consistency():
+        all_passed = False
+
+    # Test 7: Historical monthly coverage (catches collection gaps)
+    print_header("7. HISTORICAL MONTHLY COVERAGE")
+    if not check_historical_monthly_coverage():
         all_passed = False
     
     # Summary
