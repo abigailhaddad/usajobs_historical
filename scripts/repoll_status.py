@@ -106,6 +106,27 @@ def get_nonfinal_dates(parquet_path: str) -> List[str]:
     return sorted(dates)
 
 
+def get_gap_dates(parquet_path: str, year: int, cutoff_date: str, lookback_months: int = 13) -> List[str]:
+    """Find calendar dates within `year` that have NO records at all.
+
+    Only looks within the last `lookback_months` window so we don't spam the API
+    for ancient years that are genuinely sparse.  Dates with zero records are
+    pipeline gaps (API outage, collection failure) that the repoll should fill.
+    """
+    lookback_start = (datetime.now() - timedelta(days=lookback_months * 30)).strftime('%Y-%m-%d')
+    range_start = max(f"{year}-01-01", lookback_start)
+    range_end   = min(f"{year}-12-31", cutoff_date)
+
+    if range_end < range_start:
+        return []
+
+    df = pd.read_parquet(parquet_path)
+    existing = set(df['positionOpenDate'].dropna().apply(lambda x: str(x)[:10]).unique())
+
+    all_cal_dates = pd.date_range(range_start, range_end, freq='D')
+    return [d.strftime('%Y-%m-%d') for d in all_cal_dates if d.strftime('%Y-%m-%d') not in existing]
+
+
 def update_and_insert(parquet_path: str, status_map: Dict[str, str],
                       new_jobs: List[Dict]) -> tuple:
     """Update statuses for existing jobs and insert new jobs.
@@ -271,10 +292,17 @@ def main():
         dates = get_nonfinal_dates(path)
         filtered = [d for d in dates if d <= cutoff_date]
         skipped += len(dates) - len(filtered)
-        dates_by_year[year] = filtered
-        for d in filtered:
+
+        # Also include dates within the last 13 months that have NO records at all
+        # so pipeline gaps (API outages, collection failures) get back-filled here.
+        gaps = get_gap_dates(path, year, cutoff_date)
+        combined = sorted(set(filtered) | set(gaps))
+
+        dates_by_year[year] = combined
+        for d in combined:
             date_to_year[d] = year
-        log(f"{year}: {len(filtered)} dates with non-final jobs" +
+        gap_msg = f", {len(gaps)} gap dates to fill" if gaps else ""
+        log(f"{year}: {len(filtered)} dates with non-final jobs{gap_msg}" +
             (f" (skipped {len(dates) - len(filtered)} recent)" if len(dates) != len(filtered) else ""))
 
     # Sort all dates DESCENDING (most recent first)
