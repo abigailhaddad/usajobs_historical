@@ -138,6 +138,10 @@
         const API_BASE = '';
         window.API_BASE = API_BASE;
 
+        // Keep in sync with MAX_ROWS in api/download.py. Larger exports exceed
+        // the serverless response limits, so we ask the user to filter first.
+        const DOWNLOAD_ROW_LIMIT = 150000;
+
         // ============================================
         // Column Configuration
         // ============================================
@@ -514,6 +518,19 @@
             csvBtn.textContent = 'Download CSV';
             csvBtn.title = 'Download filtered data as CSV';
             csvBtn.addEventListener('click', function () {
+                // The page already knows the filtered row count — check it
+                // before downloading so an oversized export shows a friendly
+                // message instead of an opaque error page.
+                const info = table.page.info();
+                const count = info ? info.recordsDisplay : null;
+                if (count !== null && count > DOWNLOAD_ROW_LIMIT) {
+                    showToast(
+                        'Too many rows to download (' + formatNumber(count) + '). ' +
+                        'Add filters to narrow to ' + formatNumber(DOWNLOAD_ROW_LIMIT) + ' or fewer.',
+                        true
+                    );
+                    return;
+                }
                 const qs = filterManager.getFilterQueryString();
                 const url = API_BASE + '/api/download' + (qs ? '?' + qs : '');
                 window.open(url, '_blank');
