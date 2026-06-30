@@ -758,8 +758,11 @@ from api import download as download_mod
 
 
 class TestHardening:
+    # A single month stays well under the download row limit.
+    _BOUNDED = "filter_openDate_min=2024-06-01&filter_openDate_max=2024-06-30"
+
     def test_download_csv_streams_header_and_rows(self):
-        status, raw = _invoke_csv(download_mod.handler, "/api/download?length=5")
+        status, raw = _invoke_csv(download_mod.handler, f"/api/download?{self._BOUNDED}")
         assert status == 200
         lines = raw.decode("utf-8").splitlines()
         assert lines[0] == ",".join(col_mod.COLUMN_HEADERS)
@@ -768,13 +771,22 @@ class TestHardening:
     def test_download_respects_filters(self):
         status, raw = _invoke_csv(
             download_mod.handler,
-            "/api/download?filter_hiringAgencyName=Department%20of%20the%20Treasury",
+            "/api/download?filter_hiringAgencyName=Department%20of%20the%20Treasury"
+            "&filter_openDate_min=2024-01-01&filter_openDate_max=2024-12-31",
         )
         assert status == 200
         reader = list(csv.reader(io.StringIO(raw.decode("utf-8"))))
         ag_idx = col_mod.COLUMNS.index("hiringAgencyName")
         # every data row is Treasury
         assert all(r[ag_idx] == "Department of the Treasury" for r in reader[1:])
+
+    def test_download_oversized_returns_413(self):
+        """An unfiltered export exceeds the row limit -> graceful 413, not a crash."""
+        status, body = _invoke_handler(download_mod.handler, "/api/download")
+        assert status == 413
+        assert body["error"] == "too_many_rows"
+        assert body["rows"] > body["limit"]
+        assert "Add filters" in body["message"]
 
     def test_jobs_bad_length_is_400(self):
         status, body = _invoke_handler(jobs_mod.handler, "/api/jobs?length=abc")

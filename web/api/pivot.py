@@ -180,8 +180,6 @@ class handler(BaseHTTPRequestHandler):
             conn = get_conn()
 
             if want_csv:
-                # Execute before sending headers so a query error still becomes
-                # a 500, then stream in batches to bound memory.
                 cursor = conn.execute(sql, bind_values)
 
                 self.send_response(200)
@@ -190,6 +188,7 @@ class handler(BaseHTTPRequestHandler):
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
 
+                # Stream in batches (Vercel Fluid Compute streams the body).
                 buf = io.StringIO()
                 writer = csv.writer(buf)
 
