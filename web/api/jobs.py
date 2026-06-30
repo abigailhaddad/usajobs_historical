@@ -1,4 +1,5 @@
 import json
+import traceback
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -23,9 +24,19 @@ class handler(BaseHTTPRequestHandler):
             parsed = urlparse(self.path)
             params = parse_qs(parsed.query)
 
-            draw = int(params.get('draw', ['1'])[0])
-            start = max(0, int(params.get('start', ['0'])[0]))
-            length = min(100, max(1, int(params.get('length', ['25'])[0])))
+            try:
+                draw = int(params.get('draw', ['1'])[0])
+                start = max(0, int(params.get('start', ['0'])[0]))
+                length = min(100, max(1, int(params.get('length', ['25'])[0])))
+            except (ValueError, TypeError):
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(
+                    {'error': 'draw, start, and length must be integers'}
+                ).encode('utf-8'))
+                return
 
             # Sort — support up to 3 sort columns
             order_parts = []
@@ -34,7 +45,10 @@ class handler(BaseHTTPRequestHandler):
                 dir_key = f'order[{i}][dir]'
                 if col_key not in params:
                     break
-                col_idx = int(params[col_key][0])
+                try:
+                    col_idx = int(params[col_key][0])
+                except (ValueError, TypeError):
+                    break
                 dir_raw = params.get(dir_key, ['desc'])[0].lower()
                 direction = 'ASC' if dir_raw != 'desc' else 'DESC'
                 col_name = SORTABLE_COLUMNS.get(col_idx)
@@ -110,12 +124,16 @@ class handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Cache-Control', 'public, max-age=60')
             self.end_headers()
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
-        except Exception as e:
+        except Exception:
+            # Log the real error to the server logs; don't leak internals
+            # (SQL text, file paths) to the client.
+            traceback.print_exc()
             self.send_response(500)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
+            self.wfile.write(json.dumps({'error': 'internal server error'}).encode('utf-8'))

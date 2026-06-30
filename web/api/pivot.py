@@ -178,24 +178,39 @@ class handler(BaseHTTPRequestHandler):
             sql += f' LIMIT {limit}'
 
             conn = get_conn()
-            rows = conn.execute(sql, bind_values).fetchall()
-            conn.close()
 
             if want_csv:
-                buf = io.StringIO()
-                writer = csv.writer(buf)
-                writer.writerow(headers + ['Count'])
-                writer.writerows(rows)
-                csv_bytes = buf.getvalue().encode('utf-8')
+                # Execute before sending headers so a query error still becomes
+                # a 500, then stream in batches to bound memory.
+                cursor = conn.execute(sql, bind_values)
 
                 self.send_response(200)
                 self.send_header('Content-Type', 'text/csv; charset=utf-8')
                 self.send_header('Content-Disposition', 'attachment; filename="usajobs_pivot.csv"')
                 self.send_header('Access-Control-Allow-Origin', '*')
-                self.send_header('Content-Length', str(len(csv_bytes)))
                 self.end_headers()
-                self.wfile.write(csv_bytes)
+
+                buf = io.StringIO()
+                writer = csv.writer(buf)
+
+                def flush():
+                    self.wfile.write(buf.getvalue().encode('utf-8'))
+                    buf.seek(0)
+                    buf.truncate(0)
+
+                writer.writerow(headers + ['Count'])
+                flush()
+                while True:
+                    batch = cursor.fetchmany(10000)
+                    if not batch:
+                        break
+                    writer.writerows(batch)
+                    flush()
+                conn.close()
                 return
+
+            rows = conn.execute(sql, bind_values).fetchall()
+            conn.close()
 
             truncated = len(rows) > MAX_PREVIEW_ROWS
             if truncated:
@@ -209,5 +224,7 @@ class handler(BaseHTTPRequestHandler):
                 'multi_value_dims': multi,
             })
 
-        except Exception as e:
-            self._send_json(500, {'error': str(e)})
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            self._send_json(500, {'error': 'internal server error'})

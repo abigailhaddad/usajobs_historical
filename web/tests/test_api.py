@@ -748,3 +748,35 @@ class TestPivot:
         lines = text.splitlines()
         assert lines[0] == "Department,Count"
         assert len(lines) > 1
+
+
+# ===================================================================
+# Hardening: download streaming, bad-input validation
+# ===================================================================
+
+from api import download as download_mod
+
+
+class TestHardening:
+    def test_download_csv_streams_header_and_rows(self):
+        status, raw = _invoke_csv(download_mod.handler, "/api/download?length=5")
+        assert status == 200
+        lines = raw.decode("utf-8").splitlines()
+        assert lines[0] == ",".join(col_mod.COLUMN_HEADERS)
+        assert len(lines) > 1
+
+    def test_download_respects_filters(self):
+        status, raw = _invoke_csv(
+            download_mod.handler,
+            "/api/download?filter_hiringAgencyName=Department%20of%20the%20Treasury",
+        )
+        assert status == 200
+        reader = list(csv.reader(io.StringIO(raw.decode("utf-8"))))
+        ag_idx = col_mod.COLUMNS.index("hiringAgencyName")
+        # every data row is Treasury
+        assert all(r[ag_idx] == "Department of the Treasury" for r in reader[1:])
+
+    def test_jobs_bad_length_is_400(self):
+        status, body = _invoke_handler(jobs_mod.handler, "/api/jobs?length=abc")
+        assert status == 400
+        assert "integer" in body["error"]

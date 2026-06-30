@@ -30,8 +30,17 @@ def get_parquet_path():
         if age < _MAX_AGE_SECONDS:
             return _TMP_PATH
 
-    # Download from R2
+    # Download from R2.
+    #
+    # Fluid Compute serves concurrent requests from a single instance, so we
+    # must never write the cached file in place: boto3's download_file streams
+    # to its destination and is not atomic, so another in-flight request could
+    # read a half-written parquet (a DuckDB error, or silently wrong counts).
+    # Download to a unique temp file, then os.replace() it into the cache path
+    # — replace is atomic on the same filesystem, so readers always see either
+    # the old complete file or the new complete file, never a partial one.
     import boto3
+    import tempfile
 
     s3 = boto3.client(
         's3',
@@ -39,7 +48,16 @@ def get_parquet_path():
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
     )
-    s3.download_file(bucket_name, 'web/jobs_5yr.parquet', _TMP_PATH)
+
+    fd, tmp_download = tempfile.mkstemp(dir='/tmp', prefix='jobs_', suffix='.parquet')
+    os.close(fd)
+    try:
+        s3.download_file(bucket_name, 'web/jobs_5yr.parquet', tmp_download)
+        os.replace(tmp_download, _TMP_PATH)
+    except BaseException:
+        if os.path.exists(tmp_download):
+            os.remove(tmp_download)
+        raise
 
     return _TMP_PATH
 
