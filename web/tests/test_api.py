@@ -619,3 +619,97 @@ class TestExactMatchDropdownFilters:
         b = self._filtered_total("/api/jobs?length=1&filter_positionTitle=scientist")
         either = self._filtered_total("/api/jobs?length=1&filter_positionTitle=engineer,scientist")
         assert either >= max(a, b), "Comma-OR search should match at least as many as either term alone"
+
+
+# ===================================================================
+# Pivot endpoint (/api/pivot)
+# ===================================================================
+
+from api import pivot as pivot_mod
+
+
+def _invoke_csv(handler_class, path):
+    """Invoke a handler and return (status, raw_bytes) without JSON parsing."""
+    instance = object.__new__(handler_class)
+    instance.path = path
+    instance.command = "GET"
+    instance.headers = {}
+    buf = io.BytesIO()
+    instance.wfile = buf
+    captured = {"status": None}
+    instance.send_response = lambda code, msg=None: captured.__setitem__("status", code)
+    instance.send_header = lambda k, v: None
+    instance.end_headers = lambda: None
+    instance.log_message = lambda *a: None
+    instance.do_GET()
+    return captured["status"], buf.getvalue()
+
+
+class TestPivot:
+    """Tests for the /api/pivot long-format counts endpoint."""
+
+    def test_single_dimension(self):
+        status, body = _invoke_handler(pivot_mod.handler, "/api/pivot?dims=department")
+        assert status == 200
+        assert body["headers"] == ["Department", "Count"]
+        assert len(body["rows"]) > 0
+        # ordered by count desc
+        counts = [r[-1] for r in body["rows"]]
+        assert counts == sorted(counts, reverse=True)
+
+    def test_multi_dimension_order_preserved(self):
+        status, body = _invoke_handler(pivot_mod.handler, "/api/pivot?dims=department,year")
+        assert status == 200
+        assert body["headers"] == ["Department", "Year", "Count"]
+        assert all(len(r) == 3 for r in body["rows"])
+
+    def test_count_equals_distinct_listings_for_single_value_dim(self):
+        """With no multi-value dim, the pivot total must equal the row count
+        of the filtered set (data is deduped to one row per control number)."""
+        _, pivot_body = _invoke_handler(pivot_mod.handler, "/api/pivot?dims=status")
+        pivot_total = sum(r[-1] for r in pivot_body["rows"])
+        # /api/jobs reports the filtered total via recordsFiltered
+        _, jobs_body = _invoke_handler(jobs_mod.handler, "/api/jobs?length=1")
+        assert pivot_total == jobs_body["recordsTotal"]
+
+    def test_multi_value_dim_counts_each(self):
+        """A multi-value dim (series) should count a listing once per series,
+        so its total is >= the distinct listing count."""
+        _, series_body = _invoke_handler(pivot_mod.handler, "/api/pivot?dims=series")
+        series_total = sum(r[-1] for r in series_body["rows"])
+        _, jobs_body = _invoke_handler(jobs_mod.handler, "/api/jobs?length=1")
+        assert series_total >= jobs_body["recordsTotal"]
+        # no empty series labels leak through
+        assert all(r[0].strip() != "" for r in series_body["rows"])
+
+    def test_filters_apply(self):
+        status, body = _invoke_handler(
+            pivot_mod.handler,
+            "/api/pivot?dims=grade&filter_hiringDepartmentName=Department%20of%20Veterans%20Affairs",
+        )
+        assert status == 200
+        assert len(body["rows"]) > 0
+
+    def test_missing_dims_is_400(self):
+        status, body = _invoke_handler(pivot_mod.handler, "/api/pivot")
+        assert status == 400
+        assert "dims" in body["error"]
+
+    def test_unknown_dim_is_400(self):
+        status, body = _invoke_handler(pivot_mod.handler, "/api/pivot?dims=nonsense")
+        assert status == 400
+
+    def test_too_many_dims_is_400(self):
+        status, body = _invoke_handler(
+            pivot_mod.handler,
+            "/api/pivot?dims=department,agency,year,month,grade,status,serviceType",
+        )
+        assert status == 400
+
+    def test_csv_download(self):
+        status, raw = _invoke_csv(pivot_mod.handler, "/api/pivot?dims=department&format=csv")
+        assert status == 200
+        text = raw.decode("utf-8")
+        lines = text.splitlines()
+        assert lines[0] == "Department,Count"
+        assert len(lines) > 1
