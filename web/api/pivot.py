@@ -65,6 +65,21 @@ MAX_PREVIEW_ROWS = 500  # rows returned to the on-page preview
 MAX_CSV_ROWS = 200000   # safety cap on a CSV download
 
 
+def _order_clause(group_cols):
+    """Intuitive ordering for a long-format pivot.
+
+    Group by the leading dimension columns ascending (so all rows for one value
+    of the first column stay together), then rank by count within the innermost
+    level. With a single dimension this is just count-descending (top first):
+
+      [Department]        -> ORDER BY cnt DESC, d0
+      [Year, Department]  -> ORDER BY d0, cnt DESC, d1   (each year, top depts)
+    """
+    leading = group_cols[:-1]
+    parts = list(leading) + ['cnt DESC', group_cols[-1]]
+    return ', '.join(parts)
+
+
 def _build_query(dims, where_sql):
     """Build the pivot SQL for the given ordered dimension keys.
 
@@ -74,6 +89,7 @@ def _build_query(dims, where_sql):
     parquet_path = get_parquet_path()
     headers = [DIMENSIONS[k][0] for k in dims]
     group_cols = [f'd{i}' for i in range(len(dims))]
+    order_by = _order_clause(group_cols)
 
     multi_idx = next((i for i, k in enumerate(dims) if DIMENSIONS[k][2]), None)
 
@@ -86,7 +102,7 @@ def _build_query(dims, where_sql):
             f"FROM read_parquet('{parquet_path}') "
             f"{where_sql} "
             f"GROUP BY {', '.join(group_cols)} "
-            f"ORDER BY cnt DESC, {', '.join(group_cols)}"
+            f"ORDER BY {order_by}"
         )
         return sql, headers
 
@@ -114,7 +130,7 @@ def _build_query(dims, where_sql):
         f"FROM ({inner}) sub "
         f"WHERE {multi_alias} IS NOT NULL AND {multi_alias} <> '' "
         f"GROUP BY {', '.join(group_cols)} "
-        f"ORDER BY cnt DESC, {', '.join(group_cols)}"
+        f"ORDER BY {order_by}"
     )
     return sql, headers
 
