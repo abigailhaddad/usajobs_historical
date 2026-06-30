@@ -78,6 +78,17 @@
             font-variant-numeric: tabular-nums;
         }
         .pivot-empty { color: #7A6E62; padding: 0.75rem 0; }
+        .multi-note-banner {
+            display: none;
+            margin-top: 0.9rem;
+            padding: 0.6rem 0.8rem;
+            background: #FBF1DD;
+            border: 1px solid #E7CF9E;
+            border-radius: 6px;
+            color: #7A5B16;
+            font-size: 0.9rem;
+        }
+        .multi-note-banner strong { color: #6A4E12; }
     </style>
 </head>
 <body>
@@ -107,6 +118,8 @@
                 several values, so it is counted once per value.
             </p>
             <div class="dim-grid" id="dimGrid"></div>
+
+            <div class="multi-note-banner" id="multiNote"></div>
 
             <div class="pivot-actions">
                 <button class="csv-download-btn" id="downloadBtn" disabled>Download CSV</button>
@@ -199,15 +212,50 @@
             });
         }
 
+        function isMulti(key) {
+            const dim = DIMENSIONS.find(function (d) { return d.key === key; });
+            return !!(dim && dim.multi);
+        }
+
+        function selectedMultiDims() {
+            return selectedDims.filter(isMulti);
+        }
+
         function onDimToggle(key, checked) {
             if (checked) {
+                // Only one multi-value field at a time — two would produce a
+                // meaningless cross of the two lists (and the API rejects it).
+                if (isMulti(key) && selectedMultiDims().length > 0) {
+                    const cb = document.querySelector('.dim-option[data-key="' + key + '"] input');
+                    if (cb) cb.checked = false;
+                    showToast('Pick only one of Occupational series / Location at a time.', true);
+                    return;
+                }
                 if (selectedDims.indexOf(key) === -1) selectedDims.push(key);
             } else {
                 selectedDims = selectedDims.filter(function (k) { return k !== key; });
             }
             updateOrderBadges();
+            updateMultiNote();
             writeDimsToUrl();
             runPivot();
+        }
+
+        function updateMultiNote() {
+            const note = document.getElementById('multiNote');
+            const multi = selectedMultiDims().map(function (k) {
+                return DIMENSIONS.find(function (d) { return d.key === k; }).label;
+            });
+            if (multi.length === 0) {
+                note.style.display = 'none';
+                note.innerHTML = '';
+                return;
+            }
+            note.style.display = 'block';
+            note.innerHTML = '<strong>' + escapeHtml(multi.join(' / ')) +
+                ':</strong> a listing can have several, so it is counted once in ' +
+                'each value it has. These counts will not sum to the total number ' +
+                'of listings.';
         }
 
         // The shared filter manager owns the filter params in the URL (it rewrites
@@ -228,12 +276,22 @@
             const raw = new URLSearchParams(window.location.search).get('dims') || '';
             const keys = raw.split(',').map(function (k) { return k.trim(); }).filter(Boolean);
             const valid = DIMENSIONS.map(function (d) { return d.key; });
-            selectedDims = keys.filter(function (k) { return valid.indexOf(k) !== -1; });
+            // Keep only valid keys, and at most one multi-value field.
+            let seenMulti = false;
+            selectedDims = keys.filter(function (k) {
+                if (valid.indexOf(k) === -1) return false;
+                if (isMulti(k)) {
+                    if (seenMulti) return false;
+                    seenMulti = true;
+                }
+                return true;
+            });
             selectedDims.forEach(function (k) {
                 const cb = document.querySelector('.dim-option[data-key="' + k + '"] input');
                 if (cb) cb.checked = true;
             });
             updateOrderBadges();
+            updateMultiNote();
         }
 
         function updateOrderBadges() {

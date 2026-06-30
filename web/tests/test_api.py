@@ -1,4 +1,5 @@
 """Tests for USAJobs web API endpoints."""
+import csv
 import http.server
 import io
 import json
@@ -663,24 +664,58 @@ class TestPivot:
         assert body["headers"] == ["Department", "Year", "Count"]
         assert all(len(r) == 3 for r in body["rows"])
 
+    @staticmethod
+    def _csv_rows(path):
+        """Invoke the CSV endpoint and return (header, list-of-rows-with-int-count)."""
+        status, raw = _invoke_csv(pivot_mod.handler, path)
+        assert status == 200, path
+        reader = list(csv.reader(io.StringIO(raw.decode("utf-8"))))
+        header, body = reader[0], reader[1:]
+        rows = [r[:-1] + [int(r[-1])] for r in body]
+        return header, rows
+
     def test_count_equals_distinct_listings_for_single_value_dim(self):
-        """With no multi-value dim, the pivot total must equal the row count
-        of the filtered set (data is deduped to one row per control number)."""
-        _, pivot_body = _invoke_handler(pivot_mod.handler, "/api/pivot?dims=status")
-        pivot_total = sum(r[-1] for r in pivot_body["rows"])
-        # /api/jobs reports the filtered total via recordsFiltered
+        """With no multi-value dim, the FULL pivot total must equal the total
+        listing count (data is deduped to one row per control number)."""
+        _, rows = self._csv_rows("/api/pivot?dims=status&format=csv")
+        pivot_total = sum(r[-1] for r in rows)
         _, jobs_body = _invoke_handler(jobs_mod.handler, "/api/jobs?length=1")
         assert pivot_total == jobs_body["recordsTotal"]
 
-    def test_multi_value_dim_counts_each(self):
-        """A multi-value dim (series) should count a listing once per series,
-        so its total is >= the distinct listing count."""
-        _, series_body = _invoke_handler(pivot_mod.handler, "/api/pivot?dims=series")
-        series_total = sum(r[-1] for r in series_body["rows"])
+    def test_series_counts_each_distinct_listing(self):
+        """Series is multi-value: a listing is counted once per series it has,
+        so the full total exceeds the distinct listing count, and every per-group
+        count stays at or below the total (it is a DISTINCT-listing count)."""
+        _, rows = self._csv_rows("/api/pivot?dims=series&format=csv")
         _, jobs_body = _invoke_handler(jobs_mod.handler, "/api/jobs?length=1")
-        assert series_total >= jobs_body["recordsTotal"]
-        # no empty series labels leak through
-        assert all(r[0].strip() != "" for r in series_body["rows"])
+        total = jobs_body["recordsTotal"]
+        assert sum(r[-1] for r in rows) >= total
+        assert all(0 < r[-1] <= total for r in rows)
+        assert all(r[0].strip() != "" for r in rows)  # no empty labels
+
+    def test_location_counts_each_no_crash(self):
+        """Location is the heavy multi-value field (some listings carry 1000+
+        locations). It must complete, count in each location, and never exceed
+        the total listing count per group."""
+        header, rows = self._csv_rows("/api/pivot?dims=location&format=csv")
+        assert header == ["Location", "Count"]
+        _, jobs_body = _invoke_handler(jobs_mod.handler, "/api/jobs?length=1")
+        total = jobs_body["recordsTotal"]
+        assert sum(r[-1] for r in rows) >= total
+        assert all(0 < r[-1] <= total for r in rows)
+        assert all(r[0].strip() != "" for r in rows)
+
+    def test_two_multi_value_dims_is_400(self):
+        """Series + location together is rejected (would zip the two lists)."""
+        status, body = _invoke_handler(pivot_mod.handler, "/api/pivot?dims=series,location")
+        assert status == 400
+        assert "multi-value" in body["error"]
+
+    def test_response_flags_multi_value_dims(self):
+        _, single = _invoke_handler(pivot_mod.handler, "/api/pivot?dims=department")
+        assert single["multi_value_dims"] == []
+        _, multi = _invoke_handler(pivot_mod.handler, "/api/pivot?dims=location")
+        assert multi["multi_value_dims"] == ["location"]
 
     def test_filters_apply(self):
         status, body = _invoke_handler(

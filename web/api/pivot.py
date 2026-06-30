@@ -13,13 +13,21 @@ Examples:
 
 Dimension column order in the output follows the order given in `dims`.
 
-Note on multi-value dimensions (series, location): a single listing can carry
-several occupational series or locations (stored as a '; '-delimited list).
-Selecting one of those dimensions unnests the list, so a listing is counted
-once per value it carries — the same semantics as the occupational-series
-chart on the main page. With no multi-value dimension selected, Count is a
-clean count of distinct listings (the data is already deduplicated to one row
-per usajobsControlNumber).
+Multi-value dimensions (series, location)
+-----------------------------------------
+A single listing can carry several occupational series or locations (stored
+as a '; '-delimited list). Selecting one of those dimensions unnests the list
+so the listing is counted once in EVERY value it actually has — e.g. a posting
+open in DC and Atlanta is counted under both. Counts therefore will NOT sum to
+the total number of listings; that is intentional and the UI flags it.
+
+The Count is always the number of DISTINCT listings in a group (we count
+distinct usajobsControlNumber), so a listing that happens to repeat a value
+in its own list is still only counted once for that value.
+
+To keep the result well-defined (and fast), at most ONE multi-value dimension
+may be used per pivot; combining two would produce a meaningless positional
+zip of the two lists.
 """
 
 import csv
@@ -34,9 +42,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 from data_loader import get_parquet_path, get_conn
 from columns import parse_filters
 
-# key -> (header label, single-value SQL expression, multi-value source column)
+# key -> (header label, single-value SQL expression, multi-value source column).
 # Exactly one of (expr, multi_col) is set. For multi_col the value list is
-# split on '; ' and unnested.
+# split on '; ', unnested, and counted with COUNT(DISTINCT control number).
 DIMENSIONS = {
     'department':      ('Department',       'COALESCE(CAST("hiringDepartmentName" AS VARCHAR), \'Unknown\')', None),
     'agency':          ('Agency',           'COALESCE(CAST("hiringAgencyName" AS VARCHAR), \'Unknown\')', None),
@@ -50,6 +58,8 @@ DIMENSIONS = {
     'location':        ('Location',         None, 'locations'),
 }
 
+CONTROL = '"usajobsControlNumber"'
+
 MAX_DIMS = 6            # cap dimensions to keep the grid from exploding
 MAX_PREVIEW_ROWS = 500  # rows returned to the on-page preview
 MAX_CSV_ROWS = 200000   # safety cap on a CSV download
@@ -59,43 +69,50 @@ def _build_query(dims, where_sql):
     """Build the pivot SQL for the given ordered dimension keys.
 
     Returns (sql, headers). The SQL ends without LIMIT so the caller appends one.
+    Assumes at most one multi-value dimension (validated by the caller).
     """
     parquet_path = get_parquet_path()
+    headers = [DIMENSIONS[k][0] for k in dims]
+    group_cols = [f'd{i}' for i in range(len(dims))]
 
-    selects = []        # "<expr> AS d0"
-    lateral_joins = []   # ", LATERAL (...) AS s0"
-    group_cols = []      # "d0"
-    nonempty = []        # "d0 <> ''"  (multi-value dims only)
-    headers = []
+    multi_idx = next((i for i, k in enumerate(dims) if DIMENSIONS[k][2]), None)
 
-    for i, key in enumerate(dims):
-        label, expr, multi_col = DIMENSIONS[key]
-        alias = f'd{i}'
-        headers.append(label)
-        group_cols.append(alias)
-        if multi_col:
-            join_alias = f's{i}'
-            lateral_joins.append(
-                f", LATERAL (SELECT TRIM(unnest(string_split("
-                f"CAST(\"{multi_col}\" AS VARCHAR), '; '))) AS v) AS {join_alias}"
+    if multi_idx is None:
+        # All single-value: the data is one row per listing, so COUNT(*) is the
+        # exact distinct-listing count and we can group directly.
+        selects = [f'{DIMENSIONS[k][1]} AS d{i}' for i, k in enumerate(dims)]
+        sql = (
+            f"SELECT {', '.join(selects)}, COUNT(*) AS cnt "
+            f"FROM read_parquet('{parquet_path}') "
+            f"{where_sql} "
+            f"GROUP BY {', '.join(group_cols)} "
+            f"ORDER BY cnt DESC, {', '.join(group_cols)}"
+        )
+        return sql, headers
+
+    # One multi-value dimension: unnest its list in a flat subquery, keep the
+    # control number, then COUNT(DISTINCT control) so each listing is counted
+    # once per value it actually carries.
+    multi_col = DIMENSIONS[dims[multi_idx]][2]
+    inner_selects = [f'{CONTROL} AS _cn']
+    for i, k in enumerate(dims):
+        if i == multi_idx:
+            inner_selects.append(
+                f"TRIM(unnest(string_split(CAST(\"{multi_col}\" AS VARCHAR), '; '))) AS d{i}"
             )
-            selects.append(f"{join_alias}.v AS {alias}")
-            nonempty.append(f"{alias} <> ''")
         else:
-            selects.append(f"{expr} AS {alias}")
+            inner_selects.append(f'{DIMENSIONS[k][1]} AS d{i}')
 
     inner = (
-        f"SELECT {', '.join(selects)} "
-        f"FROM read_parquet('{parquet_path}') AS t"
-        f"{''.join(lateral_joins)} "
+        f"SELECT {', '.join(inner_selects)} "
+        f"FROM read_parquet('{parquet_path}') "
         f"{where_sql}"
     )
-
-    outer_where = f"WHERE {' AND '.join(nonempty)} " if nonempty else ''
+    multi_alias = f'd{multi_idx}'
     sql = (
-        f"SELECT {', '.join(group_cols)}, COUNT(*) AS cnt "
+        f"SELECT {', '.join(group_cols)}, COUNT(DISTINCT _cn) AS cnt "
         f"FROM ({inner}) sub "
-        f"{outer_where}"
+        f"WHERE {multi_alias} IS NOT NULL AND {multi_alias} <> '' "
         f"GROUP BY {', '.join(group_cols)} "
         f"ORDER BY cnt DESC, {', '.join(group_cols)}"
     )
@@ -142,6 +159,15 @@ class handler(BaseHTTPRequestHandler):
                 self._send_json(400, {'error': f'at most {MAX_DIMS} dimensions allowed'})
                 return
 
+            multi = [d for d in dims if DIMENSIONS[d][2]]
+            if len(multi) > 1:
+                self._send_json(400, {
+                    'error': 'pick at most one multi-value field (occupational series or '
+                             'location) at a time',
+                    'multi_value_fields': multi,
+                })
+                return
+
             want_csv = params.get('format', [''])[0] == 'csv'
             limit = MAX_CSV_ROWS if want_csv else MAX_PREVIEW_ROWS + 1
 
@@ -180,6 +206,7 @@ class handler(BaseHTTPRequestHandler):
                 'rows': [list(r) for r in rows],
                 'truncated': truncated,
                 'preview_limit': MAX_PREVIEW_ROWS,
+                'multi_value_dims': multi,
             })
 
         except Exception as e:
