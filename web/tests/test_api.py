@@ -664,6 +664,18 @@ class TestPivot:
         assert body["headers"] == ["Department", "Year", "Count"]
         assert all(len(r) == 3 for r in body["rows"])
 
+    def test_multi_dim_ordering_groups_by_leading_column(self):
+        """Rows group by the leading column, ranked by count within it —
+        e.g. all of one year together, departments by count inside it."""
+        from itertools import groupby
+        _, body = _invoke_handler(pivot_mod.handler, "/api/pivot?dims=year,department")
+        rows = body["rows"]
+        years = [r[0] for r in rows]
+        assert years == sorted(years), "leading column should be grouped/ordered"
+        for _year, grp in groupby(rows, key=lambda r: r[0]):
+            counts = [r[-1] for r in grp]
+            assert counts == sorted(counts, reverse=True), "count desc within each group"
+
     @staticmethod
     def _csv_rows(path):
         """Invoke the CSV endpoint and return (header, list-of-rows-with-int-count)."""

@@ -89,6 +89,8 @@
             font-size: 0.9rem;
         }
         .multi-note-banner strong { color: #6A4E12; }
+        .joblist-note { margin-top: 0.5rem; font-size: 0.88rem; color: #7A6E62; }
+        .joblist-note a { color: #2d6e4e; }
     </style>
 </head>
 <body>
@@ -122,9 +124,11 @@
             <div class="multi-note-banner" id="multiNote"></div>
 
             <div class="pivot-actions">
-                <button class="csv-download-btn" id="downloadBtn" disabled>Download CSV</button>
+                <button class="csv-download-btn" id="downloadBtn" disabled>Download counts (CSV)</button>
+                <button class="csv-download-btn" id="jobListBtn" disabled>Download job list (CSV)</button>
                 <span class="pivot-result-meta" id="resultMeta"></span>
             </div>
+            <div class="joblist-note" id="jobListNote"></div>
         </div>
 
         <div class="pivot-table-wrapper">
@@ -142,6 +146,10 @@
     <script>
         const API_BASE = '';
         window.API_BASE = API_BASE;
+
+        // Keep in sync with MAX_ROWS in api/download.py.
+        const DOWNLOAD_ROW_LIMIT = 150000;
+        const FULL_DATASET_URL = 'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr.parquet';
 
         // Dimensions the pivot endpoint accepts. `multi` flags '; '-delimited
         // fields where one listing can carry several values.
@@ -381,7 +389,7 @@
             result.innerHTML = html;
 
             if (data.truncated) {
-                meta.textContent = 'Showing the top ' + formatNumber(data.preview_limit) +
+                meta.textContent = 'Showing the first ' + formatNumber(data.preview_limit) +
                     ' rows. Download the CSV for the full table.';
             } else {
                 meta.textContent = formatNumber(data.rows.length) + ' rows.';
@@ -391,6 +399,50 @@
         function downloadCsv() {
             if (selectedDims.length === 0) return;
             window.location.href = API_BASE + '/api/pivot?format=csv&' + currentQueryString();
+        }
+
+        function downloadJobList() {
+            const filterQs = filterManager ? filterManager.getFilterQueryString() : '';
+            window.open(API_BASE + '/api/download' + (filterQs ? '?' + filterQs : ''), '_blank');
+        }
+
+        // The job list is the underlying rows for the current filters (not the
+        // pivot dimensions). Only offer it when the filtered set is small enough
+        // to export; otherwise point to the full dataset.
+        let jobListReqId = 0;
+        async function updateJobListButton() {
+            const btn = document.getElementById('jobListBtn');
+            const note = document.getElementById('jobListNote');
+            const filterQs = filterManager ? filterManager.getFilterQueryString() : '';
+
+            btn.disabled = true;
+            note.textContent = 'Checking…';
+
+            const myReq = ++jobListReqId;
+            let count;
+            try {
+                const url = API_BASE + '/api/jobs?length=1' + (filterQs ? '&' + filterQs : '');
+                const data = await (await fetch(url)).json();
+                count = data.recordsFiltered;
+            } catch (e) {
+                count = null;
+            }
+            if (myReq !== jobListReqId) return;  // a newer filter change superseded this
+
+            if (count == null) {
+                note.textContent = '';
+            } else if (count === 0) {
+                note.textContent = 'No jobs match the current filters.';
+            } else if (count > DOWNLOAD_ROW_LIMIT) {
+                note.innerHTML = 'Full job list available once filtered under ' +
+                    formatNumber(DOWNLOAD_ROW_LIMIT) + ' jobs (currently ' + formatNumber(count) +
+                    '). Or get the <a href="' + FULL_DATASET_URL + '" target="_blank" rel="noopener">' +
+                    'full dataset (parquet)</a>.';
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'Download job list (' + formatNumber(count) + ' jobs, CSV)';
+                note.textContent = '';
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -405,17 +457,20 @@
                 onFilterChange: function () {
                     writeDimsToUrl();
                     runPivot();
+                    updateJobListButton();
                 }
             });
             // No DataTable on this page — init(null) just wires up the filter bar.
             filterManager.init(null);
 
             document.getElementById('downloadBtn').addEventListener('click', downloadCsv);
+            document.getElementById('jobListBtn').addEventListener('click', downloadJobList);
 
             // Restore group-by + filters from the URL so a shared link reproduces
             // the whole pivot. (The manager already restored filters in its ctor.)
             restoreDimsFromUrl();
             if (selectedDims.length > 0) runPivot();
+            updateJobListButton();
         });
     </script>
 </body>
