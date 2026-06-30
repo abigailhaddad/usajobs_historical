@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pivot &amp; Counts — USAJobs Data</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="shared/shared.css">
+    <style>
+        .pivot-builder {
+            background: #fff;
+            border: 1px solid #E8DDD0;
+            border-radius: 10px;
+            padding: 1.1rem 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+        .pivot-builder h2 {
+            font-size: 1.05rem;
+            margin: 0 0 0.25rem;
+        }
+        .pivot-builder .hint {
+            color: #7A6E62;
+            font-size: 0.9rem;
+            margin-bottom: 0.85rem;
+        }
+        .dim-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem 0.8rem;
+        }
+        .dim-option {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.6rem;
+            border: 1px solid #E8DDD0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.92rem;
+            user-select: none;
+        }
+        .dim-option:hover { background: #FBF7F0; }
+        .dim-option input { cursor: pointer; }
+        .dim-option .order-badge {
+            display: inline-block;
+            min-width: 1.25rem;
+            text-align: center;
+            background: #2D6A4F;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0 0.25rem;
+        }
+        .dim-option .multi-note { color: #B07A1E; font-size: 0.78rem; }
+        .pivot-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .pivot-result-meta { color: #7A6E62; font-size: 0.9rem; }
+        .pivot-table-wrapper { overflow-x: auto; margin-top: 0.5rem; }
+        table.pivot-table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+        table.pivot-table th, table.pivot-table td {
+            border-bottom: 1px solid #EFE7DA;
+            padding: 0.4rem 0.7rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+        table.pivot-table th { background: #FBF7F0; font-weight: 600; }
+        table.pivot-table td.count-col, table.pivot-table th.count-col {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        .pivot-empty { color: #7A6E62; padding: 0.75rem 0; }
+    </style>
+</head>
+<body>
+    <div class="site-container">
+        <header class="site-header">
+            <h1>Pivot &amp; Counts</h1>
+            <p class="site-subtitle">Count federal job listings grouped by any combination of fields — then download the table</p>
+            <nav class="site-nav" style="margin-top:0.6rem;font-size:0.95rem;">
+                <a href="index.html" style="font-weight:600;color:#2d6e4e;">&larr; Back to data</a>
+            </nav>
+        </header>
+
+        <!-- Filters (reuses the same filter machinery as the main page) -->
+        <div id="toolbarButtons" class="toolbar-row"></div>
+        <div class="filters-bar-container">
+            <div class="filters-bar" id="filtersBar">
+                <span class="filters-bar-empty">No filters applied</span>
+            </div>
+        </div>
+
+        <!-- Pivot builder -->
+        <div class="pivot-builder">
+            <h2>Group by</h2>
+            <p class="hint">
+                Pick one or more fields. Counts are shown for every combination, ordered by count.
+                Fields marked <span style="color:#B07A1E;">(counts each)</span> let a listing carry
+                several values, so it is counted once per value.
+            </p>
+            <div class="dim-grid" id="dimGrid"></div>
+
+            <div class="pivot-actions">
+                <button class="csv-download-btn" id="downloadBtn" disabled>Download CSV</button>
+                <span class="pivot-result-meta" id="resultMeta"></span>
+            </div>
+        </div>
+
+        <div class="pivot-table-wrapper">
+            <div id="pivotResult" class="pivot-empty">Select a field above to build a pivot table.</div>
+        </div>
+
+        <footer class="site-footer">
+            <p><a href="index.html">Data</a> &middot; Data from <a href="https://developer.usajobs.gov/">USAJobs API</a> &middot; Code on <a href="https://github.com/abigailhaddad/usajobs_historical">GitHub</a> &middot; Built by <a href="https://abigailhaddad.netlify.app">Abigail Haddad</a></p>
+        </footer>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="shared/shared.js"></script>
+    <script>
+        const API_BASE = '';
+        window.API_BASE = API_BASE;
+
+        // Dimensions the pivot endpoint accepts. `multi` flags '; '-delimited
+        // fields where one listing can carry several values.
+        const DIMENSIONS = [
+            { key: 'department',      label: 'Department' },
+            { key: 'agency',          label: 'Agency' },
+            { key: 'year',            label: 'Year (open date)' },
+            { key: 'month',           label: 'Month (open date)' },
+            { key: 'grade',           label: 'Grade' },
+            { key: 'appointmentType', label: 'Appointment type' },
+            { key: 'serviceType',     label: 'Service' },
+            { key: 'status',          label: 'Status' },
+            { key: 'series',          label: 'Occupational series', multi: true },
+            { key: 'location',        label: 'Location', multi: true }
+        ];
+
+        // Filter config — same fields/types the main jobs table uses, so the
+        // shared ServerSideFilterManager (filter bar UI + URL sync) just works.
+        const FILTER_COLUMNS = [
+            { name: 'Position Title', field: 'positionTitle', filterType: 'text', index: 0 },
+            { name: 'Occ. Series', field: 'occupationalSeries', filterType: 'multiselect', index: 1 },
+            { name: 'Department', field: 'hiringDepartmentName', filterType: 'multiselect', index: 2 },
+            { name: 'Agency', field: 'hiringAgencyName', filterType: 'multiselect', index: 3 },
+            { name: 'Grade', field: 'grade', filterType: 'multiselect', index: 4 },
+            { name: 'Min Salary', field: 'minimumSalary', filterType: 'range', index: 5, format: 'currency' },
+            { name: 'Max Salary', field: 'maximumSalary', filterType: 'range', index: 6, format: 'currency' },
+            { name: 'Open Date', field: 'openDate', filterType: 'daterange', index: 7 },
+            { name: 'Close Date', field: 'closeDate', filterType: 'daterange', index: 8 },
+            { name: 'Appointment Type', field: 'appointmentType', filterType: 'multiselect', index: 9 },
+            { name: 'Service', field: 'serviceType', filterType: 'multiselect', index: 10 },
+            { name: 'Locations', field: 'locations', filterType: 'text', index: 11 },
+            { name: 'Status', field: 'status', filterType: 'multiselect', index: 12 }
+        ];
+
+        // Selected dimension keys, in the order the user picked them.
+        let selectedDims = [];
+        let filterManager = null;
+
+        function buildDimGrid() {
+            const grid = document.getElementById('dimGrid');
+            DIMENSIONS.forEach(function (dim) {
+                const label = document.createElement('label');
+                label.className = 'dim-option';
+                label.dataset.key = dim.key;
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = dim.key;
+                cb.addEventListener('change', function () { onDimToggle(dim.key, cb.checked); });
+
+                const badge = document.createElement('span');
+                badge.className = 'order-badge';
+                badge.style.display = 'none';
+
+                const text = document.createElement('span');
+                text.textContent = dim.label;
+
+                label.appendChild(cb);
+                label.appendChild(badge);
+                label.appendChild(text);
+                if (dim.multi) {
+                    const note = document.createElement('span');
+                    note.className = 'multi-note';
+                    note.textContent = '(counts each)';
+                    label.appendChild(note);
+                }
+                grid.appendChild(label);
+            });
+        }
+
+        function onDimToggle(key, checked) {
+            if (checked) {
+                if (selectedDims.indexOf(key) === -1) selectedDims.push(key);
+            } else {
+                selectedDims = selectedDims.filter(function (k) { return k !== key; });
+            }
+            updateOrderBadges();
+            writeDimsToUrl();
+            runPivot();
+        }
+
+        // The shared filter manager owns the filter params in the URL (it rewrites
+        // the whole query string on every filter change). We layer the `dims`
+        // param on top so a shared link reproduces both the filters and the
+        // group-by selection.
+        function writeDimsToUrl() {
+            const url = new URL(window.location.href);
+            if (selectedDims.length > 0) {
+                url.searchParams.set('dims', selectedDims.join(','));
+            } else {
+                url.searchParams.delete('dims');
+            }
+            window.history.replaceState({}, '', url);
+        }
+
+        function restoreDimsFromUrl() {
+            const raw = new URLSearchParams(window.location.search).get('dims') || '';
+            const keys = raw.split(',').map(function (k) { return k.trim(); }).filter(Boolean);
+            const valid = DIMENSIONS.map(function (d) { return d.key; });
+            selectedDims = keys.filter(function (k) { return valid.indexOf(k) !== -1; });
+            selectedDims.forEach(function (k) {
+                const cb = document.querySelector('.dim-option[data-key="' + k + '"] input');
+                if (cb) cb.checked = true;
+            });
+            updateOrderBadges();
+        }
+
+        function updateOrderBadges() {
+            document.querySelectorAll('.dim-option').forEach(function (el) {
+                const pos = selectedDims.indexOf(el.dataset.key);
+                const badge = el.querySelector('.order-badge');
+                if (pos === -1) {
+                    badge.style.display = 'none';
+                } else {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = pos + 1;
+                }
+            });
+        }
+
+        function currentQueryString() {
+            const filterQs = filterManager ? filterManager.getFilterQueryString() : '';
+            const parts = ['dims=' + encodeURIComponent(selectedDims.join(','))];
+            if (filterQs) parts.push(filterQs);
+            return parts.join('&');
+        }
+
+        async function runPivot() {
+            const result = document.getElementById('pivotResult');
+            const meta = document.getElementById('resultMeta');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            if (selectedDims.length === 0) {
+                result.className = 'pivot-empty';
+                result.textContent = 'Select a field above to build a pivot table.';
+                meta.textContent = '';
+                downloadBtn.disabled = true;
+                return;
+            }
+
+            result.className = 'pivot-empty';
+            result.textContent = 'Loading…';
+            meta.textContent = '';
+
+            try {
+                const resp = await fetch(API_BASE + '/api/pivot?' + currentQueryString());
+                const data = await resp.json();
+                if (data.error) {
+                    result.textContent = 'Error: ' + data.error;
+                    downloadBtn.disabled = true;
+                    return;
+                }
+                renderTable(data);
+                downloadBtn.disabled = data.rows.length === 0;
+            } catch (e) {
+                result.textContent = 'Error loading pivot: ' + e;
+                downloadBtn.disabled = true;
+            }
+        }
+
+        function renderTable(data) {
+            const result = document.getElementById('pivotResult');
+            const meta = document.getElementById('resultMeta');
+
+            if (data.rows.length === 0) {
+                result.className = 'pivot-empty';
+                result.textContent = 'No rows match the current filters.';
+                meta.textContent = '';
+                return;
+            }
+
+            const lastCol = data.headers.length - 1;
+            let html = '<table class="pivot-table"><thead><tr>';
+            data.headers.forEach(function (h, i) {
+                html += '<th class="' + (i === lastCol ? 'count-col' : '') + '">' + escapeHtml(h) + '</th>';
+            });
+            html += '</tr></thead><tbody>';
+            data.rows.forEach(function (row) {
+                html += '<tr>';
+                row.forEach(function (cell, i) {
+                    if (i === lastCol) {
+                        html += '<td class="count-col">' + formatNumber(cell) + '</td>';
+                    } else {
+                        html += '<td>' + escapeHtml(cell == null ? '' : String(cell)) + '</td>';
+                    }
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+
+            result.className = '';
+            result.innerHTML = html;
+
+            if (data.truncated) {
+                meta.textContent = 'Showing the top ' + formatNumber(data.preview_limit) +
+                    ' rows. Download the CSV for the full table.';
+            } else {
+                meta.textContent = formatNumber(data.rows.length) + ' rows.';
+            }
+        }
+
+        function downloadCsv() {
+            if (selectedDims.length === 0) return;
+            window.location.href = API_BASE + '/api/pivot?format=csv&' + currentQueryString();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            buildDimGrid();
+
+            filterManager = new ServerSideFilterManager({
+                columns: FILTER_COLUMNS,
+                filterBarId: 'filtersBar',
+                syncURL: true,
+                // The manager rewrites the URL with the filter params *before*
+                // calling this, so we re-add `dims` afterward to keep both.
+                onFilterChange: function () {
+                    writeDimsToUrl();
+                    runPivot();
+                }
+            });
+            // No DataTable on this page — init(null) just wires up the filter bar.
+            filterManager.init(null);
+
+            document.getElementById('downloadBtn').addEventListener('click', downloadCsv);
+
+            // Restore group-by + filters from the URL so a shared link reproduces
+            // the whole pivot. (The manager already restored filters in its ctor.)
+            restoreDimsFromUrl();
+            if (selectedDims.length > 0) runPivot();
+        });
+    </script>
+</body>
+</html>
