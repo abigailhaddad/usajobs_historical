@@ -12,6 +12,15 @@
     <link rel="stylesheet" href="shared/shared.css">
     <style>
         /* Page-specific overrides */
+        .full-dataset-link {
+            font-size: 0.85rem;
+            color: #2d6e4e;
+            text-decoration: none;
+            align-self: center;
+            margin-left: 0.25rem;
+            white-space: nowrap;
+        }
+        .full-dataset-link:hover { text-decoration: underline; }
         .dataTables_wrapper .row {
             margin: 0;
         }
@@ -141,6 +150,9 @@
         // Keep in sync with MAX_ROWS in api/download.py. Larger exports exceed
         // the serverless response limits, so we ask the user to filter first.
         const DOWNLOAD_ROW_LIMIT = 150000;
+        // Full deduplicated dataset (all rows, same columns) as a single parquet
+        // on R2 — the escape hatch when a CSV export is over the row limit.
+        const FULL_DATASET_URL = 'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr.parquet';
 
         // ============================================
         // Column Configuration
@@ -526,7 +538,8 @@
                 if (count !== null && count > DOWNLOAD_ROW_LIMIT) {
                     showToast(
                         'Too many rows to download (' + formatNumber(count) + '). ' +
-                        'Add filters to narrow to ' + formatNumber(DOWNLOAD_ROW_LIMIT) + ' or fewer.',
+                        'Add filters to narrow to ' + formatNumber(DOWNLOAD_ROW_LIMIT) + ' or fewer, ' +
+                        'or use the "Full dataset" link for everything.',
                         true
                     );
                     return;
@@ -536,6 +549,17 @@
                 window.open(url, '_blank');
             });
             toolbarEl.appendChild(csvBtn);
+
+            // Link to the full dataset (all rows, single parquet on R2) for
+            // anyone who needs more than the per-export row limit.
+            const fullLink = document.createElement('a');
+            fullLink.className = 'full-dataset-link';
+            fullLink.href = FULL_DATASET_URL;
+            fullLink.textContent = 'Full dataset (parquet) ↓';
+            fullLink.title = 'Download all rows as a single parquet file (~130 MB)';
+            fullLink.target = '_blank';
+            fullLink.rel = 'noopener';
+            toolbarEl.appendChild(fullLink);
 
             // Update stats on every table draw
             table.on('draw', function () {
