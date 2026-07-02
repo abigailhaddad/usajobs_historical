@@ -20,6 +20,7 @@ import os
 from tqdm import tqdm
 import logging
 import sys
+from cap_alert import check_cap
 
 # Base URL for API requests
 
@@ -200,6 +201,11 @@ def fetch_all_pages(params: Dict, description: str = "") -> List[Dict]:
         alert_path = os.path.join(log_dir, 'PAGINATION_UNDER_COLLECTION.txt')
         with open(alert_path, 'a') as f:
             f.write(f"{description}: expected {expected_total}, got {len(all_jobs)} ({page_num} pages)\n")
+
+    # Cap tripwire: landing exactly on 500 (page size) or 10,000 may mean
+    # pagination stopped at a boundary rather than the true end.
+    check_cap(len(all_jobs), f"historical fetch [{description}] total")
+    check_cap(expected_total, f"historical fetch [{description}] totalCount")
 
     return all_jobs
 

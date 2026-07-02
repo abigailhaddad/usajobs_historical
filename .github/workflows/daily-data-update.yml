@@ -256,6 +256,42 @@ jobs:
             fs.unlinkSync(warningFile);
           }
 
+    - name: Check for pagination cap hits (500 / 10,000)
+      if: always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const capFile = 'logs/CAP_HIT_WARNING.txt';
+
+          if (fs.existsSync(capFile)) {
+            const content = fs.readFileSync(capFile, 'utf8');
+            console.log('Warning: a collection hit an exact pagination cap!');
+
+            const today = new Date().toISOString().split('T')[0];
+            const runUrl = context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId;
+
+            const body = '## Pagination Cap Hit (exactly 500 or 10,000)\n\n' +
+              'A collection returned a count that lands *exactly* on a known page-size (500) ' +
+              'or max-results (10,000) boundary. That is the classic signature of pagination ' +
+              'silently stopping early — the numbers for the affected query may be truncated.\n\n' +
+              '**Affected fetches:**\n```\n' + content + '\n```\n\n' +
+              '**Action:** Confirm whether the real total actually equals that number (a rare ' +
+              'coincidence) or whether pagination broke and the data needs re-collecting.\n\n' +
+              '[View the workflow run](' + runUrl + ')';
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Pagination Cap Hit - ' + today,
+              body: body,
+              labels: ['bug', 'data-issue'],
+              assignees: ['abigailhaddad']
+            });
+
+            fs.unlinkSync(capFile);
+          }
+
     # NOTE: Historical status re-polling (older than the last 14 days) now runs
     # in its own workflow (.github/workflows/repoll-status.yml) so a slow/large
     # repoll can never block today's data from publishing. The daily collection

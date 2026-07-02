@@ -23,6 +23,7 @@ import os
 from tqdm import tqdm
 from html import unescape
 import re
+from cap_alert import check_cap
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -381,7 +382,14 @@ def fetch_all_jobs(params: Dict, headers: Dict, appointment_type_map: Dict[str, 
     
     progress_bar.close()
     print(f"✅ Fetched {len(raw_jobs)} total jobs across {page} pages")
-    
+
+    # Cap tripwire: hitting exactly max_results (10,000) or exactly the page
+    # size (500) usually means this query was truncated — the current API is
+    # segmented by occupational series precisely to stay under the 10k ceiling.
+    query_desc = params.get('JobCategoryCode') or params.get('Keyword') or 'current jobs query'
+    check_cap(len(raw_jobs), f"current fetch [{query_desc}] total")
+    check_cap(total_count, f"current fetch [{query_desc}] SearchResultCountAll")
+
     return raw_jobs, flattened_jobs
 
 
