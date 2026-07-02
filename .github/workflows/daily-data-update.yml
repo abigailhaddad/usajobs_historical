@@ -28,6 +28,12 @@ permissions:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+# Serialize with the repoll workflow: both mutate the parquet files in R2,
+# so they must never write concurrently. Queue rather than cancel.
+concurrency:
+  group: usajobs-r2-data-write
+  cancel-in-progress: false
+
 jobs:
   update-data:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -250,40 +256,10 @@ jobs:
             fs.unlinkSync(warningFile);
           }
 
-    - name: Re-poll status for non-final jobs
-      env:
-        GITHUB_ACTIONS: true
-      run: |
-        # Always poll recent data: current year + previous year
-        CURRENT_YEAR=$(date +'%Y')
-        PREV_YEAR=$((CURRENT_YEAR - 1))
-        YEARS="$PREV_YEAR $CURRENT_YEAR"
-
-        # Older years rotate by day of week (1=Mon .. 7=Sun)
-        # so each day only repolls a small batch:
-        #
-        # Mon: 2013-2016  (~257 dates, mostly resolved)
-        # Tue: 2017-2018  (~719 dates)
-        # Wed: 2019-2020  (~709 dates)
-        # Thu: 2021-2022  (~702 dates)
-        # Fri: 2023       (~352 dates)
-        # Sat/Sun: just current + previous year
-        #
-        DOW=$(date +%u)
-        case $DOW in
-          1) YEARS="2013 2014 2015 2016 $YEARS" ;;
-          2) YEARS="2017 2018 $YEARS" ;;
-          3) YEARS="2019 2020 $YEARS" ;;
-          4) YEARS="2021 2022 $YEARS" ;;
-          5) YEARS="2023 $YEARS" ;;
-        esac
-
-        # Remove duplicates
-        YEARS=$(echo $YEARS | tr ' ' '\n' | sort -u | tr '\n' ' ')
-
-        echo "Day of week: $DOW"
-        echo "Re-polling years: $YEARS"
-        python scripts/repoll_status.py --years $YEARS --skip-recent-days 14
+    # NOTE: Historical status re-polling (older than the last 14 days) now runs
+    # in its own workflow (.github/workflows/repoll-status.yml) so a slow/large
+    # repoll can never block today's data from publishing. The daily collection
+    # above already re-fetches the last 14 days with fresh statuses.
 
     - name: Run data integrity tests
       id: data_tests
