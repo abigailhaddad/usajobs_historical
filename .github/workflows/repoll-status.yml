@@ -1,0 +1,200 @@
+name: Repoll Historical Status
+
+# Re-polls status transitions for jobs OLDER than the last 14 days (the daily
+# workflow already refreshes the recent window). Runs on its own so a slow or
+# large repoll can never block today's data from publishing.
+#
+# Rotation: one year-group per run, cycling by day-of-year. 2013-2018 (sparse)
+# share one slot; each year from 2019 through the current year gets its own —
+# a full sweep every ~9 days today, extending by one day each new year. A
+# wall-clock budget stops the run cleanly and opens an issue if it can't finish
+# its group in time.
+
+on:
+  schedule:
+    # 15:00 UTC — well after the daily update (07:00 UTC) has finished.
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "Override years to repoll (space-separated, e.g. '2025 2026'). Blank = today's rotation."
+        type: string
+        default: ""
+      max_minutes:
+        description: "Wall-clock budget for the repoll step (minutes)."
+        type: string
+        default: "90"
+
+permissions:
+  contents: read
+  issues: write
+
+# Serialize with the daily update: both mutate the parquet files in R2, so they
+# must never write concurrently. Queue rather than cancel.
+concurrency:
+  group: usajobs-r2-data-write
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  repoll:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        lfs: false
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install boto3 pytest
+
+    - name: Download data from R2
+      env:
+        R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+        R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+      run: |
+        python3 -c "
+        import boto3, os
+        s3 = boto3.client('s3',
+            endpoint_url=os.environ['R2_ENDPOINT_URL'],
+            aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
+            aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'],
+        )
+        os.makedirs('data', exist_ok=True)
+        paginator = s3.get_paginator('list_objects_v2')
+        for page in paginator.paginate(Bucket='usajobs-data', Prefix='data/'):
+            for obj in page.get('Contents', []):
+                key = obj['Key']
+                print(f'Downloading {key} ({obj[\"Size\"]/1024/1024:.1f} MB)')
+                s3.download_file('usajobs-data', key, key)
+        print('Done')
+        "
+        echo "Checking data files:"
+        ls -lh data/*.parquet | head -5
+
+    - name: Validate downloaded data from R2
+      run: |
+        python3 -c "
+        import os, sys, datetime
+        import pyarrow.parquet as pq
+
+        missing, empty = [], []
+        current_year = datetime.date.today().year
+        for year in range(2013, current_year + 1):
+            path = os.path.join('data', f'historical_jobs_{year}.parquet')
+            if not os.path.exists(path):
+                missing.append(path)
+            elif pq.read_metadata(path).num_rows == 0:
+                empty.append(f'{path} (0 rows)')
+
+        if missing: print('MISSING:', *missing, sep='\n  ')
+        if empty:   print('EMPTY:', *empty, sep='\n  ')
+        if missing or empty:
+            sys.exit(1)
+        print('R2 download validated: all historical files present and non-empty')
+        "
+
+    - name: Re-poll status for non-final jobs
+      env:
+        GITHUB_ACTIONS: true
+        REPOLL_YEARS: ${{ inputs.years }}
+        MAX_MINUTES: ${{ inputs.max_minutes || '90' }}
+      run: |
+        if [ -n "$REPOLL_YEARS" ]; then
+          YEARS="$REPOLL_YEARS"
+          echo "Manual override — repolling years: $YEARS"
+        else
+          # One year-group per run, rotating by day-of-year. 2013-2018 (sparse)
+          # share slot 0; every year from 2019 through the CURRENT year gets its
+          # own slot, so the rotation extends automatically each January.
+          YEARS=$(python3 -c "import datetime; cy=datetime.date.today().year; groups=[list(range(2013,2019))]+[[y] for y in range(2019,cy+1)]; doy=datetime.date.today().timetuple().tm_yday; print(' '.join(map(str, groups[doy % len(groups)])))")
+          echo "Rotation selected years: $YEARS"
+        fi
+
+        python scripts/repoll_status.py --years $YEARS --skip-recent-days 14 --max-minutes "$MAX_MINUTES"
+
+    - name: Run data integrity tests
+      id: data_tests
+      run: |
+        cd update
+        python test_data_integrity.py
+
+    - name: Prep web data
+      env:
+        USAJOBS_API_TOKEN: ${{ secrets.USAJOBS_API_TOKEN }}
+      run: |
+        python scripts/prep_web_data.py
+
+    - name: Run API tests against new web data
+      run: |
+        python -m pytest web/tests/test_api.py -v
+
+    - name: Sync to R2
+      if: steps.data_tests.outcome == 'success'
+      env:
+        R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+        R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+      run: |
+        python scripts/sync_to_r2.py
+
+    - name: Alert if repoll did not finish its year
+      if: always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const markerFile = 'logs/REPOLL_INCOMPLETE.txt';
+          if (fs.existsSync(markerFile)) {
+            const content = fs.readFileSync(markerFile, 'utf8');
+            const today = new Date().toISOString().split('T')[0];
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = '## Repoll Did Not Finish Its Assigned Year\n\n' +
+              'The historical status repoll hit its time budget before covering every date. ' +
+              'Partial progress was saved and synced; remaining dates will be retried on the next run. ' +
+              'If this recurs for the same year, the year may need splitting or the budget raising.\n\n' +
+              '**Details:**\n```\n' + content + '\n```\n\n' +
+              `[View the workflow run](${runUrl})`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Repoll Incomplete - ' + today,
+              body,
+              labels: ['data-issue', 'automated'],
+              assignees: ['abigailhaddad'],
+            });
+            fs.unlinkSync(markerFile);
+          }
+
+    - name: Alert on workflow failure
+      if: failure()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const today = new Date().toISOString().split('T')[0];
+          const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: 'Repoll Workflow Failed - ' + today,
+            body: 'The historical status repoll workflow failed (error, timeout, or failing test). ' +
+              'No data may have been synced for this run.\n\n' +
+              `[View the workflow run](${runUrl})`,
+            labels: ['bug', 'automated'],
+            assignees: ['abigailhaddad'],
+          });

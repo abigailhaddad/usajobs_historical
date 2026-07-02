@@ -261,6 +261,9 @@ def main():
     parser.add_argument("--workers", type=int, default=15, help="Parallel API workers (default: 15)")
     parser.add_argument("--skip-recent-days", type=int, default=14,
                         help="Skip dates within this many days of today (default: 14, covered by daily collection)")
+    parser.add_argument("--max-minutes", type=float, default=None,
+                        help="Stop cleanly after this many minutes, saving partial progress and "
+                             "writing logs/REPOLL_INCOMPLETE.txt (default: no limit)")
     args = parser.parse_args()
 
     # Find all historical parquet files
@@ -342,8 +345,19 @@ def main():
     # Process in batches for parallel fetching
     batch_size = args.workers
     i = 0
+    stopped_early = False
 
     while i < total_dates:
+        # Honor a wall-clock budget so the workflow always leaves time to
+        # save, prep and sync. Partial progress is preserved (incremental
+        # saves already happened) and the final save below flushes the rest.
+        if args.max_minutes and (time.time() - start_time) > args.max_minutes * 60:
+            stopped_early = True
+            log(f"\n⏱️  Time budget of {args.max_minutes:.0f} min reached — "
+                f"stopping at {dates_queried}/{total_dates} dates. "
+                f"Remaining dates will be picked up on the next run.")
+            break
+
         batch = all_dates[i:i + batch_size]
 
         # Fetch batch in parallel
@@ -503,6 +517,25 @@ def main():
             for cn, old, new in all_transitions:
                 f.write(f'{cn},{old},{new}\n')
         log(f"  Detailed transitions: {summary_path}")
+
+    # Loud, non-fatal signal that this run did not cover all assigned dates.
+    # The workflow turns this marker into a GitHub issue, and the remaining
+    # dates get retried on the next scheduled run.
+    if stopped_early or dates_queried < total_dates:
+        marker_path = os.path.join(os.path.dirname(__file__), '..', 'logs',
+                                   'REPOLL_INCOMPLETE.txt')
+        os.makedirs(os.path.dirname(marker_path), exist_ok=True)
+        reason = (f"Hit --max-minutes budget of {args.max_minutes:.0f} min"
+                  if stopped_early else "Loop ended before all dates were queried")
+        with open(marker_path, 'w') as f:
+            f.write(f"Repoll did not finish all assigned dates.\n"
+                    f"Reason: {reason}\n"
+                    f"Progress: {dates_queried}/{total_dates} dates queried "
+                    f"({total_dates - dates_queried} remaining)\n"
+                    f"Years this run: {sorted(files.keys())}\n"
+                    f"Partial progress WAS saved and synced. "
+                    f"Remaining dates will be retried on the next scheduled run.\n")
+        log(f"\n⚠️  Wrote {marker_path} (workflow will open an issue).")
 
     log(f"{'='*60}")
 
