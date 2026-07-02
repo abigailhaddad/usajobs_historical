@@ -153,6 +153,15 @@ jobs:
       run: |
         python scripts/sync_to_r2.py
 
+    - name: Upload status transitions CSV
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: status-transitions
+        path: logs/status_transitions_*.csv
+        if-no-files-found: ignore
+        retention-days: 90
+
     - name: Check for pagination cap hits (500 / 10,000)
       if: always()
       uses: actions/github-script@v7
