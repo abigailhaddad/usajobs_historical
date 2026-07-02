@@ -172,7 +172,12 @@ def update_and_insert(parquet_path: str, status_map: Dict[str, str],
             if old != new:
                 df.at[idx, 'positionOpeningStatus'] = new
                 df.at[idx, 'last_seen'] = now
-                transitions.append((key, str(old), str(new)))
+                ann = df.at[idx, 'announcementNumber'] if 'announcementNumber' in df.columns else ''
+                title = df.at[idx, 'positionTitle'] if 'positionTitle' in df.columns else ''
+                agency = df.at[idx, 'hiringAgencyName'] if 'hiringAgencyName' in df.columns else ''
+                odate = df.at[idx, 'positionOpenDate'] if 'positionOpenDate' in df.columns else ''
+                transitions.append((key, str(old), str(new), str(ann), str(title),
+                                    str(agency), str(odate)))
                 changed += 1
 
     # Insert new jobs
@@ -509,19 +514,36 @@ def main():
 
     # Status transitions
     if all_transitions:
-        transition_counts = Counter((old, new) for _, old, new in all_transitions)
+        transition_counts = Counter((t[1], t[2]) for t in all_transitions)
         log(f"\nStatus transitions:")
         for (old, new), count in transition_counts.most_common():
             log(f"  {old} -> {new}: {count:,}")
 
-        # Write detailed transitions to CSV
+        # Highlight "reopens": a supposedly-final status going back to non-final.
+        # These are the anomalies worth eyeballing, so print each with enough to
+        # locate the job (control + announcement number + best-effort URL).
+        reopens = [t for t in all_transitions
+                   if t[1] in FINAL_STATUSES and t[2] not in FINAL_STATUSES]
+        if reopens:
+            log(f"\n⚠️  {len(reopens)} reopened job(s) (final -> non-final):")
+            for cn, old, new, ann, title, agency, odate in reopens:
+                log(f"  {cn} | ann {ann} | {old} -> {new} | {title} | {agency} | "
+                    f"opened {odate} | https://www.usajobs.gov/job/{cn}")
+
+        # Write detailed transitions to CSV (enough to locate each job)
+        def _q(s):
+            s = str(s)
+            return '"' + s.replace('"', '""') + '"' if (',' in s or '"' in s) else s
+
         summary_path = os.path.join(os.path.dirname(__file__), '..', 'logs',
                                      f'status_transitions_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv')
         os.makedirs(os.path.dirname(summary_path), exist_ok=True)
         with open(summary_path, 'w') as f:
-            f.write('control_number,old_status,new_status\n')
-            for cn, old, new in all_transitions:
-                f.write(f'{cn},{old},{new}\n')
+            f.write('control_number,old_status,new_status,announcement_number,'
+                    'position_title,hiring_agency,position_open_date\n')
+            for cn, old, new, ann, title, agency, odate in all_transitions:
+                f.write(f'{_q(cn)},{_q(old)},{_q(new)},{_q(ann)},{_q(title)},'
+                        f'{_q(agency)},{_q(odate)}\n')
         log(f"  Detailed transitions: {summary_path}")
 
     # Loud, non-fatal signal that this run did not cover all assigned dates.
