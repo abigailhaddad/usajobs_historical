@@ -207,18 +207,30 @@ def load_existing_jobs(parquet_path: str) -> set:
     return set()
 
 
-def fetch_jobs_page(params: Dict, headers: Dict, page: int = 1) -> Optional[Dict]:
-    """Fetch a single page of job results"""
+def fetch_jobs_page(params: Dict, headers: Dict, page: int = 1, retries: int = 3) -> Optional[Dict]:
+    """Fetch a single page of job results.
+
+    Uses a tight 30s timeout with a small bounded retry so a degraded API
+    can't stall the whole run for minutes on one slow series. Worst case per
+    page is ~30s x 3 attempts plus short backoff (~1.5 min) before we give up
+    and move on, instead of a single 120s inactivity timeout.
+    """
     params_copy = params.copy()
     params_copy['Page'] = page
-    
-    try:
-        response = requests.get(BASE_URL, headers=headers, params=params_copy, timeout=120)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching page {page}: {e}")
-        return None
+
+    for attempt in range(1, retries + 1):
+        try:
+            response = requests.get(BASE_URL, headers=headers, params=params_copy, timeout=30)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            if attempt < retries:
+                wait = attempt * 3
+                print(f"Error fetching page {page} (attempt {attempt}/{retries}): {e} — retrying in {wait}s")
+                time.sleep(wait)
+            else:
+                print(f"Error fetching page {page} after {retries} attempts: {e}")
+                return None
 
 
 def fetch_position_offering_types() -> Dict[str, str]:
