@@ -32,6 +32,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 
+from cap_alert import check_cap
+
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
 
 FINAL_STATUSES = {'Candidate selected', 'Job canceled', 'Job closed'}
@@ -93,6 +95,10 @@ def fetch_all_for_date(date_str: str) -> List[Dict]:
             params = None
         else:
             break
+
+    # Cap tripwire: a single date returning exactly 500 (page size) or 10,000
+    # may mean pagination silently stopped instead of reaching the true end.
+    check_cap(len(all_jobs), f"repoll date {date_str}")
 
     return all_jobs
 
