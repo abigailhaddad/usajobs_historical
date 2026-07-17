@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-07-16T07:59:07.218162",
+  "created_at": "2026-07-17T07:57:44.239028",
   "row_counts": {
     "historical_jobs_2018.parquet": 329356,
     "historical_jobs_2016.parquet": 3879,
@@ -8,7 +8,7 @@
     "historical_jobs_2025_backup.parquet": 134580,
     "historical_jobs_2022.parquet": 441604,
     "historical_jobs_2019.parquet": 349256,
-    "historical_jobs_2026.parquet": 136502,
+    "historical_jobs_2026.parquet": 137619,
     "historical_jobs_2013.parquet": 5,
     "historical_jobs_2024_backup.parquet": 367186,
     "historical_jobs_2025.parquet": 167020,
@@ -18,7 +18,7 @@
     "current_jobs_2025.parquet": 87735,
     "historical_jobs_2023.parquet": 454652,
     "historical_jobs_2020.parquet": 328440,
-    "current_jobs_2026.parquet": 131898,
+    "current_jobs_2026.parquet": 132986,
     "current_jobs_2024.parquet": 584
   },
   "job_ids": {
@@ -3178,6 +3178,7 @@
     ],
     "historical_jobs_2026.parquet": [
       "564710800",
+      "721962100",
       "723111900",
       "728738000",
       "736239300",
@@ -3675,8 +3676,7 @@
       "853325100",
       "853326600",
       "853328700",
-      "853328800",
-      "853329700"
+      "853328800"
     ],
     "historical_jobs_2013.parquet": [
       "302858300",
