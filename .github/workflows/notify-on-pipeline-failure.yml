@@ -1,0 +1,75 @@
+name: Notify on Pipeline Failure
+
+# Safety net for the data pipelines. This runs as a SEPARATE workflow on a
+# fresh runner AFTER the watched workflow finishes, so it fires even when the
+# original run's runner is killed mid-job (OOM / "lost communication") — the
+# exact failure mode the in-job "Check for failures" step cannot catch,
+# because that step dies along with the runner.
+
+on:
+  workflow_run:
+    workflows:
+      - "Daily Data Update"
+      - "Repoll Historical Status"
+    types:
+      - completed
+
+permissions:
+  issues: write
+
+jobs:
+  notify:
+    # Only act on genuine failures (skip success / cancelled).
+    if: github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open an issue for the failed run
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const date = new Date().toISOString().split('T')[0];
+            // Matches the in-job "Check for failures" handler's title exactly
+            // (e.g. "Daily Data Update Failed - 2026-07-24") so that if the
+            // runner survived and that handler already opened an issue, we
+            // dedup against it and don't post a second one.
+            const title = `${run.name} Failed - ${date}`;
+
+            const existing = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+            if (existing.some(i => i.title === title)) {
+              console.log(`Open issue already exists for "${title}" — skipping.`);
+              return;
+            }
+
+            const body = [
+              `**${run.name}** run failed.`,
+              ``,
+              `This alert comes from a separate watcher workflow, so it fires even`,
+              `when the runner is killed mid-run (OOM / lost communication) and the`,
+              `in-job failure handler never gets to execute.`,
+              ``,
+              `- Conclusion: \`${run.conclusion}\``,
+              `- Attempt: ${run.run_attempt}`,
+              `- Triggered by: ${run.event}`,
+              `- Head branch: \`${run.head_branch}\``,
+              ``,
+              `[View the failed run](${run.html_url})`,
+              ``,
+              `Note: if the runner died, that run's own logs may be unavailable.`,
+              `Check an earlier attempt's logs (\`?/attempts/1\`) for the last output.`,
+            ].join('\n');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['bug', 'automated', 'pipeline-failure'],
+              assignees: ['abigailhaddad'],
+            });
+            console.log(`Opened issue: ${title}`);
