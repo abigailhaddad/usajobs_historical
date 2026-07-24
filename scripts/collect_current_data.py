@@ -405,7 +405,7 @@ def fetch_all_jobs(params: Dict, headers: Dict, appointment_type_map: Dict[str, 
     return raw_jobs, flattened_jobs
 
 
-def save_jobs_to_parquet(jobs: List[Dict], raw_jobs: List[Dict], parquet_path: str):
+def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
     """Save jobs to parquet file, NEVER removing existing jobs.
     
     This creates a complete historical record of all jobs that were ever 'current'.
@@ -496,20 +496,19 @@ def get_year_from_date(date_str: Optional[str]) -> Optional[int]:
         return None
 
 
-def group_jobs_by_year(jobs: List[Dict], raw_jobs: List[Dict]) -> Dict[int, tuple[List[Dict], List[Dict]]]:
+def group_jobs_by_year(jobs: List[Dict]) -> Dict[int, List[Dict]]:
     """Group jobs by year based on positionOpenDate"""
     jobs_by_year = {}
-    
-    for i, job in enumerate(jobs):
+
+    for job in jobs:
         year = get_year_from_date(job.get("positionOpenDate"))
         if year:
             if year not in jobs_by_year:
-                jobs_by_year[year] = ([], [])
-            jobs_by_year[year][0].append(job)
-            jobs_by_year[year][1].append(raw_jobs[i] if i < len(raw_jobs) else {})
+                jobs_by_year[year] = []
+            jobs_by_year[year].append(job)
         else:
             print(f"⚠️ Skipping job {job.get('usajobsControlNumber')} - no valid positionOpenDate")
-    
+
     return jobs_by_year
 
 
@@ -575,7 +574,6 @@ def main():
         base_params["DatePosted"] = args.days_posted
         print(f"📅 Filtering to jobs posted in last {args.days_posted} days")
     
-    all_raw_jobs = []
     all_flattened_jobs = []
     job_ids = set()  # Track unique jobs to avoid duplicates
     series_with_jobs = 0
@@ -588,17 +586,20 @@ def main():
         params['JobCategoryCode'] = series['code']
         
         try:
-            series_raw_jobs, series_flattened_jobs = fetch_all_jobs(params, headers, appointment_type_map, hiring_path_map)
-            
+            # Raw jobs are only needed inside fetch_all_jobs for pagination/cap
+            # checks; the flattened records are what get written. Accumulating the
+            # full nested raw JSON for every open posting is what previously OOM-ed
+            # the CI runner, so we intentionally drop it here.
+            _, series_flattened_jobs = fetch_all_jobs(params, headers, appointment_type_map, hiring_path_map)
+
             # Add only unique jobs (some jobs may have multiple series)
             new_jobs = 0
-            for j, job in enumerate(series_flattened_jobs):
+            for job in series_flattened_jobs:
                 # Use usajobsControlNumber as unique identifier
                 control_number = job.get('usajobsControlNumber')
                 if control_number and control_number not in job_ids:
                     job_ids.add(control_number)
                     all_flattened_jobs.append(job)
-                    all_raw_jobs.append(series_raw_jobs[j])
                     new_jobs += 1
             
             if new_jobs > 0:
@@ -628,7 +629,7 @@ def main():
     
     # Group jobs by year based on positionOpenDate
     print("\n📊 Grouping jobs by year based on position open date...")
-    jobs_by_year = group_jobs_by_year(all_flattened_jobs, all_raw_jobs)
+    jobs_by_year = group_jobs_by_year(all_flattened_jobs)
     
     if not jobs_by_year:
         print("❌ No jobs with valid position open dates found")
@@ -636,35 +637,33 @@ def main():
     
     print(f"📅 Found jobs across {len(jobs_by_year)} years:")
     for year in sorted(jobs_by_year.keys()):
-        print(f"   - {year}: {len(jobs_by_year[year][0])} jobs")
-    
+        print(f"   - {year}: {len(jobs_by_year[year])} jobs")
+
     # Process each year
     total_new_jobs = 0
     for year in sorted(jobs_by_year.keys()):
-        year_jobs, year_raw_jobs = jobs_by_year[year]
+        year_jobs = jobs_by_year[year]
         parquet_path = f"{args.data_dir}/current_jobs_{year}.parquet"
-        
+
         print(f"\n📅 Processing {year} jobs...")
         print(f"💾 Parquet file: {parquet_path}")
-        
+
         # Get existing control numbers to avoid duplicates
         existing_control_numbers = load_existing_jobs(parquet_path)
         print(f"   Found {len(existing_control_numbers)} existing current jobs")
-        
+
         # Filter for new jobs only
         new_jobs = []
-        new_raw_jobs = []
-        for i, job in enumerate(year_jobs):
+        for job in year_jobs:
             usajobs_control_number = str(job.get("usajobsControlNumber", ""))
             if usajobs_control_number and usajobs_control_number not in existing_control_numbers:
                 new_jobs.append(job)
-                new_raw_jobs.append(year_raw_jobs[i])
-        
+
         print(f"   📊 Found {len(new_jobs)} new jobs to add")
-        
+
         # Save to Parquet
         if new_jobs:
-            save_jobs_to_parquet(new_jobs, new_raw_jobs, parquet_path)
+            save_jobs_to_parquet(new_jobs, parquet_path)
             total_new_jobs += len(new_jobs)
         
         # Show stats for this year
