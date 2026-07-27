@@ -25,10 +25,29 @@ def _get_static_data():
             with open(_TMP_PATH) as f:
                 return f.read()
 
+    # Never write the cache in place: boto3's download_file streams to its
+    # destination and is not atomic, so a concurrent request on the same Fluid
+    # instance could read a half-written file and fail to parse it. Download to
+    # a unique temp file, then os.replace() it in — replace is atomic on the
+    # same filesystem, so readers see either the old or the new file, never a
+    # partial one. (Same reasoning as get_parquet_path in data_loader.py; this
+    # file is small enough not to need that one's single-flight lock.)
     import boto3
+    import tempfile
+
     s3 = boto3.client('s3', endpoint_url=endpoint_url,
                        aws_access_key_id=access_key, aws_secret_access_key=secret_key)
-    s3.download_file('usajobs-data', 'web/static.json', _TMP_PATH)
+
+    fd, tmp_download = tempfile.mkstemp(dir='/tmp', prefix='static_', suffix='.json')
+    os.close(fd)
+    try:
+        s3.download_file('usajobs-data', 'web/static.json', tmp_download)
+        os.replace(tmp_download, _TMP_PATH)
+    except BaseException:
+        if os.path.exists(tmp_download):
+            os.remove(tmp_download)
+        raise
+
     with open(_TMP_PATH) as f:
         return f.read()
 
