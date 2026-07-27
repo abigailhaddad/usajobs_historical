@@ -15,7 +15,11 @@ from columns import COLUMNS, COLUMN_HEADERS, parse_filters
 # ~140 MB, which exceeds the serverless response limits; streamed exports in the
 # tens-of-MB range work fine. Above this we return a clear 413 so the UI can ask
 # the user to add filters instead of failing opaquely.
-MAX_ROWS = 150000
+# Keep DOWNLOAD_ROW_LIMIT in web/shared/shared.js at this value.
+MAX_ROWS = 100000
+
+# Every row, same columns, as one parquet — where we send anyone over the cap.
+FULL_DATASET_URL = 'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr.parquet'
 
 
 class handler(BaseHTTPRequestHandler):
@@ -59,9 +63,11 @@ class handler(BaseHTTPRequestHandler):
                     'error': 'too_many_rows',
                     'rows': row_count,
                     'limit': MAX_ROWS,
+                    'full_dataset_url': FULL_DATASET_URL,
                     'message': (
-                        f'This export has {row_count:,} rows, which is too large to '
-                        f'download here. Add filters to narrow it to {MAX_ROWS:,} rows or fewer.'
+                        f'This export has {row_count:,} rows, over the {MAX_ROWS:,}-row CSV limit. '
+                        f'Add filters to narrow it, or download every row as a single parquet: '
+                        f'{FULL_DATASET_URL}'
                     ),
                 })
                 return
