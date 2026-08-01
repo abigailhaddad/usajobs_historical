@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-07-31T08:18:19.056311",
-  "total_jobs": 3931765,
+  "generated_at": "2026-08-01T08:01:30.191359",
+  "total_jobs": 3932517,
   "total_fields": 47,
   "file_size": "2.2GB",
-  "latest_job_date": "2026-07-31",
+  "latest_job_date": "2026-08-01",
   "data_coverage": [
     {
       "year": 2013,
@@ -94,13 +94,13 @@
       "total_jobs": 256879,
       "jobs_opened": 256879,
       "jobs_closed": 240511,
-      "coverage": "Current through July 31, 2026"
+      "coverage": "Current through August 01, 2026"
     },
     {
       "year": 2026,
-      "total_jobs": 291691,
-      "jobs_opened": 291691,
-      "jobs_closed": 289481,
+      "total_jobs": 292443,
+      "jobs_opened": 292443,
+      "jobs_closed": 290180,
       "coverage": "Closing dates only"
     }
   ],
@@ -116,7 +116,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0661\"}], [{\"series\": \"0893\"}, {\"series\": \"0830\"}, {\"series\": \"0850\"}, {\"series\": \"0801\"}, {\"series\": \"0855\"}], [{\"series\": \"0830\"}, {\"series\": \"0855\"}, {\"series\": \"1550\"}, {\"series\": \"1501\"}], [{\"series\": \"0850\"}, {\"series\": \"1301\"}, {\"series\": \"0401\"}, {\"series\": \"0830\"}, {\"series\": \"0810\"}] (4424 unique)",
+      "examples": "[{\"series\": \"1520\"}, {\"series\": \"0801\"}, {\"series\": \"1550\"}, {\"series\": \"1310\"}, {\"series\": \"1515\"}], [{\"series\": \"0830\"}, {\"series\": \"1310\"}, {\"series\": \"0854\"}, {\"series\": \"0855\"}, {\"series\": \"0850\"}], [{\"series\": \"1410\"}, {\"series\": \"0150\"}, {\"series\": \"0801\"}, {\"series\": \"1301\"}], [{\"series\": \"0896\"}, {\"series\": \"1560\"}, {\"series\": \"1515\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -140,7 +140,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Council of the Inspectors General on Integrity and Efficiency, Department of Justice\\U.S. Marshals Service, Department of Veterans Affairs\\National Cemetery Administration, Department of Labor\\Wage and Hour Division (542 unique)",
+      "examples": "Department of Housing and Urban Development\\Office of Field Policy and Management, Department of Veterans Affairs\\Deputy Assistant Secretary for Finance, General Services Administration\\Office of General Counsel, Department of the Navy\\Naval Intelligence Command (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -164,7 +164,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "25-XA-03404-12628352-GOV, CBSV-12449395-24-VS, CAZM-12440310-24-IA, HSJT247379197289HDR (363816 unique)",
+      "examples": "MP-12535096-24-SC, 24-12346121, MCGT249091486187R, OBPA-12395534-24-PS (363816 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363816
@@ -172,7 +172,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Multiple, Recent graduates, Summer, Detail (16 unique)",
+      "examples": "Intermittent, Internships, Temporary, Permanent (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -204,7 +204,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "HUCC, HFHI, DN03, EDEM (528 unique)",
+      "examples": "ARTA, ARAP, IN06, AFGS (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -212,7 +212,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Headquarters, Air Force Reserve Command, Commander, Naval Information Warfare Systems Command (NAVWARSYSCOM), Office of the Director of National Intelligence, Woodrow Wilson International Center for Scholars (502 unique)",
+      "examples": "Government Accountability Office, National Credit Union Administration, US Army Financial Management Command, Bonneville Power Administration (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -220,7 +220,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "GE, EW, EB, BO (122 unique)",
+      "examples": "PO, GJ, HE, LP (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -228,7 +228,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of the Army, Department of Agriculture, Department of Energy, Department of the Air Force (26 unique)",
+      "examples": "Court Services and Offender Supervision Agency for DC, Department of the Interior, Department of the Treasury, Department of Transportation (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -236,7 +236,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "FLEET READINESS CENTER SOUTHWEST, Office of Capital Access - Processing and Disbursement Center, Secondary Stage Production Modernization Program Office, NA-195, ATO, Tech Ops, WSA, Honolulu District, Service Operations Center SOC, WWW22-ZHN (59972 unique)",
+      "examples": "UTTR/CC. May be used to fill other vacancies at Hill AFB., USAG Wiesbaden, NAF Support Services Division, Ralph H. Johnson VA Healthcare System, US ARMY CORPS OF ENGINEERS, G-6 PROGRAM AND PROJECT MGMT DIR (PM) (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -252,7 +252,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T13:57:17.433401, 2025-07-05T14:04:05.159450, 2025-09-20T11:55:10.899012, 2025-07-05T14:01:38.981791 (367192 unique)",
+      "examples": "2025-09-20T12:15:51.659590, 2025-07-05T13:45:23.220982, 2025-07-05T13:52:56.658631, 2025-09-20T12:03:23.699513 (367192 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367192
@@ -268,7 +268,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-20T12:24:39.419733, 2025-07-05T13:02:09.525941, 2025-07-05T13:05:06.384859, 2025-09-20T12:34:34.250087 (360270 unique)",
+      "examples": "2025-09-20T12:13:57.808543, 2025-09-20T12:34:34.290902, 2025-09-20T11:42:34.327809, 2025-09-20T12:00:40.227972 (360270 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 360270
@@ -276,7 +276,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "15, 17, IJ, KH (127 unique)",
+      "examples": "25, JL, AA, I (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -292,7 +292,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "LL, M, 06, E (125 unique)",
+      "examples": "K, I, G, 02 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -308,7 +308,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "SW, TR, XA, WM (191 unique)",
+      "examples": "NG, LL, IH, CY (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -316,7 +316,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-10-28, 2025-05-01, 2024-05-27, 2024-01-09 (671 unique)",
+      "examples": "2025-02-22, 2024-10-29, 2024-03-30, 2025-02-08 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -324,7 +324,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-09-17, 2025-04-18, 2025-06-01, 2024-05-11 (596 unique)",
+      "examples": "2025-02-26, 2025-08-08, 2017-12-07, 2024-01-22 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -332,7 +332,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-03-28, 2024-06-21, 2024-05-17, 2024-10-05 (365 unique)",
+      "examples": "2024-02-18, 2024-07-16, 2024-03-02, 2024-11-15 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -348,7 +348,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Government Information Specialist GS-0306-12/13 (FPL 13)(MP), Deputy Director (D.I.G), Senior Social Worker - Primary Care Mental Health Integration (PCMHI), Auditor (Performance) - TERM (MPP) (77992 unique)",
+      "examples": "Supervisory Social Insurance Specialist (Division Director), Pharmacy Technician-Procurement, ATTORNEY-ADVISER (LABOR), Oral Health Fitness Assistant (Office Automation) (77992 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77992
@@ -364,7 +364,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "Contingent, 8, PB1, 23 (115 unique)",
+      "examples": "7, 11, FG12, 25 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -428,7 +428,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "90, 64, 73, 49 (157 unique)",
+      "examples": "002, 00, 27, 43 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
