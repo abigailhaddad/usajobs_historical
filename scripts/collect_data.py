@@ -15,6 +15,7 @@ import time
 import requests
 from typing import List, Dict, Optional
 import pandas as pd
+import pyarrow.parquet as pq
 from datetime import datetime, timedelta
 import os
 from tqdm import tqdm
@@ -300,17 +301,23 @@ def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> tup
 
 
 def load_existing_jobs(parquet_path: str) -> set:
-    """Load existing job control numbers from parquet file."""
+    """Load existing job control numbers from parquet file.
+
+    Reads ONLY the control number column — these files are mostly job
+    description text, and loading them whole here is pure memory waste.
+    """
     try:
-        df = pd.read_parquet(parquet_path)
+        names = pq.read_schema(parquet_path).names
         # Use usajobs_control_number if available (consistent with current script), otherwise fall back
-        if 'usajobs_control_number' in df.columns:
-            return set(df['usajobs_control_number'].dropna().astype(str))
-        elif 'usajobsControlNumber' in df.columns:
-            return set(df['usajobsControlNumber'].dropna().astype(str))
+        if 'usajobs_control_number' in names:
+            col = 'usajobs_control_number'
+        elif 'usajobsControlNumber' in names:
+            col = 'usajobsControlNumber'
         else:
             return set()
-    except (FileNotFoundError, KeyError):
+        df = pd.read_parquet(parquet_path, columns=[col])
+        return set(df[col].dropna().astype(str))
+    except (FileNotFoundError, KeyError, OSError):
         return set()
 
 
@@ -631,8 +638,8 @@ def main():
     for year in range(2015, datetime.now().year + 2):
         parquet_path = f"{args.data_dir}/historical_jobs_{year}.parquet"
         if os.path.exists(parquet_path):
-            df = pd.read_parquet(parquet_path)
-            print(f"  historical_jobs_{year}.parquet: {len(df):,} jobs")
+            n_jobs = pq.read_metadata(parquet_path).num_rows
+            print(f"  historical_jobs_{year}.parquet: {n_jobs:,} jobs")
 
 
 if __name__ == "__main__":

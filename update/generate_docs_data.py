@@ -11,11 +11,24 @@ Usage:
 """
 
 import pandas as pd
+import pyarrow.parquet as pq
 import json
 import os
 import glob
 from datetime import datetime
 import numpy as np
+
+# The current_jobs parquet files are gigabytes of job-description text. Reading
+# them whole to count rows or scan one column is what OOM-killed the daily
+# update runner, so everything here reads metadata or projects columns.
+
+def read_cols(path, cols):
+    """Read only `cols` that actually exist in the file; None if none do."""
+    names = pq.read_schema(path).names
+    present = [c for c in cols if c in names]
+    if not present:
+        return None
+    return pd.read_parquet(path, columns=present)
 
 def get_field_examples(series, field_name, max_examples=4):
     """Get representative examples for a field, showing variety when possible"""
@@ -87,28 +100,26 @@ def analyze_data_coverage():
         jobs_opened = 0
         jobs_closed = 0
         
-        # Historical data
-        if os.path.exists(hist_file):
-            df = pd.read_parquet(hist_file)
-            total_jobs += len(df)
-            
-            # Count jobs opened/closed by date parsing
-            df['positionOpenDate'] = pd.to_datetime(df['positionOpenDate'], errors='coerce')
-            df['positionCloseDate'] = pd.to_datetime(df['positionCloseDate'], errors='coerce')
-            
-            jobs_opened += len(df[df['positionOpenDate'].dt.year == year])
-            jobs_closed += len(df[df['positionCloseDate'].dt.year == year])
-        
-        # Current data  
-        if os.path.exists(curr_file):
-            df_curr = pd.read_parquet(curr_file)
-            total_jobs += len(df_curr)
-            
-            df_curr['positionOpenDate'] = pd.to_datetime(df_curr['positionOpenDate'], errors='coerce')
-            df_curr['positionCloseDate'] = pd.to_datetime(df_curr['positionCloseDate'], errors='coerce')
-            
-            jobs_opened += len(df_curr[df_curr['positionOpenDate'].dt.year == year])
-            jobs_closed += len(df_curr[df_curr['positionCloseDate'].dt.year == year])
+        for path in (hist_file, curr_file):
+            if not os.path.exists(path):
+                continue
+
+            total_jobs += pq.read_metadata(path).num_rows
+
+            # Count jobs opened/closed by date parsing — only the two date
+            # columns get loaded, not the whole announcement text.
+            dates = read_cols(path, ['positionOpenDate', 'positionCloseDate'])
+            if dates is None:
+                continue
+            for col, bucket in (('positionOpenDate', 'opened'), ('positionCloseDate', 'closed')):
+                if col not in dates.columns:
+                    continue
+                parsed = pd.to_datetime(dates[col], errors='coerce')
+                n = int((parsed.dt.year == year).sum())
+                if bucket == 'opened':
+                    jobs_opened += n
+                else:
+                    jobs_closed += n
         
         # Determine coverage notes
         if year <= 2016:
@@ -139,12 +150,24 @@ def analyze_data_coverage():
     return coverage_data
 
 def analyze_all_fields():
-    """Analyze all fields from the most recent complete year (2024)"""
-    df = pd.read_parquet('../data/historical_jobs_2024.parquet')
-    
+    """Analyze all fields from the most recent complete year (2024)
+
+    One column at a time: peak memory is a single column, not the whole file.
+    """
+    path = '../data/historical_jobs_2024.parquet'
+    schema = pq.read_schema(path)
+    n_rows = pq.read_metadata(path).num_rows
+
+    # A stored pandas index shows up in the arrow schema but never was a
+    # column in the old full-DataFrame read — don't document it as a field.
+    col_names = [c for c in schema.names if not c.startswith('__index_level_')]
+
     field_data = []
-    
-    for col in sorted(df.columns):
+
+    for col_name in sorted(col_names):
+        df = pd.read_parquet(path, columns=[col_name])
+        col = col_name  # keep the rest of the loop reading as before
+
         # Determine data type
         dtype = str(df[col].dtype)
         if dtype == 'object':
@@ -164,7 +187,7 @@ def analyze_all_fields():
             field_type = "String"
         
         # Calculate completeness
-        completeness = (df[col].notna().sum() / len(df)) * 100
+        completeness = (df[col].notna().sum() / n_rows) * 100 if n_rows else 0
         
         # Get examples
         examples, unique_count = get_field_examples(df[col], col)
@@ -208,11 +231,10 @@ def get_latest_date():
     all_files = glob.glob('../data/historical_jobs_*.parquet') + glob.glob('../data/current_jobs_*.parquet')
     
     for file in all_files:
-        df = pd.read_parquet(file)
-        if 'inserted_at' in df.columns:
-            df['inserted_at'] = pd.to_datetime(df['inserted_at'], errors='coerce')
-            file_latest = df['inserted_at'].max()
-            
+        df = read_cols(file, ['inserted_at'])
+        if df is not None:
+            file_latest = pd.to_datetime(df['inserted_at'], errors='coerce').max()
+
             if pd.notna(file_latest) and (latest_date is None or file_latest > latest_date):
                 latest_date = file_latest
     
@@ -227,8 +249,7 @@ def generate_docs_data():
     total_jobs = 0
     
     for file in all_files:
-        df = pd.read_parquet(file)
-        total_jobs += len(df)
+        total_jobs += pq.read_metadata(file).num_rows
     
     # Generate all data
     coverage_data = analyze_data_coverage()
