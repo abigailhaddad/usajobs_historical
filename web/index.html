@@ -21,6 +21,8 @@
             white-space: nowrap;
         }
         .full-dataset-link:hover { text-decoration: underline; }
+        .csv-note { margin-top: 0.5rem; font-size: 0.88rem; color: #7A6E62; }
+        .csv-note a { color: #2d6e4e; }
         .dataTables_wrapper .row {
             margin: 0;
         }
@@ -147,12 +149,7 @@
         const API_BASE = '';
         window.API_BASE = API_BASE;
 
-        // Keep in sync with MAX_ROWS in api/download.py. Larger exports exceed
-        // the serverless response limits, so we ask the user to filter first.
-        const DOWNLOAD_ROW_LIMIT = 150000;
-        // Full deduplicated dataset (all rows, same columns) as a single parquet
-        // on R2 — the escape hatch when a CSV export is over the row limit.
-        const FULL_DATASET_URL = 'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr.parquet';
+        // DOWNLOAD_ROW_LIMIT and FULL_DATASET_URL come from shared/shared.js.
 
         // ============================================
         // Column Configuration
@@ -529,21 +526,8 @@
             csvBtn.className = 'csv-download-btn';
             csvBtn.textContent = 'Download CSV';
             csvBtn.title = 'Download filtered data as CSV';
+            csvBtn.disabled = true;  // enabled by the first draw, once the count is known
             csvBtn.addEventListener('click', function () {
-                // The page already knows the filtered row count — check it
-                // before downloading so an oversized export shows a friendly
-                // message instead of an opaque error page.
-                const info = table.page.info();
-                const count = info ? info.recordsDisplay : null;
-                if (count !== null && count > DOWNLOAD_ROW_LIMIT) {
-                    showToast(
-                        'Too many rows to download (' + formatNumber(count) + '). ' +
-                        'Add filters to narrow to ' + formatNumber(DOWNLOAD_ROW_LIMIT) + ' or fewer, ' +
-                        'or use the "Full dataset" link for everything.',
-                        true
-                    );
-                    return;
-                }
                 const qs = filterManager.getFilterQueryString();
                 const url = API_BASE + '/api/download' + (qs ? '?' + qs : '');
                 window.open(url, '_blank');
@@ -561,10 +545,37 @@
             fullLink.rel = 'noopener';
             toolbarEl.appendChild(fullLink);
 
+            // Say whether the current filters are exportable before the user
+            // clicks, so an oversized selection never becomes a failed download.
+            const csvNote = document.createElement('div');
+            csvNote.className = 'csv-note';
+            csvNote.textContent = 'Checking…';
+            toolbarEl.insertAdjacentElement('afterend', csvNote);
+
+            function updateCsvButton(count) {
+                if (count === 0) {
+                    csvBtn.disabled = true;
+                    csvBtn.textContent = 'Download CSV';
+                    csvNote.textContent = 'No listings match these filters.';
+                } else if (count > DOWNLOAD_ROW_LIMIT) {
+                    csvBtn.disabled = true;
+                    csvBtn.textContent = 'Download CSV';
+                    csvNote.innerHTML = formatNumber(count) + ' listings is over the ' +
+                        formatNumber(DOWNLOAD_ROW_LIMIT) + '-row CSV limit. Add filters, or get every row as ' +
+                        'the <a href="' + FULL_DATASET_URL + '" target="_blank" rel="noopener">' +
+                        'full dataset (parquet)</a>.';
+                } else {
+                    csvBtn.disabled = false;
+                    csvBtn.textContent = 'Download CSV (' + formatNumber(count) + ' listings)';
+                    csvNote.textContent = '';
+                }
+            }
+
             // Update stats on every table draw
             table.on('draw', function () {
                 const info = table.page.info();
                 document.getElementById('statTotal').textContent = formatNumber(info.recordsDisplay);
+                updateCsvButton(info.recordsDisplay);
 
                 // Agency count is approximate from chart data, updated in updateCharts
             });

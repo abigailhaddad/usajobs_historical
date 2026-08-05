@@ -147,9 +147,7 @@
         const API_BASE = '';
         window.API_BASE = API_BASE;
 
-        // Keep in sync with MAX_ROWS in api/download.py.
-        const DOWNLOAD_ROW_LIMIT = 150000;
-        const FULL_DATASET_URL = 'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr.parquet';
+        // DOWNLOAD_ROW_LIMIT and FULL_DATASET_URL come from shared/shared.js.
 
         // Dimensions the pivot endpoint accepts. `multi` flags '; '-delimited
         // fields where one listing can carry several values.
