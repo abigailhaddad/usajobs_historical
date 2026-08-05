@@ -147,8 +147,12 @@ jobs:
         BACKFILL_START_DATE: ${{ inputs.backfill_start_date }}
         BACKFILL_END_DATE: ${{ inputs.backfill_end_date }}
       run: |
+        free -h || true
         cd update
-        python update_all.py
+        # -u: unbuffered. When the runner gets OOM-killed mid-step, buffered
+        # progress output dies with it and the log just stops with no clue
+        # which phase was running. Unbuffered output survives the kill.
+        python -u update_all.py
 
     - name: Check for Current API warning
       if: always()

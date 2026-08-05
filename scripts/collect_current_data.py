@@ -18,6 +18,7 @@ import time
 import requests
 from typing import List, Dict, Optional
 import pandas as pd
+import pyarrow.parquet as pq
 from datetime import datetime
 import os
 from tqdm import tqdm
@@ -196,10 +197,15 @@ def flatten_current_job(job_item: dict, appointment_type_map: dict, hiring_path_
 
 
 def load_existing_jobs(parquet_path: str) -> set:
-    """Load existing control numbers from parquet file"""
+    """Load existing control numbers from parquet file.
+
+    Reads ONLY the control number column. These files are gigabytes of job
+    description text; loading them whole to get one column is what was
+    OOM-killing the daily update runner.
+    """
     if os.path.exists(parquet_path):
         try:
-            df = pd.read_parquet(parquet_path)
+            df = pd.read_parquet(parquet_path, columns=['usajobsControlNumber'])
             return set(df['usajobsControlNumber'].dropna().astype(str))
         except Exception as e:
             print(f"⚠️ Warning: Could not read existing parquet file {parquet_path}: {e}")
@@ -666,13 +672,17 @@ def main():
             save_jobs_to_parquet(new_jobs, parquet_path)
             total_new_jobs += len(new_jobs)
         
-        # Show stats for this year
+        # Show stats for this year (row count from metadata, one column for the
+        # open count — never load the whole file just to print two numbers)
         if os.path.exists(parquet_path):
             try:
-                df = pd.read_parquet(parquet_path)
-                total_current = len(df)
-                open_jobs = len(df[df['positionOpeningStatus'] == 'Open']) if 'positionOpeningStatus' in df.columns else 0
-                
+                total_current = pq.read_metadata(parquet_path).num_rows
+                if 'positionOpeningStatus' in pq.read_schema(parquet_path).names:
+                    status = pd.read_parquet(parquet_path, columns=['positionOpeningStatus'])
+                    open_jobs = int((status['positionOpeningStatus'] == 'Open').sum())
+                else:
+                    open_jobs = 0
+
                 print(f"   ✅ {year} parquet file now contains:")
                 print(f"      - {total_current:,} total current jobs")
                 print(f"      - {open_jobs:,} open positions")

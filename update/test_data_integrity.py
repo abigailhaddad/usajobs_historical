@@ -32,26 +32,26 @@ def check_parquet_file(filepath, min_rows, required_columns, description):
         return False
 
     try:
-        # Check if file is valid parquet
+        # Check if file is valid parquet. Row count and column names both come
+        # from the footer — these files are gigabytes of announcement text and
+        # don't need to be loaded into pandas to be checked.
         pq_file = pq.ParquetFile(filepath)
-        schema = pq_file.schema
-
-        # Read the data
-        df = pd.read_parquet(filepath)
+        n_rows = pq_file.metadata.num_rows
+        columns = pq_file.schema_arrow.names
 
         # Check row count
-        if len(df) < min_rows:
+        if n_rows < min_rows:
             print(f"{Colors.RED}❌ FAIL{Colors.RESET} {description}")
-            print(f"     Expected at least {min_rows} rows, found {len(df)}")
+            print(f"     Expected at least {min_rows} rows, found {n_rows}")
             return False
 
         # Check columns
-        missing_cols = [col for col in required_columns if col not in df.columns]
+        missing_cols = [col for col in required_columns if col not in columns]
         if missing_cols:
             print(f"{Colors.RED}❌ FAIL{Colors.RESET} {description} - Missing columns: {missing_cols}")
             return False
 
-        print(f"{Colors.GREEN}✅ PASS{Colors.RESET} {description} ({len(df):,} rows)")
+        print(f"{Colors.GREEN}✅ PASS{Colors.RESET} {description} ({n_rows:,} rows)")
         return True
 
     except Exception as e:
@@ -62,15 +62,17 @@ def check_parquet_file(filepath, min_rows, required_columns, description):
 def check_data_recency(filepath, max_days_old, description):
     """Check if data is recent enough"""
     try:
-        df = pd.read_parquet(filepath)
+        # Pick the date column from the schema, then load only that column.
+        available = pq.ParquetFile(filepath).schema_arrow.names
 
-        # Check if there's a date column
         date_columns = ['DatePosted', 'date_posted', 'PositionOpenDate', 'ApplicationCloseDate', 'applicationCloseDate', 'positionOpenDate']
         date_col = None
         for col in date_columns:
-            if col in df.columns:
+            if col in available:
                 date_col = col
                 break
+
+        df = pd.read_parquet(filepath, columns=[date_col]) if date_col else None
 
         if not date_col:
             print(f"{Colors.YELLOW}⚠️  WARN{Colors.RESET} {description} - No date column found")
@@ -120,8 +122,7 @@ def check_no_data_loss():
         filepath = f"../data/{filename}"
         if os.path.exists(filepath):
             try:
-                df = pd.read_parquet(filepath)
-                current_count = len(df)
+                current_count = pq.ParquetFile(filepath).metadata.num_rows
 
                 if current_count < baseline_count:
                     print(f"{Colors.RED}❌ FAIL{Colors.RESET} {filename} shrunk: {baseline_count} → {current_count}")
@@ -268,18 +269,21 @@ def check_data_consistency():
         if not os.path.exists(historical_file):
             historical_file = f'../data/historical_jobs_{current_year - 1}.parquet'
 
-        current_df = pd.read_parquet(current_file)
-        historical_df = pd.read_parquet(historical_file)
+        def load_ids(path):
+            """Load just the ID column, preferring PositionID, then control
+            number — loading the full file here is what OOM'd the runner."""
+            available = pq.ParquetFile(path).schema_arrow.names
+            ids = set()
+            if 'PositionID' in available:
+                ids = set(pd.read_parquet(path, columns=['PositionID'])['PositionID'].unique())
+            # Check for control numbers if PositionID doesn't exist
+            if not ids and 'usajobsControlNumber' in available:
+                ids = set(pd.read_parquet(path, columns=['usajobsControlNumber'])['usajobsControlNumber'].unique())
+            return ids
 
         # Current should be subset of or equal to historical for same year
-        current_ids = set(current_df['PositionID'].unique()) if 'PositionID' in current_df.columns else set()
-        historical_ids = set(historical_df['PositionID'].unique()) if 'PositionID' in historical_df.columns else set()
-
-        # Check for control numbers if PositionID doesn't exist
-        if not current_ids and 'usajobsControlNumber' in current_df.columns:
-            current_ids = set(current_df['usajobsControlNumber'].unique())
-        if not historical_ids and 'usajobsControlNumber' in historical_df.columns:
-            historical_ids = set(historical_df['usajobsControlNumber'].unique())
+        current_ids = load_ids(current_file)
+        historical_ids = load_ids(historical_file)
 
         if current_ids and historical_ids:
             missing_in_historical = current_ids - historical_ids
