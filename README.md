@@ -8,13 +8,13 @@
 
 ## Browse the Data
 
-**[Live site](https://usajobs-historical.vercel.app)** -- Interactive DataTable with filters, charts (jobs by month, top agencies, grade distribution), multi-column sorting, and shareable filter URLs. Shows a curated subset of 14 columns (title, agency, grade, salary, dates, location, etc.).
+**[Live site](https://usajobs-historical.abigailhaddad.com)** -- Interactive DataTable with filters, charts (jobs by month, top agencies, grade distribution), multi-column sorting, and shareable filter URLs. Shows a curated subset of 14 columns (title, agency, grade, salary, dates, location, etc.).
 
 ## Getting the Data
 
 | Option | What you get | How |
 |--------|-------------|-----|
-| **[Live site](https://usajobs-historical.vercel.app)** | 14 key columns, interactive filtering/charts | Just visit the site |
+| **[Live site](https://usajobs-historical.abigailhaddad.com)** | 14 key columns, interactive filtering/charts | Just visit the site |
 | **Web dataset** | Same 14 columns as the site, one parquet file | `python download_data.py --web-only` |
 | **Full dataset** | All 40+ fields per job (nested JSON, qualifications, duty descriptions, all original API fields) | `python download_data.py` |
 | **Run the pipeline yourself** | Collect your own data from the USAJobs APIs | See [Setup](#setup) below |
