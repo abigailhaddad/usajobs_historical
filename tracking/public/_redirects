@@ -1,0 +1,9 @@
+# Send the Netlify subdomain to the custom domain. Netlify does not do this on
+# its own - a primary custom domain only adds a rel="canonical" header, which
+# search engines may honour and a person following an old link never will.
+# Full URLs on the left: a bare /* would match the custom domain too and
+# redirect it to itself forever. The ! forces the rule over index.html.
+# 302 while this is new; switch to 301 once it has run a while, since browsers
+# cache a 301 almost permanently.
+https://usajobs-tracker.netlify.app/*  https://usajobs-tracker.abigailhaddad.com/:splat  302!
+http://usajobs-tracker.netlify.app/*   https://usajobs-tracker.abigailhaddad.com/:splat  302!
