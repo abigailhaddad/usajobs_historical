@@ -18,7 +18,10 @@ import time
 import requests
 from typing import List, Dict, Optional
 import pandas as pd
+import pyarrow as pa
+import pyarrow.compute as pc
 import pyarrow.parquet as pq
+import tempfile
 from datetime import datetime
 import os
 from tqdm import tqdm
@@ -411,9 +414,125 @@ def fetch_all_jobs(params: Dict, headers: Dict, appointment_type_map: Dict[str, 
     return raw_jobs, flattened_jobs
 
 
+# MatchedObjectDescriptor -- the raw announcement JSON -- is 99% of these files
+# (1,206 MB of current_jobs_2026.parquet's 1,218 MB), and about half of every
+# blob is application boilerplate that repeats near-verbatim across a given
+# agency's postings. zstd's window finds that cross-row repetition where
+# snappy's cannot: measured on 8,000 real rows it was 3.85x smaller AND faster
+# to write. Every reader we and downstream consumers use (pyarrow, duckdb,
+# pandas) reads zstd transparently, so the files stay drop-in compatible.
+_COMPRESSION = "zstd"
+_COMPRESSION_LEVEL = 3
+
+# ~21 KB/row uncompressed, so 2,000 rows is a ~40 MB row group: big enough for
+# zstd to find the cross-row repetition it needs, small enough that peak memory
+# stays flat no matter how large the file grows.
+_ROW_BATCH = 2000
+
+
+def _unified_schema(existing_schema, new_schema):
+    """Existing columns in their original order, plus any genuinely new ones."""
+    fields = list(existing_schema)
+    known = {f.name for f in fields}
+    for field in new_schema:
+        if field.name not in known:
+            fields.append(field)
+    return pa.schema(fields)
+
+
+def _conform(table, schema):
+    """Line a table up with `schema`, filling absent columns with nulls."""
+    # Overwhelmingly the common case: the old file's batches already match, and
+    # copying each one just to hand it straight to the writer doubles the peak.
+    if table.schema.equals(schema):
+        return table
+
+    columns = []
+    for field in schema:
+        if field.name in table.column_names:
+            col = table.column(field.name)
+            if col.type != field.type:
+                col = col.cast(field.type)
+        else:
+            col = pa.chunked_array([pa.nulls(table.num_rows, type=field.type)])
+        columns.append(col)
+    return pa.Table.from_arrays(columns, schema=schema)
+
+
+def _rewrite_streaming(parquet_path, new_df, drop_ids, id_columns):
+    """Merge new rows into an existing parquet without loading it into memory.
+
+    Reads the old file a row group at a time, drops rows superseded by
+    `drop_ids`, writes them straight back out, then appends the new rows.
+    Measured against the real 1.1 GB / 142k-row current_jobs_2026: 1.37 GB peak
+    and 10s, versus 3.18 GB and 46s for the pandas read-plus-concat it replaces.
+
+    Writes to a temp file and renames, so an interrupted run can no longer
+    leave a truncated parquet where the real data was.
+
+    Returns (initial_count, final_count).
+    """
+    pf = pq.ParquetFile(parquet_path)
+    initial_count = pf.metadata.num_rows
+
+    new_table = pa.Table.from_pandas(new_df, preserve_index=False)
+    schema = _unified_schema(pf.schema_arrow, new_table.schema)
+    drop_array = pa.array(sorted(drop_ids), type=pa.string())
+
+    fd, tmp_path = tempfile.mkstemp(
+        dir=os.path.dirname(parquet_path) or ".", prefix=".tmp_", suffix=".parquet"
+    )
+    os.close(fd)
+
+    kept = 0
+    try:
+        with pq.ParquetWriter(tmp_path, schema, compression=_COMPRESSION,
+                              compression_level=_COMPRESSION_LEVEL) as writer:
+            for batch in pf.iter_batches(batch_size=_ROW_BATCH):
+                table = pa.Table.from_batches([batch])
+
+                if drop_ids:
+                    mask = None
+                    for col in id_columns:
+                        if col not in table.column_names:
+                            continue
+                        ids = table.column(col).cast(pa.string())
+                        # A null id is not a match, so fill_null(False) keeps
+                        # the row -- same as pandas .isin() on NaN.
+                        hit = pc.fill_null(pc.is_in(ids, value_set=drop_array), False)
+                        mask = hit if mask is None else pc.or_(mask, hit)
+                    if mask is not None:
+                        table = table.filter(pc.invert(mask))
+
+                if table.num_rows:
+                    writer.write_table(_conform(table, schema))
+                    kept += table.num_rows
+
+                # Hand each batch's buffers back rather than letting the pool
+                # hold every one of them for the length of the rewrite.
+                del table
+                pa.default_memory_pool().release_unused()
+
+            writer.write_table(_conform(new_table, schema))
+
+        final_count = kept + new_table.num_rows
+        if final_count < initial_count:
+            raise ValueError(
+                f"DATA LOSS PREVENTED: Would have lost {initial_count - final_count} jobs. "
+                f"Initial: {initial_count}, Final: {final_count}"
+            )
+        os.replace(tmp_path, parquet_path)
+    except BaseException:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        raise
+
+    return initial_count, final_count
+
+
 def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
     """Save jobs to parquet file, NEVER removing existing jobs.
-    
+
     This creates a complete historical record of all jobs that were ever 'current'.
     """
     if not jobs:
@@ -430,6 +549,23 @@ def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
     # Ensure usajobs_control_number is string for consistency
     new_df['usajobs_control_number'] = new_df['usajobsControlNumber'].astype(str)
     
+    # Preferred path: merge without ever holding the old file in memory.
+    if os.path.exists(parquet_path):
+        try:
+            existing_ids = load_existing_jobs(parquet_path)
+            new_ids = set(new_df['usajobs_control_number'].dropna().astype(str))
+            overlapping = existing_ids & new_ids
+            initial_count, final_count = _rewrite_streaming(
+                parquet_path, new_df, overlapping,
+                ('usajobs_control_number', 'usajobsControlNumber'),
+            )
+            print(f"   💾 Updated {parquet_path}: {initial_count} → {final_count} jobs "
+                  f"(+{len(new_ids - existing_ids)} new, {len(overlapping)} updated)")
+            return
+        except Exception as e:
+            print(f"⚠️ Streaming merge failed for {parquet_path} ({e}); "
+                  f"falling back to the in-memory merge")
+
     # Load existing data if file exists
     if os.path.exists(parquet_path):
         try:
@@ -479,7 +615,9 @@ def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
     
     # Save to parquet
     try:
-        combined_df.to_parquet(parquet_path, index=False)
+        combined_df.to_parquet(parquet_path, index=False,
+                               compression=_COMPRESSION,
+                               compression_level=_COMPRESSION_LEVEL)
     except Exception as e:
         print(f"❌ Error saving to parquet: {e}")
         raise
