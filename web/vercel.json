@@ -1,4 +1,18 @@
 {
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "usajobs-historical.vercel.app" }],
+      "destination": "https://usajobs-historical.abigailhaddad.com/",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "usajobs-historical.vercel.app" }],
+      "destination": "https://usajobs-historical.abigailhaddad.com/:path*",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ],

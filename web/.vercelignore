@@ -3,3 +3,11 @@ test_server.py
 tests/
 .wrangler/
 node_modules/
+
+# `vercel --prod` uploads the working tree, not the committed one, so anything
+# sitting in here goes live whether or not it was ever committed. These two are
+# untracked work-in-progress from May, unlinked from the index and 404 in
+# production — keep it that way until they are deliberately finished. Delete
+# these lines to publish them.
+hiring.html
+api/hiring_stats.py
