@@ -153,10 +153,23 @@
         const PARQUET_URL =
             'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr_v2.parquet';
 
-        // One connection for the page. Top-level await delays the rest of this
-        // module, which is fine: $(document).ready() below runs immediately
-        // when registered after the DOM is already parsed.
-        const conn = await initDb(PARQUET_URL);
+        // Started, not awaited. Booting DuckDB-WASM means downloading the wasm
+        // bundle and the parquet extension, which measured 7s warm and 17s cold
+        // — so nothing on the page may block on it. Everything that needs the
+        // connection awaits this promise at the point of use instead.
+        const connPromise = initDb(PARQUET_URL);
+
+        // Precomputed charts/stats for the unfiltered view, so the page paints
+        // in well under a second instead of waiting on the boot above. It is a
+        // PLACEHOLDER: it goes stale between pipeline runs, so the real query
+        // always follows and overwrites it.
+        const staticPromise = fetch('data/static.json')
+            .then(r => (r.ok ? r.json() : null))
+            .catch(() => null);
+
+        // Guards against the placeholder landing after the live results and
+        // rendering the page backwards.
+        let chartsAreLive = false;
 
         // ============================================
         // Column Configuration
@@ -347,17 +360,10 @@
             });
         }
 
-        async function updateCharts(filterParams) {
-            const params = filterParams || {};
-
-            try {
-                const [monthResp, agencyResp, seriesResp, gradeResp] = await Promise.all([
-                    aggregate(conn, 'month', params),
-                    aggregate(conn, 'department', params),
-                    aggregate(conn, 'series', params),
-                    aggregate(conn, 'grade', params)
-                ]);
-
+        // Rendering is split from fetching so the same code paints both the
+        // precomputed static.json (instant, on first load) and live query
+        // results. The old build had two renderers that had to be kept in sync.
+        function renderCharts(monthResp, agencyResp, seriesResp, gradeResp) {
                 // Jobs by Month
                 if (monthResp.labels) {
                     chartMonth.data.labels = monthResp.labels.map(m => {
@@ -408,7 +414,19 @@
                 if (monthResp.datasets && monthResp.datasets.distinct_series !== undefined) {
                     document.getElementById('statSeries').textContent = formatNumber(monthResp.datasets.distinct_series);
                 }
+        }
 
+        async function updateCharts(filterParams) {
+            const params = filterParams || {};
+            try {
+                const conn = await connPromise;
+                const [monthResp, agencyResp, seriesResp, gradeResp] = await Promise.all([
+                    aggregate(conn, 'month', params),
+                    aggregate(conn, 'department', params),
+                    aggregate(conn, 'series', params),
+                    aggregate(conn, 'grade', params)
+                ]);
+                renderCharts(monthResp, agencyResp, seriesResp, gradeResp);
             } catch (err) {
                 console.error('Failed to update charts:', err);
                 showToast('Failed to load chart data', true);
@@ -431,7 +449,8 @@
                 syncURL: true,
                 showCopyLinkButton: true,
                 // Dropdown values now come from the parquet, not /api/filter_options.
-                fetchOptions: (field) => filterOptions(conn, field).then(r => r.values),
+                fetchOptions: (field) =>
+                    connPromise.then(conn => filterOptions(conn, field)).then(r => r.values),
                 onFilterChange: function () {
                     updateCharts(filterManager.getServerParams());
                 }
@@ -453,10 +472,13 @@
                         params['order[' + i + '][column]'] = o.column;
                         params['order[' + i + '][dir]'] = o.dir;
                     });
-                    jobs(conn, params).then(callback).catch(function (err) {
-                        console.error('Table data load failed:', err);
-                        showToast('Failed to load listings', true);
-                    });
+                    connPromise
+                        .then(conn => jobs(conn, params))
+                        .then(callback)
+                        .catch(function (err) {
+                            console.error('Table data load failed:', err);
+                            showToast('Failed to load listings', true);
+                        });
                 },
                 columns: [
                     { data: 0 },  // Position Title
@@ -541,6 +563,7 @@
                 csvBtn.disabled = true;
                 csvBtn.textContent = 'Preparing…';
                 try {
+                    const conn = await connPromise;
                     const csv = await downloadCsv(conn, filterManager.getServerParams());
                     const url = URL.createObjectURL(
                         new Blob([csv], { type: 'text/csv;charset=utf-8' }));
@@ -607,12 +630,26 @@
                 // Agency count is approximate from chart data, updated in updateCharts
             });
 
-            // static.json (and the second chart-rendering path that consumed
-            // it) existed only to paper over multi-second cold starts on the
-            // Python API. Aggregates now run in ~0.2s straight from the
-            // parquet, so there is one code path and no precomputed copy to
-            // keep in sync.
-            updateCharts(filterManager.getServerParams());
+            // Paint the precomputed view first so the page is useful while
+            // DuckDB boots, then always re-query and overwrite it. Only worth
+            // doing for the unfiltered view — static.json covers no other.
+            const activeParams = filterManager.getServerParams();
+            const hasFilters = Object.keys(filterManager.activeFilters).length > 0;
+            if (!hasFilters) {
+                staticPromise.then(staticData => {
+                    // Skip if the live results already landed; re-rendering
+                    // stale placeholder data over fresh data would be a
+                    // visible flicker backwards.
+                    if (!staticData || chartsAreLive) return;
+                    renderCharts(staticData.month, staticData.department,
+                                 staticData.series, staticData.grade);
+                    if (staticData.jobs) {
+                        document.getElementById('statTotal').textContent =
+                            formatNumber(staticData.jobs.recordsTotal);
+                    }
+                });
+            }
+            updateCharts(activeParams).then(() => { chartsAreLive = true; });
         });
 
     </script>
