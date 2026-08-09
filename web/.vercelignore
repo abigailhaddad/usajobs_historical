@@ -1,7 +1,16 @@
-# The Vercel project is now a redirect stub only (see vercel.json) — the site
-# is served from Cloudflare Pages out of dist/. Nothing here should ever be
-# published, but `vercel --prod` uploads the working tree, so keep the list
-# accurate in case the stub is ever redeployed.
+# The Vercel project is now a REDIRECT STUB ONLY. The site moved to Cloudflare
+# Pages on 2026-08-09 and is served from dist/. The only reason this project
+# still exists is the host redirects in vercel.json, which keep
+# usajobs-historical.vercel.app working — deleting the project kills those URLs
+# permanently. The /api rewrites and CORS headers that used to be in
+# vercel.json died with the serverless functions.
+#
+# (This explanation lives here rather than in vercel.json because that file is
+# schema-validated and rejects unknown keys — a "_comment" property fails the
+# deploy with `should NOT have additional property`.)
+#
+# Nothing below should ever be published, but `vercel --prod` uploads the
+# working tree, so keep the list accurate in case the stub is redeployed.
 
 # Local working copies. The site reads the parquet and static.json from R2.
 data/
