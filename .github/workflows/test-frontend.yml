@@ -56,7 +56,8 @@ jobs:
 
     - name: Start test server
       run: |
-        cd web && python test_server.py &
+        # test_server.py is gone — the site is static now, so any file server does.
+        cd web && python -m http.server 3333 --bind 127.0.0.1 &
         # Wait for server to be ready
         for i in $(seq 1 30); do
           if curl -s http://localhost:3333 > /dev/null 2>&1; then
@@ -71,7 +72,7 @@ jobs:
 
     - name: Run filter parity tests
       run: |
-        python -m pytest web/tests/test_filters_parity.py -v
+        python -m pytest web/tests/test_filters.py -v
 
     - name: Run frontend E2E tests
       run: |

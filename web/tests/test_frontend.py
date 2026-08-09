@@ -14,6 +14,16 @@ from playwright.sync_api import Page, expect
 
 BASE_URL = "http://localhost:3333"
 
+# The jobs table waits on the DuckDB-WASM boot: downloading the wasm bundle and
+# the parquet extension before the first query can run. Measured on a cold
+# browser with nothing cached that exceeds 30s, which is what this file used to
+# allow — the suite failed here on 2026-08-09 after the site moved off the
+# server API. Charts do NOT need this: they paint from static.json in ~0.5s,
+# which is why only the table waits are long.
+TABLE_TIMEOUT = 120000
+CHART_TIMEOUT = 30000
+
+
 
 @pytest.fixture(scope="session")
 def browser_context_args():
@@ -27,14 +37,14 @@ def browser_context_args():
 def test_page_loads_table_with_data(page: Page):
     page.goto(BASE_URL)
     # Wait for DataTables to finish loading rows
-    page.wait_for_selector("#jobsTable tbody tr td", timeout=30000)
+    page.wait_for_selector("#jobsTable tbody tr td", timeout=TABLE_TIMEOUT)
     rows = page.locator("#jobsTable tbody tr")
     assert rows.count() > 0, "Expected data rows in the table"
 
 
 def test_page_loads_charts_visible(page: Page):
     page.goto(BASE_URL)
-    page.wait_for_selector("#chartMonth", timeout=30000)
+    page.wait_for_selector("#chartMonth", timeout=CHART_TIMEOUT)
     for chart_id in ["chartMonth", "chartAgency", "chartGrade"]:
         canvas = page.locator(f"#{chart_id}")
         expect(canvas).to_be_visible()
@@ -46,7 +56,7 @@ def test_page_loads_charts_visible(page: Page):
 
 def test_sort_click_redraws_table(page: Page):
     page.goto(BASE_URL)
-    page.wait_for_selector("#jobsTable tbody tr td", timeout=30000)
+    page.wait_for_selector("#jobsTable tbody tr td", timeout=TABLE_TIMEOUT)
 
     # Get first row before sort
     first_row_before = page.locator("#jobsTable tbody tr").first.inner_text()
@@ -66,7 +76,7 @@ def test_sort_click_redraws_table(page: Page):
 
 def test_filter_add_and_remove(page: Page):
     page.goto(BASE_URL)
-    page.wait_for_selector("#jobsTable tbody tr td", timeout=30000)
+    page.wait_for_selector("#jobsTable tbody tr td", timeout=TABLE_TIMEOUT)
 
     # Verify empty state
     empty_msg = page.locator("#filtersBar .filters-bar-empty")
@@ -111,7 +121,7 @@ def test_filter_add_and_remove(page: Page):
 def test_chart_month_rendered(page: Page):
     page.goto(BASE_URL)
     # Wait for chart data to load
-    page.wait_for_selector("#chartMonth", timeout=30000)
+    page.wait_for_selector("#chartMonth", timeout=CHART_TIMEOUT)
     page.wait_for_timeout(3000)  # Allow charts to render with data
 
     canvas = page.locator("#chartMonth")
@@ -124,7 +134,7 @@ def test_chart_month_rendered(page: Page):
 
 def test_chart_month_no_decimal_y_labels(page: Page):
     page.goto(BASE_URL)
-    page.wait_for_selector("#chartMonth", timeout=30000)
+    page.wait_for_selector("#chartMonth", timeout=CHART_TIMEOUT)
     page.wait_for_timeout(3000)
 
     # Use Chart.js API to check y-axis tick values have precision 0
@@ -146,7 +156,7 @@ def test_chart_month_no_decimal_y_labels(page: Page):
 def test_charts_have_data(page: Page):
     """Every chart should have non-empty labels (i.e. actual bars/points, not just axes)."""
     page.goto(BASE_URL)
-    page.wait_for_selector("#chartMonth", timeout=30000)
+    page.wait_for_selector("#chartMonth", timeout=CHART_TIMEOUT)
     page.wait_for_timeout(3000)
 
     for chart_id in ["chartMonth", "chartAgency", "chartGrade"]:
@@ -160,7 +170,7 @@ def test_charts_have_data(page: Page):
 
 def test_copy_link_button_exists(page: Page):
     page.goto(BASE_URL)
-    page.wait_for_selector(".copy-link-btn", timeout=30000)
+    page.wait_for_selector(".copy-link-btn", timeout=CHART_TIMEOUT)
     btn = page.locator(".copy-link-btn")
     expect(btn).to_be_visible()
     expect(btn).to_have_text("Copy Link")

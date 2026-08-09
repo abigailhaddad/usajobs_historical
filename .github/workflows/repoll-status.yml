@@ -142,7 +142,7 @@ jobs:
 
     - name: Test web data and filter parity
       run: |
-        python -m pytest web/tests/test_filters_parity.py -v
+        python -m pytest web/tests/test_filters.py -v
 
     - name: Sync to R2
       if: steps.data_tests.outcome == 'success'

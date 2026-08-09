@@ -1,4 +1,12 @@
 {
+  "_comment": [
+    "The site moved to Cloudflare Pages on 2026-08-09.",
+    "This Vercel project exists ONLY to keep usajobs-historical.vercel.app",
+    "working — the redirects below are the sole reason not to delete it.",
+    "Deleting the project kills those URLs permanently.",
+    "The /api rewrites and CORS headers that used to live here are gone with",
+    "the serverless functions; the browser queries the parquet on R2 directly."
+  ],
   "redirects": [
     {
       "source": "/",
@@ -11,18 +19,6 @@
       "has": [{ "type": "host", "value": "usajobs-historical.vercel.app" }],
       "destination": "https://usajobs-historical.abigailhaddad.com/:path*",
       "permanent": false
-    }
-  ],
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" }
-  ],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" }
-      ]
     }
   ]
 }

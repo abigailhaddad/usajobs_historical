@@ -346,7 +346,7 @@ jobs:
       if: env.CHANGES_MADE == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         pip install pytest duckdb
-        python -m pytest web/tests/test_filters_parity.py -v
+        python -m pytest web/tests/test_filters.py -v
 
     - name: Sync to R2
       if: (env.CHANGES_MADE == 'true' || github.event_name == 'workflow_dispatch') && steps.data_tests.outcome == 'success'

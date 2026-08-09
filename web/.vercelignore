@@ -1,24 +1,18 @@
-# Local working copies only. The site reads both the parquet and static.json
-# from R2 (web/data/static.json is gitignored, so it is not in a deploy
-# anyway).
-data/
-test_server.py
-tests/
-.wrangler/
-node_modules/
+# The Vercel project is now a redirect stub only (see vercel.json) — the site
+# is served from Cloudflare Pages out of dist/. Nothing here should ever be
+# published, but `vercel --prod` uploads the working tree, so keep the list
+# accurate in case the stub is ever redeployed.
 
-# Cloudflare Pages build output. Without this, `vercel --prod` would serve a
-# second copy of the whole site under /dist/*.
+# Local working copies. The site reads the parquet and static.json from R2.
+data/
+
+# Tests, and the Cloudflare Pages build output.
+tests/
 dist/
 
-# R2 bucket CORS policy — infrastructure config, applied with
+# R2 bucket CORS policy — infrastructure config applied with
 # `wrangler r2 bucket cors set`. Nothing serves it.
 r2-cors.json
 
-# `vercel --prod` uploads the working tree, not the committed one, so anything
-# sitting in here goes live whether or not it was ever committed. These two are
-# untracked work-in-progress from May, unlinked from the index and 404 in
-# production — keep it that way until they are deliberately finished. Delete
-# these lines to publish them.
-hiring.html
-api/hiring_stats.py
+.wrangler/
+node_modules/

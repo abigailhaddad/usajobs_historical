@@ -278,8 +278,13 @@ def build(web_dir: Path, dist_dir: Path, quiet: bool = False) -> list[str]:
 
     if not quiet:
         print(f"\n{len(files)} files, {human(total)} total -> {dist_dir}")
-        if EXCLUDED_PAGES:
-            print("Deliberately NOT published: " + ", ".join(sorted(EXCLUDED_PAGES)))
+        # Only mention exclusions that actually exist. hiring.html was deleted
+        # 2026-08-09; keeping it listed means restoring it from git will not
+        # abort the build, but announcing a withheld file that is not there is
+        # just noise.
+        withheld = sorted(p for p in EXCLUDED_PAGES if (WEB_DIR / p).exists())
+        if withheld:
+            print("Deliberately NOT published: " + ", ".join(withheld))
     return files
 
 
