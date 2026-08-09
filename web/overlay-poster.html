@@ -61,7 +61,14 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script>
+    <script type="module">
+        // Postings data comes from the parquet on R2 via DuckDB-WASM, the same
+        // as index.html and pivot.html. There is no server API any more.
+        import { initDb, aggregate } from './shared/wasm-api.js';
+
+        const PARQUET_URL =
+            'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr_v2.parquet';
+        const connPromise = initDb(PARQUET_URL);
         Chart.defaults.font.family = "'Source Sans 3', sans-serif";
         Chart.defaults.color = '#7A6E62';
 
@@ -178,14 +185,11 @@
             // typically returns an empty series; if anything throws, we
             // treat it as "no postings data" and let the panel render with
             // just the accessions line.
-            const qs = new URLSearchParams({
-                group_by: 'month',
-                filter_hiringDepartmentName: dept,
-            });
             try {
-                const resp = await fetch('/api/aggregate?' + qs);
-                if (!resp.ok) return { labels: [], counts: [] };
-                const data = await resp.json();
+                const conn = await connPromise;
+                const data = await aggregate(conn, 'month', {
+                    filter_hiringDepartmentName: dept,
+                });
                 return { labels: data.labels || [], counts: (data.datasets && data.datasets.count) || [] };
             } catch (_) {
                 return { labels: [], counts: [] };

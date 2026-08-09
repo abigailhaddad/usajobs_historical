@@ -10,6 +10,13 @@
 // Runs each case twice — once through shared/wasm-api.js against the v2 parquet
 // on R2, once against the live Python API — and diffs the results.
 //
+// HISTORICAL as of 2026-08-09: the Python endpoints this compares against have
+// been deleted, so every live fetch now 404s and every case reports a
+// difference. It is kept as the record of how the port was verified (28/28
+// matched, including both multi-value pivot dimensions). To run it again, point
+// `live` at a deployment that still serves /api/* — e.g.
+//   ?live=https://web-<old-deployment>-abigail-haddads-projects.vercel.app
+//
 // Both sides must be reachable: serve this from an origin in the R2 CORS policy
 // (python3 -m http.server 3333 from web/), and the live API sends
 // Access-Control-Allow-Origin: * so it can be fetched cross-origin.
