@@ -110,6 +110,7 @@ class ServerSideFilterManager {
      * @param {boolean} options.syncURL - Whether to sync filters to URL (default true)
      * @param {boolean} options.showCopyLinkButton - Whether to show copy-link button (default true)
      * @param {Function} options.onFilterChange - Callback when filters change (for chart updates)
+     * @param {Function} options.fetchOptions - async (field) => string[] of dropdown values
      */
     constructor(options) {
         this.tableSelector = options.tableSelector;
@@ -118,6 +119,7 @@ class ServerSideFilterManager {
         this.syncURL = options.syncURL !== false;
         this.showCopyLinkButton = options.showCopyLinkButton !== false;
         this.onFilterChange = options.onFilterChange || null;
+        this.fetchOptions = options.fetchOptions || null;
         this.table = null;
         this.activeFilters = {};
         this._optionsCache = {};
@@ -354,11 +356,10 @@ class ServerSideFilterManager {
         if (this._optionsCache[field]) {
             return this._optionsCache[field];
         }
-        const base = window.API_BASE || '';
-        const resp = await fetch(base + '/api/filter_options?field=' + encodeURIComponent(field));
-        const data = await resp.json();
-        if (data.error) throw new Error(data.error);
-        this._optionsCache[field] = data.values || [];
+        if (!this.fetchOptions) {
+            throw new Error('ServerSideFilterManager requires a fetchOptions(field) option');
+        }
+        this._optionsCache[field] = await this.fetchOptions(field);
         return this._optionsCache[field];
     }
 

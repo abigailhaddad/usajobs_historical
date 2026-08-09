@@ -142,14 +142,21 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="shared/shared.js"></script>
-    <script>
-        // ============================================
-        // API Configuration
-        // ============================================
-        const API_BASE = '';
-        window.API_BASE = API_BASE;
+    <script type="module">
+        // Data comes from the parquet on R2, queried in the browser with
+        // DuckDB-WASM. There is no server: the api/ functions are gone.
+        import { initDb, aggregate, jobs, downloadCsv, filterOptions }
+            from './shared/wasm-api.js';
 
         // DOWNLOAD_ROW_LIMIT and FULL_DATASET_URL come from shared/shared.js.
+
+        const PARQUET_URL =
+            'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr_v2.parquet';
+
+        // One connection for the page. Top-level await delays the rest of this
+        // module, which is fine: $(document).ready() below runs immediately
+        // when registered after the DOM is already parsed.
+        const conn = await initDb(PARQUET_URL);
 
         // ============================================
         // Column Configuration
@@ -340,16 +347,15 @@
             });
         }
 
-        async function updateCharts(filterQueryString) {
-            const qs = filterQueryString || '';
-            const sep = qs ? '&' : '';
+        async function updateCharts(filterParams) {
+            const params = filterParams || {};
 
             try {
                 const [monthResp, agencyResp, seriesResp, gradeResp] = await Promise.all([
-                    fetch(API_BASE + '/api/aggregate?group_by=month' + sep + qs).then(r => r.json()),
-                    fetch(API_BASE + '/api/aggregate?group_by=department' + sep + qs).then(r => r.json()),
-                    fetch(API_BASE + '/api/aggregate?group_by=series' + sep + qs).then(r => r.json()),
-                    fetch(API_BASE + '/api/aggregate?group_by=grade' + sep + qs).then(r => r.json())
+                    aggregate(conn, 'month', params),
+                    aggregate(conn, 'department', params),
+                    aggregate(conn, 'series', params),
+                    aggregate(conn, 'grade', params)
                 ]);
 
                 // Jobs by Month
@@ -424,8 +430,10 @@
                 filterBarId: 'filtersBar',
                 syncURL: true,
                 showCopyLinkButton: true,
+                // Dropdown values now come from the parquet, not /api/filter_options.
+                fetchOptions: (field) => filterOptions(conn, field).then(r => r.values),
                 onFilterChange: function () {
-                    updateCharts(filterManager.getFilterQueryString());
+                    updateCharts(filterManager.getServerParams());
                 }
             });
 
@@ -433,21 +441,22 @@
             const table = $('#jobsTable').DataTable({
                 serverSide: true,
                 processing: false,
-                ajax: {
-                    url: API_BASE + '/api/jobs',
-                    timeout: 120000,  // 2 min timeout for cold start
-                    data: function (d) {
-                        // Strip column metadata to keep URL short (server doesn't use it)
-                        delete d.columns;
-                        delete d.search;
-                        // Merge filter params into DataTables request
-                        const filterParams = filterManager.getServerParams();
-                        Object.assign(d, filterParams);
-                        return d;
-                    },
-                    error: function (xhr, error, thrown) {
-                        console.error('Table data load failed:', error, thrown);
-                    }
+                // As a function, DataTables hands us its request object and a
+                // callback instead of hitting a URL. Its nested order[] objects
+                // get flattened to the same order[i][column] keys the old query
+                // string used, so jobs() reads one shape either way.
+                ajax: function (d, callback) {
+                    const params = Object.assign({
+                        draw: d.draw, start: d.start, length: d.length,
+                    }, filterManager.getServerParams());
+                    (d.order || []).slice(0, 3).forEach(function (o, i) {
+                        params['order[' + i + '][column]'] = o.column;
+                        params['order[' + i + '][dir]'] = o.dir;
+                    });
+                    jobs(conn, params).then(callback).catch(function (err) {
+                        console.error('Table data load failed:', err);
+                        showToast('Failed to load listings', true);
+                    });
                 },
                 columns: [
                     { data: 0 },  // Position Title
@@ -527,10 +536,28 @@
             csvBtn.textContent = 'Download CSV';
             csvBtn.title = 'Download filtered data as CSV';
             csvBtn.disabled = true;  // enabled by the first draw, once the count is known
-            csvBtn.addEventListener('click', function () {
-                const qs = filterManager.getFilterQueryString();
-                const url = API_BASE + '/api/download' + (qs ? '?' + qs : '');
-                window.open(url, '_blank');
+            csvBtn.addEventListener('click', async function () {
+                const label = csvBtn.textContent;
+                csvBtn.disabled = true;
+                csvBtn.textContent = 'Preparing…';
+                try {
+                    const csv = await downloadCsv(conn, filterManager.getServerParams());
+                    const url = URL.createObjectURL(
+                        new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'usajobs_export.csv';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    csvBtn.disabled = false;
+                    csvBtn.textContent = label;
+                } catch (err) {
+                    // Restore from the real row count rather than guessing, so
+                    // the button and note stay consistent with the table.
+                    console.error('CSV export failed:', err);
+                    showToast(err.message || 'CSV export failed', true);
+                    updateCsvButton(table.page.info().recordsDisplay);
+                }
             });
             toolbarEl.appendChild(csvBtn);
 
@@ -580,75 +607,14 @@
                 // Agency count is approximate from chart data, updated in updateCharts
             });
 
-            // Load precomputed static data for instant first render
-            const hasFilters = Object.keys(filterManager.activeFilters).length > 0;
-            if (!hasFilters) {
-                fetch(API_BASE + '/api/static_data')
-                    .then(r => r.json())
-                    .then(staticData => {
-                        // Populate charts immediately from static data
-                        if (staticData.month) updateChartsFromData(staticData.month, staticData.department, staticData.series, staticData.grade);
-                        // Populate stats
-                        if (staticData.jobs) {
-                            document.getElementById('statTotal').textContent = formatNumber(staticData.jobs.recordsTotal);
-                        }
-                        // Prepopulate filter options cache so dropdowns open instantly
-                        if (staticData.filter_options) {
-                            for (const [field, values] of Object.entries(staticData.filter_options)) {
-                                filterManager._optionsCache[field] = values;
-                            }
-                        }
-                    })
-                    .catch(() => {
-                        // Fallback to live API
-                        updateCharts('');
-                    });
-            } else {
-                updateCharts(filterManager.getFilterQueryString());
-            }
+            // static.json (and the second chart-rendering path that consumed
+            // it) existed only to paper over multi-second cold starts on the
+            // Python API. Aggregates now run in ~0.2s straight from the
+            // parquet, so there is one code path and no precomputed copy to
+            // keep in sync.
+            updateCharts(filterManager.getServerParams());
         });
 
-        // Render charts from precomputed data (same logic as updateCharts but no fetch)
-        function updateChartsFromData(monthResp, agencyResp, seriesResp, gradeResp) {
-            if (monthResp && monthResp.labels) {
-                chartMonth.data.labels = monthResp.labels.map(m => {
-                    const [y, mo] = m.split('-');
-                    const d = new Date(y, mo - 1);
-                    return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-                });
-                chartMonth.data.datasets[0].data = monthResp.datasets.count;
-                chartMonth.update();
-
-                const minDate = monthResp.datasets.min_date;
-                const maxDate = monthResp.datasets.max_date;
-                if (minDate && maxDate) {
-                    const fmtDate = (d) => {
-                        const [y, mo, day] = d.split('-');
-                        return `${parseInt(mo)}/${parseInt(day)}/${y.slice(2)}`;
-                    };
-                    document.getElementById('statDateRange').textContent = fmtDate(minDate) + ' \u2013 ' + fmtDate(maxDate);
-                }
-                if (monthResp.datasets.distinct_series !== undefined) {
-                    document.getElementById('statSeries').textContent = formatNumber(monthResp.datasets.distinct_series);
-                }
-            }
-            if (agencyResp && agencyResp.labels) {
-                chartAgency.data.labels = agencyResp.labels;
-                chartAgency.data.datasets[0].data = agencyResp.datasets.count;
-                chartAgency.update();
-                document.getElementById('statAgencies').textContent = formatNumber(agencyResp.datasets.total_distinct || agencyResp.labels.length);
-            }
-            if (seriesResp && seriesResp.labels) {
-                chartSeries.data.labels = seriesResp.labels;
-                chartSeries.data.datasets[0].data = seriesResp.datasets.count;
-                chartSeries.update();
-            }
-            if (gradeResp && gradeResp.labels) {
-                chartGrade.data.labels = gradeResp.labels.map(g => 'GS-' + g);
-                chartGrade.data.datasets[0].data = gradeResp.datasets.count;
-                chartGrade.update();
-            }
-        }
     </script>
 </body>
 </html>
