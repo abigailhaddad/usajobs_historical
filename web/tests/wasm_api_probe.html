@@ -1,0 +1,144 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>wasm-api parity vs live Python API</title>
+<body style="font:13px ui-monospace,monospace;padding:1rem">
+<h3>shared/wasm-api.js vs the live /api/* endpoints</h3>
+<div id="status">running…</div>
+<pre id="out" style="white-space:pre-wrap"></pre>
+
+<script type="module">
+// Runs each case twice — once through shared/wasm-api.js against the v2 parquet
+// on R2, once against the live Python API — and diffs the results.
+//
+// Both sides must be reachable: serve this from an origin in the R2 CORS policy
+// (python3 -m http.server 3333 from web/), and the live API sends
+// Access-Control-Allow-Origin: * so it can be fetched cross-origin.
+//
+// Row-ORDER caveat: the live API reads the original parquet and this reads the
+// re-sorted v2 file. Where the ORDER BY has ties, the two can legitimately
+// return different rows for the same page. So `data` is compared as a sorted
+// multiset, and only when the whole result fits on one page.
+import { initDb, aggregate, jobs, filterOptions } from '../shared/wasm-api.js';
+
+const qs = new URLSearchParams(location.search);
+const PARQUET = qs.get('parquet')
+  || 'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr_v2.parquet';
+const LIVE = qs.get('live') || 'https://usajobs-historical.abigailhaddad.com';
+
+const DOJ = 'Department of Justice';
+const CASES = [
+  { n: 'aggregate:month',             fn: 'aggregate', arg: 'month',      p: {} },
+  { n: 'aggregate:agency',            fn: 'aggregate', arg: 'agency',     p: {} },
+  { n: 'aggregate:department',        fn: 'aggregate', arg: 'department', p: {} },
+  { n: 'aggregate:grade',             fn: 'aggregate', arg: 'grade',      p: {} },
+  { n: 'aggregate:series',            fn: 'aggregate', arg: 'series',     p: {} },
+  { n: 'aggregate:month+dept',        fn: 'aggregate', arg: 'month',      p: { filter_hiringDepartmentName: DOJ } },
+  { n: 'aggregate:grade+dept',        fn: 'aggregate', arg: 'grade',      p: { filter_hiringDepartmentName: DOJ } },
+  { n: 'aggregate:series+dept',       fn: 'aggregate', arg: 'series',     p: { filter_hiringDepartmentName: DOJ } },
+  { n: 'aggregate:department+grade7', fn: 'aggregate', arg: 'department', p: { filter_grade: 'GS-7' } },
+  { n: 'filter_options:grade',        fn: 'filterOptions', arg: 'grade',                p: {} },
+  { n: 'filter_options:agency',       fn: 'filterOptions', arg: 'hiringAgencyName',     p: {} },
+  { n: 'filter_options:department',   fn: 'filterOptions', arg: 'hiringDepartmentName', p: {} },
+  { n: 'filter_options:series',       fn: 'filterOptions', arg: 'occupationalSeries',   p: {} },
+  { n: 'jobs:default',                fn: 'jobs', p: { draw: 1, start: 0, length: 25 } },
+  { n: 'jobs:sorted-title-asc',       fn: 'jobs', p: { draw: 2, start: 0, length: 25, 'order[0][column]': 0, 'order[0][dir]': 'asc' } },
+  { n: 'jobs:filtered-dept',          fn: 'jobs', p: { draw: 3, start: 0, length: 25, filter_hiringDepartmentName: DOJ } },
+  { n: 'jobs:search-rare',            fn: 'jobs', p: { draw: 4, start: 0, length: 25, 'search[value]': 'astrophysicist' } },
+  { n: 'jobs:page2',                  fn: 'jobs', p: { draw: 5, start: 25, length: 25 } },
+  // These two fit on one page, so the row DATA gets compared, not just counts.
+  // Without them every jobs case passes on counts alone and the returned cell
+  // values are never actually checked against the Python API.
+  { n: 'jobs:single-row',             fn: 'jobs', p: { draw: 6, start: 0, length: 25, filter_usajobsControlNumber: '606669800' } },
+  { n: 'jobs:two-rows-search',        fn: 'jobs', p: { draw: 7, start: 0, length: 25, 'search[value]': 'volcanolog' } },
+];
+
+function liveUrl(c) {
+  const u = new URLSearchParams();
+  if (c.fn === 'aggregate') u.set('group_by', c.arg);
+  if (c.fn === 'filterOptions') u.set('field', c.arg);
+  for (const [k, v] of Object.entries(c.p)) u.set(k, v);
+  const path = c.fn === 'aggregate' ? 'aggregate' : c.fn === 'filterOptions' ? 'filter_options' : 'jobs';
+  return `${LIVE}/api/${path}?${u.toString()}`;
+}
+
+/** Deep compare; returns null if equal, else a short description of the first
+ *  difference found. Numbers compare by value so 5 and 5.0 match. */
+function diff(a, b, path = '') {
+  if (a === b) return null;
+  if (typeof a === 'number' && typeof b === 'number') {
+    return Math.abs(a - b) < 1e-9 ? null : `${path}: ${a} != ${b}`;
+  }
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return `${path}: length ${a.length} != ${b.length}`;
+    for (let i = 0; i < a.length; i += 1) {
+      const d = diff(a[i], b[i], `${path}[${i}]`);
+      if (d) return d;
+    }
+    return null;
+  }
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
+    const ka = Object.keys(a).sort(); const kb = Object.keys(b).sort();
+    if (ka.join(',') !== kb.join(',')) return `${path}: keys ${ka} != ${kb}`;
+    for (const k of ka) {
+      const d = diff(a[k], b[k], `${path}.${k}`);
+      if (d) return d;
+    }
+    return null;
+  }
+  return `${path}: ${JSON.stringify(a)} != ${JSON.stringify(b)}`;
+}
+
+const log = (s) => { document.getElementById('out').textContent += s + '\n'; };
+const status = document.getElementById('status');
+const results = [];
+
+try {
+  const conn = await initDb(PARQUET);
+  for (const c of CASES) {
+    status.textContent = 'running: ' + c.n;
+    let mine, theirs, note = '';
+    try {
+      if (c.fn === 'aggregate') mine = await aggregate(conn, c.arg, c.p);
+      else if (c.fn === 'filterOptions') mine = await filterOptions(conn, c.arg, c.p);
+      else mine = await jobs(conn, c.p);
+      theirs = await (await fetch(liveUrl(c))).json();
+    } catch (e) {
+      log(`ERROR ${c.n}: ${e && e.message || e}`);
+      results.push({ n: c.n, ok: false });
+      continue;
+    }
+
+    let d;
+    if (c.fn === 'jobs') {
+      // Counts must match exactly. Rows only compare meaningfully when the
+      // whole filtered set fits on this page (otherwise ORDER BY ties across
+      // the page boundary legitimately differ between the two files).
+      d = diff(
+        { recordsTotal: mine.recordsTotal, recordsFiltered: mine.recordsFiltered, draw: mine.draw },
+        { recordsTotal: theirs.recordsTotal, recordsFiltered: theirs.recordsFiltered, draw: theirs.draw },
+      );
+      const onePage = mine.recordsFiltered <= (c.p.length || 25) && (c.p.start || 0) === 0;
+      if (!d && onePage) {
+        const sortRows = (rs) => rs.map(r => JSON.stringify(r)).sort();
+        d = diff(sortRows(mine.data), sortRows(theirs.data), '.data(sorted)');
+        note = ' [rows compared as multiset]';
+      } else if (!d) {
+        note = ` [counts only; ${mine.recordsFiltered} rows spans pages, ties not comparable]`;
+      }
+    } else {
+      d = diff(mine, theirs);
+    }
+
+    results.push({ n: c.n, ok: !d });
+    log(`${d ? 'FAIL' : 'ok  '}  ${c.n}${note}${d ? '\n        ' + d : ''}`);
+  }
+  const bad = results.filter(r => !r.ok);
+  log(`\n${results.length - bad.length}/${results.length} match` +
+      (bad.length ? `\nFAILING: ${bad.map(b => b.n).join(', ')}` : ''));
+  status.textContent = bad.length ? 'DIFFERENCES' : 'ALL MATCH';
+} catch (e) {
+  status.textContent = 'FATAL';
+  log('FATAL: ' + (e && e.stack || e));
+}
+</script>
+</body>
