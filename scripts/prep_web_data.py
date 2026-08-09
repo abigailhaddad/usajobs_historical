@@ -493,9 +493,37 @@ def main():
         if out[col].dtype == object:
             out[col] = out[col].str.strip()
 
-    # Write output
+    # Write output.
+    #
+    # Shape matters as much as content here: the web viewer no longer reads this
+    # through a server, it queries it straight from R2 with DuckDB-WASM over HTTP
+    # range requests. Two properties make that fast, both measured 2026-08-09 on
+    # the 2.96M-row file:
+    #
+    #   ROW_GROUP_SIZE  a default pandas write produced THREE row groups for the
+    #                   whole file, so no rows could ever be skipped and the job
+    #                   listing query had to read 56 MB. At 100k rows/group (30
+    #                   groups) the same query reads 9 MB and went 7.0s -> 0.18s.
+    #   ORDER BY        sorting before writing lets dictionary encoding do its
+    #                   job: 68.9 MB unsorted vs 51.2 MB sorted, a 26% saving
+    #                   from the sort alone. Sort by the columns people filter
+    #                   and group by, so those also cluster into fewer groups.
+    #
+    # ZSTD over SNAPPY takes it from 129.2 MB to 51.2 MB overall (-60%).
+    #
+    # Written with DuckDB rather than to_parquet() because these three settings
+    # are exactly what was benchmarked, and DuckDB reads the DataFrame directly.
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
-    out.to_parquet(OUT_PATH, index=False, compression="snappy")
+    import duckdb as _duckdb
+    _write_con = _duckdb.connect(':memory:')
+    _write_con.register('out_df', out)
+    _write_con.execute(
+        f"COPY (SELECT * FROM out_df "
+        f"      ORDER BY \"hiringDepartmentName\", \"occupationalSeries\", "
+        f"               \"positionTitle\", \"locations\") "
+        f"TO '{OUT_PATH}' (FORMAT PARQUET, COMPRESSION ZSTD, ROW_GROUP_SIZE 100000)"
+    )
+    _write_con.close()
 
     # --- Stats ---
     file_size = os.path.getsize(OUT_PATH)
@@ -518,8 +546,36 @@ def main():
     import duckdb
     conn = duckdb.connect(':memory:')
 
-    # First page of results (default sort: openDate DESC, 25 rows)
-    col_list = ', '.join([f'COALESCE(CAST("{c}" AS VARCHAR), \'\')' for c in OUTPUT_COLUMNS])
+    # First page of results (default sort: openDate DESC, 25 rows).
+    #
+    # These rows must be in the ORDER THE TABLE RENDERS, which is not
+    # OUTPUT_COLUMNS (that is the parquet's storage order, control number
+    # first). They used to be written in storage order, so anything that fed
+    # them to the table would have put every value in the wrong column. Nothing
+    # did — index.html only ever read recordsTotal — but that was luck, not
+    # design. Keep this list identical to COLUMNS in web/shared/filters.js.
+    DISPLAY_COLUMNS = [
+        "positionTitle",
+        "occupationalSeries",
+        "hiringDepartmentName",
+        "hiringAgencyName",
+        "grade",
+        "minimumSalary",
+        "maximumSalary",
+        "openDate",
+        "closeDate",
+        "appointmentType",
+        "serviceType",
+        "locations",
+        "status",
+        "usajobsControlNumber",
+    ]
+    assert set(DISPLAY_COLUMNS) == set(OUTPUT_COLUMNS), (
+        "DISPLAY_COLUMNS and OUTPUT_COLUMNS must cover the same fields; "
+        f"only in DISPLAY: {set(DISPLAY_COLUMNS) - set(OUTPUT_COLUMNS)}, "
+        f"only in OUTPUT: {set(OUTPUT_COLUMNS) - set(DISPLAY_COLUMNS)}"
+    )
+    col_list = ', '.join([f'COALESCE(CAST("{c}" AS VARCHAR), \'\')' for c in DISPLAY_COLUMNS])
     first_page = conn.execute(
         f"SELECT {col_list} FROM read_parquet('{OUT_PATH}') "
         f"ORDER BY COALESCE(CAST(\"openDate\" AS VARCHAR), '') DESC LIMIT 25"

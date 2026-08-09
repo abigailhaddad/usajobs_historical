@@ -177,6 +177,31 @@ def test_filterable_columns_agree_across_implementations():
     assert json.loads(proc.stdout) == sorted(FILTERABLE_COLUMNS)
 
 
+def test_static_json_row_order_matches_the_table():
+    """The precomputed first page must be in the order the table renders.
+
+    scripts/prep_web_data.py writes static.json's jobs.data with
+    DISPLAY_COLUMNS; the table renders shared/filters.js COLUMNS. If those two
+    lists ever drift, every value lands in the wrong column with no error — the
+    rows still look like plausible data. They were written in the parquet's
+    storage order (control number first) until 2026-08-09.
+    """
+    import re
+    prep = (WEB.parent / 'scripts' / 'prep_web_data.py').read_text()
+    m = re.search(r'DISPLAY_COLUMNS = \[(.*?)\]', prep, re.S)
+    assert m, 'DISPLAY_COLUMNS not found in scripts/prep_web_data.py'
+    py_cols = re.findall(r'"([^"]+)"', m.group(1))
+
+    js = (WEB / 'shared' / 'filters.js').read_text()
+    m2 = re.search(r'export const COLUMNS = \[(.*?)\];', js, re.S)
+    assert m2, 'COLUMNS not found in shared/filters.js'
+    js_cols = re.findall(r"'([^']+)'", m2.group(1))
+
+    assert py_cols == js_cols, (
+        'static.json row order has drifted from the table column order:\n'
+        f'  prep_web_data.py: {py_cols}\n  filters.js:       {js_cols}')
+
+
 def test_grade_canonicalization_is_load_bearing():
     """GS-7 must also return the GS-07 rows. If this passes trivially (one form
     absent from the data) the corpus above is no longer testing anything."""
