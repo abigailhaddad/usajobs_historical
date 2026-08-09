@@ -263,20 +263,26 @@ export async function filterOptions(conn, field, params = {}) {
     AND TRIM(CAST("${field}" AS VARCHAR)) != '' ORDER BY val`, binds);
 
   let values = rows.map(r => r[0]).filter(v => v != null && v.trim());
-
-  if (field === 'grade') {
-    // Collapse zero-padded variants (GS-07 -> GS-7) to one option per grade,
-    // preferring the un-padded spelling for display.
-    const seen = new Map();
-    for (const v of values) {
-      const key = canonicalGrade(v);
-      const canonDisplay = key.toUpperCase();
-      if (v.toUpperCase() === canonDisplay) seen.set(key, canonDisplay);
-      else if (!seen.has(key)) seen.set(key, v);
-    }
-    values = [...seen.values()].sort();
-  }
+  if (field === 'grade') values = collapseGrades(values);
   return { values, count: values.length };
+}
+
+/** Collapse zero-padded grade variants (GS-07 -> GS-7) to one option each,
+ *  preferring the un-padded spelling for display.
+ *
+ *  Exported because the precomputed lists in static.json are NOT collapsed —
+ *  scripts/prep_web_data.py takes a plain DISTINCT — so priming a dropdown
+ *  from static.json would offer GS-07 and GS-7 as separate choices (3123
+ *  options instead of 2608). Both paths run this, so they agree. Idempotent. */
+export function collapseGrades(values) {
+  const seen = new Map();
+  for (const v of values) {
+    const key = canonicalGrade(v);
+    const canonDisplay = key.toUpperCase();
+    if (v.toUpperCase() === canonDisplay) seen.set(key, canonDisplay);
+    else if (!seen.has(key)) seen.set(key, v);
+  }
+  return [...seen.values()].sort();
 }
 
 // ── /api/pivot ──────────────────────────────────────────────────────────────

@@ -145,7 +145,7 @@
     <script type="module">
         // Data comes from the parquet on R2, queried in the browser with
         // DuckDB-WASM. There is no server: the api/ functions are gone.
-        import { initDb, aggregate, jobs, downloadCsv, filterOptions }
+        import { initDb, aggregate, jobs, downloadCsv, filterOptions, collapseGrades }
             from './shared/wasm-api.js';
 
         // DOWNLOAD_ROW_LIMIT and FULL_DATASET_URL come from shared/shared.js.
@@ -450,9 +450,21 @@
                 filterBarId: 'filtersBar',
                 syncURL: true,
                 showCopyLinkButton: true,
-                // Dropdown values now come from the parquet, not /api/filter_options.
-                fetchOptions: (field) =>
-                    connPromise.then(conn => filterOptions(conn, field)).then(r => r.values),
+                // static.json ships precomputed option lists for every dropdown
+                // field, so use those and skip the query entirely. Deriving the
+                // occupational-series list live costs ~900ms because it unnests
+                // a '; '-delimited column across 3M rows (the others ~200ms).
+                // Falls back to querying if static.json is missing a field.
+                fetchOptions: async (field) => {
+                    const staticData = await staticPromise;
+                    const precomputed = staticData?.filter_options?.[field];
+                    if (precomputed) {
+                        // static.json's grade list is uncollapsed; see collapseGrades.
+                        return field === 'grade' ? collapseGrades(precomputed) : precomputed;
+                    }
+                    const conn = await connPromise;
+                    return (await filterOptions(conn, field)).values;
+                },
                 onFilterChange: function () {
                     updateCharts(filterManager.getServerParams());
                 }

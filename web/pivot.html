@@ -148,7 +148,7 @@
         // browser with DuckDB-WASM; there is no server.
         // downloadCsv is imported as jobsCsv: this page already has a local
         // function called downloadCsv (the pivot export).
-        import { initDb, pivot, pivotCsv, jobs, downloadCsv as jobsCsv, filterOptions }
+        import { initDb, pivot, pivotCsv, jobs, downloadCsv as jobsCsv, filterOptions, collapseGrades }
             from './shared/wasm-api.js';
 
         // DOWNLOAD_ROW_LIMIT and FULL_DATASET_URL come from shared/shared.js.
@@ -158,6 +158,14 @@
 
         // Started, not awaited — see index.html. Callers await at point of use.
         const connPromise = initDb(PARQUET_URL);
+
+        // Precomputed dropdown option lists, so opening a filter does not wait
+        // on the DuckDB boot or on a ~900ms unnest for occupational series.
+        const STATIC_URL =
+            'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/static.json';
+        const staticPromise = fetch(STATIC_URL)
+            .then(r => (r.ok ? r.json() : null))
+            .catch(() => null);
 
         // Dimensions the pivot endpoint accepts. `multi` flags '; '-delimited
         // fields where one listing can carry several values.
@@ -493,9 +501,16 @@
                 columns: FILTER_COLUMNS,
                 filterBarId: 'filtersBar',
                 syncURL: true,
-                // Dropdown values now come from the parquet, not the API.
-                fetchOptions: (field) =>
-                    connPromise.then(conn => filterOptions(conn, field)).then(r => r.values),
+                // Precomputed lists first — see index.html for why.
+                fetchOptions: async (field) => {
+                    const staticData = await staticPromise;
+                    const precomputed = staticData?.filter_options?.[field];
+                    if (precomputed) {
+                        return field === 'grade' ? collapseGrades(precomputed) : precomputed;
+                    }
+                    const conn = await connPromise;
+                    return (await filterOptions(conn, field)).values;
+                },
                 // The manager rewrites the URL with the filter params *before*
                 // calling this, so we re-add `dims` afterward to keep both.
                 onFilterChange: function () {
