@@ -29,7 +29,7 @@ import { initDb, aggregate, jobs, filterOptions, pivot } from '../shared/wasm-ap
 
 const qs = new URLSearchParams(location.search);
 const PARQUET = qs.get('parquet')
-  || 'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr_v2.parquet';
+  || 'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr.parquet';
 const LIVE = qs.get('live') || 'https://usajobs-historical.abigailhaddad.com';
 
 const DOJ = 'Department of Justice';
