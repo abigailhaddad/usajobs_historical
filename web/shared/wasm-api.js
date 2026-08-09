@@ -275,6 +275,107 @@ export async function filterOptions(conn, field, params = {}) {
   return { values, count: values.length };
 }
 
+// ── /api/pivot ──────────────────────────────────────────────────────────────
+
+// key -> [header label, single-value SQL expression, multi-value source column].
+// Exactly one of expr / multiCol is set. multiCol values are split on '; ',
+// unnested, and counted with COUNT(DISTINCT control number).
+const DIMENSIONS = {
+  department:      ['Department',       `COALESCE(CAST("hiringDepartmentName" AS VARCHAR), 'Unknown')`, null],
+  agency:          ['Agency',           `COALESCE(CAST("hiringAgencyName" AS VARCHAR), 'Unknown')`, null],
+  year:            ['Year',             `strftime(CAST("openDate" AS DATE), '%Y')`, null],
+  month:           ['Month',            `strftime(CAST("openDate" AS DATE), '%Y-%m')`, null],
+  grade:           ['Grade',            `COALESCE(CAST("grade" AS VARCHAR), 'Unknown')`, null],
+  appointmentType: ['Appointment Type', `COALESCE(CAST("appointmentType" AS VARCHAR), 'Unknown')`, null],
+  serviceType:     ['Service',          `COALESCE(CAST("serviceType" AS VARCHAR), 'Unknown')`, null],
+  status:          ['Status',           `COALESCE(CAST("status" AS VARCHAR), 'Unknown')`, null],
+  series:          ['Occ. Series',      null, 'occupationalSeries'],
+  location:        ['Location',         null, 'locations'],
+};
+
+const CONTROL = '"usajobsControlNumber"';
+const MAX_DIMS = 6;
+const MAX_PREVIEW_ROWS = 500;
+const MAX_CSV_ROWS = 200000;
+
+/** Group by leading dimensions ascending, then rank by count within the
+ *  innermost level: [Year, Department] -> each year's top departments. */
+function orderClause(groupCols) {
+  return [...groupCols.slice(0, -1), 'cnt DESC', groupCols[groupCols.length - 1]].join(', ');
+}
+
+function buildPivotQuery(t, dims, whereSql) {
+  const headers = dims.map(k => DIMENSIONS[k][0]);
+  const groupCols = dims.map((_, i) => `d${i}`);
+  const orderBy = orderClause(groupCols);
+  const multiIdx = dims.findIndex(k => DIMENSIONS[k][2]);
+
+  if (multiIdx === -1) {
+    // One row per listing, so COUNT(*) is already the distinct-listing count.
+    const selects = dims.map((k, i) => `${DIMENSIONS[k][1]} AS d${i}`);
+    return {
+      headers,
+      sql: `SELECT ${selects.join(', ')}, COUNT(*) AS cnt FROM ${t} ${whereSql} ` +
+           `GROUP BY ${groupCols.join(', ')} ORDER BY ${orderBy}`,
+    };
+  }
+
+  // One multi-value dimension: unnest it in a flat subquery keeping the control
+  // number, then COUNT(DISTINCT control) so a listing counts once per value it
+  // actually carries.
+  const multiCol = DIMENSIONS[dims[multiIdx]][2];
+  const innerSelects = [`${CONTROL} AS _cn`, ...dims.map((k, i) => (
+    i === multiIdx
+      ? `TRIM(unnest(string_split(CAST("${multiCol}" AS VARCHAR), '; '))) AS d${i}`
+      : `${DIMENSIONS[k][1]} AS d${i}`))];
+  const alias = `d${multiIdx}`;
+  return {
+    headers,
+    sql: `SELECT ${groupCols.join(', ')}, COUNT(DISTINCT _cn) AS cnt FROM (` +
+         `SELECT ${innerSelects.join(', ')} FROM ${t} ${whereSql}) sub ` +
+         `WHERE ${alias} IS NOT NULL AND ${alias} <> '' ` +
+         `GROUP BY ${groupCols.join(', ')} ORDER BY ${orderBy}`,
+  };
+}
+
+/** Validate dims the way the endpoint did. Returns an error string or null. */
+function validateDims(dims) {
+  if (!dims.length) return 'dims is required, e.g. dims=department,year';
+  const bad = dims.filter(d => !(d in DIMENSIONS));
+  if (bad.length) return `unknown dimension(s): ${bad.join(', ')}`;
+  if (dims.length > MAX_DIMS) return `at most ${MAX_DIMS} dimensions allowed`;
+  if (dims.filter(d => DIMENSIONS[d][2]).length > 1) {
+    return 'pick at most one multi-value field (occupational series or location) at a time';
+  }
+  return null;
+}
+
+export async function pivot(conn, dims, params = {}) {
+  const err = validateDims(dims);
+  if (err) return { error: err };
+  const { whereSql, binds } = whereFrom(params);
+  const { sql, headers } = buildPivotQuery(src(conn), dims, whereSql);
+  const rows = await run(conn, `${sql} LIMIT ${MAX_PREVIEW_ROWS + 1}`, binds);
+  const truncated = rows.length > MAX_PREVIEW_ROWS;
+  return {
+    headers: [...headers, 'Count'],
+    rows: (truncated ? rows.slice(0, MAX_PREVIEW_ROWS) : rows).map(r => r.map(num)),
+    truncated,
+    preview_limit: MAX_PREVIEW_ROWS,
+    multi_value_dims: dims.filter(d => DIMENSIONS[d][2]),
+  };
+}
+
+/** The same pivot as a CSV string (the old ?format=csv path). */
+export async function pivotCsv(conn, dims, params = {}) {
+  const err = validateDims(dims);
+  if (err) throw new Error(err);
+  const { whereSql, binds } = whereFrom(params);
+  const { sql, headers } = buildPivotQuery(src(conn), dims, whereSql);
+  const rows = await run(conn, `${sql} LIMIT ${MAX_CSV_ROWS}`, binds);
+  return toCsv([...headers, 'Count'], rows.map(r => r.map(num)));
+}
+
 // ── /api/download ───────────────────────────────────────────────────────────
 
 /** Rows matching the filters, as a CSV string. Throws over the row limit. */
@@ -295,9 +396,14 @@ export async function downloadCsv(conn, params = {}) {
     SELECT ${colList} FROM ${t} ${whereSql}
     ORDER BY COALESCE(CAST("openDate" AS VARCHAR), '') DESC LIMIT ${DOWNLOAD_ROW_LIMIT}`, binds);
 
+  return toCsv(COLUMN_HEADERS, rows);
+}
+
+/** RFC4180-ish CSV. Shared by the job export and the pivot export. */
+function toCsv(headers, rows) {
   const esc = (v) => {
     const s = v == null ? '' : String(v);
     return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
-  return [COLUMN_HEADERS, ...rows].map(r => r.map(esc).join(',')).join('\r\n');
+  return [headers, ...rows].map(r => r.map(esc).join(',')).join('\r\n');
 }

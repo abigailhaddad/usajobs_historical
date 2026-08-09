@@ -18,7 +18,7 @@
 // re-sorted v2 file. Where the ORDER BY has ties, the two can legitimately
 // return different rows for the same page. So `data` is compared as a sorted
 // multiset, and only when the whole result fits on one page.
-import { initDb, aggregate, jobs, filterOptions } from '../shared/wasm-api.js';
+import { initDb, aggregate, jobs, filterOptions, pivot } from '../shared/wasm-api.js';
 
 const qs = new URLSearchParams(location.search);
 const PARQUET = qs.get('parquet')
@@ -50,15 +50,28 @@ const CASES = [
   // values are never actually checked against the Python API.
   { n: 'jobs:single-row',             fn: 'jobs', p: { draw: 6, start: 0, length: 25, filter_usajobsControlNumber: '606669800' } },
   { n: 'jobs:two-rows-search',        fn: 'jobs', p: { draw: 7, start: 0, length: 25, 'search[value]': 'volcanolog' } },
+  // series and location are the multi-value dims: they unnest a '; '-delimited
+  // column and COUNT(DISTINCT control number) so a listing counts once per
+  // value it carries. Easiest thing in the whole port to get subtly wrong.
+  { n: 'pivot:department',            fn: 'pivot', arg: ['department'], p: {} },
+  { n: 'pivot:year,department',       fn: 'pivot', arg: ['year', 'department'], p: {} },
+  { n: 'pivot:grade,month',           fn: 'pivot', arg: ['grade', 'month'], p: {} },
+  { n: 'pivot:series(multi)',         fn: 'pivot', arg: ['series'], p: {} },
+  { n: 'pivot:location(multi)',       fn: 'pivot', arg: ['location'], p: {} },
+  { n: 'pivot:year,series(multi)',    fn: 'pivot', arg: ['year', 'series'], p: {} },
+  { n: 'pivot:department+filter',     fn: 'pivot', arg: ['department'], p: { filter_grade: 'GS-7' } },
+  { n: 'pivot:series+filter',         fn: 'pivot', arg: ['series'], p: { filter_hiringDepartmentName: DOJ } },
 ];
+
+const LIVE_PATH = { aggregate: 'aggregate', filterOptions: 'filter_options', jobs: 'jobs', pivot: 'pivot' };
 
 function liveUrl(c) {
   const u = new URLSearchParams();
   if (c.fn === 'aggregate') u.set('group_by', c.arg);
   if (c.fn === 'filterOptions') u.set('field', c.arg);
+  if (c.fn === 'pivot') u.set('dims', c.arg.join(','));
   for (const [k, v] of Object.entries(c.p)) u.set(k, v);
-  const path = c.fn === 'aggregate' ? 'aggregate' : c.fn === 'filterOptions' ? 'filter_options' : 'jobs';
-  return `${LIVE}/api/${path}?${u.toString()}`;
+  return `${LIVE}/api/${LIVE_PATH[c.fn]}?${u.toString()}`;
 }
 
 /** Deep compare; returns null if equal, else a short description of the first
@@ -100,6 +113,7 @@ try {
     try {
       if (c.fn === 'aggregate') mine = await aggregate(conn, c.arg, c.p);
       else if (c.fn === 'filterOptions') mine = await filterOptions(conn, c.arg, c.p);
+      else if (c.fn === 'pivot') mine = await pivot(conn, c.arg, c.p);
       else mine = await jobs(conn, c.p);
       theirs = await (await fetch(liveUrl(c))).json();
     } catch (e) {
