@@ -3,9 +3,10 @@
  * Provides: ServerSideFilterManager, URL sync, toast notifications, chart integration
  */
 
-// The CSV export cap. api/download.py enforces MAX_ROWS server-side and is the
-// real gate; this copy only lets the UI say so before the user clicks. Anything
-// bigger goes to the full parquet on R2.
+// The CSV export cap. The export runs entirely in the browser now, so the real
+// gate is DOWNLOAD_ROW_LIMIT in shared/wasm-api.js, which downloadCsv() throws
+// on; this copy only lets the UI say so before the user clicks. Keep the two in
+// sync. Anything bigger goes to the full parquet on R2.
 const DOWNLOAD_ROW_LIMIT = 100000;
 const FULL_DATASET_URL = 'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr.parquet';
 

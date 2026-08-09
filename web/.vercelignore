@@ -7,6 +7,10 @@ tests/
 .wrangler/
 node_modules/
 
+# Cloudflare Pages build output. Without this, `vercel --prod` would serve a
+# second copy of the whole site under /dist/*.
+dist/
+
 # R2 bucket CORS policy — infrastructure config, applied with
 # `wrangler r2 bucket cors set`. Nothing serves it.
 r2-cors.json

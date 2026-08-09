@@ -1,9 +1,13 @@
-// Browser-side replacements for the eight Python functions in api/.
+// The site's whole data layer. This IS the API — there is no server side left.
 //
-// Each function here returns exactly the JSON shape its endpoint returned, so
-// the calling code in index.html / pivot.html changes only where the data comes
-// from, not how it is used. tests/test_wasm_api_parity.py pins that by diffing
-// these against the live Python API.
+// It began as browser-side replacements for the Python functions in api/
+// (aggregate.py, jobs.py, pivot.py, filter_options.py, download.py,
+// static_data.py), all six deleted on 2026-08-09. Each function here still
+// returns exactly the JSON shape its endpoint returned, which is why the
+// calling code in index.html / pivot.html changed only where the data comes
+// from, not how it is used. tests/wasm_api_probe.html is the record of that
+// port being diffed against the live Python API while it still existed
+// (28/28 cases matched); it cannot re-run now that the endpoints are gone.
 //
 // Deliberately plain functions taking an explicit `conn`. No client object, no
 // wrapper class, no patched global fetch — the call sites say what they fetch.

@@ -1,24 +1,27 @@
 #!/usr/bin/env python3
 """
 Build a multi-panel poster of monthly USAJobs postings, one panel per
-cabinet department / branch. Reads from the live API at
-usajobs-historical.vercel.app — no local data needed.
+cabinet department / branch. Queries the web parquet on Cloudflare R2 with
+DuckDB over HTTP range requests — no local data needed.
 
-Output: dept-poster.png in the repo root (or --output PATH).
+This used to call /api/aggregate on usajobs-historical.vercel.app. That
+endpoint, and the rest of the Python API, was deleted on 2026-08-09 when the
+site moved to DuckDB-WASM in the browser; the script now runs the same GROUP BY
+itself. web/poster.html renders the same numbers live, from the same parquet.
+
+Output: dept-poster.png in web/ (or --output PATH).
 
 Usage:
     python scripts/make_dept_poster.py
     python scripts/make_dept_poster.py --output /tmp/poster.png
 """
 import argparse
-import json
 import os
-import urllib.parse
-import urllib.request
 
+import duckdb
 from PIL import Image, ImageDraw, ImageFont
 
-API_BASE = "https://usajobs-historical.vercel.app"
+PARQUET_URL = "https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr.parquet"
 
 # Visual palette — matches the live site
 BG = (250, 245, 232)
@@ -97,13 +100,53 @@ def font(size, bold=False):
     return ImageFont.load_default()
 
 
-def fetch_monthly(dept):
-    """Returns (labels, counts) for the given department from the live API."""
-    qs = {"group_by": "month", "filter_hiringDepartmentName": dept}
-    url = f"{API_BASE}/api/aggregate?" + urllib.parse.urlencode(qs)
-    with urllib.request.urlopen(url) as resp:
-        data = json.load(resp)
-    return data["labels"], data["datasets"]["count"]
+def fetch_monthly_all():
+    """{dept: (labels, counts)} for every department in DEPTS, in one pass.
+
+    Same result /api/aggregate?group_by=month&filter_hiringDepartmentName=…
+    returned, including the gap fill: months with no postings still get a label
+    and a zero, so the X axis stays continuous and the bars line up with the
+    year ticks and the cliff marker.
+    """
+    con = duckdb.connect()
+    con.execute("INSTALL httpfs; LOAD httpfs;")
+    rows = con.execute(
+        """
+        SELECT "hiringDepartmentName" AS dept,
+               strftime(CAST("openDate" AS DATE), '%Y-%m') AS month_label,
+               COUNT(*) AS cnt
+        FROM read_parquet(?)
+        WHERE "openDate" IS NOT NULL
+          AND "hiringDepartmentName" IN ?
+        GROUP BY dept, month_label
+        ORDER BY dept, month_label
+        """,
+        [PARQUET_URL, DEPTS],
+    ).fetchall()
+
+    by_dept = {}
+    for dept, month_label, cnt in rows:
+        by_dept.setdefault(dept, {})[month_label] = cnt
+
+    out = {}
+    for dept in DEPTS:
+        months = by_dept.get(dept)
+        if not months:
+            out[dept] = ([], [])
+            continue
+        first, last = min(months), max(months)
+        labels, counts = [], []
+        year, month = int(first[:4]), int(first[5:7])
+        end_year, end_month = int(last[:4]), int(last[5:7])
+        while (year, month) <= (end_year, end_month):
+            label = f"{year:04d}-{month:02d}"
+            labels.append(label)
+            counts.append(months.get(label, 0))
+            month += 1
+            if month > 12:
+                month, year = 1, year + 1
+        out[dept] = (labels, counts)
+    return out
 
 
 def post_pre_pct(labels, counts):
@@ -184,10 +227,11 @@ def draw_tile(dept, labels, counts, tile_w, tile_h, scale=1):
 def build_poster(output_path, scale=2):
     """Render the poster. scale=2 produces a high-DPI image that stays crisp
     when zoomed in; scale=1 gives a smaller file for quick previews."""
-    print("Fetching monthly data for", len(DEPTS), "departments...")
+    print("Querying monthly data for", len(DEPTS), "departments from R2...")
+    monthly = fetch_monthly_all()
     series = {}
     for dept in DEPTS:
-        labels, counts = fetch_monthly(dept)
+        labels, counts = monthly[dept]
         pct = post_pre_pct(labels, counts)
         labels, counts = filter_window(labels, counts)
         series[dept] = (labels, counts, pct)
@@ -243,7 +287,7 @@ def build_poster(output_path, scale=2):
 
     draw.text(
         (gap * 2, grid_h - 38 * scale),
-        "Source: USAJobs Historical | usajobs-historical.vercel.app",
+        "Source: USAJobs Historical | usajobs-historical.abigailhaddad.com",
         fill=TEXT_MUTED, font=foot,
     )
 

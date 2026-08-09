@@ -164,11 +164,32 @@ The `jobs_5yr.parquet` web dataset already has this fix applied — it is safe t
 │   ├── extract_questionnaires.py # Scrape questionnaires from job postings
 │   ├── questionnaire_links.csv   # Links extracted from job data
 │   └── raw_questionnaires/       # Scraped questionnaire text files
+├── web/                     # The live site (static files only -- no server)
+│   ├── index.html               # Job table, filters, charts
+│   ├── pivot.html               # Pivot table
+│   ├── poster.html              # Postings-by-department poster
+│   └── shared/
+│       ├── wasm-api.js          # aggregate/jobs/pivot/filterOptions/downloadCsv
+│       └── filters.js           # Column + filter definitions shared by the pages
 ├── data/                    # Local data (gitignored, stored in R2)
 │   ├── historical_jobs_YEAR.parquet  # Historical jobs by year
 │   └── current_jobs_YEAR.parquet     # Current jobs by year
 └── logs/                    # Auto-generated pipeline logs
 ```
+
+### How the site works
+
+There is no backend. `web/` is plain static HTML, and every page loads
+[DuckDB-WASM](https://duckdb.org/docs/api/wasm/overview.html) in the browser and
+queries `jobs_5yr.parquet` on Cloudflare R2 directly over HTTP range requests --
+so a filter or a chart reads only the row groups it needs, not the whole file.
+`web/shared/wasm-api.js` holds the query layer: `aggregate`, `jobs`, `pivot`,
+`filterOptions` and `downloadCsv`.
+
+That makes the parquet's physical layout part of the site's performance.
+`scripts/prep_web_data.py` writes it sorted, ZSTD-compressed and in 100k-row row
+groups: 129.2MB to 51.2MB, 3 row groups to 30. The job-listing query went from
+7.0s to 0.18s, reading 9MB instead of 56MB.
 
 ## Run Pipeline
 

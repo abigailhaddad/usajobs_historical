@@ -1,0 +1,97 @@
+name: Deploy Pages
+
+# Publishes the static site to Cloudflare Pages (project: usajobs-historical).
+#
+# What actually goes live is web/dist/, assembled by scripts/build_pages_dist.py
+# from the site's entry pages and whatever those pages reference. It is an
+# ALLOW-LIST: nothing reaches Cloudflare unless a published page points at it.
+# Two sibling sites previously served their whole repo root — CLAUDE.md,
+# pipeline scripts, CI config, all HTTP 200 — because they deployed the
+# directory itself with a deny-list of exclusions. Do not "simplify" this back
+# into `directory: web`.
+#
+# web/tests/test_pages_dist.py runs before the deploy and is the regression
+# gate: it scans the built tree for .py, .parquet, api/, tests/, hiring.html,
+# .DS_Store, __pycache__ and for Cloudflare's 25 MiB / 20,000-file limits. If it
+# fails, nothing is uploaded.
+#
+# ---------------------------------------------------------------------------
+# IMPORTANT — this workflow cannot be the pipeline's deploy mechanism.
+#
+# GitHub does not fire workflow triggers for commits pushed with the built-in
+# GITHUB_TOKEN. That is deliberate on GitHub's part (it prevents recursive
+# workflow loops), and it is absolute: it applies even when the push touches
+# web/**. The daily data pipeline (daily-data-update.yml) pushes with
+# secrets.GITHUB_TOKEN, so a data-update commit will NEVER trigger this
+# workflow, no matter what paths it changes.
+#
+# Consequences, pick one and know which you picked:
+#   * The pipeline needs its OWN deploy step (same build + wrangler-action, or
+#     `gh workflow run deploy-pages.yml`), otherwise data commits silently never
+#     reach production. This is the current expectation.
+#   * Or the pipeline pushes with a PAT / GitHub App token instead of
+#     GITHUB_TOKEN, which does re-trigger workflows.
+#
+# In practice most of the data the site reads lives in R2, not in this repo, so
+# the pipeline's R2 sync updates the live site without any deploy at all. The
+# deploy only matters when web/** HTML/CSS/JS changes.
+# ---------------------------------------------------------------------------
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'web/**'
+      - 'scripts/build_pages_dist.py'
+      - '.github/workflows/deploy-pages.yml'
+  # Manual escape hatch: also the way the data pipeline can ask for a deploy
+  # (`gh workflow run deploy-pages.yml`) given the GITHUB_TOKEN limitation above.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never let two deploys upload to the same Pages project at once.
+concurrency:
+  group: cloudflare-pages-usajobs-historical
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install test dependencies
+        run: pip install pytest
+
+      - name: Build web/dist (allow-list)
+        run: python scripts/build_pages_dist.py
+
+      # Runs the build again itself and scans the resulting tree. This is the
+      # gate that stops a repo-root leak from ever being uploaded.
+      - name: Verify nothing forbidden is in dist/
+        run: python -m pytest web/tests/test_pages_dist.py -v
+
+      - name: Show what will be deployed
+        run: |
+          echo "Files to be uploaded to Cloudflare Pages:"
+          find web/dist -type f | sort
+          echo "---"
+          du -sh web/dist
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web/dist --project-name=usajobs-historical --branch=main
