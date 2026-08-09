@@ -167,10 +167,6 @@
             .then(r => (r.ok ? r.json() : null))
             .catch(() => null);
 
-        // Guards against the placeholder landing after the live results and
-        // rendering the page backwards.
-        let chartsAreLive = false;
-
         // ============================================
         // Column Configuration
         // ============================================
@@ -630,26 +626,26 @@
                 // Agency count is approximate from chart data, updated in updateCharts
             });
 
-            // Paint the precomputed view first so the page is useful while
-            // DuckDB boots, then always re-query and overwrite it. Only worth
-            // doing for the unfiltered view — static.json covers no other.
-            const activeParams = filterManager.getServerParams();
-            const hasFilters = Object.keys(filterManager.activeFilters).length > 0;
-            if (!hasFilters) {
-                staticPromise.then(staticData => {
-                    // Skip if the live results already landed; re-rendering
-                    // stale placeholder data over fresh data would be a
-                    // visible flicker backwards.
-                    if (!staticData || chartsAreLive) return;
-                    renderCharts(staticData.month, staticData.department,
-                                 staticData.series, staticData.grade);
-                    if (staticData.jobs) {
-                        document.getElementById('statTotal').textContent =
-                            formatNumber(staticData.jobs.recordsTotal);
+            // Placeholder first, live second, in that order — awaited, not
+            // raced. static.json is same-origin and ~89 KB so it resolves in a
+            // few ms, while the DuckDB boot it is covering for takes seconds;
+            // sequencing them costs nothing and removes the need to arbitrate
+            // which render "wins".
+            (async function paintCharts() {
+                const hasFilters = Object.keys(filterManager.activeFilters).length > 0;
+                if (!hasFilters) {
+                    const staticData = await staticPromise;
+                    if (staticData) {
+                        renderCharts(staticData.month, staticData.department,
+                                     staticData.series, staticData.grade);
+                        if (staticData.jobs) {
+                            document.getElementById('statTotal').textContent =
+                                formatNumber(staticData.jobs.recordsTotal);
+                        }
                     }
-                });
-            }
-            updateCharts(activeParams).then(() => { chartsAreLive = true; });
+                }
+                await updateCharts(filterManager.getServerParams());
+            })();
         });
 
     </script>
