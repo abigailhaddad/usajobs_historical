@@ -1,0 +1,104 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>DuckDB-WASM range-read harness</title>
+<body style="font:14px ui-monospace,monospace;padding:1rem">
+<h3>DuckDB-WASM over HTTP range requests</h3>
+<div id="status">starting…</div>
+<pre id="out"></pre>
+<script type="module">
+import * as duckdb from 'https://esm.sh/@duckdb/duckdb-wasm';
+
+const params = new URLSearchParams(location.search);
+const FILE = params.get('file') || 'v2_sorted.parquet';
+const URLBASE = params.get('base') || location.origin + '/';
+const out = document.getElementById('out');
+const status = document.getElementById('status');
+const log = (s) => { out.textContent += s + '\n'; };
+const results = { file: FILE, queries: [], error: null };
+
+// Count the bytes DuckDB actually pulls, and how, by wrapping fetch. This is
+// the whole point of the harness: a run that silently downloads the entire
+// file would otherwise look identical to one doing real range reads.
+let bytes = 0, rangeReqs = 0, fullReqs = 0;
+const origFetch = window.fetch;
+window.fetch = async (input, init) => {
+  const hdrs = new Headers((init && init.headers) || (input && input.headers) || {});
+  const isRange = hdrs.has('Range');
+  const r = await origFetch(input, init);
+  const len = Number(r.headers.get('content-length')) || 0;
+  const u = (typeof input === 'string' ? input : input.url) || '';
+  if (u.includes('.parquet')) {
+    bytes += len;
+    if (isRange || r.status === 206) rangeReqs++; else fullReqs++;
+  }
+  return r;
+};
+
+try {
+  status.textContent = 'loading duckdb-wasm…';
+  const bundle = await duckdb.selectBundle(duckdb.getJsDelivrBundles());
+  const workerUrl = URL.createObjectURL(
+    new Blob([`importScripts("${bundle.mainWorker}");`], { type: 'text/javascript' }));
+  const worker = new Worker(workerUrl);
+  const db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(), worker);
+  await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+  URL.revokeObjectURL(workerUrl);
+
+  const url = new URL(FILE, URLBASE).href;
+  // Two ways to point DuckDB at a remote parquet:
+  //   mode=register -> registerFileURL(). MEASURED: issues one GET 200 for the
+  //                    whole file regardless of the directIO flag.
+  //   mode=sql      -> put the https:// URL straight in the query and let the
+  //                    httpfs filesystem handle it. This is the path that is
+  //                    supposed to produce Range reads.
+  const MODE = params.get('mode') || 'sql';
+  results.mode = MODE;
+  const conn = await db.connect();
+  let TBL;
+  if (MODE === 'register') {
+    const directIO = params.get('directio') !== '0';
+    results.directIO = directIO;
+    await db.registerFileURL('jobs.parquet', url, duckdb.DuckDBDataProtocol.HTTP, directIO);
+    TBL = `'jobs.parquet'`;
+  } else {
+    await conn.query(`INSTALL httpfs; LOAD httpfs;`).catch(e => log('httpfs: ' + e));
+    TBL = `read_parquet('${url}')`;
+  }
+  results.registered = url;
+
+  const QUERIES = {
+    'aggregate (count by dept)':
+      `SELECT hiringDepartmentName, count(*) c FROM ${TBL} GROUP BY 1 ORDER BY c DESC`,
+    'pivot (series x grade)':
+      `SELECT occupationalSeries, grade, count(*) FROM ${TBL} GROUP BY 1,2`,
+    'filter_options (distinct agencies)':
+      `SELECT DISTINCT hiringAgencyName FROM ${TBL} ORDER BY 1`,
+    'jobs listing (2 text cols, top 25)':
+      `SELECT positionTitle, locations, hiringAgencyName, openDate FROM ${TBL}
+       ORDER BY openDate DESC LIMIT 25`,
+  };
+
+  for (const [name, sql] of Object.entries(QUERIES)) {
+    status.textContent = 'running: ' + name;
+    const b0 = bytes, r0 = rangeReqs;
+    const t0 = performance.now();
+    const res = await conn.query(sql);
+    const ms = performance.now() - t0;
+    const rec = { name, ms: Math.round(ms), mb: +((bytes - b0) / 1e6).toFixed(2),
+                  rangeReqs: rangeReqs - r0, rows: res.numRows };
+    results.queries.push(rec);
+    log(`${name.padEnd(36)} ${String(rec.ms).padStart(6)}ms  ${String(rec.mb).padStart(7)}MB  ${String(rec.rangeReqs).padStart(4)} range reqs  ${rec.rows} rows`);
+  }
+  results.totalMB = +(bytes / 1e6).toFixed(2);
+  results.rangeReqs = rangeReqs;
+  results.fullDownloads = fullReqs;
+  log(`\nTOTAL ${results.totalMB} MB over ${rangeReqs} range requests; full downloads: ${fullReqs}`);
+  status.textContent = 'DONE';
+} catch (e) {
+  results.error = String(e && e.stack || e);
+  log('ERROR: ' + results.error);
+  status.textContent = 'ERROR';
+}
+window.__results = results;
+</script>
+</body>

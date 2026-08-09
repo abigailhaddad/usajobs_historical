@@ -4,6 +4,10 @@ tests/
 .wrangler/
 node_modules/
 
+# R2 bucket CORS policy — infrastructure config, applied with
+# `wrangler r2 bucket cors set`. Nothing serves it.
+r2-cors.json
+
 # `vercel --prod` uploads the working tree, not the committed one, so anything
 # sitting in here goes live whether or not it was ever committed. These two are
 # untracked work-in-progress from May, unlinked from the index and 404 in

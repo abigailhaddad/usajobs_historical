@@ -1,0 +1,29 @@
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": [
+          "https://usajobs-historical.abigailhaddad.com",
+          "http://localhost:3333",
+          "http://127.0.0.1:3333"
+        ],
+        "methods": ["GET", "HEAD"],
+        "headers": [
+          "range",
+          "content-type",
+          "if-match",
+          "if-none-match",
+          "cache-control"
+        ]
+      },
+      "exposeHeaders": [
+        "content-range",
+        "content-length",
+        "accept-ranges",
+        "etag",
+        "last-modified"
+      ],
+      "maxAgeSeconds": 3600
+    }
+  ]
+}

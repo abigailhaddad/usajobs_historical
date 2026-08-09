@@ -47,11 +47,14 @@ COLUMN_HEADERS = [
 SORTABLE_COLUMNS = {i: col for i, col in enumerate(COLUMNS)}
 
 # All columns that can appear in filter_* query params.
-# This is a superset of COLUMNS — includes extra parquet columns
-# that are filterable but not displayed in the table.
+# Every name here MUST exist in the parquet: an unknown filter_ param is
+# ignored, but a listed one builds SQL and a missing column raises a
+# BinderException -> HTTP 500. 'workSchedule' was listed here and is not in the
+# parquet, so ?filter_workSchedule=... returned 500 in production until
+# 2026-08-09. tests/test_filters_parity.py now asserts this set matches the
+# file.
 FILTERABLE_COLUMNS = set(COLUMNS) | {
     'occupationalSeries',
-    'workSchedule',
 }
 
 # Columns searchable via the global search box
