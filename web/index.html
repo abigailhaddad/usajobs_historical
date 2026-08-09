@@ -173,6 +173,11 @@
             .then(r => (r.ok ? r.json() : null))
             .catch(() => null);
 
+        // One-shot: the precomputed first page is served once, then replaced by
+        // a real query. Without this a later draw could be answered from the
+        // stale copy.
+        let servedPrecomputedRows = false;
+
         // ============================================
         // Column Configuration
         // ============================================
@@ -486,13 +491,46 @@
                         params['order[' + i + '][column]'] = o.column;
                         params['order[' + i + '][dir]'] = o.dir;
                     });
-                    connPromise
+
+                    const queryLive = () => connPromise
                         .then(conn => jobs(conn, params))
                         .then(callback)
                         .catch(function (err) {
                             console.error('Table data load failed:', err);
                             showToast('Failed to load listings', true);
                         });
+
+                    // The very first unfiltered page is exactly what static.json
+                    // precomputed, so serve that instead of waiting out the
+                    // DuckDB boot — which is ~20s on a cold browser and was the
+                    // last thing on the page still blocked on it. Then reload
+                    // once for real, because the precomputed rows go stale
+                    // between pipeline runs.
+                    //
+                    // static.json's rows must be in the table's column order,
+                    // NOT the parquet's storage order. prep_web_data.py writes
+                    // DISPLAY_COLUMNS for this reason and a test pins the two
+                    // lists together; get that wrong and every value lands in
+                    // the wrong column with no error.
+                    const isFirstUnfilteredPage =
+                        !servedPrecomputedRows && d.draw === 1 && (d.start || 0) === 0 &&
+                        Object.keys(filterManager.activeFilters).length === 0;
+                    if (!isFirstUnfilteredPage) return queryLive();
+
+                    staticPromise.then(function (staticData) {
+                        const pre = staticData && staticData.jobs;
+                        if (!pre || !pre.data || !pre.data.length) return queryLive();
+                        servedPrecomputedRows = true;
+                        callback({
+                            draw: d.draw,
+                            recordsTotal: pre.recordsTotal,
+                            recordsFiltered: pre.recordsFiltered,
+                            data: pre.data,
+                        });
+                        // `table` is assigned by the time this resolves — the
+                        // DuckDB boot takes seconds and this callback is async.
+                        connPromise.then(() => table.ajax.reload(null, false));
+                    });
                 },
                 columns: [
                     { data: 0 },  // Position Title

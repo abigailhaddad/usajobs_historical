@@ -12,10 +12,15 @@ Usage:
 
 import json
 import os
+import re
 import sys
 
 import pandas as pd
 import requests
+
+# Zero-padded pay-plan codes: GS-07 -> GS-7. Mirrors canonicalGrade() in
+# web/shared/filters.js — keep the two in step.
+_GRADE_ZERO_PAD = re.compile(r'([-/])0([1-9])')
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "jobs_5yr.parquet")
@@ -670,7 +675,28 @@ def main():
                 f"FROM read_parquet('{OUT_PATH}') WHERE \"{field}\" IS NOT NULL "
                 f"AND TRIM(CAST(\"{field}\" AS VARCHAR)) != '' ORDER BY val"
             ).fetchall()
-        filter_options[field] = [r[0] for r in frows if r[0] and r[0].strip()]
+        values = [r[0] for r in frows if r[0] and r[0].strip()]
+
+        if field == 'grade':
+            # Pay-plan codes appear both zero-padded ("GS-07") and not ("GS-7")
+            # and mean the same grade, so a plain DISTINCT offers the user two
+            # options for one grade — 3123 entries where the site shows 2608.
+            # collapseGrades() in web/shared/wasm-api.js does this on the client
+            # too (it has to, for older static.json files), and the two are
+            # idempotent, so running both is harmless.
+            # Leaves XX-00 alone: only -0[1-9] collapses, because the second
+            # digit being 0 means ungraded, not a zero-padded 0.
+            seen = {}
+            for v in values:
+                key = _GRADE_ZERO_PAD.sub(r'\1\2', v.lower())
+                canon_display = key.upper()
+                if v.upper() == canon_display:
+                    seen[key] = canon_display
+                elif key not in seen:
+                    seen[key] = v
+            values = sorted(seen.values())
+
+        filter_options[field] = values
         print(f"    {field}: {len(filter_options[field])} options")
 
     total_depts = conn.execute(
