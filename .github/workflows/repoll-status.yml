@@ -140,9 +140,9 @@ jobs:
       run: |
         python scripts/prep_web_data.py
 
-    - name: Run API tests against new web data
+    - name: Test web data and filter parity
       run: |
-        python -m pytest web/tests/test_api.py -v
+        python -m pytest web/tests/test_filters_parity.py -v
 
     - name: Sync to R2
       if: steps.data_tests.outcome == 'success'

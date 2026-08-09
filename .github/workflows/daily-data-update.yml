@@ -326,21 +326,30 @@ jobs:
           echo "CHANGES_MADE=false" >> $GITHUB_ENV
         fi
 
+    # A manual run must re-prep and sync even when no new rows arrived —
+    # that is exactly what the skip_collection input promises. Gating these on
+    # CHANGES_MADE alone made skip_collection a no-op: with collection skipped
+    # nothing changes, so CHANGES_MADE is false and prep/sync never ran.
     - name: Prep web data
-      if: env.CHANGES_MADE == 'true'
+      if: env.CHANGES_MADE == 'true' || github.event_name == 'workflow_dispatch'
       env:
         USAJOBS_API_TOKEN: ${{ secrets.USAJOBS_API_TOKEN }}
       run: |
         python scripts/prep_web_data.py
 
-    - name: Run API tests against new web data
-      if: env.CHANGES_MADE == 'true'
+    # The site has no server API any more; the browser queries the parquet
+    # directly. What needs guarding is that the filter semantics in
+    # web/shared/filters.js still match api/columns.py, that every filterable
+    # column exists in the parquet just written, and that static.json's row
+    # order still matches the table's column order.
+    - name: Test web data and filter parity
+      if: env.CHANGES_MADE == 'true' || github.event_name == 'workflow_dispatch'
       run: |
-        pip install pytest
-        python -m pytest web/tests/test_api.py -v
+        pip install pytest duckdb
+        python -m pytest web/tests/test_filters_parity.py -v
 
     - name: Sync to R2
-      if: env.CHANGES_MADE == 'true' && steps.data_tests.outcome == 'success'
+      if: (env.CHANGES_MADE == 'true' || github.event_name == 'workflow_dispatch') && steps.data_tests.outcome == 'success'
       env:
         R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
         R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}

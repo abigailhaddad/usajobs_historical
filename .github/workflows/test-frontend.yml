@@ -69,9 +69,9 @@ jobs:
         # Final check
         curl -sf http://localhost:3333 > /dev/null || (echo "Server failed to start" && exit 1)
 
-    - name: Run API tests
+    - name: Run filter parity tests
       run: |
-        python -m pytest web/tests/test_api.py -v
+        python -m pytest web/tests/test_filters_parity.py -v
 
     - name: Run frontend E2E tests
       run: |
