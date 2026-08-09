@@ -161,9 +161,15 @@
 
         // Precomputed charts/stats for the unfiltered view, so the page paints
         // in well under a second instead of waiting on the boot above. It is a
-        // PLACEHOLDER: it goes stale between pipeline runs, so the real query
-        // always follows and overwrites it.
-        const staticPromise = fetch('data/static.json')
+        // PLACEHOLDER: the real query always follows and overwrites it.
+        //
+        // Read from R2, not from this site. web/data/static.json is gitignored
+        // (precomputed data lives in R2 by design), so it is not in the deploy
+        // at all — serving it from here 404s. The daily pipeline writes the R2
+        // copy, so this is also the fresher of the two.
+        const STATIC_URL =
+            'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/static.json';
+        const staticPromise = fetch(STATIC_URL)
             .then(r => (r.ok ? r.json() : null))
             .catch(() => null);
 

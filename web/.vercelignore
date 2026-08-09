@@ -1,9 +1,7 @@
-# The 122 MB parquet must never be published — the site reads it from R2.
-# data/static.json DOES get published: index.html fetches it directly for a
-# fast first paint while DuckDB-WASM boots. A bare `data/` here excludes the
-# directory, and gitignore syntax cannot re-include a file underneath an
-# excluded directory, so exclude the parquet specifically.
-data/*.parquet
+# Local working copies only. The site reads both the parquet and static.json
+# from R2 (web/data/static.json is gitignored, so it is not in a deploy
+# anyway).
+data/
 test_server.py
 tests/
 .wrangler/
