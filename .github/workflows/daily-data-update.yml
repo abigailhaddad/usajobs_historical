@@ -2,8 +2,19 @@ name: Daily Data Update
 
 on:
   schedule:
-    # Run daily at 2 AM EST (7 AM UTC)
-    - cron: '0 7 * * *'
+    # Primary run, ~2 AM EST. Deliberately at :37 and not :00 — GitHub's
+    # scheduled-workflow backlog is worst on the hour, and while this was
+    # '0 7 * * *' it fired 21-71 minutes late on every one of the last 15
+    # scheduled runs (07:21, 07:31, 07:53, 08:09, 08:11, ...).
+    - cron: '37 7 * * *'
+    # Self-healing retries. Both no-op in ~10 seconds if a run has already
+    # succeeded today (see the `check` job), so on a normal day these cost
+    # nothing. They exist because the free shared runner pool sometimes
+    # cannot allocate for hours: queue waits of 2h48m (2026-08-09) and
+    # 2h36m (2026-08-05) were both followed by a manual re-run that worked.
+    # This automates that re-run.
+    - cron: '37 13 * * *'
+    - cron: '37 19 * * *'
   workflow_dispatch:
     inputs:
       skip_collection:
@@ -19,11 +30,13 @@ on:
         type: string
         default: ""
 
-# Needed for pushing changes back to repo and creating PRs
+# Needed for pushing changes back to repo and creating PRs.
+# actions: read lets the `check` job list this workflow's earlier runs.
 permissions:
   contents: write
   issues: write
   pull-requests: write
+  actions: read
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -35,8 +48,51 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Guard for the retry crons. The expensive job downloads the whole dataset
+  # from R2 before it can tell whether there is anything to do, so decide here
+  # instead: if a run already succeeded today, the retries stop at this job.
+  #
+  # This job is inside the same concurrency group as the real work, so a retry
+  # that fires while the primary run is still going waits for it to finish and
+  # then correctly sees the success — it does not race it.
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      should_run: ${{ steps.decide.outputs.should_run }}
+    steps:
+    - name: Has a run already succeeded today?
+      id: decide
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_REPO: ${{ github.repository }}
+      run: |
+        # A human asking for a run always gets one.
+        if [ "${{ github.event_name }}" != "schedule" ]; then
+          echo "Triggered by ${{ github.event_name }} — running."
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        TODAY=$(date -u +%F)
+        SUCCESSES=$(gh run list \
+          --workflow=daily-data-update.yml \
+          --status=success \
+          --created="$TODAY" \
+          --limit 50 \
+          --json databaseId --jq 'length')
+
+        if [ "$SUCCESSES" -gt 0 ]; then
+          echo "$SUCCESSES successful run(s) already today ($TODAY) — skipping."
+          echo "should_run=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "No successful run yet today ($TODAY) — proceeding."
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+        fi
+
   update-data:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: check
+    if: needs.check.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 120  # 2 hour timeout for data update
     
@@ -408,21 +464,43 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: |
-          const issue = {
+          const title = `Daily Data Update Failed - ${new Date().toISOString().split('T')[0]}`;
+
+          // There are three scheduled attempts a day now, so a failure that
+          // persists across all of them would otherwise open three identical
+          // issues. Comment on today's issue instead of opening another.
+          const existing = await github.rest.issues.listForRepo({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            title: `Daily Data Update Failed - ${new Date().toISOString().split('T')[0]}`,
-            body: `The daily data update workflow had issues.
+            state: 'open',
+            labels: 'automated',
+            per_page: 100
+          });
+          const dupe = existing.data.find(i => i.title === title);
 
-            ${context.job.status === 'failure' ? 'The workflow failed to complete.' : 'Tests failed but a PR was created.'}
+          const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+          const detail = `${context.job.status === 'failure' ? 'The workflow failed to complete.' : 'Tests failed but a PR was created.'}
 
             Test Results:
             - Data Integrity Tests: ${{ steps.data_tests.outcome }}
 
-            [View the workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+            [View the workflow run](${runUrl})`;
 
-            Please check the logs for details.`,
-            labels: ['bug', 'automated'],
-            assignees: ['abigailhaddad']
-          };
-          await github.rest.issues.create(issue);
+          if (dupe) {
+            console.log(`Issue #${dupe.number} already open for today — commenting instead.`);
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: dupe.number,
+              body: `Another attempt failed today.\n\n${detail}`
+            });
+          } else {
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: `The daily data update workflow had issues.\n\n${detail}\n\n            Please check the logs for details.`,
+              labels: ['bug', 'automated'],
+              assignees: ['abigailhaddad']
+            });
+          }
