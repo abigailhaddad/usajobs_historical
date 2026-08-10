@@ -48,14 +48,22 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Guard for the retry crons. The expensive job downloads the whole dataset
-  # from R2 before it can tell whether there is anything to do, so decide here
-  # instead: if a run already succeeded today, the retries stop at this job.
+  # Guard for the RETRY crons only. The expensive job downloads the whole
+  # dataset from R2 before it can tell whether there is anything to do, so a
+  # retry decides here instead and stops if the day is already done.
   #
-  # This job is inside the same concurrency group as the real work, so a retry
-  # that fires while the primary run is still going waits for it to finish and
-  # then correctly sees the success — it does not race it.
+  # Deliberately skipped for the primary 07:37 run and for manual dispatches.
+  # A separate job means a separate runner acquisition, and on 2026-08-10 this
+  # job itself sat unallocated for over 15 minutes while the real work waited
+  # behind `needs`. Since the first run of the day never has a prior success to
+  # find, making it wait for a second runner is pure added latency on exactly
+  # the path this workflow is trying to protect. Retries can afford the wait.
+  #
+  # This job shares the concurrency group with the real work, so a retry that
+  # fires while the primary run is still going waits for it to finish and then
+  # correctly sees the success — it does not race it.
   check:
+    if: github.event_name == 'schedule' && github.event.schedule != '37 7 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -67,13 +75,6 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GH_REPO: ${{ github.repository }}
       run: |
-        # A human asking for a run always gets one.
-        if [ "${{ github.event_name }}" != "schedule" ]; then
-          echo "Triggered by ${{ github.event_name }} — running."
-          echo "should_run=true" >> "$GITHUB_OUTPUT"
-          exit 0
-        fi
-
         TODAY=$(date -u +%F)
         SUCCESSES=$(gh run list \
           --workflow=daily-data-update.yml \
@@ -92,7 +93,12 @@ jobs:
 
   update-data:
     needs: check
-    if: needs.check.outputs.should_run == 'true'
+    # `check` is skipped for the primary run and for dispatches, and a skipped
+    # dependency would normally skip this job too, hence the explicit result
+    # handling. Anything other than a clean "already done today" runs the work:
+    # a guard that errored tells us nothing, and missing a day's data is worse
+    # than a redundant run, which collection dedupes anyway.
+    if: ${{ !cancelled() && (needs.check.result != 'success' || needs.check.outputs.should_run == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 120  # 2 hour timeout for data update
     
