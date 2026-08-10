@@ -16,6 +16,7 @@ import re
 import sys
 
 import pandas as pd
+import pyarrow.parquet as pq
 import requests
 
 # Zero-padded pay-plan codes: GS-07 -> GS-7. Mirrors canonicalGrade() in
@@ -154,6 +155,138 @@ def _resolve_series(code, mapping):
     return code
 
 
+MOD_COL = "MatchedObjectDescriptor"
+
+# Everything this script derives from MatchedObjectDescriptor. The blob itself
+# is 99% of the current_jobs files (1,206 MB of current_jobs_2026's 1,218 MB),
+# and none of it reaches the output — only these seven scalars do. They are
+# computed per row group in _load_one and the blob is dropped immediately, so
+# the whole column is never resident.
+_MOD_DERIVED = (
+    "_had_mod",        # was there a blob at all (drives the grade rewrite)
+    "_mod_locations",
+    "_mod_series",
+    "_mod_org",
+    "_mod_service",
+    "_mod_low",
+    "_mod_high",
+    "_mod_payplan",
+)
+
+_SERVICE_TYPE_MAP = {"01": "Competitive", "02": "Excepted", "03": "Senior Executive"}
+
+# Rows per streamed batch. At roughly 25 KB of decompressed JSON per row this
+# keeps the blob's footprint near 50 MB regardless of how large the file grows.
+_BATCH_ROWS = 2000
+
+
+def _extract_mod_fields(val):
+    """Parse one MatchedObjectDescriptor and return every value derived from it.
+
+    Returns a tuple matching _MOD_DERIVED. The previous code parsed the same
+    blob separately in five places; doing it once here is both cheaper and the
+    only way to avoid keeping the column around for the later stages.
+    """
+    empty = (False, None, None, None, None, None, None, None)
+
+    if val is None or (isinstance(val, float) and pd.isna(val)):
+        return empty
+    if isinstance(val, str) and not val.strip():
+        return empty
+
+    try:
+        obj = val if isinstance(val, dict) else json.loads(val) if isinstance(val, str) else None
+    except Exception:
+        # A blob that will not parse still counts as present: the old grade
+        # rewrite keyed off the raw column being non-empty, and it blanked the
+        # grade fields when parsing failed. Preserve that.
+        return (True, None, None, None, None, None, None, None)
+
+    if not obj:
+        return (True, None, None, None, None, None, None, None)
+
+    # locations
+    locations = None
+    try:
+        locs = obj.get("PositionLocation", [])
+        if locs:
+            locations = _extract_all_locations(locs)
+        else:
+            display = obj.get("PositionLocationDisplay", "")
+            locations = display if display else None
+    except Exception:
+        locations = None
+
+    # occupational series codes
+    series = None
+    try:
+        codes = [str(c.get("Code")).strip()
+                 for c in obj.get("JobCategory", []) if c.get("Code")]
+        series = codes if codes else None
+    except Exception:
+        series = None
+
+    # bureau name
+    org = None
+    try:
+        org = obj.get("OrganizationName")
+    except Exception:
+        org = None
+
+    # service type
+    service = None
+    try:
+        code = obj.get("UserArea", {}).get("Details", {}).get("ServiceType")
+        if code:
+            service = _SERVICE_TYPE_MAP.get(str(code), str(code))
+    except Exception:
+        service = None
+
+    # grade fields
+    low = high = pay_plan = None
+    try:
+        details = obj.get("UserArea", {}).get("Details", {})
+        low = details.get("LowGrade")
+        high = details.get("HighGrade")
+        grades = obj.get("JobGrade", [])
+        pay_plan = grades[0].get("Code") if grades else None
+    except Exception:
+        low = high = pay_plan = None
+
+    return (True, locations, series, org, service, low, high, pay_plan)
+
+
+def _load_one(path):
+    """Read one parquet, replacing the MOD blob with the scalars we derive.
+
+    Files without the column (the historical family) take the original
+    whole-file read, which is small and already fine.
+    """
+    schema_names = pq.ParquetFile(path).schema_arrow.names
+    if MOD_COL not in schema_names:
+        return pd.read_parquet(path)
+
+    parts = []
+    parquet_file = pq.ParquetFile(path)
+    for batch in parquet_file.iter_batches(batch_size=_BATCH_ROWS):
+        chunk = batch.to_pandas()
+        blobs = chunk.pop(MOD_COL)  # drops the column from `chunk`
+        derived = list(zip(*(_extract_mod_fields(v) for v in blobs)))
+        for name, values in zip(_MOD_DERIVED, derived):
+            chunk[name] = list(values)
+        parts.append(chunk)
+        del blobs, derived
+
+    if not parts:
+        # An empty file still has to contribute the right columns.
+        empty = pd.read_parquet(path).drop(columns=[MOD_COL], errors="ignore")
+        for name in _MOD_DERIVED:
+            empty[name] = None
+        return empty
+
+    return pd.concat(parts, ignore_index=True)
+
+
 def load_frames(file_list, source_label):
     """Load parquet files, returning a list of DataFrames."""
     frames = []
@@ -161,7 +294,7 @@ def load_frames(file_list, source_label):
         path = os.path.join(DATA_DIR, fname)
         if os.path.exists(path):
             try:
-                df = pd.read_parquet(path)
+                df = _load_one(path)
                 df["_source"] = source_label
                 frames.append(df)
                 print(f"  Loaded {fname}: {len(df):,} rows, {len(df.columns)} cols")
@@ -198,24 +331,10 @@ def main():
     else:
         combined["locations"] = None
 
-    # For records missing locations, try MatchedObjectDescriptor (current API)
-    if "MatchedObjectDescriptor" in combined.columns:
+    # For records missing locations, fall back to what came out of the blob.
+    if "_mod_locations" in combined.columns:
         mask = combined["locations"].isna() | (combined["locations"] == "")
-        def _extract_loc_from_mod(val):
-            if val is None or (isinstance(val, float) and pd.isna(val)):
-                return None
-            try:
-                obj = val if isinstance(val, dict) else json.loads(val) if isinstance(val, str) else None
-                if not obj:
-                    return None
-                locs = obj.get("PositionLocation", [])
-                if locs:
-                    return _extract_all_locations(locs)
-                display = obj.get("PositionLocationDisplay", "")
-                return display if display else None
-            except:
-                return None
-        combined.loc[mask, "locations"] = combined.loc[mask, "MatchedObjectDescriptor"].apply(_extract_loc_from_mod)
+        combined.loc[mask, "locations"] = combined.loc[mask, "_mod_locations"]
 
     # Build a lookup of locations from ALL records that have them
     all_locs = combined[
@@ -241,32 +360,15 @@ def main():
             pass
         return None
 
-    def _extract_all_series_from_mod(val):
-        if val is None or (isinstance(val, float) and pd.isna(val)):
-            return None
-        try:
-            obj = val if isinstance(val, dict) else json.loads(val) if isinstance(val, str) else None
-            if obj:
-                cats = obj.get("JobCategory", [])
-                codes = []
-                for cat in cats:
-                    code = cat.get("Code")
-                    if code:
-                        codes.append(str(code).strip())
-                return codes if codes else None
-        except:
-            pass
-        return None
-
     # Build series lookup from ALL records BEFORE dedup (like we do for locations)
     if "JobCategories" in combined.columns:
         combined["_series_codes"] = combined["JobCategories"].apply(_extract_all_series)
     else:
         combined["_series_codes"] = None
 
-    if "MatchedObjectDescriptor" in combined.columns:
+    if "_mod_series" in combined.columns:
         mask = combined["_series_codes"].isna()
-        combined.loc[mask, "_series_codes"] = combined.loc[mask, "MatchedObjectDescriptor"].apply(_extract_all_series_from_mod)
+        combined.loc[mask, "_series_codes"] = combined.loc[mask, "_mod_series"]
 
     # Build a lookup so we can fill after dedup
     series_rows = combined[combined["_series_codes"].notna()][["usajobsControlNumber", "_series_codes"]].drop_duplicates(
@@ -289,21 +391,11 @@ def main():
     # available inside MatchedObjectDescriptor.OrganizationName — pull it out.
     # Only touch records where the buggy signature applies (agency == dept) so
     # historical records that already have correct bureau names stay untouched.
-    if "MatchedObjectDescriptor" in combined.columns:
-        def _extract_org_name(val):
-            if val is None or (isinstance(val, float) and pd.isna(val)):
-                return None
-            try:
-                obj = val if isinstance(val, dict) else json.loads(val) if isinstance(val, str) else None
-                if obj:
-                    return obj.get("OrganizationName")
-            except Exception:
-                pass
-            return None
+    if "_mod_org" in combined.columns:
         ag = combined["hiringAgencyName"].astype("string").str.strip()
         dept = combined["hiringDepartmentName"].astype("string").str.strip()
         buggy_signature = ag.notna() & dept.notna() & (ag.str.lower() == dept.str.lower())
-        org_names = combined.loc[buggy_signature, "MatchedObjectDescriptor"].apply(_extract_org_name)
+        org_names = combined.loc[buggy_signature, "_mod_org"]
         org_names = org_names.astype("string").str.strip()
         usable = org_names.notna() & (org_names != "")
         n_fixable = int(usable.sum())
@@ -318,24 +410,11 @@ def main():
     print(f"  Filled {filled:,} missing locations from historical data")
 
     # Fill missing serviceType from MatchedObjectDescriptor (current API stores code in UserArea.Details)
-    SERVICE_TYPE_MAP = {'01': 'Competitive', '02': 'Excepted', '03': 'Senior Executive'}
     if "serviceType" not in combined.columns:
         combined["serviceType"] = None
-    if "MatchedObjectDescriptor" in combined.columns:
+    if "_mod_service" in combined.columns:
         mask = combined["serviceType"].isna() | (combined["serviceType"] == "")
-        def _extract_service_type(val):
-            if val is None or (isinstance(val, float) and pd.isna(val)):
-                return None
-            try:
-                obj = val if isinstance(val, dict) else json.loads(val) if isinstance(val, str) else None
-                if obj:
-                    code = obj.get("UserArea", {}).get("Details", {}).get("ServiceType")
-                    if code:
-                        return SERVICE_TYPE_MAP.get(str(code), str(code))
-            except:
-                pass
-            return None
-        combined.loc[mask, "serviceType"] = combined.loc[mask, "MatchedObjectDescriptor"].apply(_extract_service_type)
+        combined.loc[mask, "serviceType"] = combined.loc[mask, "_mod_service"]
         filled = mask.sum() - (combined["serviceType"].isna() | (combined["serviceType"] == "")).sum()
         print(f"  Filled {filled:,} missing serviceType from MatchedObjectDescriptor")
 
@@ -348,30 +427,17 @@ def main():
     # Fix grade fields from MatchedObjectDescriptor for current API records.
     # Older collect_current_data.py stored the pay plan code (e.g. "GS") in minimumGrade/maximumGrade
     # instead of the numeric grade level. Re-extract from the stored JSON.
-    if "MatchedObjectDescriptor" in combined.columns:
-        def _extract_grade_fields(val):
-            if val is None or (isinstance(val, float) and pd.isna(val)):
-                return None, None, None
-            try:
-                obj = val if isinstance(val, dict) else json.loads(val) if isinstance(val, str) else None
-                if obj:
-                    details = obj.get("UserArea", {}).get("Details", {})
-                    low = details.get("LowGrade")
-                    high = details.get("HighGrade")
-                    grades = obj.get("JobGrade", [])
-                    pay_plan = grades[0].get("Code") if grades else None
-                    return low, high, pay_plan
-            except:
-                pass
-            return None, None, None
-
-        mod_col = combined["MatchedObjectDescriptor"]
-        has_mod = mod_col.notna() & (mod_col != "")
+    if "_had_mod" in combined.columns:
+        # Note this overwrites for EVERY record that had a blob, not just ones
+        # missing a grade -- including writing None when the blob had no grade
+        # in it. That is the pre-existing behaviour and is load-bearing, since
+        # the old current-API rows hold a pay plan ("GS") where the numeric
+        # grade belongs.
+        has_mod = combined["_had_mod"].fillna(False).astype(bool)
         if has_mod.any():
-            extracted = mod_col[has_mod].apply(_extract_grade_fields)
-            combined.loc[has_mod, "minimumGrade"] = extracted.apply(lambda x: x[0])
-            combined.loc[has_mod, "maximumGrade"] = extracted.apply(lambda x: x[1])
-            combined.loc[has_mod, "payScale"] = extracted.apply(lambda x: x[2])
+            combined.loc[has_mod, "minimumGrade"] = combined.loc[has_mod, "_mod_low"]
+            combined.loc[has_mod, "maximumGrade"] = combined.loc[has_mod, "_mod_high"]
+            combined.loc[has_mod, "payScale"] = combined.loc[has_mod, "_mod_payplan"]
             print(f"  Re-extracted grade fields from MatchedObjectDescriptor for {has_mod.sum():,} records")
 
     # Build derived columns
