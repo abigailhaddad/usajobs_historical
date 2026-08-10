@@ -195,6 +195,12 @@ jobs:
         print(f'R2 download validated: all historical files present and non-empty')
         "
 
+    # Record what every parquet looked like before collection touches it, so
+    # the sync at the end can skip the ones nothing wrote. Must run after the
+    # download and before update_all.py. Needs no R2 credentials.
+    - name: Snapshot data baseline for changed-only sync
+      run: python scripts/sync_to_r2.py --snapshot
+
     - name: Run daily data update
       if: inputs.skip_collection != true
       env:
@@ -411,7 +417,7 @@ jobs:
         R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
         R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
       run: |
-        python scripts/sync_to_r2.py
+        python scripts/sync_to_r2.py --only-changed
 
     - name: Create Pull Request
       if: env.CHANGES_MADE == 'true'

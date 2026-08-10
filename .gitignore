@@ -12,6 +12,8 @@ download/*.duckdb
 
 # Data files - Parquet and precomputed data (stored in Cloudflare R2, not in git)
 data/*.parquet
+# Baseline written by `sync_to_r2.py --snapshot`; local to a pipeline run.
+data/.r2_baseline.json
 web/data/*.parquet
 web/data/static.json
 
