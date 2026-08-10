@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-08-09T10:26:08.734393",
-  "total_jobs": 3943397,
+  "generated_at": "2026-08-10T07:47:27.460881",
+  "total_jobs": 3944845,
   "total_fields": 47,
   "file_size": "1.4GB",
-  "latest_job_date": "2026-08-09",
+  "latest_job_date": "2026-08-10",
   "data_coverage": [
     {
       "year": 2013,
@@ -94,13 +94,13 @@
       "total_jobs": 256880,
       "jobs_opened": 256880,
       "jobs_closed": 240511,
-      "coverage": "Current through August 09, 2026"
+      "coverage": "Current through August 10, 2026"
     },
     {
       "year": 2026,
-      "total_jobs": 303322,
-      "jobs_opened": 303322,
-      "jobs_closed": 301002,
+      "total_jobs": 304770,
+      "jobs_opened": 304770,
+      "jobs_closed": 302438,
       "coverage": "Closing dates only"
     }
   ],
@@ -116,7 +116,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"4816\"}], [{\"series\": \"1301\"}, {\"series\": \"1501\"}], [{\"series\": \"0017\"}], [{\"series\": \"0401\"}, {\"series\": \"1301\"}, {\"series\": \"0819\"}, {\"series\": \"0020\"}] (4424 unique)",
+      "examples": "[{\"series\": \"0801\"}, {\"series\": \"0808\"}, {\"series\": \"0020\"}, {\"series\": \"0810\"}], [{\"series\": \"0801\"}, {\"series\": \"1320\"}, {\"series\": \"1310\"}, {\"series\": \"1550\"}], [{\"series\": \"0854\"}, {\"series\": \"0861\"}, {\"series\": \"0855\"}, {\"series\": \"0801\"}, {\"series\": \"0830\"}, {\"series\": \"1550\"}], [{\"series\": \"0850\"}, {\"series\": \"0807\"}, {\"series\": \"0810\"}, {\"series\": \"0830\"}, {\"series\": \"0808\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -140,7 +140,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Securities and Exchange Commission, Department of Transportation\\Federal Aviation Administration, Consumer Product Safety Commission, Department of Agriculture\\Office of the Chief Information Officer (542 unique)",
+      "examples": "National Aeronautics and Space Administration\\George C. Marshall Space Flight Center, Department of Transportation\\Federal Transit Administration, Department of the Navy\\U.S. Pacific Fleet, Department of the Interior\\Bureau of Reclamation (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -164,7 +164,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "HHS-ASPR-DE-25-12618801, DE-12539152-24-LPW, 24-4OFSY-0420718, MO-12487622-AR-24-285 (363816 unique)",
+      "examples": "DECA-24-12444074-DE, 9Q-AFPC-12480135-489596-JSH, CBSR-12587415-25-MM, 8D-AFPC-12449493-454015-NYM (363816 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363816
@@ -172,7 +172,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Temporary, Term, Detail, Internships (16 unique)",
+      "examples": "Multiple, Detail, Agency Employees Only, Presidential Management Fellows (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -204,7 +204,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "GS26, DLSL, AR, ARMC (528 unique)",
+      "examples": "AG34, DLLS, HUCC, HFHI (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -212,7 +212,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Office of the National Cyber Director, Defense Information Systems Agency, Office of the Chief of the National Guard Bureau, U.S. Army Forces Command (502 unique)",
+      "examples": "Joint Activities, Naval Special Warfare Command, Air Force Civilian Career Training, Office of Accountability and Whistleblower Protection (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -220,7 +220,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "RO, EC, HB, GU (122 unique)",
+      "examples": "OS, FT, HD, 5L (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -228,7 +228,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Energy, Department of the Navy, Department of the Treasury, Judicial Branch (26 unique)",
+      "examples": "Department of State, Department of the Treasury, Department of Transportation, Department of Justice (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -236,7 +236,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "OFFICE OF INVESTIGATION, ENFORCEMENT AND AUDIT, XVIII ABN CORPS SENIOR CDR AUG Fort Liberty, North Carolina, Office of Refugee, Asylum and International Operations, Asylum Divison, Veterans Health Administration-Fiscal Service (59972 unique)",
+      "examples": "Dublin VA Healthcare System, Geriatrics and Extended Care, Salem VA Healthcare System, Security Operations (SO), Operations Management (OM), Resource Management Office (RMO), Louisville District Operations Division, Nolin River Lake (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -252,7 +252,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-20T12:07:01.881524, 2025-09-20T12:11:56.914927, 2025-07-05T13:02:09.567965, 2025-09-20T12:24:39.416816 (367192 unique)",
+      "examples": "2025-09-20T12:17:31.810880, 2025-09-20T12:15:51.657286, 2025-09-20T11:57:01.774411, 2025-07-05T12:59:13.265497 (367192 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367192
@@ -268,7 +268,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-20T12:21:27.943974, 2025-09-20T11:32:13.154772, 2025-09-20T11:53:10.074242, 2025-07-05T13:05:06.340218 (360188 unique)",
+      "examples": "2025-07-05T13:59:26.152809, 2025-09-20T11:28:24.532963, 2025-09-20T12:34:34.277325, 2025-09-20T12:34:34.271380 (360188 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 360188
@@ -276,7 +276,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "SL, 13, IJ, CB (127 unique)",
+      "examples": "12, 0, K, CB (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -292,7 +292,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "KH, 53, 51, KL (125 unique)",
+      "examples": "GJ, 96, 14, 06 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -308,7 +308,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "WK, WY, PA, CP (191 unique)",
+      "examples": "JS, KP, RF, IC (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -316,7 +316,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2024-01-20, 2025-01-13, 2024-10-07, 2025-02-18 (671 unique)",
+      "examples": "2025-10-22, 2024-12-25, 2025-10-07, 2025-10-01 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -324,7 +324,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-11-10, 2024-11-11, 2025-05-14, 2024-04-17 (596 unique)",
+      "examples": "2024-02-07, 2024-04-29, 2024-12-02, 2025-01-07 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -332,7 +332,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-10-07, 2024-01-30, 2024-11-27, 2024-12-26 (365 unique)",
+      "examples": "2024-08-24, 2024-12-28, 2024-12-24, 2024-05-06 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -348,7 +348,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Tractor Operator (Golf Course), Director, Business Partnership Services, Program Analyst (Risk Management), Electrical Engineer (Recent Graduates) (77992 unique)",
+      "examples": "PROGRAM SUPPORT ASSISTANT (OFFICE AUTOMATION), Vocational Nurse (Emergency Department), Deputy CFO and Division Director, Division of Financial Management, Assistant Inspector General (77992 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77992
@@ -364,7 +364,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "02, 70, none, 8 (115 unique)",
+      "examples": "30, 70, 20, 42 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -428,7 +428,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "02, 36, 1000, 467 (157 unique)",
+      "examples": "8, 200, many, 70 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
