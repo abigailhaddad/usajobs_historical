@@ -12,10 +12,19 @@
 // Deliberately plain functions taking an explicit `conn`. No client object, no
 // wrapper class, no patched global fetch — the call sites say what they fetch.
 //
-// IMPORTANT: query the parquet with read_parquet('https://…') in the SQL text.
-// db.registerFileURL() downloads the ENTIRE file up front (measured: one GET
-// 200 for all 51 MB) no matter what directIO says. Only the SQL path issues
-// Range requests. See memory/reference_duckdb_wasm_range_reads.md.
+// The parquet is fetched once in initDb() and queried from memory. This
+// REVERSES the previous rule ("query with read_parquet('https://…') so DuckDB
+// issues Range requests, because registerFile* downloads the whole file").
+// That rule's factual claim still holds -- registerFile* does pull all 48 MB
+// up front -- but the assumption that this is the expensive option did not
+// survive measurement:
+//
+//   cold range reads   ~9.4s between connection ready and first chart
+//   whole-file fetch    ~3.8s for all 48 MB, then queries run locally
+//
+// Range responses are also cached per byte-range, so each new filter that
+// touches new column chunks pays again, while one buffer serves every filter.
+// (The referenced memory/reference_duckdb_wasm_range_reads.md did not exist.)
 
 import * as duckdb from 'https://esm.sh/@duckdb/duckdb-wasm';
 
@@ -27,7 +36,22 @@ import {
 // Matches MAX_ROWS in the old api/download.py.
 export const DOWNLOAD_ROW_LIMIT = 100000;
 
-/** Boot DuckDB-WASM. Returns a connection; `src` is the SQL-ready table ref. */
+// Name DuckDB sees for the in-memory copy of the parquet.
+const LOCAL_PARQUET = 'jobs.parquet';
+
+/** Boot DuckDB-WASM. Returns a connection; `src` is the SQL-ready table ref.
+ *
+ *  The file is fetched once and handed to DuckDB as bytes, rather than left on
+ *  R2 for read_parquet() to range-read. The note this replaces was right that
+ *  registerFile* pulls the whole file up front; what changed is the measurement
+ *  of whether that is bad. Cold, the range-read path spent ~9.4s between having
+ *  a connection and the first chart, while the entire 48 MB downloads in ~3.8s.
+ *  Range responses also cache per byte-range, so a new filter touching new
+ *  column chunks pays again; one buffer is warm for every later filter.
+ *
+ *  Dropping httpfs is a side effect, not the point -- the extension is 0.42 MB
+ *  against a 34 MB (6.8 MB brotli) wasm bundle.
+ */
 export async function initDb(parquetUrl) {
   const bundle = await duckdb.selectBundle(duckdb.getJsDelivrBundles());
   const workerUrl = URL.createObjectURL(
@@ -37,11 +61,18 @@ export async function initDb(parquetUrl) {
   await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
   URL.revokeObjectURL(workerUrl);
 
+  // Fetch and register in parallel with nothing else: callers already treat
+  // initDb() as the slow thing and never block first paint on it.
+  const resp = await fetch(parquetUrl);
+  if (!resp.ok) throw new Error(`parquet fetch failed: ${resp.status} ${resp.statusText}`);
+  const bytes = new Uint8Array(await resp.arrayBuffer());
+  await db.registerFileBuffer(LOCAL_PARQUET, bytes);
+
   const conn = await db.connect();
-  await conn.query('INSTALL httpfs; LOAD httpfs;');
-  conn.__src = `read_parquet('${parquetUrl}')`;
+  conn.__src = `read_parquet('${LOCAL_PARQUET}')`;
   return conn;
 }
+
 
 function src(conn) {
   if (!conn.__src) throw new Error('connection was not created by initDb()');
