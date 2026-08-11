@@ -150,6 +150,16 @@
 
         // DOWNLOAD_ROW_LIMIT and FULL_DATASET_URL come from shared/shared.js.
 
+        // Phase timing for first paint. Left in production deliberately: the
+        // cost is a few array pushes, and without it a "the site was slow"
+        // report is unactionable — every component measures fast in isolation
+        // (boot 0.4s warm, all six queries 1.2s) while the page took 9.2s.
+        // Run __perf() in the console after a slow load to see which phase owned it.
+        const PERF = [];
+        const perfMark = (name) => PERF.push({ phase: name, msSinceNavStart: Math.round(performance.now()) });
+        window.__perf = () => { console.table(PERF); return PERF; };
+        perfMark('module-start');
+
         const PARQUET_URL =
             'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr.parquet';
 
@@ -158,6 +168,9 @@
         // — so nothing on the page may block on it. Everything that needs the
         // connection awaits this promise at the point of use instead.
         const connPromise = initDb(PARQUET_URL);
+        perfMark('duckdb-boot-started');
+        connPromise.then(() => perfMark('duckdb-ready'),
+                         () => perfMark('duckdb-FAILED'));
 
         // Precomputed charts/stats for the unfiltered view, so the page paints
         // in well under a second instead of waiting on the boot above. It is a
@@ -172,6 +185,7 @@
         const staticPromise = fetch(STATIC_URL)
             .then(r => (r.ok ? r.json() : null))
             .catch(() => null);
+        staticPromise.then(d => perfMark(d ? 'static-json-ready' : 'static-json-missing'));
 
         // One-shot: the precomputed first page is served once, then replaced by
         // a real query. Without this a later draw could be answered from the
@@ -370,8 +384,13 @@
         // Rendering is split from fetching so the same code paints both the
         // precomputed static.json (instant, on first load) and live query
         // results. The old build had two renderers that had to be kept in sync.
-        function renderCharts(monthResp, agencyResp, seriesResp, gradeResp) {
-                // Jobs by Month
+        // One renderer per chart so each can paint the moment its own query
+        // returns. Previously all four were awaited together and applied in one
+        // block, so the page sat blank until the slowest finished — measured as
+        // every milestone (table rows, canvases, row count) landing at the same
+        // instant, 9.2s in. The four queries differ by ~6x (24ms to 158ms), and
+        // more importantly the table no longer waits behind the charts.
+        function renderMonthChart(monthResp) {
                 if (monthResp.labels) {
                     chartMonth.data.labels = monthResp.labels.map(m => {
                         const [y, mo] = m.split('-');
@@ -382,29 +401,8 @@
                     chartMonth.update();
                 }
 
-                // Top Agencies (departments)
-                if (agencyResp.labels) {
-                    chartAgency.data.labels = agencyResp.labels;
-                    chartAgency.data.datasets[0].data = agencyResp.datasets.count;
-                    chartAgency.update();
-                    document.getElementById('statAgencies').textContent = formatNumber(agencyResp.datasets.total_distinct || agencyResp.labels.length);
-                }
-
-                // Top Occupational Series
-                if (seriesResp.labels) {
-                    chartSeries.data.labels = seriesResp.labels;
-                    chartSeries.data.datasets[0].data = seriesResp.datasets.count;
-                    chartSeries.update();
-                }
-
-                // Grade Distribution
-                if (gradeResp.labels) {
-                    chartGrade.data.labels = gradeResp.labels.map(g => 'GS-' + g);
-                    chartGrade.data.datasets[0].data = gradeResp.datasets.count;
-                    chartGrade.update();
-                }
-
-                // Update date range stat from month data
+                // Date range and distinct-series stats both come off the month
+                // response, so they belong with it rather than in a final pass.
                 if (monthResp.labels && monthResp.labels.length > 0) {
                     const minDate = monthResp.datasets.min_date;
                     const maxDate = monthResp.datasets.max_date;
@@ -423,21 +421,66 @@
                 }
         }
 
+        function renderAgencyChart(agencyResp) {
+                if (!agencyResp.labels) return;
+                chartAgency.data.labels = agencyResp.labels;
+                chartAgency.data.datasets[0].data = agencyResp.datasets.count;
+                chartAgency.update();
+                document.getElementById('statAgencies').textContent =
+                    formatNumber(agencyResp.datasets.total_distinct || agencyResp.labels.length);
+        }
+
+        function renderSeriesChart(seriesResp) {
+                if (!seriesResp.labels) return;
+                chartSeries.data.labels = seriesResp.labels;
+                chartSeries.data.datasets[0].data = seriesResp.datasets.count;
+                chartSeries.update();
+        }
+
+        function renderGradeChart(gradeResp) {
+                if (!gradeResp.labels) return;
+                chartGrade.data.labels = gradeResp.labels.map(g => 'GS-' + g);
+                chartGrade.data.datasets[0].data = gradeResp.datasets.count;
+                chartGrade.update();
+        }
+
+        /** Paint all four at once — used only for the precomputed static.json
+         *  snapshot, where every response is already in hand. */
+        function renderCharts(monthResp, agencyResp, seriesResp, gradeResp) {
+                renderMonthChart(monthResp);
+                renderAgencyChart(agencyResp);
+                renderSeriesChart(seriesResp);
+                renderGradeChart(gradeResp);
+        }
+
         async function updateCharts(filterParams) {
             const params = filterParams || {};
+            perfMark('charts-requested');
+            let conn;
             try {
-                const conn = await connPromise;
-                const [monthResp, agencyResp, seriesResp, gradeResp] = await Promise.all([
-                    aggregate(conn, 'month', params),
-                    aggregate(conn, 'department', params),
-                    aggregate(conn, 'series', params),
-                    aggregate(conn, 'grade', params)
-                ]);
-                renderCharts(monthResp, agencyResp, seriesResp, gradeResp);
+                conn = await connPromise;
             } catch (err) {
-                console.error('Failed to update charts:', err);
+                console.error('Query engine failed to start:', err);
                 showToast('Failed to load chart data', true);
+                return;
             }
+            perfMark('charts-have-conn');
+
+            // Each chart renders on its own resolution. One failing no longer
+            // blanks the other three, so a single bad aggregate degrades to a
+            // stale chart instead of an empty dashboard.
+            const paint = (kind, render) => aggregate(conn, kind, params)
+                .then(resp => { perfMark('chart-' + kind); render(resp); return true; })
+                .catch(err => { console.error(`Failed to update ${kind} chart:`, err); return false; });
+
+            const ok = await Promise.all([
+                paint('month', renderMonthChart),
+                paint('department', renderAgencyChart),
+                paint('series', renderSeriesChart),
+                paint('grade', renderGradeChart),
+            ]);
+            perfMark('charts-done');
+            if (ok.every(x => !x)) showToast('Failed to load chart data', true);
         }
 
         // ============================================
@@ -478,7 +521,11 @@
             // DataTable in server-side mode
             const table = $('#jobsTable').DataTable({
                 serverSide: true,
-                processing: false,
+                // On. The first filtered query waits out the DuckDB boot, which
+                // is seconds; with this off the table just sat there showing
+                // nothing with no indication anything was happening. The
+                // language.processing string below is what gets shown.
+                processing: true,
                 // As a function, DataTables hands us its request object and a
                 // callback instead of hitting a URL. Its nested order[] objects
                 // get flattened to the same order[i][column] keys the old query
@@ -492,8 +539,10 @@
                         params['order[' + i + '][dir]'] = o.dir;
                     });
 
+                    perfMark('table-query-requested');
                     const queryLive = () => connPromise
-                        .then(conn => jobs(conn, params))
+                        .then(conn => { perfMark('table-have-conn'); return jobs(conn, params); })
+                        .then(res => { perfMark('table-rows-ready'); return res; })
                         .then(callback)
                         .catch(function (err) {
                             console.error('Table data load failed:', err);
