@@ -354,6 +354,38 @@ def load_existing_jobs(parquet_path: str) -> set:
         return set()
 
 
+def _control_numbers(df: pd.DataFrame) -> pd.Series:
+    """One control-number-per-row Series, preferring the snake_case column.
+
+    These files carry the same id under two names: `usajobsControlNumber` (from
+    the API) and `usajobs_control_number` (added later). Rows written before
+    that second column existed have it as NaN, and the old lookup here was
+
+        row.get('usajobs_control_number', row.get('usajobsControlNumber', ''))
+
+    which only falls back when the KEY is missing. Once the column exists every
+    row has the key, so those older rows resolved to NaN -> "nan", never matched
+    the overlap set, survived the "remove the rows we are replacing" mask, and
+    were then concatenated alongside their own replacement. That produced 2,124
+    duplicate pairs in 2025 and 698 in 2026, every one of them a NULL-snake-col
+    row twinned with a populated one. Coalesce properly instead.
+    """
+    def as_text(vals):
+        # A numeric column that contains any null is read back as float64, and
+        # astype(str) would then render 861001500 as "861001500.0" — which
+        # matches nothing on the other side of the comparison.
+        if pd.api.types.is_integer_dtype(vals) or pd.api.types.is_float_dtype(vals):
+            return vals.astype('Int64').astype(str)
+        return vals.astype(str)
+
+    out = pd.Series('', index=df.index, dtype=object)
+    for col in ('usajobsControlNumber', 'usajobs_control_number'):
+        if col in df.columns:
+            vals = df[col]
+            out = out.mask((out == '') & vals.notna(), as_text(vals))
+    return out
+
+
 def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
     """Save jobs to parquet file, merging with existing data.
     
@@ -400,46 +432,50 @@ def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
         if 'usajobsControlNumber' in existing_df.columns and 'usajobs_control_number' not in existing_df.columns:
             existing_df['usajobs_control_number'] = existing_df['usajobsControlNumber'].astype(str)
         
-        # Get control numbers from both dataframes
-        existing_control_numbers = set()
-        if 'usajobs_control_number' in existing_df.columns:
-            existing_control_numbers.update(existing_df['usajobs_control_number'].dropna().astype(str))
-        if 'usajobsControlNumber' in existing_df.columns:
-            existing_control_numbers.update(existing_df['usajobsControlNumber'].dropna().astype(str))
-            
-        new_control_numbers = set()
-        if 'usajobs_control_number' in new_df.columns:
-            new_control_numbers.update(new_df['usajobs_control_number'].dropna().astype(str))
-        if 'usajobsControlNumber' in new_df.columns:
-            new_control_numbers.update(new_df['usajobsControlNumber'].dropna().astype(str))
+        # Get control numbers from both dataframes. Both sides go through the
+        # same coalesce so a row is identified identically wherever it is read.
+        existing_control_numbers = set(_control_numbers(existing_df)) - {''}
+        new_control_numbers = set(_control_numbers(new_df)) - {''}
         
         # Identify which jobs to update (exist in both)
         overlapping_control_numbers = existing_control_numbers.intersection(new_control_numbers)
-        
+
         # Update last_seen for existing jobs that we're updating
         if overlapping_control_numbers and 'last_seen' not in existing_df.columns:
             existing_df['last_seen'] = existing_df.get('inserted_at', datetime.now().isoformat())
-        
+
         # Remove duplicates from existing data (keep existing version for now)
         # We'll add the new versions below
         if overlapping_control_numbers:
             # Create mask for jobs to keep (not in overlap)
-            mask = ~existing_df.apply(lambda row: 
-                str(row.get('usajobs_control_number', row.get('usajobsControlNumber', ''))) in overlapping_control_numbers, 
-                axis=1)
+            mask = ~_control_numbers(existing_df).isin(overlapping_control_numbers)
             existing_df = existing_df[mask]
-        
+
         # Combine dataframes - this adds new jobs and updated versions of existing jobs
         combined_df = pd.concat([existing_df, new_df], ignore_index=True)
-        
-        # Verify we haven't lost any jobs
-        final_count = len(combined_df)
-        if final_count < initial_count:
-            raise ValueError(f"DATA LOSS PREVENTED: Would have lost {initial_count - final_count} jobs. "
-                           f"Initial: {initial_count}, Final: {final_count}")
-        
-        print(f"    📊 {parquet_path}: {initial_count} → {final_count} jobs "
-              f"(+{final_count - initial_count} new/updated)")
+
+        # Belt and braces: collapse any control number that still appears twice,
+        # keeping the newest copy. This heals files that already carry duplicate
+        # pairs from the bug described on _control_numbers() — they are only
+        # fixed when something rewrites the file, which is here.
+        before_dedupe = len(combined_df)
+        keys = _control_numbers(combined_df)
+        combined_df = combined_df[~keys.duplicated(keep='last') | (keys == '')]
+        if len(combined_df) < before_dedupe:
+            print(f"    🧹 Collapsed {before_dedupe - len(combined_df)} duplicate row(s) "
+                  f"in {parquet_path}")
+
+        # Verify we haven't lost any actual jobs. Compare DISTINCT control
+        # numbers, not row counts — with the dedupe above, a shrinking row count
+        # is the fix working, while a shrinking job count is real loss.
+        initial_jobs = len(existing_control_numbers)
+        final_jobs = len(set(_control_numbers(combined_df)) - {''})
+        if final_jobs < initial_jobs:
+            raise ValueError(f"DATA LOSS PREVENTED: Would have lost {initial_jobs - final_jobs} jobs. "
+                           f"Initial: {initial_jobs}, Final: {final_jobs}")
+
+        print(f"    📊 {parquet_path}: {initial_jobs} → {final_jobs} jobs "
+              f"(+{final_jobs - initial_jobs} new/updated)")
     else:
         combined_df = new_df
         print(f"    📊 Created {parquet_path} with {len(combined_df)} jobs")

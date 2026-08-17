@@ -100,6 +100,106 @@ def check_data_recency(filepath, max_days_old, description):
         print(f"{Colors.RED}❌ FAIL{Colors.RESET} {description} - Error checking dates: {e}")
         return False
 
+ID_COLUMNS = ('usajobsControlNumber', 'usajobs_control_number', 'PositionID')
+
+
+def _job_ids(filepath):
+    """Distinct job ids in a parquet, or None if it has no recognisable id column.
+
+    Coalesces the two spellings the historical files carry: rows written before
+    `usajobs_control_number` existed have it as NULL while `usajobsControlNumber`
+    is set, so reading either column alone under-counts.
+    """
+    names = pq.ParquetFile(filepath).schema.names
+    cols = [c for c in ID_COLUMNS if c in names]
+    if not cols:
+        return None
+
+    df = pd.read_parquet(filepath, columns=cols)
+    ids = pd.Series('', index=df.index, dtype=object)
+    for col in cols:
+        vals = df[col]
+        if pd.api.types.is_integer_dtype(vals) or pd.api.types.is_float_dtype(vals):
+            text = vals.astype('Int64').astype(str)
+        else:
+            text = vals.astype(str)
+        ids = ids.mask((ids == '') & vals.notna(), text)
+    return set(ids) - {''}
+
+
+def _distinct_job_count(filepath):
+    ids = _job_ids(filepath)
+    return None if ids is None else len(ids)
+
+
+def check_no_duplicate_control_numbers():
+    """Fail if a parquet gained duplicate control numbers since the baseline.
+
+    One job should be one row. Duplicates arrived through a merge bug in
+    save_jobs_to_parquet (see _control_numbers there) that left 2,124 duplicate
+    pairs in 2025 and 698 in 2026 — each a row whose `usajobs_control_number`
+    was NULL, twinned with its own replacement.
+
+    This is a ratchet, not a clean-room assertion: the write path now collapses
+    duplicates whenever it rewrites a file, but a file is only rewritten when a
+    date inside it is collected, so the known ones clear out gradually. The
+    recorded allowance therefore only ever moves down — any INCREASE fails.
+    """
+    baseline_file = 'data_baseline.json'
+    if not os.path.exists(baseline_file):
+        print(f"{Colors.YELLOW}⚠️  No baseline yet — skipping duplicate check{Colors.RESET}")
+        return True
+
+    with open(baseline_file, 'r') as f:
+        baseline = json.load(f)
+
+    allowance = baseline.get('duplicate_counts')
+    recording = allowance is None
+    if recording:
+        allowance = {}
+        print(f"{Colors.YELLOW}⚠️  Recording first duplicate-count baseline{Colors.RESET}")
+
+    all_good = True
+    updated = {}
+
+    for filename in sorted(os.listdir('../data')):
+        if not filename.endswith('.parquet'):
+            continue
+        filepath = os.path.join('../data', filename)
+        try:
+            ids = _job_ids(filepath)
+            if ids is None:
+                continue
+            rows = pq.ParquetFile(filepath).metadata.num_rows
+            dupes = rows - len(ids)
+        except Exception as e:
+            print(f"{Colors.YELLOW}⚠️  WARN{Colors.RESET} Could not check {filename}: {e}")
+            continue
+
+        # On the recording run every file sets its own allowance, so nothing
+        # fails — this is establishing where the ratchet starts, not judging it.
+        allowed = dupes if recording else allowance.get(filename, 0)
+        updated[filename] = dupes if recording else min(dupes, allowed)
+
+        if dupes > allowed:
+            print(f"{Colors.RED}❌ FAIL{Colors.RESET} {filename} gained duplicates: "
+                  f"{allowed} allowed → {dupes} present ({rows:,} rows, {len(ids):,} jobs)")
+            all_good = False
+        elif dupes > 0:
+            print(f"{Colors.YELLOW}⚠️  WARN{Colors.RESET} {filename} still carries {dupes:,} "
+                  f"known duplicate row(s) — clears when the file is next rewritten")
+        else:
+            print(f"{Colors.GREEN}✅ PASS{Colors.RESET} {filename} one row per job ({len(ids):,})")
+
+    # Ratchet: never let the allowance grow, and bank any improvement.
+    if updated != allowance:
+        baseline['duplicate_counts'] = updated
+        with open(baseline_file, 'w') as f:
+            json.dump(baseline, f, indent=2)
+
+    return all_good
+
+
 def check_no_data_loss():
     """Ensure historical data hasn't been lost"""
     baseline_file = 'data_baseline.json'  # Store in update directory
@@ -117,12 +217,21 @@ def check_no_data_loss():
 
     all_good = True
 
-    # Check each parquet file hasn't shrunk
+    # Check each parquet file hasn't shrunk.
+    #
+    # NB: create_baseline() stores len(unique ids) under the name "row_counts",
+    # so this must count DISTINCT ids too. Comparing it against
+    # metadata.num_rows (as this did) compares jobs to rows, and the two differ
+    # whenever a file carries duplicates: historical_jobs_2026 held 159,854
+    # distinct ids in 160,552 rows, so the check reported a comfortable "grew"
+    # and would have kept doing so while up to 698 real jobs went missing.
     for filename, baseline_count in baseline.get('row_counts', {}).items():
         filepath = f"../data/{filename}"
         if os.path.exists(filepath):
             try:
-                current_count = pq.ParquetFile(filepath).metadata.num_rows
+                current_count = _distinct_job_count(filepath)
+                if current_count is None:
+                    current_count = pq.ParquetFile(filepath).metadata.num_rows
 
                 if current_count < baseline_count:
                     print(f"{Colors.RED}❌ FAIL{Colors.RESET} {filename} shrunk: {baseline_count} → {current_count}")
@@ -221,9 +330,20 @@ def create_baseline(filepath):
     The no-data-loss check uses row counts; the no-job-ID-loss check uses a
     small sentinel sample so we can detect corruption without a 70 MB JSON.
     """
+    # The duplicate allowance is a ratchet — carry the old one forward so a
+    # rewrite here can never hand back headroom the data no longer needs.
+    prior_dupes = {}
+    if os.path.exists(filepath):
+        try:
+            with open(filepath) as f:
+                prior_dupes = json.load(f).get('duplicate_counts', {}) or {}
+        except Exception:
+            pass
+
     baseline = {
         'created_at': datetime.now().isoformat(),
         'row_counts': {},
+        'duplicate_counts': {},
         'job_ids': {}  # Sentinel sample only — first 500 IDs per file
     }
 
@@ -231,23 +351,20 @@ def create_baseline(filepath):
     for filename in os.listdir(data_dir):
         if filename.endswith('.parquet'):
             try:
-                # Read only the ID column to avoid loading full parquet
                 path = os.path.join(data_dir, filename)
-                id_col = None
-                for col in ('usajobsControlNumber', 'usajobs_control_number', 'PositionID'):
-                    try:
-                        s = pd.read_parquet(path, columns=[col])[col]
-                        id_col = col
-                        ids = sorted(s.dropna().astype(str).unique())
-                        baseline['row_counts'][filename] = len(ids)
-                        baseline['job_ids'][filename] = ids[:500]  # sentinel sample
-                        break
-                    except Exception:
-                        continue
+                ids = _job_ids(path)  # coalesces both id spellings
 
-                if id_col is None:
+                if ids is None:
                     df = pd.read_parquet(path)
                     baseline['row_counts'][filename] = len(df)
+                    continue
+
+                baseline['row_counts'][filename] = len(ids)
+                baseline['job_ids'][filename] = sorted(ids)[:500]  # sentinel sample
+
+                dupes = pq.ParquetFile(path).metadata.num_rows - len(ids)
+                baseline['duplicate_counts'][filename] = min(
+                    dupes, prior_dupes.get(filename, dupes))
 
             except Exception as e:
                 print(f"Could not read {filename}: {e}")
@@ -427,6 +544,11 @@ def run_tests():
     # Test 7: Historical monthly coverage (catches collection gaps)
     print_header("7. HISTORICAL MONTHLY COVERAGE")
     if not check_historical_monthly_coverage():
+        all_passed = False
+
+    # Test 8: One row per job
+    print_header("8. NO DUPLICATE CONTROL NUMBERS")
+    if not check_no_duplicate_control_numbers():
         all_passed = False
 
     # Summary
