@@ -56,9 +56,16 @@ def get_page(params: Optional[Dict] = None, next_url: Optional[str] = None, retr
                 resp = requests.get(f"{base_url}/api/historicjoa", params=params, timeout=120)
 
             if resp.status_code == 503:
-                wait = (attempt + 1) * 5
-                time.sleep(wait)
-                continue
+                if attempt < retries - 1:
+                    time.sleep((attempt + 1) * 5)
+                    continue
+                # The last 503 used to `continue` too, falling out of the loop
+                # and returning None. The caller's data.get(...) then died with
+                # "'NoneType' object has no attribute 'get'", which the worker
+                # swallowed into a per-date error string — so a sustained API
+                # outage read as a mystery AttributeError. Say what happened.
+                raise requests.HTTPError(
+                    f"503 Service Unavailable after {retries} attempts", response=resp)
 
             resp.raise_for_status()
 
@@ -74,17 +81,29 @@ def get_page(params: Optional[Dict] = None, next_url: Optional[str] = None, retr
             else:
                 raise
 
+    # Unreachable — every exit path above either returns or raises. Here so a
+    # future edit to the loop can never resurrect the silent `return None`.
+    raise requests.HTTPError(f"exhausted {retries} attempts with no response")
+
 
 def fetch_all_for_date(date_str: str) -> List[Dict]:
     """Fetch all jobs from the Historical API for a single date."""
     params = {"StartPositionOpenDate": date_str, "EndPositionOpenDate": date_str}
     all_jobs = []
     next_url = None
+    page_num = 1
+    expected_total = None
 
     while True:
         data = get_page(params=params, next_url=next_url)
         jobs = data.get("data", [])
         all_jobs.extend(jobs)
+
+        # The API tells us up front how many rows this date has. Reading it is
+        # the difference between catching under-collection and guessing at it
+        # from a suspicious round number.
+        if page_num == 1:
+            expected_total = data.get("paging", {}).get("metadata", {}).get("totalCount")
 
         next_path = data.get("paging", {}).get("next")
         if next_path and next_path.strip():
@@ -93,12 +112,29 @@ def fetch_all_for_date(date_str: str) -> List[Dict]:
             else:
                 next_url = f"https://data.usajobs.gov{next_path}"
             params = None
+            page_num += 1
         else:
             break
 
+    under_collected = expected_total is not None and len(all_jobs) < expected_total
+    if under_collected:
+        msg = (f"🚨 PAGINATION UNDER-COLLECTION: repoll date {date_str} — API reported "
+               f"{expected_total} total jobs but only collected {len(all_jobs)} after "
+               f"{page_num} page(s). Statuses for the rows we never saw are stale.")
+        log(msg)
+        log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
+        os.makedirs(log_dir, exist_ok=True)
+        with open(os.path.join(log_dir, 'PAGINATION_UNDER_COLLECTION.txt'), 'a') as f:
+            f.write(f"repoll date {date_str}: expected {expected_total}, "
+                    f"got {len(all_jobs)} ({page_num} pages)\n")
+
     # Cap tripwire: a single date returning exactly 500 (page size) or 10,000
     # may mean pagination silently stopped instead of reaching the true end.
-    check_cap(len(all_jobs), f"repoll date {date_str}")
+    # Skipped when the count already came up short — the tripwire is for
+    # truncation that is otherwise *silent*, and firing both just opens two
+    # issues about one event (see #531/#532 on the daily collection).
+    if not under_collected:
+        check_cap(len(all_jobs), f"repoll date {date_str}")
 
     return all_jobs
 
