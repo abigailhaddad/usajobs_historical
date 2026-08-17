@@ -380,18 +380,29 @@ jobs:
       run: |
         # Check if there are changes (exclude parquet files and workflow files)
         # Workflow files are excluded because GITHUB_TOKEN lacks workflows permission to push them
+        # CHANGES_MADE means "something changed, so prep and sync" — it is true
+        # for parquet-only runs too, since those still belong in R2.
+        # COMMIT_PUSHED means "there is a commit on data-updates to open a PR
+        # for", which is a different question. Gating PR creation on the first
+        # one meant a backfill that only rewrote a parquet still tried to open a
+        # PR from a branch identical to main, and GitHub answered "No commits
+        # between main and data-updates" — a red run over data that was already
+        # safely synced (2026-08-14, run 32041326957).
         if [ -n "$(git status --porcelain -- ':!*.parquet' ':!.github/')" ]; then
           git add -- ':!*.parquet' ':!.github/'
           git commit -m "Daily data update - $(date +'%Y-%m-%d')"
           git push -f origin data-updates
           echo "CHANGES_MADE=true" >> $GITHUB_ENV
+          echo "COMMIT_PUSHED=true" >> $GITHUB_ENV
         elif [ -n "$(git status --porcelain)" ]; then
           # Parquet files changed but nothing else — still sync to R2
-          echo "Only data files changed (will sync to R2)"
+          echo "Only data files changed (will sync to R2, no PR needed)"
           echo "CHANGES_MADE=true" >> $GITHUB_ENV
+          echo "COMMIT_PUSHED=false" >> $GITHUB_ENV
         else
           echo "No changes to commit"
           echo "CHANGES_MADE=false" >> $GITHUB_ENV
+          echo "COMMIT_PUSHED=false" >> $GITHUB_ENV
         fi
 
     # A manual run must re-prep and sync even when no new rows arrived —
@@ -426,7 +437,7 @@ jobs:
         python scripts/sync_to_r2.py --only-changed
 
     - name: Create Pull Request
-      if: env.CHANGES_MADE == 'true'
+      if: env.COMMIT_PUSHED == 'true'
       env:
         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
@@ -546,7 +557,13 @@ jobs:
           const dupe = existing.data.find(i => i.title === title);
 
           const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-          const detail = `${context.job.status === 'failure' ? 'The workflow failed to complete.' : 'Tests failed but a PR was created.'}
+          // context.job is the job NAME ("update-data"), not an object, so
+          // context.job.status was always undefined and this always chose the
+          // "Tests failed" branch. Issue #547 therefore read "Tests failed but
+          // a PR was created" directly above "Data Integrity Tests: success",
+          // when what actually happened was a failing PR-creation step.
+          const jobStatus = '${{ job.status }}';
+          const detail = `${jobStatus === 'failure' ? 'The workflow failed to complete.' : 'Tests failed but a PR was created.'}
 
             Test Results:
             - Data Integrity Tests: ${{ steps.data_tests.outcome }}
