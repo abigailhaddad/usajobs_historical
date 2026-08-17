@@ -152,12 +152,19 @@ def get_job_data_page(params: Optional[Dict] = None, next_url: Optional[str] = N
                 raise e
 
 
-def fetch_all_pages(params: Dict, description: str = "") -> List[Dict]:
-    """Fetch all pages of data with pagination. Returns list of all jobs."""
+def fetch_all_pages(params: Dict, description: str = "") -> tuple[List[Dict], bool]:
+    """Fetch all pages of data with pagination.
+
+    Returns (all_jobs, complete). `complete` is False when a page request
+    failed part-way through or the API reported more rows than we ended up
+    with. The jobs we did collect are still good and worth saving — but the
+    set is truncated, so the caller must not treat that date as finished.
+    """
     all_jobs = []
     next_url = None
     page_num = 1
     expected_total = None
+    complete = True
 
     while True:
         try:
@@ -187,10 +194,12 @@ def fetch_all_pages(params: Dict, description: str = "") -> List[Dict]:
         except Exception as e:
             print(f"  ⚠️  Page {page_num} failed with error: {e}")
             print(f"  💾 Saving {len(all_jobs)} jobs collected so far and continuing...")
+            complete = False
             break
 
     # Verify we collected everything the API said was available
     if expected_total is not None and len(all_jobs) < expected_total:
+        complete = False
         msg = (f"🚨 PAGINATION UNDER-COLLECTION: API reported {expected_total} total jobs "
                f"but only collected {len(all_jobs)} after {page_num} page(s). "
                f"Check if continuationToken-based pagination broke.")
@@ -205,14 +214,26 @@ def fetch_all_pages(params: Dict, description: str = "") -> List[Dict]:
 
     # Cap tripwire: landing exactly on 500 (page size) or 10,000 may mean
     # pagination stopped at a boundary rather than the true end.
-    check_cap(len(all_jobs), f"historical fetch [{description}] total")
-    check_cap(expected_total, f"historical fetch [{description}] totalCount")
+    #
+    # Only worth checking when the fetch looked clean. The tripwire exists to
+    # catch truncation that is otherwise *silent*; when a page already failed
+    # or the count already came up short, the truncation is loud and the
+    # tripwire just opens a second issue about the same event. (2026-08-17:
+    # one 503 on page 2 of 2026-08-07 produced both #531 and #532.)
+    if complete:
+        check_cap(len(all_jobs), f"historical fetch [{description}] total")
+        check_cap(expected_total, f"historical fetch [{description}] totalCount")
 
-    return all_jobs
+    return all_jobs, complete
 
 
-def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> tuple[List[Dict], bool]:
-    """Fetch all jobs for a specific date. Returns (jobs_list, success_flag)."""
+def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> tuple[List[Dict], bool, bool]:
+    """Fetch all jobs for a specific date.
+
+    Returns (jobs_list, success_flag, complete_flag). `complete_flag` is False
+    when pagination cut short — the jobs returned are real and should still be
+    saved, but the date is missing rows and needs re-collecting.
+    """
     params = {
         "StartPositionOpenDate": date,
         "EndPositionOpenDate": date
@@ -224,9 +245,9 @@ def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> tup
 
     try:
         # Try single day query first
-        jobs_for_date = fetch_all_pages(params)
+        jobs_for_date, complete = fetch_all_pages(params, description=date)
         # 0 jobs is a valid result - the API may simply have no data for this date
-        return jobs_for_date, True
+        return jobs_for_date, True, complete
 
     except Exception as e:
         print(f"  ❌ API FAILURE for single day {date}: {e}")
@@ -240,7 +261,11 @@ def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> tup
         next_date_str = next_date.strftime('%Y-%m-%d')
         
         all_target_jobs = []
-        
+        # The single-day query already blew up, so this date is suspect until a
+        # fallback comes back clean. Each fallback that fails or truncates keeps
+        # it False.
+        complete = False
+
         # Fallback 1: previous day + target day
         try:
             print(f"  🔄 Fallback 1: querying {prev_date_str} to {date}")
@@ -252,8 +277,13 @@ def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> tup
             if position_series:
                 fallback1_params["PositionSeries"] = position_series
             
-            range1_jobs = fetch_all_pages(fallback1_params)
-            
+            range1_jobs, range1_complete = fetch_all_pages(
+                fallback1_params, description=f"{prev_date_str}..{date} (fallback for {date})")
+            # A range query that paginated cleanly covers every row for the
+            # target date, so one clean fallback is enough to call it complete.
+            complete = complete or range1_complete
+
+
             # Filter to only jobs that actually have positionOpenDate = our target date
             target_jobs_1 = [job for job in range1_jobs 
                             if job.get('positionOpenDate', '').startswith(date)]
@@ -275,8 +305,11 @@ def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> tup
             if position_series:
                 fallback2_params["PositionSeries"] = position_series
             
-            range2_jobs = fetch_all_pages(fallback2_params)
-            
+            range2_jobs, range2_complete = fetch_all_pages(
+                fallback2_params, description=f"{date}..{next_date_str} (fallback for {date})")
+            complete = complete or range2_complete
+
+
             # Filter to only jobs that actually have positionOpenDate = our target date
             target_jobs_2 = [job for job in range2_jobs 
                             if job.get('positionOpenDate', '').startswith(date)]
@@ -297,7 +330,7 @@ def fetch_jobs_for_date(date: str, position_series: Optional[str] = None) -> tup
             print(f"  ✅ Combined fallbacks: found {len(all_target_jobs)} jobs for {date}")
         else:
             print(f"  ℹ️  Fallbacks completed: 0 jobs for {date} (may be valid)")
-        return all_target_jobs, True
+        return all_target_jobs, True, complete
 
 
 def load_existing_jobs(parquet_path: str) -> set:
@@ -482,6 +515,7 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
     seen_control_numbers = set()  # Track unique jobs
     weekly_batch = []  # Accumulate jobs for weekly saves
     failed_dates = []  # Track dates that failed to fetch
+    partial_dates = []  # Track dates where pagination cut short (rows saved, but incomplete)
     suspicious_zero_days = []  # Track days with 0 jobs (may be legitimate but worth flagging)
     
     # Create data directory if it doesn't exist
@@ -515,7 +549,7 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
         progress_bar.set_description(f"Fetching {date_str}")
         
         try:
-            jobs, success = fetch_jobs_for_date(date_str, position_series)
+            jobs, success, complete = fetch_jobs_for_date(date_str, position_series)
             if not success:
                 failed_dates.append(date_str)
                 logger.critical(f"💀 CRITICAL FAILURE: No data collected for {date_str}")
@@ -552,8 +586,18 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
         # Add daily jobs to weekly batch
         weekly_batch.extend(daily_jobs)
         
-        # Distinguish between 0 jobs (legitimate) and failures
-        if len(jobs) == 0:
+        # Distinguish between 0 jobs (legitimate), truncated days, and failures.
+        # A truncated day is NOT a success: the rows we got are saved, but the
+        # API had more and the date has to be collected again. Logging it as
+        # "✅ SUCCESS: 2026-08-07 - 500 jobs" is how a 503 mid-pagination read
+        # as a clean day in the 2026-08-17 run.
+        if not complete:
+            partial_dates.append(date_str)
+            logger.critical(f"⚠️  PARTIAL: {date_str} - saved {len(jobs)} jobs but the day is "
+                            f"truncated (pagination cut short); needs re-collection")
+            data_logger.critical(f"PARTIAL DATA: {date_str} - saved {len(jobs)} jobs, day incomplete")
+            progress_bar.write(f"  {date_str}: ⚠️  PARTIAL - {len(jobs)} jobs saved, day incomplete")
+        elif len(jobs) == 0:
             suspicious_zero_days.append(date_str)
             logger.warning(f"⚠️  SUSPICIOUS: Found 0 jobs for {date_str} - may be legitimate weekend/holiday or API issue")
             progress_bar.write(f"  {date_str}: Found 0 jobs (⚠️  suspicious - check if legitimate)")
@@ -605,6 +649,18 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
     if failed_dates:
         log_violent_data_gap_warning(data_logger, failed_dates, start_date, end_date)
     
+    # Flag truncated days — these look like data but are missing rows
+    if partial_dates:
+        logger.critical(f"⚠️  {len(partial_dates)} date(s) were only partially collected")
+        data_logger.critical(f"PARTIALLY COLLECTED DATES: {', '.join(partial_dates)}")
+        print(f"\n⚠️  WARNING: {len(partial_dates)} date(s) were truncated mid-pagination:")
+        for partial_date in partial_dates:
+            print(f"  ⚠️  {partial_date}")
+        print("💡 Re-collect them:")
+        for partial_date in partial_dates[:10]:
+            print(f"    python scripts/collect_data.py --start-date {partial_date} "
+                  f"--end-date {partial_date} --data-dir {data_dir}")
+
     # Flag suspicious zero-job days
     if suspicious_zero_days:
         logger.warning(f"⚠️  SUSPICIOUS: {len(suspicious_zero_days)} days had 0 jobs - verify if legitimate:")
@@ -614,7 +670,7 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
             print(f"  🤔 {zero_date}")
         print(f"💡 If these aren't weekends/holidays, consider re-running those dates")
     
-    if not failed_dates and not suspicious_zero_days:
+    if not failed_dates and not partial_dates and not suspicious_zero_days:
         logger.info("🎉 PERFECT RUN: All dates fetched successfully with data!")
         print("🎉 All dates fetched successfully!")
     
