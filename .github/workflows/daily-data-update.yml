@@ -430,16 +430,45 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
-        # Check if PR already exists
-        PR_EXISTS=$(gh pr list --base main --head data-updates --state open --json number --jq length)
-        
+        # Every call here can come back 503 — GitHub threw them at everything on
+        # 2026-08-17. Untreated, a 503 on the lookup reads as "no PR exists" and
+        # a 503 on the create fails the step, both AFTER the data has already
+        # synced to R2, so the run goes red over a repo-side bookkeeping call.
+        LOOKUP_OK=false
+        for attempt in 1 2 3 4 5; do
+          if PR_EXISTS=$(gh pr list --base main --head data-updates --state open --json number --jq length 2>&1); then
+            LOOKUP_OK=true
+            break
+          fi
+          echo "  PR lookup failed (attempt $attempt/5): $PR_EXISTS"
+          sleep $((attempt * 10))
+        done
+
+        if [ "$LOOKUP_OK" != "true" ]; then
+          echo "::error::Could not reach GitHub to check for an existing PR after 5 attempts"
+          exit 1
+        fi
+
         if [ "$PR_EXISTS" -eq "0" ]; then
           echo "Creating new PR..."
-          gh pr create \
-            --base main \
-            --head data-updates \
-            --title "Daily data update - $(date +'%Y-%m-%d')" \
-            --body "Automated daily data update from USAJobs API"
+          for attempt in 1 2 3 4 5; do
+            if gh pr create \
+                 --base main \
+                 --head data-updates \
+                 --title "Daily data update - $(date +'%Y-%m-%d')" \
+                 --body "Automated daily data update from USAJobs API"; then
+              exit 0
+            fi
+            # It may have been created despite the error response.
+            if [ "$(gh pr list --base main --head data-updates --state open --json number --jq length 2>/dev/null)" = "1" ]; then
+              echo "PR exists despite the API error — continuing"
+              exit 0
+            fi
+            echo "  PR create failed (attempt $attempt/5) — retrying in $((attempt * 15))s"
+            sleep $((attempt * 15))
+          done
+          echo "::error::Could not create the data-updates PR after 5 attempts"
+          exit 1
         else
           echo "PR already exists, skipping creation"
         fi
@@ -450,24 +479,50 @@ jobs:
         # Wait a moment for PR to be created
         sleep 10
 
-        # Find the PR number
-        PR_NUMBER=$(gh pr list --base main --head data-updates --json number --jq '.[0].number')
+        # Find the PR number. Separate "GitHub would not answer" from "there is
+        # no PR" — the old single call conflated them, so a 503 here silently
+        # skipped the merge and passed the step.
+        LOOKUP_OK=false
+        for attempt in 1 2 3 4 5; do
+          if PR_NUMBER=$(gh pr list --base main --head data-updates --json number --jq '.[0].number' 2>&1); then
+            LOOKUP_OK=true
+            break
+          fi
+          echo "  PR lookup failed (attempt $attempt/5): $PR_NUMBER"
+          sleep $((attempt * 10))
+        done
 
-        if [ -n "$PR_NUMBER" ]; then
-          echo "Auto-merging PR #$PR_NUMBER"
-          gh pr merge $PR_NUMBER --merge --auto || {
-            # Tolerate transient API errors (502, stream cancel, etc.)
-            # The merge may have gone through despite the error response
-            sleep 5
-            PR_STATE=$(gh pr view $PR_NUMBER --json state --jq '.state')
-            if [ "$PR_STATE" = "MERGED" ]; then
-              echo "PR #$PR_NUMBER is already merged despite API error — continuing"
-            else
-              echo "PR #$PR_NUMBER merge failed (state: $PR_STATE)"
-              exit 1
-            fi
-          }
+        if [ "$LOOKUP_OK" != "true" ]; then
+          echo "::error::Could not reach GitHub to look up the data-updates PR after 5 attempts"
+          exit 1
         fi
+
+        if [ -z "$PR_NUMBER" ]; then
+          echo "No open data-updates PR — nothing to merge"
+          exit 0
+        fi
+
+        # Retry the merge itself. On 2026-08-17 a single 503 here failed a run
+        # whose data had already collected, tested and synced — and the retry
+        # workflow then re-ran the whole ~15 minute job to redo a 5 second call.
+        echo "Auto-merging PR #$PR_NUMBER"
+        for attempt in 1 2 3 4 5; do
+          if gh pr merge "$PR_NUMBER" --merge --auto; then
+            echo "Merge requested for PR #$PR_NUMBER"
+            exit 0
+          fi
+          # It may have gone through despite the error response.
+          PR_STATE=$(gh pr view "$PR_NUMBER" --json state --jq '.state' 2>/dev/null || echo UNKNOWN)
+          if [ "$PR_STATE" = "MERGED" ]; then
+            echo "PR #$PR_NUMBER is already merged despite the API error — continuing"
+            exit 0
+          fi
+          echo "  merge attempt $attempt/5 failed (state: $PR_STATE) — retrying in $((attempt * 15))s"
+          sleep $((attempt * 15))
+        done
+
+        echo "::error::PR #$PR_NUMBER could not be merged after 5 attempts"
+        exit 1
       env:
         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
