@@ -140,6 +140,29 @@ def fetch_all_for_date(date_str: str) -> List[Dict]:
     return all_jobs
 
 
+# How far behind the API a date may sit before the coverage check calls it a
+# gap worth re-collecting.
+#
+# Being a few rows behind is the normal resting state, not a fault: the historic
+# API keeps attaching late announcements to a date for months afterwards. On
+# 2025-11-14 we hold 647 against 651; on 2026-08-07 the API grew by 8 overnight.
+# Treating those as gaps means re-collecting almost every date in a year on every
+# rotation, forever, for a handful of rows — and the next trickle puts them right
+# back on the list. Nothing converges.
+#
+# Real truncation does not look like that. 2025-11-17 held 4 rows against 659.
+MIN_GAP_ROWS = 10
+MIN_GAP_FRACTION = 0.02
+
+
+def _material_gap(held: int, total: Optional[int]) -> bool:
+    """True when a shortfall is bigger than the API's normal late-arrival drift."""
+    if total is None:
+        return False
+    short = total - held
+    return short >= MIN_GAP_ROWS and short >= MIN_GAP_FRACTION * total
+
+
 def api_total(start_date: str, end_date: str) -> Optional[int]:
     """The API's own row count for a date range, or None if it wouldn't answer.
 
@@ -170,9 +193,17 @@ def get_coverage_gap_dates(parquet_path: str, year: int, cutoff_date: str,
     the API agrees it should. The API's totalCount is the only ground truth.
 
     Month totals first — 12 requests to clear a year — drilling into a month
-    only when the API reports more than we hold. Dates where we hold MORE are
-    ignored: the archive deliberately keeps announcements the API has since
-    retired.
+    only when it is materially short. Dates where we hold MORE are ignored: the
+    archive deliberately keeps announcements the API has since retired.
+
+    "Materially" matters, see MIN_GAP_ROWS. Only shortfalls beyond the API's
+    normal late-arrival drift count, so a date we have already re-collected
+    does not come straight back onto the list because two more announcements
+    turned up. The cost is that a small truncation inside a busy month can
+    hide under the threshold — a 300-row hole in a 30,000-row month is 1%.
+    Recent truncation is covered anyway: the daily collection re-fetches 14
+    days, and fetch_all_for_date now alerts on under-collection at the moment
+    it happens. This check is the backstop for old, large holes.
     """
     df = pd.read_parquet(parquet_path, columns=['positionOpenDate'])
     dates = df['positionOpenDate'].dropna().apply(lambda x: str(x)[:10])
@@ -193,8 +224,11 @@ def get_coverage_gap_dates(parquet_path: str, year: int, cutoff_date: str,
     with ThreadPoolExecutor(max_workers=workers) as ex:
         totals = list(ex.map(lambda t: (t[0], api_total(t[1], t[2])), months))
 
+    # Same materiality rule at month level. Without it a month sitting a few
+    # rows behind on every date costs 31 probes per rotation to discover there
+    # is nothing to do.
     short_months = [(ym, s, e) for (ym, s, e), (_, total) in zip(months, totals)
-                    if total is not None and total > by_month.get(ym, 0)]
+                    if _material_gap(by_month.get(ym, 0), total)]
     if not short_months:
         return []
 
@@ -213,7 +247,7 @@ def get_coverage_gap_dates(parquet_path: str, year: int, cutoff_date: str,
     gaps = []
     for d, total in day_totals:
         held = by_date.get(d, 0)
-        if total is not None and total > held:
+        if _material_gap(held, total):
             gaps.append(d)
             # Capped: a year that has never been coverage-checked can come back
             # with hundreds of dates a few rows short, and one line each buries
