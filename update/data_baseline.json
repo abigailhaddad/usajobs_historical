@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-08-17T14:18:04.985640",
+  "created_at": "2026-08-17T14:39:59.131846",
   "row_counts": {
     "current_jobs_2025.parquet": 87736,
     "historical_jobs_2018.parquet": 329356,
@@ -14,12 +14,33 @@
     "historical_jobs_2013.parquet": 5,
     "historical_jobs_2014.parquet": 24,
     "historical_jobs_2023.parquet": 454652,
-    "current_jobs_2026.parquet": 154847,
+    "current_jobs_2026.parquet": 154876,
     "historical_jobs_2022.parquet": 441604,
     "historical_jobs_2016.parquet": 3879,
     "historical_jobs_2024_backup.parquet": 367186,
     "historical_jobs_2024.parquet": 367192,
     "historical_jobs_2019.parquet": 349256
+  },
+  "duplicate_counts": {
+    "current_jobs_2025.parquet": 0,
+    "historical_jobs_2018.parquet": 0,
+    "historical_jobs_2021.parquet": 0,
+    "historical_jobs_2020.parquet": 0,
+    "historical_jobs_2026.parquet": 698,
+    "historical_jobs_2017.parquet": 0,
+    "current_jobs_2024.parquet": 0,
+    "historical_jobs_2025_backup.parquet": 0,
+    "historical_jobs_2015.parquet": 0,
+    "historical_jobs_2025.parquet": 0,
+    "historical_jobs_2013.parquet": 0,
+    "historical_jobs_2014.parquet": 0,
+    "historical_jobs_2023.parquet": 0,
+    "current_jobs_2026.parquet": 0,
+    "historical_jobs_2022.parquet": 0,
+    "historical_jobs_2016.parquet": 0,
+    "historical_jobs_2024_backup.parquet": 0,
+    "historical_jobs_2024.parquet": 0,
+    "historical_jobs_2019.parquet": 0
   },
   "job_ids": {
     "current_jobs_2025.parquet": [
