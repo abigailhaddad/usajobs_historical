@@ -56,10 +56,18 @@ jobs:
             }
 
   notify:
-    # Only act on genuine failures (skip success / cancelled), and only after
-    # the automatic retry has also failed (attempt >= 2). Attempt 1 failures
-    # are handled by the retry job above.
-    if: github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt >= 2
+    # Fires once the automatic retry has also gone wrong (attempt >= 2).
+    # Attempt 1 failures are handled by the retry job above.
+    #
+    # `cancelled` counts here even though it is ignored on attempt 1, where it
+    # usually means a human stopped the run. On attempt 2 nobody asked for the
+    # run at all — it is a retry we started — so a cancellation is the retry
+    # dying, not a person changing their mind. Alerting only on 'failure' would
+    # trade attempt 1's alert for silence in that case, and cancellations are
+    # not rare here: 3 of the last 6 non-success daily runs ended cancelled.
+    # Kept on one line on purpose: a folded `if:` still evaluates, but a broken
+    # condition here fails silently (no alert, no error), so this stays boring.
+    if: (github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'cancelled') && github.event.workflow_run.run_attempt >= 2
     runs-on: ubuntu-latest
     steps:
       - name: Open an issue for the failed run
@@ -85,10 +93,21 @@ jobs:
               return;
             }
 
+            // Attempt >= 2 means the original run failed and the automatic
+            // retry then failed or was cancelled. Say which, because they
+            // point at different things: a second failure suggests a real
+            // bug, a cancelled retry suggests the runner never got going.
+            const lead = run.conclusion === 'cancelled'
+              ? [`**${run.name}** failed, and the automatic retry was cancelled`,
+                 `rather than completing. Nobody requested this attempt, so the`,
+                 `cancellation is the retry dying — not a human stopping it.`,
+                 `The original failure is still unaddressed.`]
+              : [`**${run.name}** run failed twice: the original run and the`,
+                 `automatic retry. This is unlikely to be a transient runner`,
+                 `death — check the logs.`];
+
             const body = [
-              `**${run.name}** run failed twice: the original run and the`,
-              `automatic retry. This is unlikely to be a transient runner`,
-              `death — check the logs.`,
+              ...lead,
               ``,
               ``,
               `This alert comes from a separate watcher workflow, so it fires even`,
