@@ -22,6 +22,7 @@ Usage:
 """
 
 import argparse
+import calendar
 import json
 import time
 import os
@@ -137,6 +138,95 @@ def fetch_all_for_date(date_str: str) -> List[Dict]:
         check_cap(len(all_jobs), f"repoll date {date_str}")
 
     return all_jobs
+
+
+def api_total(start_date: str, end_date: str) -> Optional[int]:
+    """The API's own row count for a date range, or None if it wouldn't answer.
+
+    Only the first page's metadata is needed, so this is one request however
+    many rows the range holds.
+    """
+    try:
+        data = get_page(params={"StartPositionOpenDate": start_date,
+                                "EndPositionOpenDate": end_date})
+        return data.get("paging", {}).get("metadata", {}).get("totalCount")
+    except Exception as e:
+        log(f"  ⚠️  coverage check: {start_date}..{end_date} unavailable ({e})")
+        return None
+
+
+def get_coverage_gap_dates(parquet_path: str, year: int, cutoff_date: str,
+                           workers: int = 6) -> List[str]:
+    """Dates where the API holds more rows than we do.
+
+    The other two selectors both miss truncated dates. get_gap_dates only
+    catches a date with NO rows, and the status sweep only revisits a date
+    still holding a non-final job. 2025-11-17 held 4 rows against the API's
+    659, all of them final — so it matched neither and sat there for nine
+    months. Nothing in the pipeline was capable of noticing it.
+
+    Comparing row counts to their neighbours cannot work either: federal
+    holidays produce exactly the same shape. Christmas 2025 holds 2 rows and
+    the API agrees it should. The API's totalCount is the only ground truth.
+
+    Month totals first — 12 requests to clear a year — drilling into a month
+    only when the API reports more than we hold. Dates where we hold MORE are
+    ignored: the archive deliberately keeps announcements the API has since
+    retired.
+    """
+    df = pd.read_parquet(parquet_path, columns=['positionOpenDate'])
+    dates = df['positionOpenDate'].dropna().apply(lambda x: str(x)[:10])
+    by_date = dates.value_counts().to_dict()
+    by_month = dates.str[:7].value_counts().to_dict()
+
+    months = []
+    for m in range(1, 13):
+        start = f"{year}-{m:02d}-01"
+        if start > cutoff_date:
+            break
+        last = calendar.monthrange(year, m)[1]
+        months.append((f"{year}-{m:02d}", start, min(f"{year}-{m:02d}-{last}", cutoff_date)))
+
+    if not months:
+        return []
+
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        totals = list(ex.map(lambda t: (t[0], api_total(t[1], t[2])), months))
+
+    short_months = [(ym, s, e) for (ym, s, e), (_, total) in zip(months, totals)
+                    if total is not None and total > by_month.get(ym, 0)]
+    if not short_months:
+        return []
+
+    # Drill only the months that came up short.
+    candidates = []
+    for ym, start, end in short_months:
+        d = datetime.strptime(start, '%Y-%m-%d')
+        end_dt = datetime.strptime(end, '%Y-%m-%d')
+        while d <= end_dt:
+            candidates.append(d.strftime('%Y-%m-%d'))
+            d += timedelta(days=1)
+
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        day_totals = list(ex.map(lambda d: (d, api_total(d, d)), candidates))
+
+    gaps = []
+    for d, total in day_totals:
+        held = by_date.get(d, 0)
+        if total is not None and total > held:
+            gaps.append(d)
+            # Capped: a year that has never been coverage-checked can come back
+            # with hundreds of dates a few rows short, and one line each buries
+            # the run log. The big shortfalls are what matter and they sort first.
+            if len(gaps) <= 20:
+                log(f"  📉 coverage gap {d}: API has {total:,}, we hold {held:,}")
+            elif len(gaps) == 21:
+                log(f"  📉 ...further coverage gaps not listed individually")
+
+    if gaps:
+        log(f"{year}: coverage check found {len(gaps)} date(s) short of the API "
+            f"across {len(short_months)} month(s)")
+    return gaps
 
 
 def get_nonfinal_dates(parquet_path: str) -> List[str]:
@@ -308,6 +398,9 @@ def main():
     parser.add_argument("--workers", type=int, default=15, help="Parallel API workers (default: 15)")
     parser.add_argument("--skip-recent-days", type=int, default=14,
                         help="Skip dates within this many days of today (default: 14, covered by daily collection)")
+    parser.add_argument("--skip-coverage-check", action="store_true",
+                        help="Skip comparing our per-month row counts against the API's "
+                             "totalCount (that check costs ~12 requests per year)")
     parser.add_argument("--max-minutes", type=float, default=None,
                         help="Stop cleanly after this many minutes, saving partial progress and "
                              "writing logs/REPOLL_INCOMPLETE.txt (default: no limit)")
@@ -346,13 +439,20 @@ def main():
         # Also include dates within the last 13 months that have NO records at all
         # so pipeline gaps (API outages, collection failures) get back-filled here.
         gaps = get_gap_dates(path, year, cutoff_date)
-        combined = sorted(set(filtered) | set(gaps))
+
+        # ...and dates that DO hold rows but fewer than the API reports. Those
+        # are invisible to both selectors above; see get_coverage_gap_dates.
+        coverage = [] if args.skip_coverage_check else get_coverage_gap_dates(
+            path, year, cutoff_date, workers=args.workers)
+
+        combined = sorted(set(filtered) | set(gaps) | set(coverage))
 
         dates_by_year[year] = combined
         for d in combined:
             date_to_year[d] = year
         gap_msg = f", {len(gaps)} gap dates to fill" if gaps else ""
-        log(f"{year}: {len(filtered)} dates with non-final jobs{gap_msg}" +
+        cov_msg = f", {len(coverage)} short of the API" if coverage else ""
+        log(f"{year}: {len(filtered)} dates with non-final jobs{gap_msg}{cov_msg}" +
             (f" (skipped {len(dates) - len(filtered)} recent)" if len(dates) != len(filtered) else ""))
 
     # Sort all dates DESCENDING (most recent first)
