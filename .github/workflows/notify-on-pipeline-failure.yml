@@ -45,14 +45,39 @@ jobs:
               // issue now instead of waiting for an attempt 2 that won't come.
               console.log(`Rerun request failed: ${e.message} — opening issue instead.`);
               const date = new Date().toISOString().split('T')[0];
-              await github.rest.issues.create({
+              const title = `${run.name} Failed - ${date}`;
+
+              // Dedup exactly as the notify job does. When the runner survives
+              // its failure, the watched workflow's own "Check for failures"
+              // step has already opened this issue under this title, and this
+              // path opens a second one seconds later — which is what happened
+              // on 2026-08-17 (#542 and #543, one event).
+              const existing = await github.paginate(github.rest.issues.listForRepo, {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `${run.name} Failed - ${date}`,
-                body: `**${run.name}** failed and the automatic rerun could not be started (${e.message}).\n\n[View the failed run](${run.html_url})`,
-                labels: ['bug', 'automated', 'pipeline-failure'],
-                assignees: ['abigailhaddad'],
+                state: 'open',
+                per_page: 100,
               });
+              const dupe = existing.find(i => i.title === title);
+
+              if (dupe) {
+                console.log(`Issue #${dupe.number} already open for "${title}" — commenting instead.`);
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: dupe.number,
+                  body: `The automatic rerun could not be started either (${e.message}), so this run will not retry itself.\n\n[View the failed run](${run.html_url})`,
+                });
+              } else {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title,
+                  body: `**${run.name}** failed and the automatic rerun could not be started (${e.message}).\n\n[View the failed run](${run.html_url})`,
+                  labels: ['bug', 'automated', 'pipeline-failure'],
+                  assignees: ['abigailhaddad'],
+                });
+              }
             }
 
   notify:
