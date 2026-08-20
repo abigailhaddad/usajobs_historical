@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-08-19T08:45:02.606882",
-  "total_jobs": 3958084,
+  "generated_at": "2026-08-20T09:16:06.110023",
+  "total_jobs": 3960343,
   "total_fields": 47,
   "file_size": "1.4GB",
-  "latest_job_date": "2026-08-19",
+  "latest_job_date": "2026-08-20",
   "data_coverage": [
     {
       "year": 2013,
@@ -94,13 +94,13 @@
       "total_jobs": 256093,
       "jobs_opened": 256093,
       "jobs_closed": 240106,
-      "coverage": "Current through August 19, 2026"
+      "coverage": "Current through August 20, 2026"
     },
     {
       "year": 2026,
-      "total_jobs": 318796,
-      "jobs_opened": 318796,
-      "jobs_closed": 316362,
+      "total_jobs": 321055,
+      "jobs_opened": 321055,
+      "jobs_closed": 318597,
       "coverage": "Closing dates only"
     }
   ],
@@ -116,7 +116,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0801\"}, {\"series\": \"0854\"}, {\"series\": \"1550\"}], [{\"series\": \"0810\"}, {\"series\": \"0807\"}, {\"series\": \"0808\"}, {\"series\": \"0020\"}], [{\"series\": \"0905\"}, {\"series\": \"0343\"}, {\"series\": \"0904\"}], [{\"series\": \"4454\"}] (4424 unique)",
+      "examples": "[{\"series\": \"2601\"}], [{\"series\": \"0830\"}, {\"series\": \"0855\"}, {\"series\": \"0861\"}], [{\"series\": \"1550\"}, {\"series\": \"0854\"}, {\"series\": \"0801\"}, {\"series\": \"0855\"}], [{\"series\": \"0503\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -140,7 +140,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of Education\\Office of Communications and Outreach, General Services Administration, Committee for Purchase from People Who Are Blind or Severely Disabled, Southwest Border Regional Commission (542 unique)",
+      "examples": "Department of Homeland Security\\Federal Emergency Management Agency, Judicial Branch\\Administrative Office of the U.S. Courts, Department of the Navy\\Secretary of the Navy Offices (SECNAV), Court Services and Offender Supervision Agency for DC\\Pretrial Services Agency (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -164,7 +164,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "HQMP-25-12619557-KB, DE-12391374-24-JHH, HHS-ONC-ES-24-12476273, CHIPS-206-24-12335327-AS (363816 unique)",
+      "examples": "CBCT-12266867-24-RGU, 24103-4, NRCS-24-12449323-DE-MS-MW, CERH241273680326 (363816 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363816
@@ -172,7 +172,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Multiple, Summer, Temporary promotion, Recent graduates (16 unique)",
+      "examples": "Internships, Permanent, Term, Detail (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -204,7 +204,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "BO00, NV41, LC00, ARJA (528 unique)",
+      "examples": "AG11, CM62, AG10, VAGB (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -212,7 +212,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "General Counsel, Office of the Inspector General, Office of the Assistant Secretary for Administration and Management, Bureau of Ocean Energy Management (502 unique)",
+      "examples": "Alcohol and Tobacco Tax and Trade Bureau, U.S. Fish and Wildlife Service, U. S. Sentencing Commission, Bureau of Reclamation (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -220,7 +220,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "HF, IN, ST, ZG (122 unique)",
+      "examples": "TD, HB, BO, FC (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -228,7 +228,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "General Services Administration, Executive Office of the President, Court Services and Offender Supervision Agency for DC, Other Agencies and Independent Organizations (26 unique)",
+      "examples": "Executive Office of the President, Department of Veterans Affairs, General Services Administration, Department of the Air Force (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -236,7 +236,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "J9, Naval Sea Logistics Center (NSLC), Associate Director for Field Operations, Field Division, Health Surveys Branch, ARP/Deputy Associate Administrator for Airports-Alaskan Regional Airports Division-AL600 (59972 unique)",
+      "examples": "Fraud Detection & National Security Directorate, District 42, FDNS Sacramento CA, Family and Morale, Welfare & Recreation - Leisure Travel Services, United States Army Garrison, Directorate of Public Works, Master Planning Division, Directorate of Family, Morale, Welfare and Recreation, Business Operations Division (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -252,7 +252,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-07-05T12:59:13.261778, 2025-09-20T12:15:51.629388, 2025-09-20T12:00:40.211763, 2025-09-20T12:11:56.912685 (367192 unique)",
+      "examples": "2025-09-19T23:01:37.169777, 2025-07-05T13:47:41.903242, 2025-09-20T11:46:05.951325, 2025-07-05T13:02:09.586511 (367192 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367192
@@ -268,15 +268,15 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-20T11:39:03.887180, 2025-09-20T11:40:47.482073, 2025-09-20T11:40:47.478928, 2025-07-05T13:50:17.138254 (360161 unique)",
+      "examples": "2025-07-05T13:08:00.717401, 2025-09-19T23:01:37.149276, 2025-09-20T11:39:03.907240, 2025-09-19T22:59:09.257905 (359966 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 360161
+      "unique_count": 359966
     },
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "10, 11, 14, LK (127 unique)",
+      "examples": "AH, HJ, 40, C (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -292,7 +292,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "GL, H, GI, G (125 unique)",
+      "examples": "E, 02, 27, HS3 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -308,7 +308,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "MA, LP, NR, GH (191 unique)",
+      "examples": "KA, XH, NB, WU (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -316,7 +316,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-04-30, 2024-09-21, 2025-01-23, 2024-07-30 (671 unique)",
+      "examples": "2024-11-18, 2024-05-10, 2025-05-01, 2024-06-19 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -324,7 +324,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-06-03, 2024-10-04, 2024-05-31, 2024-04-07 (596 unique)",
+      "examples": "2024-09-04, 2024-04-08, 2025-09-12, 2024-08-18 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -332,7 +332,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-05-15, 2024-04-02, 2024-11-30, 2024-07-27 (365 unique)",
+      "examples": "2024-06-07, 2024-02-28, 2024-04-25, 2024-06-12 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -348,7 +348,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Eligibility Specialist, Management Specialist, Human Resources Specialist (ER), CURRENT OPERATIONS STAFF SPECIALIST (77992 unique)",
+      "examples": "Social Worker - Emergency Department/Specialty Care/Acute Medicine, Supvy Strategic Initiatives Analyst, Housekeeping Aid Supervisor / EMS Tech Supervisor, Advanced Medical Support Assistant (Substance Use Disorder Program) (77992 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77992
@@ -364,7 +364,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "44, 9, DISES, 23 (115 unique)",
+      "examples": "no, 71, F, FG07 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -428,7 +428,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "6, 85, 52, 5 (157 unique)",
+      "examples": "94, 68, 55, 204 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
