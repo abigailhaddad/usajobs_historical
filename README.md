@@ -153,9 +153,22 @@ which the Current API collection doesn't populate. The text fields have no API
 counterpart to check against, so the report tracks their fill rate instead: if
 usajobs.gov changes its markup they go empty, and that's the signal.
 
+Duty stations come out as a `PositionLocations` column in the historical API's
+`{positionLocationCity, positionLocationState}` shape, so `prep_web_data.py`
+consumes them through the path it already has. Rendered through that same
+extractor, the location string matched the API exactly on 337 of 348 postings.
+The other 11 are the page's own doing rather than a parse failure: a posting
+with 31 API entries across 22 cities renders 12, and some collapse to a label
+like "Location Negotiable After Selection". The search endpoint's own
+`positionLocationCount` matched the API on all 348, so the accurate count is
+kept alongside the page's list in `scrapedLocationCount` and the gap stays
+measurable.
+
 What scraping can't give you: `hiringAgencyCode`, `hiringDepartmentCode`,
 `agencyLevel`, `agencyLevelSort`, `vendor`, `whoMayApply`. Those are API-only
-and the announcement page never shows them. It also can't backfill — search
+and the announcement page never shows them. Nothing reads them off the current
+parquets — `repoll_status.py` is the only consumer and it writes them into the
+historical files, from the keyless `/api/historicjoa`. It also can't backfill — search
 only lists open postings, so this accumulates forward from the day it started.
 Closed announcement pages do stay up indefinitely, which is what the
 [announcement-text dataset](https://github.com/abigailhaddad/joa) relies on.

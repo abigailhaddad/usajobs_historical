@@ -368,6 +368,81 @@ def parse_sections(soup: BeautifulSoup) -> Dict[str, str]:
     return out
 
 
+# The announcement page writes duty stations as "City, ST"; both APIs use the
+# full state name ("Anchorage, Alaska"). Territories and the military postal
+# codes (AA/AE/AP) are in here because federal postings use all of them.
+_US_STATES = {
+    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
+    "CA": "California", "CO": "Colorado", "CT": "Connecticut",
+    "DE": "Delaware", "DC": "District of Columbia", "FL": "Florida",
+    "GA": "Georgia", "HI": "Hawaii", "ID": "Idaho", "IL": "Illinois",
+    "IN": "Indiana", "IA": "Iowa", "KS": "Kansas", "KY": "Kentucky",
+    "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
+    "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota",
+    "MS": "Mississippi", "MO": "Missouri", "MT": "Montana",
+    "NE": "Nebraska", "NV": "Nevada", "NH": "New Hampshire",
+    "NJ": "New Jersey", "NM": "New Mexico", "NY": "New York",
+    "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio",
+    "OK": "Oklahoma", "OR": "Oregon", "PA": "Pennsylvania",
+    "RI": "Rhode Island", "SC": "South Carolina", "SD": "South Dakota",
+    "TN": "Tennessee", "TX": "Texas", "UT": "Utah", "VT": "Vermont",
+    "VA": "Virginia", "WA": "Washington", "WV": "West Virginia",
+    "WI": "Wisconsin", "WY": "Wyoming",
+    "AS": "American Samoa", "FM": "Federated States of Micronesia",
+    "GU": "Guam", "MH": "Marshall Islands",
+    "MP": "Northern Mariana Islands", "PR": "Puerto Rico",
+    "PW": "Palau", "VI": "Virgin Islands",
+    "AA": "Armed Forces Americas", "AE": "Armed Forces Europe",
+    "AP": "Armed Forces Pacific",
+}
+
+
+def parse_locations(soup: BeautifulSoup) -> List[Dict[str, str]]:
+    """Duty stations, in the shape the historical API uses.
+
+    Each station is a .location-item whose bold line is "City, ST" for a US
+    posting and "City, Country" for an overseas one. The page renders every
+    item twice (one block for mobile, one for desktop), so entries are deduped
+    on data-location-text -- which carries the facility code and street address
+    and therefore separates two offices in the same city. Deduping on the
+    city/state line instead collapsed a 408-station IRS posting to 361.
+
+    Emitting positionLocationCity/positionLocationState means
+    prep_web_data.py's existing PositionLocations path handles this with no
+    changes: it renders "Anchorage, Alaska", the same string the API produces.
+    """
+    locations: List[Dict[str, str]] = []
+    seen = set()
+
+    for item in soup.select(".location-item"):
+        key = (item.get("data-location-text") or "").strip()
+        bold = item.select_one(".font-bold")
+        if not bold:
+            continue
+        label = _WS.sub(" ", bold.get_text(" ")).strip()
+        if not label:
+            continue
+
+        # No data-location-text to dedupe on: fall back to the label, which at
+        # worst merges two identical-looking stations.
+        if (key or label) in seen:
+            continue
+        seen.add(key or label)
+
+        city, _, region = label.rpartition(", ")
+        if not city:
+            # No comma at all -- a collapsed label such as "Department of
+            # State Posts - Overseas and Domestic". Keep it whole.
+            locations.append({"positionLocationCity": label})
+            continue
+
+        state = _US_STATES.get(region.upper(), region)
+        locations.append({"positionLocationCity": city,
+                          "positionLocationState": state})
+
+    return locations
+
+
 def parse_job_page(html: str) -> Dict:
     """A /job/{n} page -> the fields the API collection stores, plus the text.
 
@@ -489,6 +564,16 @@ def parse_job_page(html: str) -> Dict:
                  for h in paths_block.find_all("h3")]
         if paths:
             row["HiringPaths"] = json.dumps(paths)
+
+    # Deliberately does NOT set positionLocationCount. Discovery already put
+    # the search endpoint's count there, and for about 3% of postings the page
+    # lists fewer stations than the API holds -- a job with 31 API entries
+    # across 22 cities renders 12. Keeping both means the gap stays visible
+    # instead of being papered over.
+    locations = parse_locations(soup)
+    if locations:
+        row["PositionLocations"] = json.dumps(locations)
+        row["scrapedLocationCount"] = len(locations)
 
     row.update(parse_sections(soup))
     row["text"] = body_text

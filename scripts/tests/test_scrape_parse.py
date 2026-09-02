@@ -19,7 +19,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from usajobs_scrape import (normalize_search_job, parse_job_page,
-                            parse_sections)
+                            parse_locations, parse_sections)
 
 FIXTURES = os.path.join(os.path.dirname(__file__), 'fixtures')
 
@@ -191,6 +191,88 @@ class TestLongTextSections:
         from bs4 import BeautifulSoup
         assert parse_sections(BeautifulSoup('<html><body>hi</body></html>',
                                             'html.parser')) == {}
+
+
+class TestLocations:
+    """Duty stations, emitted in the historical API's shape.
+
+    prep_web_data.py already reads a PositionLocations column of
+    {positionLocationCity, positionLocationState} dicts, so matching that shape
+    means the web build needs no changes to consume scraped locations.
+    """
+
+    def _soup(self, items):
+        from bs4 import BeautifulSoup
+        html = "".join(
+            f'<div class="location-item" data-location-text="{key}">'
+            f'<div class="font-bold">{label}</div></div>'
+            for key, label in items)
+        return BeautifulSoup(f"<html><body>{html}</body></html>", "html.parser")
+
+    def test_fixture_locations(self, open_job, closed_job):
+        assert json.loads(open_job['PositionLocations']) == [
+            {'positionLocationCity': 'Washington',
+             'positionLocationState': 'District of Columbia'}]
+        assert json.loads(closed_job['PositionLocations']) == [
+            {'positionLocationCity': 'Eielson AFB',
+             'positionLocationState': 'Alaska'}]
+
+    def test_state_abbreviation_is_expanded(self):
+        locs = parse_locations(self._soup([("anchorage, ak", "Anchorage, AK")]))
+        # The APIs write "Anchorage, Alaska"; the page writes "Anchorage, AK".
+        assert locs == [{'positionLocationCity': 'Anchorage',
+                         'positionLocationState': 'Alaska'}]
+
+    def test_overseas_region_is_left_alone(self):
+        locs = parse_locations(
+            self._soup([("sigonella sicily, italy", "Sigonella Sicily, Italy")]))
+        assert locs == [{'positionLocationCity': 'Sigonella Sicily',
+                         'positionLocationState': 'Italy'}]
+
+    def test_city_containing_a_comma_keeps_only_the_last_part_as_region(self):
+        locs = parse_locations(
+            self._soup([("x", "Winston-Salem, NC"), ("y", "Ft. Belvoir, VA")]))
+        assert [l['positionLocationCity'] for l in locs] == [
+            'Winston-Salem', 'Ft. Belvoir']
+
+    def test_page_renders_each_station_twice(self):
+        # One block for mobile, one for desktop. Every real page does this.
+        locs = parse_locations(self._soup([
+            ("denver, co (co1234) 1 main st", "Denver, CO"),
+            ("denver, co (co1234) 1 main st", "Denver, CO"),
+        ]))
+        assert len(locs) == 1
+
+    def test_two_offices_in_one_city_are_kept_apart(self):
+        # Deduping on the city/state line instead of data-location-text
+        # collapsed a real 408-station IRS posting to 361.
+        locs = parse_locations(self._soup([
+            ("denver, co (co1234) 1 main st", "Denver, CO"),
+            ("denver, co (co5678) 9 elm ave", "Denver, CO"),
+        ]))
+        assert len(locs) == 2
+        assert {l['positionLocationCity'] for l in locs} == {'Denver'}
+
+    def test_collapsed_label_with_no_comma_is_kept_whole(self):
+        # e.g. "Location Negotiable After Selection", or State's
+        # "Department of State Posts - Overseas and Domestic".
+        locs = parse_locations(self._soup([
+            ("location negotiable after selection",
+             "Location Negotiable After Selection")]))
+        assert locs == [{'positionLocationCity':
+                         'Location Negotiable After Selection'}]
+
+    def test_page_count_does_not_overwrite_the_search_count(self, open_job):
+        # Discovery stores the search endpoint's count, which matched the API
+        # on all 348 postings checked. The page's own count goes in its own
+        # field so a shortfall stays visible.
+        assert open_job['scrapedLocationCount'] == 1
+        assert 'positionLocationCount' not in open_job
+
+    def test_no_location_block(self):
+        from bs4 import BeautifulSoup
+        assert parse_locations(
+            BeautifulSoup('<html><body>hi</body></html>', 'html.parser')) == []
 
 
 class TestNormalizeSearchJob:
