@@ -177,6 +177,55 @@ Coverage shortfalls and field disagreements past the thresholds in
 `compare_scrape_to_api.py` open a GitHub issue. Neither the scrape nor the
 comparison can fail the daily run.
 
+## The HuggingFace announcement dataset
+
+[abigailhaddad/usajobs-scraping](https://huggingface.co/datasets/abigailhaddad/usajobs-scraping)
+is one parquet per month plus a manifest, published daily by
+`scripts/publish_to_huggingface.py`. It joins the two halves this pipeline
+already has on disk: structured fields from `historical_jobs_{year}.parquet`,
+and announcement text from `scraped_jobs_{year}.parquet`. Nothing is fetched at
+publish time.
+
+This replaced a publish path that lived in a separate repo
+([joa](https://github.com/abigailhaddad/joa)) and keyed off the historical
+mirror alone. Two things were wrong with it. Its field list never selected
+`positionTitle`, so the published dataset had no job title in it — easy to miss,
+because its controls CSV aliased `announcementNumber` as "title". And it could
+not carry the eleven structured announcement sections, which come from a parse
+that lives here.
+
+The dataset went from 40 columns to 53: `positionTitle` and
+`hiringSubelementName`, plus `jobSummary`, `majorDuties`, `requirements`,
+`conditionsOfEmployment`, `qualificationSummary`, `education`,
+`additionalInformation`, `benefits`, `howYouWillBeEvaluated`,
+`requiredDocuments` and `howToApply`. The whole-page `text` column stays, so
+anything built against it keeps working — columns are only ever added.
+
+A month file is rewritten wholesale, so the publisher refuses to write a month
+when the local join is missing announcements the dataset already holds, rather
+than silently shrinking it. That is the expected state while the page backfill
+is still running.
+
+```bash
+python scripts/publish_to_huggingface.py --dry-run
+python scripts/publish_to_huggingface.py
+python scripts/publish_to_huggingface.py --refresh-all   # rewrite every month
+```
+
+### Backfilling announcement pages
+
+The scraped collection only starts the day it was switched on, so postings from
+earlier in the year have metadata but no text. usajobs.gov serves closed
+announcements indefinitely, so they can be filled in — roughly 160k pages for a
+full year, about three hours. Run it on its own, not inside the daily workflow.
+It writes immutable shards and folds them in at the end, so it is resumable:
+kill it whenever and rerun.
+
+```bash
+python scripts/backfill_scraped_pages.py --year 2026 --dry-run
+python scripts/backfill_scraped_pages.py --year 2026
+```
+
 ## Data Storage
 
 - **Cloudflare R2**: All parquet files are stored in R2 (not in this git repo due to size)
@@ -215,6 +264,8 @@ comparison can fail the daily run.
 │   ├── collect_scraped_data.py  # Same jobs, scraped from usajobs.gov (shadow)
 │   ├── usajobs_scrape.py        # Search endpoint + announcement-page parsing
 │   ├── compare_scrape_to_api.py # Diff the scraped and API collections
+│   ├── publish_to_huggingface.py # Push the announcement dataset to HuggingFace
+│   ├── backfill_scraped_pages.py # Fetch pages for postings scraped before the scrape existed
 │   ├── prep_web_data.py         # Build slim 14-column parquet for website
 │   ├── sync_to_r2.py            # Upload parquet files to Cloudflare R2
 │   ├── run_parallel.sh          # Run multiple years in parallel
