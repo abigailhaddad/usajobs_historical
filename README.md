@@ -153,9 +153,22 @@ which the Current API collection doesn't populate. The text fields have no API
 counterpart to check against, so the report tracks their fill rate instead: if
 usajobs.gov changes its markup they go empty, and that's the signal.
 
+Duty stations come out as a `PositionLocations` column in the historical API's
+`{positionLocationCity, positionLocationState}` shape, so `prep_web_data.py`
+consumes them through the path it already has. Rendered through that same
+extractor, the location string matched the API exactly on 337 of 348 postings.
+The other 11 are the page's own doing rather than a parse failure: a posting
+with 31 API entries across 22 cities renders 12, and some collapse to a label
+like "Location Negotiable After Selection". The search endpoint's own
+`positionLocationCount` matched the API on all 348, so the accurate count is
+kept alongside the page's list in `scrapedLocationCount` and the gap stays
+measurable.
+
 What scraping can't give you: `hiringAgencyCode`, `hiringDepartmentCode`,
 `agencyLevel`, `agencyLevelSort`, `vendor`, `whoMayApply`. Those are API-only
-and the announcement page never shows them. It also can't backfill — search
+and the announcement page never shows them. Nothing reads them off the current
+parquets — `repoll_status.py` is the only consumer and it writes them into the
+historical files, from the keyless `/api/historicjoa`. It also can't backfill — search
 only lists open postings, so this accumulates forward from the day it started.
 Closed announcement pages do stay up indefinitely, which is what the
 [announcement-text dataset](https://github.com/abigailhaddad/joa) relies on.
@@ -163,6 +176,76 @@ Closed announcement pages do stay up indefinitely, which is what the
 Coverage shortfalls and field disagreements past the thresholds in
 `compare_scrape_to_api.py` open a GitHub issue. Neither the scrape nor the
 comparison can fail the daily run.
+
+## The HuggingFace announcement dataset
+
+[abigailhaddad/usajobs-scraping](https://huggingface.co/datasets/abigailhaddad/usajobs-scraping)
+is one parquet per month plus a manifest, published daily by
+`scripts/publish_to_huggingface.py`. It joins the two halves this pipeline
+already has on disk: structured fields from `historical_jobs_{year}.parquet`,
+and announcement text from `scraped_jobs_{year}.parquet`. Nothing is fetched at
+publish time.
+
+This replaced a publish path that lived in a separate repo
+([joa](https://github.com/abigailhaddad/joa)) and keyed off the historical
+mirror alone. Two things were wrong with it. Its field list never selected
+`positionTitle`, so the published dataset had no job title in it — easy to miss,
+because its controls CSV aliased `announcementNumber` as "title". And it could
+not carry the eleven structured announcement sections, which come from a parse
+that lives here.
+
+The dataset went from 40 columns to 53: `positionTitle` and
+`hiringSubelementName`, plus `jobSummary`, `majorDuties`, `requirements`,
+`conditionsOfEmployment`, `qualificationSummary`, `education`,
+`additionalInformation`, `benefits`, `howYouWillBeEvaluated`,
+`requiredDocuments` and `howToApply`. The whole-page `text` column stays, so
+anything built against it keeps working — columns are only ever added.
+
+A month file is rewritten wholesale, so the publisher refuses to write a month
+when the local join is missing announcements the dataset already holds, rather
+than silently shrinking it. That is the expected state while the page backfill
+is still running.
+
+```bash
+python scripts/publish_to_huggingface.py --dry-run
+python scripts/publish_to_huggingface.py
+python scripts/publish_to_huggingface.py --refresh-all   # rewrite every month
+```
+
+### What stays on disk
+
+Announcement text is 97.8% of `scraped_jobs_{year}.parquet` — 5.42 KB of a
+5.54 KB row — so a full year would be 920 MB local against 20 MB for
+everything else in it. HuggingFace is the store for the text instead: after a
+month publishes, the publisher blanks those rows' text columns locally, and
+what stays is the structured shadow the API comparison reads plus anything not
+yet pushed. Measured on real rows, that takes a 162,000-row year from 920 MB to
+34 MB. `--keep-text` opts out.
+
+### Backfilling announcement pages
+
+The scraped collection only starts the day it was switched on, so postings from
+earlier in the year have metadata but no text. usajobs.gov serves closed
+announcements indefinitely, so they can be filled in — roughly 160k pages for a
+full year.
+
+It works a month at a time and publishes each one as it lands, so the working
+set stays near a single month rather than piling up the year, and a killed run
+resumes at month granularity. Within a month it writes immutable shards and
+folds them in once at the end.
+
+It is network-bound, not CPU-bound: a page costs ~32 ms to parse, so a full
+year is about 86 CPU-minutes over those three hours. It runs niced and under a
+CPU governor by default. `--max-cpu` is a share of **one** core, not of the
+machine — measured, an uncapped run sits at 53% of a core, and `--max-cpu 15`
+holds it to 18% at three times the wall clock.
+
+```bash
+python scripts/backfill_scraped_pages.py --year 2026 --dry-run
+python scripts/backfill_scraped_pages.py --year 2026
+python scripts/backfill_scraped_pages.py --year 2026 --max-cpu 20   # gentler
+python scripts/backfill_scraped_pages.py --year 2026 --no-publish   # keep local
+```
 
 ## Data Storage
 
@@ -202,6 +285,8 @@ comparison can fail the daily run.
 │   ├── collect_scraped_data.py  # Same jobs, scraped from usajobs.gov (shadow)
 │   ├── usajobs_scrape.py        # Search endpoint + announcement-page parsing
 │   ├── compare_scrape_to_api.py # Diff the scraped and API collections
+│   ├── publish_to_huggingface.py # Push the announcement dataset to HuggingFace
+│   ├── backfill_scraped_pages.py # Fetch pages for postings scraped before the scrape existed
 │   ├── prep_web_data.py         # Build slim 14-column parquet for website
 │   ├── sync_to_r2.py            # Upload parquet files to Cloudflare R2
 │   ├── run_parallel.sh          # Run multiple years in parallel

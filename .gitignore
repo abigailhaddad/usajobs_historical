@@ -56,3 +56,7 @@ session_base64.txt
 questionnaires/session_base64.txt
 .vercel
 .wrangler/
+
+# HuggingFace publish staging and page-backfill shards
+build/
+data/.scraped_shards_*/

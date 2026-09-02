@@ -450,47 +450,31 @@ jobs:
         cd update
         python test_data_integrity.py
 
-    # Publish announcement text to HuggingFace. The USAJOBS API is a poor source
-    # for it: Search only lists open jobs, so postings that open and close
-    # between runs are never captured, and MatchedObjectDescriptor drops content
-    # the announcement page shows. This scrapes the page instead, reading
-    # data/historical_jobs_2026.parquet off disk — the copy this run just
-    # refreshed — so it needs no R2 credentials of its own.
-    # See https://github.com/abigailhaddad/joa
-
-    - name: Check usajobs.gov is reachable from this runner
-      run: |
-        pip install beautifulsoup4 requests
-        python3 - <<'EOF'
-        import re, sys, requests
-        from bs4 import BeautifulSoup
-        UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
-        r = requests.get("https://www.usajobs.gov/job/855359900",
-                         headers={"User-Agent": UA}, timeout=45)
-        soup = BeautifulSoup(r.text, "html.parser")
-        for t in soup(["script", "style", "noscript"]):
-            t.decompose()
-        text = re.sub(r"\s+", " ", soup.get_text(" ")).strip()
-        print(f"status {r.status_code}, {len(text):,} chars")
-        if not r.ok or len(text) < 5000:
-            sys.exit("usajobs.gov is not serving this runner. Move the scrape off "
-                     "GitHub Actions, or route it through a proxy.")
-        EOF
-
-    - name: Scrape new announcements and push to HuggingFace
+    # Publish the announcement dataset to HuggingFace. Both halves are on disk
+    # by now: the structured fields from the historical mirror this run just
+    # refreshed, and the announcement text from the scraped collection above.
+    # Nothing is fetched here, so it needs no R2 credentials and no second
+    # crawl of usajobs.gov.
+    #
+    # This replaced a step that cloned abigailhaddad/joa and scraped from
+    # there. That path published no positionTitle -- the dataset had no job
+    # title in it at all -- and could not carry the eleven structured
+    # announcement sections, which come from a parse that lives in this repo.
+    - name: Publish announcement dataset to HuggingFace
+      if: always()
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
       run: |
-        git clone --depth 1 https://github.com/abigailhaddad/joa.git /tmp/joa
-        pip install -r /tmp/joa/requirements.txt
-        ln -s "$GITHUB_WORKSPACE/data" /tmp/joa/data
-        cd /tmp/joa
-        # Metadata keeps changing after a posting appears, so rewrite every
-        # month once a month; the daily run only refreshes what it touched.
+        # Metadata keeps changing after a posting appears (close dates,
+        # opening status), so rewrite every month once a month; the daily run
+        # only republishes the months that gained rows.
         REFRESH=""
         [ "$(date -u +%d)" = "01" ] && REFRESH="--refresh-all"
-        python3 update_daily.py $REFRESH
+        # Never fails the run: the dataset is downstream of everything that
+        # matters here, and publish_to_huggingface.py exits non-zero when it
+        # refuses a month rather than shrink it.
+        python scripts/publish_to_huggingface.py $REFRESH || \
+          echo "::warning::HuggingFace publish did not complete cleanly"
 
     - name: Commit and push to data-updates branch
       # Only runs if tests pass

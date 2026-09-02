@@ -78,6 +78,13 @@ TEXT_FIELDS = [
 MIN_TEXT_FILL = {"education": 0.50}
 MIN_TEXT_FILL_DEFAULT = 0.90
 
+# Share of postings whose announcement page must list as many duty stations as
+# the search endpoint says the posting has. It is not 100%: for about 3% of
+# postings the page renders a shorter list than the API holds (one with 31 API
+# entries across 22 cities showed 12), and that is the page's own doing, not a
+# parse failure. A sharp drop here means the location markup changed.
+MIN_LOCATION_COMPLETE = 0.90
+
 # Below these, say so loudly.
 MIN_COVERAGE = 0.95      # share of the API's window postings the scrape found
 MIN_AGREEMENT = 0.90     # share of comparable rows a field must match on
@@ -205,6 +212,35 @@ def text_field_health(data_dir: str) -> list:
     return rows
 
 
+def location_completeness(data_dir: str) -> dict:
+    """How often the page lists every duty station the posting has.
+
+    Self-contained: compares the page-parsed count against the count the search
+    endpoint reported for the same posting, so it needs no API data. The search
+    count matched the API exactly on all 348 postings of the first check, which
+    is what makes it usable as the reference.
+    """
+    import pyarrow.parquet as pq
+
+    total = complete = short = 0
+    for name in sorted(os.listdir(data_dir)):
+        if not (name.startswith("scraped_jobs_") and name.endswith(".parquet")):
+            continue
+        path = os.path.join(data_dir, name)
+        present = set(pq.read_schema(path).names)
+        if not {"positionLocationCount", "scrapedLocationCount"} <= present:
+            continue
+        df = pd.read_parquet(path, columns=["positionLocationCount",
+                                            "scrapedLocationCount"])
+        df = df.dropna()
+        total += len(df)
+        complete += int((df.scrapedLocationCount >= df.positionLocationCount).sum())
+        short += int((df.scrapedLocationCount < df.positionLocationCount).sum())
+
+    return {"total": total, "complete": complete, "short": short,
+            "rate": complete / total if total else None}
+
+
 def flag(message: str) -> None:
     os.makedirs(os.path.dirname(DIVERGENCE_FILE), exist_ok=True)
     with open(DIVERGENCE_FILE, "a") as f:
@@ -317,6 +353,21 @@ def main() -> int:
                   "therefore not compared: hiringAgencyCode, "
                   "hiringDepartmentCode, agencyLevel, agencyLevelSort, vendor, "
                   "whoMayApply, announcementClosingTypeDescription.", ""]
+
+    # Duty stations. Checked against the search endpoint's own count rather
+    # than the API, so this keeps working if the API collection ever stops.
+    loc = location_completeness(args.data_dir)
+    if loc["total"]:
+        lines += ["## Duty stations", "",
+                  f"Page listed every station the search endpoint reported on "
+                  f"**{loc['rate']:.1%}** of {loc['total']:,} postings "
+                  f"({loc['short']:,} listed fewer).", ""]
+        if loc["rate"] < MIN_LOCATION_COMPLETE:
+            flag(f"The announcement page listed fewer duty stations than the "
+                 f"search endpoint reported on {loc['short']:,} of "
+                 f"{loc['total']:,} postings ({1 - loc['rate']:.1%}); floor is "
+                 f"{1 - MIN_LOCATION_COMPLETE:.0%}. The location markup has "
+                 f"probably changed.")
 
     # The long-text sections, which the API has no counterpart for.
     lines += ["## Announcement text (scraped only, no API counterpart)", "",
