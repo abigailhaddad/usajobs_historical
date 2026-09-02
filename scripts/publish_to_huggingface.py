@@ -177,22 +177,69 @@ def connection():
     return con
 
 
-def select_sql(hist_path: str, scraped_path: str, month: str = None) -> str:
-    """The join. Scraped columns are coalesced against nothing — a posting with
-    no scraped row is excluded, because a row with no announcement text is what
-    the historical mirror already publishes."""
-    text_cols = ",\n    ".join(f"s.{c}" for c in TEXT_FIELDS)
-    where = ""
-    if month:
-        where = f"WHERE substr(h.positionOpenDate, 1, 7) = '{month}'"
+def parquet_columns(path):
+    import pyarrow.parquet as pq
+    return set(pq.read_schema(path).names)
+
+
+def select_sql(hist_path: str, scraped_path: str, month: str,
+               prior_path: str = None) -> str:
+    """Fresh metadata joined to announcement text from wherever it still lives.
+
+    Text comes from the local scrape when it has it, and otherwise from the
+    month file already on HuggingFace. That second source is what makes the
+    local prune safe: once a posting is published the dataset holds its text,
+    and a later republish — a metadata refresh, or a month gaining rows — reads
+    it back rather than needing a local copy that no longer exists.
+
+    A local row whose text has been pruned has NULL text, so it must not win
+    over the published copy; hence the WHERE on the local side.
+    """
+    cols = ",\n        ".join(TEXT_FIELDS)
+    parts = [f"""local_text AS (
+        SELECT usajobs_control_number AS cn,
+        {cols}
+        FROM read_parquet('{scraped_path}')
+        WHERE text IS NOT NULL
+    )"""]
+    union = "SELECT * FROM local_text"
+    if prior_path:
+        # A month published before a column existed does not have it. That is
+        # the normal case on the first pass: every month on the dataset today
+        # was written with `text` only, and the eleven sections are what this
+        # run adds. Select what is there and null the rest so the shapes line
+        # up for the UNION.
+        available = parquet_columns(prior_path)
+        prior_cols = ",\n        ".join(
+            c if c in available else f"CAST(NULL AS VARCHAR) AS {c}"
+            for c in TEXT_FIELDS)
+        parts.append(f"""prior_text AS (
+        SELECT usajobsControlNumber AS cn,
+        {prior_cols}
+        FROM read_parquet('{prior_path}')
+        WHERE usajobsControlNumber NOT IN (SELECT cn FROM local_text)
+    )""")
+        union += " UNION ALL SELECT * FROM prior_text"
+
+    text_cols = ",\n    ".join(f"t.{c}" for c in TEXT_FIELDS)
     return f"""
+        WITH {", ".join(parts)}, txt AS ({union})
         SELECT {METADATA_FIELDS},
     {text_cols}
         FROM read_parquet('{hist_path}') h
-        JOIN read_parquet('{scraped_path}') s
-          ON h.usajobsControlNumber::varchar = s.usajobs_control_number
-        {where}
+        JOIN txt t ON h.usajobsControlNumber::varchar = t.cn
+        WHERE substr(h.positionOpenDate, 1, 7) = '{month}'
     """
+
+
+def download_month(repo, month, token):
+    """The month file already on HuggingFace, or None if there is not one."""
+    from huggingface_hub import hf_hub_download
+    name = f"data/{month.replace('-', '_')}.parquet"
+    try:
+        return hf_hub_download(repo, name, repo_type="dataset", token=token)
+    except Exception:
+        return None
 
 
 def month_of_every_posting(con, hist_path):
@@ -221,7 +268,7 @@ def available_months(con, hist_path, scraped_path):
         FROM read_parquet('{hist_path}') h
         JOIN read_parquet('{scraped_path}') s
           ON h.usajobsControlNumber::varchar = s.usajobs_control_number
-        WHERE h.positionOpenDate IS NOT NULL
+        WHERE h.positionOpenDate IS NOT NULL AND s.text IS NOT NULL
     """).fetchall()
     months = {}
     for month, cn in rows:
@@ -276,7 +323,9 @@ def main() -> int:
             print(f"Missing {path} — nothing to publish.")
             return 0
 
-    token = os.environ.get("HF_TOKEN")
+    # HF_TOKEN in CI; the cached login from `huggingface-cli login` locally.
+    from huggingface_hub import get_token
+    token = os.environ.get("HF_TOKEN") or get_token()
     if not token and not args.dry_run:
         print("HF_TOKEN is not set — nothing published.")
         return 0
@@ -307,8 +356,24 @@ def main() -> int:
         todo = sorted(m for m, cns in months.items() if cns - have)
         print(f"{len(todo)} month(s) have new rows: {', '.join(todo) or '(none)'}")
 
+    # Pull the month files we are about to rewrite. Their text is the source
+    # for every posting whose local copy has been pruned, and their control
+    # numbers are what makes the rebuild provably non-destructive.
+    priors, availability = {}, {}
+    for month in todo:
+        prior = download_month(args.repo, month, token) if token else None
+        priors[month] = prior
+        prior_cns = set()
+        if prior:
+            prior_cns = {r[0] for r in con.execute(
+                f"SELECT usajobsControlNumber::varchar "
+                f"FROM read_parquet('{prior}')").fetchall()}
+            print(f"  {month}: {len(prior_cns):,} already published, "
+                  f"{len(months[month] - prior_cns):,} new")
+        availability[month] = months[month] | prior_cns
+
     month_of = month_of_every_posting(con, str(hist))
-    safe, refused = partition_safe_months(todo, months, have, month_of)
+    safe, refused = partition_safe_months(todo, availability, have, month_of)
 
     for month, n, total in refused:
         print(f"  REFUSING {month}: rebuilding it would drop {n:,} of the "
@@ -330,7 +395,7 @@ def main() -> int:
         # COPY streams straight to disk. Materializing a month in Python would
         # be ~800 MB of announcement text.
         con.execute(f"""
-            COPY ({select_sql(str(hist), str(scraped), month)}
+            COPY ({select_sql(str(hist), str(scraped), month, priors.get(month))}
                   ORDER BY usajobsControlNumber)
             TO '{dest}' (FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 19);
         """)

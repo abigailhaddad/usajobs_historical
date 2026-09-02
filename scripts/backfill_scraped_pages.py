@@ -73,6 +73,8 @@ def parse_args():
     p.add_argument("--nice", type=int, default=10,
                    help="Process niceness, 0-19 (default 10). Higher yields "
                         "more readily to whatever else is running.")
+    p.add_argument("--month", help="Only this month (YYYY-MM). Useful for a "
+                                   "pilot, or to resume a specific month.")
     p.add_argument("--no-publish", action="store_true",
                    help="Do not push each month to HuggingFace as it finishes. "
                         "Announcement text is 97.8%% of what this writes — 920 MB "
@@ -211,14 +213,21 @@ def publish_month(data_dir, year, month):
     rather than anything cached.
     """
     import subprocess
-    if not os.environ.get("HF_TOKEN"):
-        print(f"  HF_TOKEN not set — keeping {month} on disk unpublished")
+    from huggingface_hub import get_token
+    if not (os.environ.get("HF_TOKEN") or get_token()):
+        print(f"  No HuggingFace token — keeping {month} on disk unpublished")
         return
     script = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                           "publish_to_huggingface.py")
+    # --refresh-all, scoped to this one month by --month. The manifest records
+    # which announcements are published, not what is in them, so a month whose
+    # postings were already listed would otherwise be skipped — which is
+    # exactly the case here: those rows are on the dataset with text but no
+    # sections, and this run is what gives them sections.
+    sys.stdout.flush()
     result = subprocess.run(
-        [sys.executable, script, "--year", str(year), "--month", month,
-         "--data-dir", data_dir],
+        [sys.executable, "-u", script, "--year", str(year), "--month", month,
+         "--refresh-all", "--data-dir", data_dir],
         check=False)
     if result.returncode != 0:
         print(f"  publish of {month} did not complete cleanly — its text "
@@ -234,6 +243,9 @@ def main() -> int:
         return 0
 
     wanted = wanted_postings(args.data_dir, args.year)
+    if args.month:
+        wanted = {cn: d for cn, d in wanted.items() if d[:7] == args.month}
+        print(f"Restricted to {args.month}: {len(wanted):,} postings")
     known = stored_control_numbers(args.data_dir, args.year)
     todo = sorted(cn for cn in wanted if cn not in known)
 
@@ -244,6 +256,11 @@ def main() -> int:
         print(f"  limited to {len(todo):,} this run")
     if not todo:
         compact(args.data_dir, args.year)
+        # Nothing to fetch does not mean nothing to publish: a month can be
+        # fully scraped and still be on the dataset without its sections,
+        # which is the state every month is in on the first pass.
+        if args.month and not args.no_publish:
+            publish_month(args.data_dir, args.year, args.month)
         return 0
     if args.dry_run:
         for cn in todo[:10]:
@@ -326,6 +343,7 @@ def main() -> int:
                       desc=f"{month}", unit="page"))
         flush()
         compact(args.data_dir, args.year)
+        sys.stdout.flush()
         if not args.no_publish:
             publish_month(args.data_dir, args.year, month)
 
