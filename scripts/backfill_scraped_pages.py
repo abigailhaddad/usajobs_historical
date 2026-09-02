@@ -204,6 +204,31 @@ def compact(data_dir, year):
     return len(rows)
 
 
+def months_awaiting_publish(data_dir, year):
+    """Months whose local rows still hold announcement text.
+
+    Publishing prunes that text, so its presence is the marker for "fetched but
+    not yet on the dataset". Without this, a run killed between finishing a
+    month's pages and pushing them would strand it: the next run finds nothing
+    left to fetch for that month, so the fetch loop skips it and it is never
+    published.
+    """
+    import duckdb
+    hist = os.path.join(data_dir, f"historical_jobs_{year}.parquet")
+    scraped = os.path.join(data_dir, f"scraped_jobs_{year}.parquet")
+    if not (os.path.exists(hist) and os.path.exists(scraped)):
+        return []
+    rows = duckdb.connect().execute(f"""
+        SELECT DISTINCT substr(h.positionOpenDate, 1, 7) AS month
+        FROM read_parquet('{hist}') h
+        JOIN read_parquet('{scraped}') s
+          ON h.usajobsControlNumber::varchar = s.usajobs_control_number
+        WHERE s.text IS NOT NULL AND h.positionOpenDate IS NOT NULL
+        ORDER BY 1
+    """).fetchall()
+    return [r[0] for r in rows]
+
+
 def publish_month(data_dir, year, month):
     """Push one month to HuggingFace, which also drops its text from disk.
 
@@ -277,6 +302,16 @@ def main() -> int:
     if governor.target > 0:
         print(f"  holding CPU under {args.max_cpu:.0f}% of one core, "
               f"niceness +{args.nice}")
+
+    # Push anything a previous run fetched but did not get to publish, before
+    # spending hours on new pages. Only months with no work left, so a month
+    # that is about to be fetched is not published twice.
+    if not args.no_publish:
+        pending = [m for m in months_awaiting_publish(args.data_dir, args.year)
+                   if m not in {wanted[cn][:7] for cn in todo}]
+        for month in pending:
+            print(f"Publishing {month}, fetched by an earlier run")
+            publish_month(args.data_dir, args.year, month)
 
     # Work a month at a time and publish each one as it lands. Fetching the
     # whole year first would pile up 920 MB of announcement text on disk before
