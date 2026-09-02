@@ -301,6 +301,10 @@ def main() -> int:
         if not batch:
             return
         part += 1
+        # compact() removes the shard directory when it folds a month in, so
+        # the next month has to recreate it. Doing that here rather than once
+        # before the loop is what keeps a multi-month run alive.
+        os.makedirs(shards, exist_ok=True)
         path = os.path.join(shards, f"part-{run_id}-{part:05d}.parquet")
         pd.DataFrame(batch).to_parquet(path, index=False, compression="zstd")
         batch = []
