@@ -95,6 +95,58 @@ TEXT_FIELDS = [
 ]
 
 
+def prune_published_text(scraped_path, published_cns):
+    """Blank the announcement text on rows that are now on HuggingFace.
+
+    The text columns are 97.8% of scraped_jobs_{year}.parquet — 5.42 KB of a
+    5.54 KB row — so a full year is 920 MB kept locally against 20 MB for
+    everything else in it. Once a posting is published, the dataset is the
+    store; what stays here is the structured shadow the API comparison reads,
+    plus the text for anything not yet pushed.
+
+    Rewrites row group by row group so peak memory does not track file size.
+    """
+    import pyarrow as pa
+    import pyarrow.compute as pc
+    import pyarrow.parquet as pq
+    import tempfile
+
+    if not published_cns or not os.path.exists(scraped_path):
+        return 0
+
+    pf = pq.ParquetFile(scraped_path)
+    present = [c for c in TEXT_FIELDS if c in pf.schema_arrow.names]
+    if not present:
+        return 0
+
+    drop = pa.array(sorted(published_cns), type=pa.string())
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(scraped_path) or ".",
+                               prefix=".tmp_", suffix=".parquet")
+    os.close(fd)
+    cleared = 0
+    try:
+        with pq.ParquetWriter(tmp, pf.schema_arrow, compression="zstd",
+                              compression_level=3) as writer:
+            for batch in pf.iter_batches(batch_size=2000):
+                table = pa.Table.from_batches([batch])
+                ids = table.column("usajobs_control_number").cast(pa.string())
+                hit = pc.fill_null(pc.is_in(ids, value_set=drop), False)
+                cleared += int(pc.sum(hit).as_py() or 0)
+                for name in present:
+                    col = table.column(name)
+                    blanked = pc.if_else(hit, pa.nulls(len(col), col.type), col)
+                    table = table.set_column(
+                        table.schema.get_field_index(name),
+                        table.schema.field(name), blanked)
+                writer.write_table(table)
+        os.replace(tmp, scraped_path)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+        raise
+    return cleared
+
+
 def parse_args():
     p = argparse.ArgumentParser(description="Publish the dataset to HuggingFace")
     p.add_argument("--year", type=int,
@@ -107,6 +159,14 @@ def parse_args():
                         "Metadata keeps changing after a posting appears "
                         "(close dates, opening status), so run this on a slower "
                         "schedule than the daily top-up.")
+    p.add_argument("--month", help="Publish only this month (YYYY-MM)")
+    p.add_argument("--keep-text", action="store_true",
+                   help="Do not drop the published announcement text from the "
+                        "local parquet afterwards. The text is 97.8%% of that "
+                        "file — 920 MB for a year against 20 MB for the "
+                        "structured columns — so by default HuggingFace is the "
+                        "store for it and the local copy keeps only what has "
+                        "not been published yet.")
     p.add_argument("--data-dir", default=str(DATA_DIR))
     return p.parse_args()
 
@@ -234,6 +294,12 @@ def main() -> int:
     new = {cn for cns in months.values() for cn in cns} - have
     print(f"Local join has {total_available:,}; {len(new):,} are new")
 
+    if args.month:
+        months = {m: cns for m, cns in months.items() if m == args.month}
+        if not months:
+            print(f"No postings opened in {args.month} have scraped text.")
+            return 0
+
     if args.refresh_all:
         todo = sorted(months)
         print(f"Refreshing all {len(todo)} month(s)")
@@ -297,6 +363,13 @@ def main() -> int:
         commit_message=f"+{len(written_cns - have):,} announcements, "
                        f"{len(manifest):,} total")
     print(f"\nPushed {len(written)} month(s) to {args.repo}")
+
+    if not args.keep_text:
+        cleared = prune_published_text(str(scraped), written_cns)
+        after = os.path.getsize(scraped) / 1e6
+        print(f"Dropped local text for {cleared:,} published postings; "
+              f"{scraped.name} is now {after:,.0f} MB")
+
     return 1 if refused else 0
 
 

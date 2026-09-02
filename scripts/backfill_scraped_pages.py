@@ -15,6 +15,14 @@ what exists.
 Long-running by design — roughly 160k pages for a full year, about three hours
 at the default concurrency. Run it on its own, not inside the daily workflow.
 
+It is network-bound, not CPU-bound: a page costs ~32 ms to parse, so a full
+year is about 86 CPU-minutes spread over those three hours, or roughly half of
+one core. It still runs niced and under a CPU governor by default, so it stays
+out of the way of whatever else the machine is doing. --max-cpu is a share of
+ONE core, not of the machine: at the default 50 the governor barely bites,
+since the fetch rate already holds it near there. Halving it roughly doubles
+the wall clock.
+
 Resumable and crash-safe. Pages land in immutable shard files tagged with a
 per-run id; a rerun skips every control number already in a shard or in the
 main parquet. Kill it whenever. Shards fold into the main parquet at the end,
@@ -23,6 +31,8 @@ or on the next run with --compact-only.
     python backfill_scraped_pages.py --year 2026 --dry-run
     python backfill_scraped_pages.py --year 2026
     python backfill_scraped_pages.py --year 2026 --limit 500   # a taste
+    python backfill_scraped_pages.py --year 2026 --max-cpu 25  # gentler, slower
+    python backfill_scraped_pages.py --year 2026 --max-cpu 0   # no governor
     python backfill_scraped_pages.py --year 2026 --compact-only
 """
 
@@ -56,11 +66,65 @@ def parse_args():
     p.add_argument("--workers", type=int, default=8)
     p.add_argument("--limit", type=int, default=0,
                    help="Stop after this many pages (0 = everything)")
+    p.add_argument("--max-cpu", type=float, default=50.0,
+                   help="Hold average CPU under this percent of ONE core "
+                        "(default 50; 0 disables). Lower is gentler and "
+                        "proportionally slower.")
+    p.add_argument("--nice", type=int, default=10,
+                   help="Process niceness, 0-19 (default 10). Higher yields "
+                        "more readily to whatever else is running.")
+    p.add_argument("--no-publish", action="store_true",
+                   help="Do not push each month to HuggingFace as it finishes. "
+                        "Announcement text is 97.8%% of what this writes — 920 MB "
+                        "for a year — so by default each month is published and "
+                        "its text dropped locally, keeping the working set to "
+                        "about one month.")
     p.add_argument("--dry-run", action="store_true",
                    help="Report what is missing and fetch nothing")
     p.add_argument("--compact-only", action="store_true",
                    help="Fold existing shards into the main parquet and stop")
     return p.parse_args()
+
+
+class CpuGovernor:
+    """Hold this process's average CPU use under a share of one core.
+
+    Measures the process's own CPU time against wall time and sleeps the
+    calling worker when the ratio runs ahead of target. That lowers the duty
+    cycle rather than the cost per page: the same work happens, spread over
+    more wall clock, which is what "use less CPU" means for a job that is
+    already network-bound.
+
+    time.process_time() counts every thread, so the target is a share of one
+    core regardless of --workers.
+    """
+
+    def __init__(self, percent_of_one_core: float):
+        self.target = (percent_of_one_core or 0) / 100.0
+        self.lock = threading.Lock()
+        self.wall0 = time.monotonic()
+        self.cpu0 = time.process_time()
+
+    def throttle(self) -> None:
+        if self.target <= 0:
+            return
+        with self.lock:
+            wall = time.monotonic() - self.wall0
+            cpu = time.process_time() - self.cpu0
+            if wall <= 0:
+                return
+            # Want cpu/wall <= target, so wall must be at least cpu/target.
+            deficit = cpu / self.target - wall
+        if deficit > 0:
+            # Capped so a long stall cannot park a worker for minutes.
+            time.sleep(min(deficit, 2.0))
+
+    def report(self) -> str:
+        wall = time.monotonic() - self.wall0
+        cpu = time.process_time() - self.cpu0
+        share = 100 * cpu / wall if wall else 0
+        return (f"{cpu/60:.1f} CPU-minutes over {wall/60:.1f} wall-minutes "
+                f"({share:.0f}% of one core)")
 
 
 def thread_session():
@@ -138,6 +202,29 @@ def compact(data_dir, year):
     return len(rows)
 
 
+def publish_month(data_dir, year, month):
+    """Push one month to HuggingFace, which also drops its text from disk.
+
+    Run in a subprocess rather than imported: publish_to_huggingface holds a
+    duckdb connection and reads the parquet this process has been writing, and
+    a fresh process is the simplest way to be sure it sees the compacted file
+    rather than anything cached.
+    """
+    import subprocess
+    if not os.environ.get("HF_TOKEN"):
+        print(f"  HF_TOKEN not set — keeping {month} on disk unpublished")
+        return
+    script = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          "publish_to_huggingface.py")
+    result = subprocess.run(
+        [sys.executable, script, "--year", str(year), "--month", month,
+         "--data-dir", data_dir],
+        check=False)
+    if result.returncode != 0:
+        print(f"  publish of {month} did not complete cleanly — its text "
+              f"stays on disk and the next run retries it")
+
+
 def main() -> int:
     args = parse_args()
 
@@ -163,6 +250,27 @@ def main() -> int:
             print(f"   {wanted[cn]}  {cn}")
         return 0
 
+    if args.nice:
+        try:
+            os.nice(args.nice)
+        except (AttributeError, OSError) as e:
+            print(f"  could not renice ({e}) — continuing at normal priority")
+
+    governor = CpuGovernor(args.max_cpu)
+    if governor.target > 0:
+        print(f"  holding CPU under {args.max_cpu:.0f}% of one core, "
+              f"niceness +{args.nice}")
+
+    # Work a month at a time and publish each one as it lands. Fetching the
+    # whole year first would pile up 920 MB of announcement text on disk before
+    # anything could be pushed; this keeps the working set to roughly one
+    # month, and makes a killed run resume at month granularity.
+    by_month = {}
+    for cn in todo:
+        by_month.setdefault(wanted[cn][:7], []).append(cn)
+    print(f"  across {len(by_month)} month(s): "
+          + ", ".join(f"{m} ({len(c):,})" for m, c in sorted(by_month.items())))
+
     shards = shard_dir(args.data_dir, args.year)
     os.makedirs(shards, exist_ok=True)
     run_id = uuid.uuid4().hex[:8]
@@ -182,6 +290,7 @@ def main() -> int:
 
     def work(cn):
         nonlocal gone, failed
+        governor.throttle()
         html, error = fetch_job_page(thread_session(), cn)
         if html is None:
             with lock:
@@ -211,16 +320,19 @@ def main() -> int:
             if len(batch) >= SHARD_ROWS:
                 flush()
 
-    with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        list(tqdm(pool.map(work, todo), total=len(todo),
-                  desc="Announcement pages", unit="page"))
-    flush()
+    for month, cns in sorted(by_month.items()):
+        with ThreadPoolExecutor(max_workers=args.workers) as pool:
+            list(tqdm(pool.map(work, cns), total=len(cns),
+                      desc=f"{month}", unit="page"))
+        flush()
+        compact(args.data_dir, args.year)
+        if not args.no_publish:
+            publish_month(args.data_dir, args.year, month)
 
     elapsed = (time.time() - started) / 60
-    print(f"Fetched {len(todo) - gone - failed:,} pages in {elapsed:.1f} min, "
+    print(f"\nFetched {len(todo) - gone - failed:,} pages in {elapsed:.1f} min, "
           f"{failed} failed, {gone} already removed (404)")
-
-    compact(args.data_dir, args.year)
+    print(f"  used {governor.report()}")
     if failed:
         print("Failed pages stay unstored — rerun to retry them")
     return 0

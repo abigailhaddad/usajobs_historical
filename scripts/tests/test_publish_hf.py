@@ -12,7 +12,9 @@ import sys
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from publish_to_huggingface import METADATA_FIELDS, TEXT_FIELDS, partition_safe_months
+from publish_to_huggingface import (METADATA_FIELDS, TEXT_FIELDS,
+                                    partition_safe_months,
+                                    prune_published_text)
 
 
 class TestPartitionSafeMonths:
@@ -94,3 +96,71 @@ class TestPublishedSchema:
                         "education", "requiredDocuments", "howToApply", "text"):
             assert section in TEXT_FIELDS
         assert len(TEXT_FIELDS) == 12
+
+
+class TestPrunePublishedText:
+    """Announcement text is 97.8% of scraped_jobs_{year}.parquet — 5.42 KB of a
+    5.54 KB row, so a full year is 920 MB against 20 MB for everything else.
+    Once a posting is on HuggingFace the dataset is the store for its text, and
+    what stays local is the structured shadow the API comparison reads.
+    """
+
+    def _parquet(self, tmp_path, rows):
+        import pandas as pd
+        path = tmp_path / "scraped_jobs_2026.parquet"
+        pd.DataFrame(rows).to_parquet(path, index=False, compression="zstd")
+        return str(path)
+
+    def _rows(self):
+        return [
+            {"usajobs_control_number": "1", "positionTitle": "Analyst",
+             "minimumSalary": 50000.0, "text": "page one",
+             "qualificationSummary": "quals one", "majorDuties": "duties one"},
+            {"usajobs_control_number": "2", "positionTitle": "Engineer",
+             "minimumSalary": 90000.0, "text": "page two",
+             "qualificationSummary": "quals two", "majorDuties": "duties two"},
+        ]
+
+    def test_text_is_dropped_only_on_published_rows(self, tmp_path):
+        import pandas as pd
+        path = self._parquet(tmp_path, self._rows())
+        assert prune_published_text(path, {"1"}) == 1
+
+        out = pd.read_parquet(path).set_index("usajobs_control_number")
+        assert pd.isna(out.loc["1", "text"])
+        assert pd.isna(out.loc["1", "qualificationSummary"])
+        assert out.loc["2", "text"] == "page two"
+
+    def test_structured_columns_survive(self, tmp_path):
+        import pandas as pd
+        path = self._parquet(tmp_path, self._rows())
+        prune_published_text(path, {"1", "2"})
+        out = pd.read_parquet(path).set_index("usajobs_control_number")
+        assert out.loc["1", "positionTitle"] == "Analyst"
+        assert out.loc["2", "minimumSalary"] == 90000.0
+
+    def test_no_rows_are_lost(self, tmp_path):
+        import pandas as pd
+        path = self._parquet(tmp_path, self._rows())
+        prune_published_text(path, {"1", "2"})
+        assert len(pd.read_parquet(path)) == 2
+
+    def test_the_file_actually_shrinks(self, tmp_path):
+        path = self._parquet(tmp_path, self._rows())
+        before = os.path.getsize(path)
+        prune_published_text(path, {"1", "2"})
+        assert os.path.getsize(path) < before
+
+    def test_publishing_nothing_changes_nothing(self, tmp_path):
+        path = self._parquet(tmp_path, self._rows())
+        assert prune_published_text(path, set()) == 0
+
+    def test_a_missing_file_is_not_an_error(self, tmp_path):
+        assert prune_published_text(str(tmp_path / "absent.parquet"), {"1"}) == 0
+
+    def test_a_file_with_no_text_columns_is_left_alone(self, tmp_path):
+        import pandas as pd
+        path = self._parquet(tmp_path, [
+            {"usajobs_control_number": "1", "positionTitle": "Analyst"}])
+        assert prune_published_text(path, {"1"}) == 0
+        assert pd.read_parquet(path).loc[0, "positionTitle"] == "Analyst"

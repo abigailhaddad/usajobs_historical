@@ -212,18 +212,39 @@ python scripts/publish_to_huggingface.py
 python scripts/publish_to_huggingface.py --refresh-all   # rewrite every month
 ```
 
+### What stays on disk
+
+Announcement text is 97.8% of `scraped_jobs_{year}.parquet` — 5.42 KB of a
+5.54 KB row — so a full year would be 920 MB local against 20 MB for
+everything else in it. HuggingFace is the store for the text instead: after a
+month publishes, the publisher blanks those rows' text columns locally, and
+what stays is the structured shadow the API comparison reads plus anything not
+yet pushed. Measured on real rows, that takes a 162,000-row year from 920 MB to
+34 MB. `--keep-text` opts out.
+
 ### Backfilling announcement pages
 
 The scraped collection only starts the day it was switched on, so postings from
 earlier in the year have metadata but no text. usajobs.gov serves closed
 announcements indefinitely, so they can be filled in — roughly 160k pages for a
-full year, about three hours. Run it on its own, not inside the daily workflow.
-It writes immutable shards and folds them in at the end, so it is resumable:
-kill it whenever and rerun.
+full year.
+
+It works a month at a time and publishes each one as it lands, so the working
+set stays near a single month rather than piling up the year, and a killed run
+resumes at month granularity. Within a month it writes immutable shards and
+folds them in once at the end.
+
+It is network-bound, not CPU-bound: a page costs ~32 ms to parse, so a full
+year is about 86 CPU-minutes over those three hours. It runs niced and under a
+CPU governor by default. `--max-cpu` is a share of **one** core, not of the
+machine — measured, an uncapped run sits at 53% of a core, and `--max-cpu 15`
+holds it to 18% at three times the wall clock.
 
 ```bash
 python scripts/backfill_scraped_pages.py --year 2026 --dry-run
 python scripts/backfill_scraped_pages.py --year 2026
+python scripts/backfill_scraped_pages.py --year 2026 --max-cpu 20   # gentler
+python scripts/backfill_scraped_pages.py --year 2026 --no-publish   # keep local
 ```
 
 ## Data Storage
