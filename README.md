@@ -116,6 +116,54 @@ result = combine_and_fix(hist_frames=[hist_df], curr_frames=[curr_df])
 
 The `jobs_5yr.parquet` web dataset already has this fix applied — it is safe to query directly without deduplication.
 
+## Scraping usajobs.gov instead of the API (shadow run)
+
+Since 2026-09-02 the daily pipeline also collects the same postings without an
+API key, by scraping usajobs.gov. It writes `data/scraped_jobs_*.parquet`, and
+nothing downstream reads them yet. The point is to find out whether the site
+could replace the Current API if the key ever stopped working.
+
+Two keyless sources. `POST https://www.usajobs.gov/Search/ExecuteSearch` is the
+JSON endpoint behind the search page — no auth, no cookie — and returns about
+25 fields per posting plus a facet block. The facets are computed over the
+whole result set rather than the 10,000 the `Total` field reports, so one call
+gives the true open-inventory size and its breakdown by occupational series;
+that's how the collection slices itself under the same 10,000 ceiling the API
+has. Then `GET https://www.usajobs.gov/job/{control_number}` for postings we
+haven't stored, which is server-rendered HTML where every overview field is a
+`<dt>`/`<dd>` pair.
+
+It also pulls the announcement body apart by the page's own headings, which the
+API can't do at all: `jobSummary`, `majorDuties`, `conditionsOfEmployment`,
+`qualificationSummary`, `education`, `additionalInformation`,
+`howYouWillBeEvaluated`, `requiredDocuments`, `howToApply`, plus the whole-page
+`text` the [announcement-text dataset](https://github.com/abigailhaddad/joa)
+stores. `MatchedObjectDescriptor` drops content the page shows, and even the
+page's own ld+json carries a truncated `qualifications` — 1,503 characters
+against the page's 1,845 on the announcement the tests use. Across a 50-page
+live sample every field but `education` was populated on every announcement,
+and `education` is genuinely missing from about one in six.
+
+`scripts/compare_scrape_to_api.py` diffs the two collections after each run and
+writes a report to `logs/scrape_vs_api_<date>.md`, uploaded as a workflow
+artifact. On the first full check — all 354 open 2210 postings, 2026-09-02 —
+coverage was 354/354 and all 18 comparable fields matched exactly. The scrape
+also carries `workSchedule`, `promotionPotential` and `supervisoryStatus`,
+which the Current API collection doesn't populate. The text fields have no API
+counterpart to check against, so the report tracks their fill rate instead: if
+usajobs.gov changes its markup they go empty, and that's the signal.
+
+What scraping can't give you: `hiringAgencyCode`, `hiringDepartmentCode`,
+`agencyLevel`, `agencyLevelSort`, `vendor`, `whoMayApply`. Those are API-only
+and the announcement page never shows them. It also can't backfill — search
+only lists open postings, so this accumulates forward from the day it started.
+Closed announcement pages do stay up indefinitely, which is what the
+[announcement-text dataset](https://github.com/abigailhaddad/joa) relies on.
+
+Coverage shortfalls and field disagreements past the thresholds in
+`compare_scrape_to_api.py` open a GitHub issue. Neither the scrape nor the
+comparison can fail the daily run.
+
 ## Data Storage
 
 - **Cloudflare R2**: All parquet files are stored in R2 (not in this git repo due to size)
@@ -151,6 +199,9 @@ The `jobs_5yr.parquet` web dataset already has this fix applied — it is safe t
 ├── scripts/
 │   ├── collect_data.py          # Historical data collection
 │   ├── collect_current_data.py  # Current jobs collection
+│   ├── collect_scraped_data.py  # Same jobs, scraped from usajobs.gov (shadow)
+│   ├── usajobs_scrape.py        # Search endpoint + announcement-page parsing
+│   ├── compare_scrape_to_api.py # Diff the scraped and API collections
 │   ├── prep_web_data.py         # Build slim 14-column parquet for website
 │   ├── sync_to_r2.py            # Upload parquet files to Cloudflare R2
 │   ├── run_parallel.sh          # Run multiple years in parallel
@@ -173,7 +224,8 @@ The `jobs_5yr.parquet` web dataset already has this fix applied — it is safe t
 │       └── filters.js           # Column + filter definitions shared by the pages
 ├── data/                    # Local data (gitignored, stored in R2)
 │   ├── historical_jobs_YEAR.parquet  # Historical jobs by year
-│   └── current_jobs_YEAR.parquet     # Current jobs by year
+│   ├── current_jobs_YEAR.parquet     # Current jobs by year
+│   └── scraped_jobs_YEAR.parquet     # Scraped shadow collection (unused downstream)
 └── logs/                    # Auto-generated pipeline logs
 ```
 
@@ -198,6 +250,15 @@ groups: 129.2MB to 51.2MB, 3 row groups to 30. The job-listing query went from
 ```bash
 # Collect current jobs and update documentation
 python update/update_all.py      # Update data + docs
+```
+
+`update_all.py` runs the scraped collection and the comparison too. To run
+either alone, no API key needed:
+
+```bash
+python scripts/collect_scraped_data.py --data-dir data/
+python scripts/collect_scraped_data.py --data-dir data/ --series 2210  # spot check
+python scripts/compare_scrape_to_api.py --data-dir data/
 ```
 
 **Historical data collection (if needed):**

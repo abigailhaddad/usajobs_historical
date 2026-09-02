@@ -484,6 +484,25 @@ def main():
         print("❌ Current data collection failed. Continuing with documentation update...")
         collection_errors.append("Current data collection failed")
     
+    # Step 3b: Collect the same postings by scraping usajobs.gov, then diff the
+    # two. This runs in shadow — it writes data/scraped_jobs_*.parquet, which
+    # nothing downstream reads, and the comparison tells us whether it could.
+    # Neither step is allowed to fail the run: the API collection above is what
+    # the site is built from, and a scrape problem must not cost us a day of it.
+    scrape_cmd = "python ../scripts/collect_scraped_data.py --data-dir ../data"
+    success, output = run_command(scrape_cmd, "Collecting current jobs by scraping",
+                                  stream_output=True)
+    if not success:
+        print("⚠️  Scraped collection failed (shadow run — continuing)")
+        collection_errors.append("Scraped collection failed")
+    else:
+        compare_cmd = ("python ../scripts/compare_scrape_to_api.py "
+                       "--data-dir ../data")
+        success, _ = run_command(compare_cmd, "Comparing scraped vs API jobs",
+                                 stream_output=True)
+        if not success:
+            print("⚠️  Scrape/API comparison failed (shadow run — continuing)")
+
     # Step 4: Check data file integrity
     print("\\n🔍 Checking data file integrity...")
     files_ok, files_changed = check_file_sizes_vs_initial(initial_sizes)
