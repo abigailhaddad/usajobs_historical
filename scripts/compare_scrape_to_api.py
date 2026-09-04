@@ -22,6 +22,7 @@ which the daily workflow turns into a GitHub issue.
 """
 
 import argparse
+import json
 import os
 import sys
 from datetime import datetime
@@ -72,11 +73,10 @@ TEXT_FIELDS = [
     "text",
 ]
 
-# 'education' is genuinely absent from about one announcement in six, so the
-# floor has to sit below that; everything else measured at 100% on a 50-page
-# live sample (2026-09-02).
-MIN_TEXT_FILL = {"education": 0.50}
-MIN_TEXT_FILL_DEFAULT = 0.90
+# Written by collect_scraped_data.py, which measures fill on the pages it just
+# parsed and owns the threshold check.
+HEALTH_FILE = os.path.join(os.path.dirname(__file__), "..", "logs",
+                           "scrape_field_health.json")
 
 # Share of postings whose announcement page must list as many duty stations as
 # the search endpoint says the posting has. It is not 100%: for about 3% of
@@ -166,50 +166,23 @@ def compare_series(scraped: pd.Series, api: pd.Series) -> dict:
             "scrape_null": int(a.isna().sum()), "api_null": int(b.isna().sum())}
 
 
-def text_field_health(data_dir: str) -> list:
-    """Fill rate and median length for each long-text field.
+def text_field_health() -> dict:
+    """Section fill rates as collect_scraped_data.py measured them.
 
-    Scans the scraped parquets a row group at a time. These columns hold tens
-    of kilobytes per row, so reading a whole year of one into memory to
-    measure it would defeat the point.
+    Deliberately not computed by scanning scraped_jobs_*.parquet. Publishing
+    prunes the text of every posting it pushes, so a scan measures the
+    unpublished fraction and reads it as markup drift — which is what produced
+    issue #569, twelve fields flagged at 47.2% while live pages parsed at
+    12/12. The collector measures the pages it just parsed, and owns the
+    threshold check.
     """
-    import pyarrow.compute as pc
-    import pyarrow.parquet as pq
-
-    stats = {f: {"rows": 0, "filled": 0, "lengths": []} for f in TEXT_FIELDS}
-
-    for name in sorted(os.listdir(data_dir)):
-        if not (name.startswith("scraped_jobs_") and name.endswith(".parquet")):
-            continue
-        path = os.path.join(data_dir, name)
-        present = set(pq.read_schema(path).names)
-        for field in TEXT_FIELDS:
-            if field not in present:
-                stats[field]["rows"] += pq.read_metadata(path).num_rows
-                continue
-            for batch in pq.ParquetFile(path).iter_batches(
-                    batch_size=2000, columns=[field]):
-                column = batch.column(0)
-                lengths = pc.utf8_length(column)
-                stats[field]["rows"] += len(column)
-                filled = pc.greater(lengths, 0)
-                stats[field]["filled"] += int(
-                    pc.sum(pc.fill_null(filled, False)).as_py() or 0)
-                stats[field]["lengths"] += [
-                    v for v in lengths.to_pylist() if v]
-
-    rows = []
-    for field in TEXT_FIELDS:
-        st = stats[field]
-        lengths = sorted(st["lengths"])
-        rows.append({
-            "field": field,
-            "rows": st["rows"],
-            "filled": st["filled"],
-            "rate": st["filled"] / st["rows"] if st["rows"] else None,
-            "median": lengths[len(lengths) // 2] if lengths else 0,
-        })
-    return rows
+    if not os.path.exists(HEALTH_FILE):
+        return {}
+    try:
+        with open(HEALTH_FILE) as f:
+            return json.load(f)
+    except (ValueError, OSError):
+        return {}
 
 
 def location_completeness(data_dir: str) -> dict:
@@ -369,21 +342,18 @@ def main() -> int:
                  f"{1 - MIN_LOCATION_COMPLETE:.0%}. The location markup has "
                  f"probably changed.")
 
-    # The long-text sections, which the API has no counterpart for.
-    lines += ["## Announcement text (scraped only, no API counterpart)", "",
-              "| field | rows | filled | fill rate | median chars |",
-              "|---|---:|---:|---:|---:|"]
-    for row in text_field_health(args.data_dir):
-        rate = "—" if row["rate"] is None else f"{row['rate']:.1%}"
-        lines.append(f"| {row['field']} | {row['rows']:,} | {row['filled']:,} | "
-                     f"{rate} | {row['median']:,} |")
-
-        floor = MIN_TEXT_FILL.get(row["field"], MIN_TEXT_FILL_DEFAULT)
-        if row["rows"] >= 100 and row["rate"] is not None and row["rate"] < floor:
-            flag(f"Announcement text field '{row['field']}' is populated on "
-                 f"only {row['rate']:.1%} of {row['rows']:,} scraped postings; "
-                 f"floor is {floor:.0%}. The page markup has probably changed.")
-    lines.append("")
+    # The long-text sections, which the API has no counterpart for. Reported
+    # from what the collector measured while parsing; it raises the alarm.
+    health = text_field_health()
+    if health.get("fields"):
+        lines += [f"## Announcement text (scraped only, no API counterpart)", "",
+                  f"Measured on the {health['pages_parsed']:,} pages parsed at "
+                  f"{health['measured_at'][:19]}.", "",
+                  "| field | filled | fill rate |", "|---|---:|---:|"]
+        for field, st in health["fields"].items():
+            lines.append(f"| {field} | {st['filled']:,}/{st['parsed']:,} | "
+                         f"{st['rate']:.1%} |")
+        lines.append("")
 
     report = "\n".join(lines)
     print(report)

@@ -31,6 +31,7 @@ number of announcements posted that day rather than the whole inventory.
 """
 
 import argparse
+import json
 import os
 import sys
 import threading
@@ -46,8 +47,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cap_alert import check_cap
 from collect_current_data import (get_year_from_date, group_jobs_by_year,
                                   load_existing_jobs, save_jobs_to_parquet)
-from usajobs_scrape import (MAX_RESULTS, fetch_job_page, new_session,
-                            normalize_search_job, open_inventory,
+from usajobs_scrape import (MAX_RESULTS, SECTION_FIELDS, fetch_job_page,
+                            new_session, normalize_search_job, open_inventory,
                             parse_job_page, search_slice)
 
 # Under this fraction of the inventory the facets promised, something in
@@ -56,6 +57,19 @@ COVERAGE_FLOOR = 0.97
 
 WARNING_FILE = os.path.join(os.path.dirname(__file__), "..", "logs",
                             "SCRAPE_COVERAGE_WARNING.txt")
+
+# Fill rates for the announcement sections, measured on the pages parsed this
+# run. It has to be measured here rather than by scanning the stored parquet:
+# publishing prunes the text of every posting it pushes, so a scan reports the
+# unpublished fraction and reads it as markup drift. That is exactly what
+# happened on 2026-09-04, when every field was flagged at 47.2% while live
+# pages were parsing at 12/12.
+HEALTH_FILE = os.path.join(os.path.dirname(__file__), "..", "logs",
+                           "scrape_field_health.json")
+
+# 'education' is genuinely absent from about one announcement in six.
+MIN_FILL = {"education": 0.50}
+MIN_FILL_DEFAULT = 0.90
 
 _local = threading.local()
 
@@ -218,7 +232,44 @@ def add_details(rows: List[Dict], known: set, workers: int,
           f"{len(failures)} failed, {len(gone)} already removed (404)")
     if failures:
         print("   Failed pages stay unstored and are retried on the next run")
+
+    parsed = [r for r in todo
+              if r["usajobs_control_number"] not in failures | gone]
+    record_field_health(parsed)
     return skipped | failures
+
+
+def record_field_health(parsed: List[Dict]) -> None:
+    """Fill rates for the announcement sections on the pages parsed this run.
+
+    This is the only check on whether the HTML parse still works — the API has
+    no counterpart for these fields — so it measures the freshly parsed rows,
+    which is the one population guaranteed not to have been pruned yet.
+    """
+    if not parsed:
+        return
+
+    stats = {}
+    for field in SECTION_FIELDS:
+        filled = sum(1 for r in parsed if r.get(field))
+        stats[field] = {"parsed": len(parsed), "filled": filled,
+                        "rate": filled / len(parsed)}
+
+    os.makedirs(os.path.dirname(HEALTH_FILE), exist_ok=True)
+    with open(HEALTH_FILE, "w") as f:
+        json.dump({"measured_at": datetime.now().isoformat(),
+                   "pages_parsed": len(parsed), "fields": stats}, f, indent=2)
+
+    print(f"Announcement section fill over {len(parsed):,} pages parsed:")
+    for field, st in stats.items():
+        floor = MIN_FILL.get(field, MIN_FILL_DEFAULT)
+        flag = "" if st["rate"] >= floor else "   BELOW FLOOR"
+        print(f"   {st['filled']:6,}/{st['parsed']:,}  {st['rate']:6.1%}  "
+              f"{field}{flag}")
+        if st["rate"] < floor:
+            warn(f"Announcement section '{field}' parsed out of only "
+                 f"{st['rate']:.1%} of {len(parsed):,} pages fetched this run; "
+                 f"floor is {floor:.0%}. The page markup has probably changed.")
 
 
 def main() -> None:

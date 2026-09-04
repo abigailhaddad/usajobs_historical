@@ -318,6 +318,15 @@ def _clean(node) -> str:
     return _WS.sub(" ", node.get_text(" ")).strip()
 
 
+# Everything parse_job_page produces from the announcement body. Health checks
+# key off this: if usajobs.gov changes its markup, these stop being populated.
+SECTION_FIELDS = [
+    "jobSummary", "majorDuties", "requirements", "conditionsOfEmployment",
+    "qualificationSummary", "education", "additionalInformation", "benefits",
+    "howYouWillBeEvaluated", "requiredDocuments", "howToApply", "text",
+]
+
+
 def parse_sections(soup: BeautifulSoup) -> Dict[str, str]:
     """The long-text fields, keyed by the name the row will carry."""
     out: Dict[str, str] = {}
