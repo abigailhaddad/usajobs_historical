@@ -69,7 +69,7 @@ Data collection last run: 2026-09-04. Coverage spans 2018-2026 with approximatel
 | 2023 | 454,652 | 434,527 |
 | 2024 | 367,776 | 352,305 |
 | 2025 | 256,094 | 240,107 |
-| 2026 | 344,597 | 341,934 |
+| 2026 | 346,267 | 343,595 |
 
 Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,633 closed that year). 2017 starts with limited data in January-February, then ramps up significantly from March onward. Some job postings may have future opening dates.
 
