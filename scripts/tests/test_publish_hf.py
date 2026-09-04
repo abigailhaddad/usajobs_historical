@@ -74,6 +74,63 @@ class TestPartitionSafeMonths:
         assert refused == []
 
 
+class TestGuardUsesTheExistingFile:
+    """Regression for the 2026-09-04 refusal.
+
+    The guard read the manifest cross-referenced against current metadata to
+    decide what a month already holds. Which file a posting actually lives in
+    was fixed by its open date at publish time, and the daily collection
+    refreshes the last 14 days, so open dates shift and the two disagree. That
+    refused 2026-09 over 4 postings sitting safely in another month's file, and
+    blocked the daily publish.
+    """
+
+    def test_the_prior_file_beats_the_manifest(self):
+        # "4" is in the manifest and maps to this month by today's metadata,
+        # but is not in the month file, so it is not this month's to lose.
+        safe, refused = partition_safe_months(
+            todo=["2026-09"],
+            months={"2026-09": {"1", "2", "3"}},
+            have={"1", "2", "3", "4"},
+            month_of={c: "2026-09" for c in "1234"},
+            priors={"2026-09": {"1", "2", "3"}})
+        assert safe == ["2026-09"]
+        assert refused == []
+
+    def test_a_genuine_shrink_is_still_refused(self):
+        # "3" IS in the month file and would not survive the rebuild.
+        safe, refused = partition_safe_months(
+            todo=["2026-09"],
+            months={"2026-09": {"1", "2"}},
+            have={"1", "2", "3"},
+            month_of={c: "2026-09" for c in "123"},
+            priors={"2026-09": {"1", "2", "3"}})
+        assert safe == []
+        assert refused == [("2026-09", 1, 3)]
+
+    def test_no_prior_file_falls_back_to_the_manifest(self):
+        # Download failed or the month was never published: the manifest is
+        # all there is, so keep the conservative check.
+        safe, refused = partition_safe_months(
+            todo=["2026-09"],
+            months={"2026-09": {"1"}},
+            have={"1", "2"},
+            month_of={c: "2026-09" for c in "12"},
+            priors={})
+        assert safe == []
+        assert [m for m, *_ in refused] == ["2026-09"]
+
+    def test_an_empty_prior_is_not_the_same_as_a_missing_one(self):
+        # A month file that exists and is empty cannot lose anything.
+        safe, refused = partition_safe_months(
+            todo=["2026-09"],
+            months={"2026-09": {"1"}},
+            have={"1", "2"},
+            month_of={c: "2026-09" for c in "12"},
+            priors={"2026-09": set()})
+        assert safe == ["2026-09"]
+
+
 class TestPublishedSchema:
     def test_the_job_title_is_selected(self):
         # The field list this replaced omitted positionTitle, so the published
