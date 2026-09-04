@@ -73,6 +73,11 @@ def parse_args():
     p.add_argument("--nice", type=int, default=10,
                    help="Process niceness, 0-19 (default 10). Higher yields "
                         "more readily to whatever else is running.")
+    p.add_argument("--known-from-hf", action="store_true",
+                   help="Take the already-scraped set from the HuggingFace "
+                        "manifest rather than the local parquet. That makes a "
+                        "run stateless, which is what lets month jobs run "
+                        "concurrently in CI without sharing a file.")
     p.add_argument("--month", help="Only this month (YYYY-MM). Useful for a "
                                    "pilot, or to resume a specific month.")
     p.add_argument("--no-publish", action="store_true",
@@ -137,6 +142,28 @@ def thread_session():
 
 def shard_dir(data_dir, year):
     return os.path.join(data_dir, f".scraped_shards_{year}")
+
+
+def published_control_numbers():
+    """What the HuggingFace dataset already holds, from its manifest.
+
+    A few MB rather than the dataset, and it is the same record the publisher
+    keys off. Using it instead of the local parquet is what makes a CI month
+    job stateless: nothing to download from R2 beforehand, nothing to write
+    back after, so jobs for different months cannot race each other.
+    """
+    import csv as _csv
+    from huggingface_hub import get_token, hf_hub_download
+    repo = os.environ.get("HF_DATASET_REPO", "abigailhaddad/usajobs-scraping")
+    token = os.environ.get("HF_TOKEN") or get_token()
+    try:
+        path = hf_hub_download(repo, "manifest.csv", repo_type="dataset",
+                               token=token)
+    except Exception as e:
+        print(f"  could not read the manifest ({e}) — treating it as empty")
+        return set()
+    with open(path) as f:
+        return {r[0] for r in _csv.reader(f) if r and r[0] != "usajobsControlNumber"}
 
 
 def stored_control_numbers(data_dir, year):
@@ -271,7 +298,11 @@ def main() -> int:
     if args.month:
         wanted = {cn: d for cn, d in wanted.items() if d[:7] == args.month}
         print(f"Restricted to {args.month}: {len(wanted):,} postings")
-    known = stored_control_numbers(args.data_dir, args.year)
+    if args.known_from_hf:
+        known = published_control_numbers()
+        print(f"HuggingFace manifest holds {len(known):,} announcements")
+    else:
+        known = stored_control_numbers(args.data_dir, args.year)
     todo = sorted(cn for cn in wanted if cn not in known)
 
     print(f"{args.year}: {len(wanted):,} postings in the historical mirror, "

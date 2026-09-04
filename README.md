@@ -247,6 +247,27 @@ python scripts/backfill_scraped_pages.py --year 2026 --max-cpu 20   # gentler
 python scripts/backfill_scraped_pages.py --year 2026 --no-publish   # keep local
 ```
 
+2026 ran locally in 175 minutes for 160k pages: zero failures, zero 404s, 68.8
+CPU-minutes, and the local parquet ended at 15 MB because each month's text is
+pruned once published.
+
+### The rest of the backlog, in Actions
+
+There are ~3.2M postings from 2017 on — about 81 hours of fetching at the rate
+one runner sustains, so it does not belong in a single run. The
+**Backfill Announcement Pages** workflow chunks it one month per job, ~30k
+pages and ~45 minutes each. Dispatch it with a year, a list, or a range
+(`2017`, `2017,2018`, `2019-2022`).
+
+Month jobs are stateless. `--known-from-hf` takes the already-done set from the
+dataset's manifest instead of a shared parquet, so nothing is pulled from R2
+beforehand or written back after and jobs cannot race. `max-parallel` is
+deliberately 3: it multiplies with each job's `workers`, so 3 x 6 is already 18
+concurrent requests against the 8 a daily run uses.
+
+Old pages are all still served — a sample across 2017, 2019, 2021, 2023 and
+2025 came back 40/40 alive with every section parsing.
+
 ## Data Storage
 
 - **Cloudflare R2**: All parquet files are stored in R2 (not in this git repo due to size)

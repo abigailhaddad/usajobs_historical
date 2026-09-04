@@ -1,0 +1,168 @@
+name: Backfill Announcement Pages
+
+# Fetches announcement pages for postings collected before the scrape existed
+# and publishes them to HuggingFace, one month per job.
+#
+# There are ~3.2M postings from 2017 on, which is roughly 81 hours of fetching
+# at the rate a single runner sustains. A month is ~30k pages, about 45
+# minutes, so it fits a job with room to spare and the work chunks naturally.
+#
+# Month jobs are stateless: --known-from-hf takes the already-done set from the
+# dataset's manifest rather than a shared parquet, so nothing is downloaded
+# from R2 beforehand or written back after, and jobs cannot race each other.
+# The only shared thing they touch is the HuggingFace dataset, and they touch
+# different months of it.
+#
+# Old pages are all still served — a sample across 2017, 2019, 2021, 2023 and
+# 2025 came back 40/40 alive with every section parsing.
+
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "Years to backfill, e.g. 2017 or 2017,2018 or 2019-2022"
+        type: string
+        required: true
+      workers:
+        description: "Concurrent page fetches per job"
+        type: string
+        default: "6"
+      skip_current_month:
+        description: "Leave the current month to the daily workflow"
+        type: boolean
+        default: true
+
+# One backfill at a time. A second dispatch queues rather than doubling the
+# load on usajobs.gov.
+concurrency:
+  group: usajobs-page-backfill
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+      count: ${{ steps.build.outputs.count }}
+    steps:
+      - name: Expand the year list into month jobs
+        id: build
+        env:
+          YEARS: ${{ inputs.years }}
+          SKIP_CURRENT: ${{ inputs.skip_current_month }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import datetime, json, os
+
+          years = set()
+          for part in os.environ["YEARS"].replace(" ", "").split(","):
+              if not part:
+                  continue
+              if "-" in part:
+                  lo, hi = part.split("-", 1)
+                  years.update(range(int(lo), int(hi) + 1))
+              else:
+                  years.add(int(part))
+
+          today = datetime.date.today()
+          skip_current = os.environ["SKIP_CURRENT"] == "true"
+          jobs = []
+          for year in sorted(years):
+              for month in range(1, 13):
+                  # Nothing exists past today, and the current month belongs to
+                  # the daily workflow -- both would publish the same file.
+                  if (year, month) > (today.year, today.month):
+                      continue
+                  if skip_current and (year, month) == (today.year, today.month):
+                      continue
+                  jobs.append({"year": year, "month": f"{year}-{month:02d}"})
+
+          print(f"matrix={json.dumps({'include': jobs})}")
+          print(f"count={len(jobs)}")
+          PY
+
+      - name: Report the plan
+        run: echo "Planned ${{ steps.build.outputs.count }} month job(s)"
+
+  backfill:
+    needs: plan
+    if: needs.plan.outputs.count != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350  # a month is ~45 min; this is headroom, not a target
+    strategy:
+      fail-fast: false
+      # Deliberately low. Each job runs `workers` concurrent fetches, so this
+      # multiplies: 3 x 6 is 18 concurrent requests to usajobs.gov, against the
+      # 8 a daily run uses. Raising it is the fastest way to become a problem
+      # for the site.
+      max-parallel: 3
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 pandas pyarrow duckdb tqdm \
+                      huggingface_hub python-dotenv
+
+      # Public R2, no credentials. Metadata only -- a few tens of MB.
+      - name: Fetch the historical mirror for ${{ matrix.year }}
+        run: |
+          mkdir -p data
+          curl -sSf -o "data/historical_jobs_${{ matrix.year }}.parquet" \
+            "https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/data/historical_jobs_${{ matrix.year }}.parquet"
+          ls -lh "data/historical_jobs_${{ matrix.year }}.parquet"
+
+      - name: Check usajobs.gov serves this runner
+        run: |
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, "scripts")
+          from usajobs_scrape import fetch_job_page, new_session, parse_job_page
+          html, err = fetch_job_page(new_session(), "721962100")
+          if not html:
+              sys.exit(f"usajobs.gov is not serving this runner: {err}")
+          row = parse_job_page(html)
+          missing = [f for f in ("jobSummary", "majorDuties", "qualificationSummary")
+                     if not row.get(f)]
+          if missing:
+              sys.exit(f"page parsed but these sections were empty: {missing}")
+          print("reachable, and the parse still works")
+          PY
+
+      - name: Backfill ${{ matrix.month }}
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python -u scripts/backfill_scraped_pages.py \
+            --year ${{ matrix.year }} \
+            --month ${{ matrix.month }} \
+            --known-from-hf \
+            --workers ${{ inputs.workers }} \
+            --max-cpu 0 \
+            --nice 0
+
+      - name: Section fill for ${{ matrix.month }}
+        if: always()
+        run: |
+          if [ -f logs/scrape_field_health.json ]; then
+            python3 -c "
+          import json
+          h = json.load(open('logs/scrape_field_health.json'))
+          print(f\"{h['pages_parsed']:,} pages parsed\")
+          for f, s in h['fields'].items():
+              print(f\"  {s['rate']:6.1%}  {f}\")
+          "
+          else
+            echo "No pages were parsed this job."
+          fi
