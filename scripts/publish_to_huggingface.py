@@ -276,19 +276,34 @@ def available_months(con, hist_path, scraped_path):
     return months
 
 
-def partition_safe_months(todo, months, have, month_of):
+def partition_safe_months(todo, months, have, month_of, priors=None):
     """Split the months to rebuild into (safe, refused).
 
     A month file is rewritten wholesale, so publishing one built from an
-    incomplete local join would delete announcements the dataset already has.
-    That is the normal state while the page backfill is still running, and it
-    is not recoverable from the dataset side, so refuse rather than shrink.
+    incomplete local join would delete announcements the dataset already has,
+    unrecoverably. The test is whether the rebuild would contain everything the
+    existing file contains.
+
+    The existing file is the authority for that, not the manifest. Which month
+    file a posting lives in was fixed by its open date at publish time, while
+    the manifest cross-referenced against *current* metadata says where it
+    would go today — and those differ, because the daily collection refreshes
+    the last 14 days and open dates shift. On 2026-09-04 that mismatch refused
+    2026-09 over 4 postings that were sitting safely in another month's file.
+
+    Only when there is no prior file to compare against — the download failed,
+    or the month has never been published — does it fall back to the manifest.
 
     Returns refused entries as (month, would_drop, already_published).
     """
+    priors = priors or {}
     safe, refused = [], []
     for month in todo:
-        published_here = {cn for cn in have if month_of.get(cn) == month}
+        prior_cns = priors.get(month)
+        if prior_cns is None:
+            published_here = {cn for cn in have if month_of.get(cn) == month}
+        else:
+            published_here = prior_cns
         dropping = published_here - months.get(month, set())
         if dropping:
             refused.append((month, len(dropping), len(published_here)))
@@ -359,7 +374,7 @@ def main() -> int:
     # Pull the month files we are about to rewrite. Their text is the source
     # for every posting whose local copy has been pruned, and their control
     # numbers are what makes the rebuild provably non-destructive.
-    priors, availability = {}, {}
+    priors, availability, prior_sets = {}, {}, {}
     for month in todo:
         prior = download_month(args.repo, month, token) if token else None
         priors[month] = prior
@@ -370,10 +385,12 @@ def main() -> int:
                 f"FROM read_parquet('{prior}')").fetchall()}
             print(f"  {month}: {len(prior_cns):,} already published, "
                   f"{len(months[month] - prior_cns):,} new")
+            prior_sets[month] = prior_cns
         availability[month] = months[month] | prior_cns
 
     month_of = month_of_every_posting(con, str(hist))
-    safe, refused = partition_safe_months(todo, availability, have, month_of)
+    safe, refused = partition_safe_months(todo, availability, have, month_of,
+                                          prior_sets)
 
     for month, n, total in refused:
         print(f"  REFUSING {month}: rebuilding it would drop {n:,} of the "
