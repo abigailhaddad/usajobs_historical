@@ -25,6 +25,7 @@ from usajobs_scrape import SECTION_FIELDS
 def isolate(tmp_path, monkeypatch):
     monkeypatch.setattr(csd, "HEALTH_FILE", str(tmp_path / "health.json"))
     monkeypatch.setattr(csd, "WARNING_FILE", str(tmp_path / "warning.txt"))
+    monkeypatch.setattr(csd, "SAMPLE_DIR", str(tmp_path / "samples"))
     return tmp_path
 
 
@@ -82,3 +83,56 @@ class TestRecordFieldHealth:
     def test_every_parser_section_is_measured(self, isolate):
         csd.record_field_health([row()])
         assert set(health(isolate)["fields"]) == set(SECTION_FIELDS)
+
+
+class TestStructureDiagnosis:
+    """A fill rate says which section broke. The alarm should also say why.
+
+    Without this, a markup change means reading a rate, opening a browser and
+    diffing the page by eye. With it, the warning names the headings the
+    parser can no longer map -- which is the whole answer when one is renamed.
+    """
+
+    def _page(self, requirements_headings):
+        h3 = "".join(f"<h3>{h}</h3><p>body</p>" for h in requirements_headings)
+        ids = "".join(f'<div id="{i}"><h2>x</h2><p>body</p></div>'
+                      for i in ("joa-summary", "joa-duties", "joa-evaluation",
+                                "joa-required-documents", "joa-how-to-apply"))
+        return (f"<html><body>{ids}"
+                f'<div id="joa-requirements"><h2>Requirements</h2>{h3}</div>'
+                f"</body></html>")
+
+    def test_a_renamed_heading_is_named_in_the_warning(self, isolate):
+        # The realistic break: "Qualifications" becomes something else.
+        page = self._page(["Conditions of employment", "Who may apply",
+                           "Additional information"])
+        csd.record_field_health(
+            [row(qualificationSummary=None) for _ in range(100)],
+            samples=[("999", page)])
+        text = warnings(isolate)
+        assert "qualificationSummary" in text
+        assert "Who may apply" in text          # the heading we cannot map
+        assert "headings_the_parser_cannot_map" in text
+
+    def test_the_sample_page_is_kept(self, isolate):
+        page = self._page(["Conditions of employment"])
+        csd.record_field_health([row(majorDuties=None) for _ in range(100)],
+                                samples=[("12345", page)])
+        saved = isolate / "samples" / "12345.html"
+        assert saved.exists() and saved.read_text() == page
+
+    def test_a_healthy_run_writes_no_sample(self, isolate):
+        csd.record_field_health([row() for _ in range(100)],
+                                samples=[("1", self._page(["Qualifications"]))])
+        assert not (isolate / "samples").exists()
+
+    def test_below_floor_with_no_sample_says_so_rather_than_crashing(self, isolate):
+        csd.record_field_health([row(majorDuties=None) for _ in range(100)],
+                                samples=[])
+        assert "no sample page was kept" in warnings(isolate)
+
+    def test_unparseable_sample_does_not_take_the_run_down(self, isolate):
+        csd.record_field_health([row(majorDuties=None) for _ in range(100)],
+                                samples=[("7", "<html>")])
+        # No requirements block at all: still reports, still names the field.
+        assert "majorDuties" in warnings(isolate)
