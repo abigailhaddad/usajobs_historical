@@ -48,7 +48,72 @@ BUILD_DIR = Path(__file__).resolve().parent.parent / "build" / "hf"
 # HiringPaths / JobCategories / PositionLocations, which are empty integer
 # columns superseded by the *_1 varchars; inserted_at / last_seen, which are
 # bookkeeping for this pipeline's own collection runs.
-METADATA_FIELDS = """
+# Structured fields, from the historical parquet.
+#
+# The mirror's schema is not stable across years, so the list-valued columns
+# are resolved per file rather than hardcoded:
+#
+#   hiringpaths_1 / jobcategories_1 / positionlocations_1
+#       VARCHAR in 2017, 2018, 2020, 2024, 2025, 2026 -- absent in 2019,
+#       2021, 2022, 2023
+#   HiringPaths / JobCategories / PositionLocations
+#       VARCHAR in every year except 2026, where they are empty integers
+#
+# Hardcoding the 2026 shape crashed on 2019 with 'Table "h" does not have a
+# column named "hiringpaths_1"'. Preferring the *_1 varchar and falling back to
+# the capitalised one covers every year.
+#
+# whoMayApply is cast because it is VARCHAR through 2024 and an empty INTEGER
+# from 2025 -- without the cast, month files disagree on its type and reading
+# the dataset as a whole breaks.
+#
+# Against the field list this replaces, positionTitle and hiringSubelementName
+# are new -- the published dataset had no job title in it at all.
+#
+# Not selected: usajobs_control_number (duplicates usajobsControlNumber);
+# inserted_at / last_seen, bookkeeping for this pipeline's own collection runs;
+# backfilled, which only exists in 2024 and 2025.
+# Three spellings have been observed for each of these, and which one holds
+# the data changes both across years and over time as the mirror is rewritten:
+#   hiringpaths_1   2017, 2018, 2020, 2024, 2025 and 2026 until 2026-09-05
+#   HiringPaths     every year, but empty or null-typed in the recent ones
+#   hiringpaths     the current 2026 mirror
+# Order is most- to least-specific; whichever is a string type and present wins.
+_LIST_COLUMNS = {
+    "hiringPaths": ("hiringpaths_1", "hiringpaths", "HiringPaths"),
+    "jobCategories": ("jobcategories_1", "jobcategories", "JobCategories"),
+    "positionLocations": ("positionlocations_1", "positionlocations",
+                          "PositionLocations"),
+}
+
+
+def resolve_list_columns(hist_path):
+    """Pick the column that actually holds each list field in this file.
+
+    Prefers the *_1 varchar, falls back to the capitalised one, and skips any
+    candidate that is not VARCHAR -- in 2026 the capitalised columns exist but
+    are empty integers.
+    """
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    schema = pq.read_schema(hist_path)
+    # large_string as well as string: pyarrow distinguishes them and the
+    # mirror uses both. A column typed `null` is present but entirely empty,
+    # which is exactly what the capitalised ones are in recent years, so it
+    # must not win.
+    varchar = {f.name for f in schema
+               if pa.types.is_string(f.type) or pa.types.is_large_string(f.type)}
+    out = {}
+    for alias, candidates in _LIST_COLUMNS.items():
+        pick = next((c for c in candidates if c in varchar), None)
+        out[alias] = f"h.{pick}" if pick else "CAST(NULL AS VARCHAR)"
+    return out
+
+
+def metadata_fields(hist_path):
+    cols = resolve_list_columns(hist_path)
+    return f"""
     h.usajobsControlNumber::varchar AS usajobsControlNumber,
     h.positionTitle,
     h.announcementNumber,
@@ -56,7 +121,8 @@ METADATA_FIELDS = """
     h.hiringDepartmentCode, h.hiringDepartmentName,
     h.hiringSubelementName,
     h.agencyLevel, h.agencyLevelSort,
-    h.appointmentType, h.workSchedule, h.serviceType, h.whoMayApply,
+    h.appointmentType, h.workSchedule, h.serviceType,
+    CAST(h.whoMayApply AS VARCHAR) AS whoMayApply,
     h.payScale, h.salaryType, h.minimumSalary, h.maximumSalary,
     h.minimumGrade, h.maximumGrade, h.promotionPotential, h.supervisoryStatus,
     h.totalOpenings, h.positionOpeningStatus,
@@ -67,12 +133,13 @@ METADATA_FIELDS = """
     h.travelRequirement, h.teleworkEligible, h.relocationExpensesReimbursed,
     h.securityClearanceRequired, h.securityClearance, h.drugTestRequired,
     h.disableApplyOnline, h.vendor,
-    h.hiringpaths_1        AS hiringPaths,
-    h.jobcategories_1      AS jobCategories,
-    h.positionlocations_1  AS positionLocations,
+    {cols['hiringPaths']}        AS hiringPaths,
+    {cols['jobCategories']}      AS jobCategories,
+    {cols['positionLocations']}  AS positionLocations,
     array_to_string(
         regexp_extract_all(
-            coalesce(CAST(h.jobcategories_1 AS VARCHAR), ''), '[0-9]{4}'), ' | ')
+            coalesce(CAST({cols['jobCategories']} AS VARCHAR), ''),
+            '[0-9]{{4}}'), ' | ')
         AS occupationalSeries
 """
 
@@ -224,7 +291,7 @@ def select_sql(hist_path: str, scraped_path: str, month: str,
     text_cols = ",\n    ".join(f"t.{c}" for c in TEXT_FIELDS)
     return f"""
         WITH {", ".join(parts)}, txt AS ({union})
-        SELECT {METADATA_FIELDS},
+        SELECT {metadata_fields(hist_path)},
     {text_cols}
         FROM read_parquet('{hist_path}') h
         JOIN txt t ON h.usajobsControlNumber::varchar = t.cn
