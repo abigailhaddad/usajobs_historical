@@ -12,9 +12,9 @@ import sys
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from publish_to_huggingface import (METADATA_FIELDS, TEXT_FIELDS,
+from publish_to_huggingface import (TEXT_FIELDS, metadata_fields,
                                     partition_safe_months,
-                                    prune_published_text)
+                                    prune_published_text, resolve_list_columns)
 
 
 class TestPartitionSafeMonths:
@@ -131,22 +131,87 @@ class TestGuardUsesTheExistingFile:
         assert safe == ["2026-09"]
 
 
+class TestResolveListColumns:
+    """Regression for the 2019 crash.
+
+    Each list-valued field has been spelled three ways in the mirror, and
+    which one holds the data varies by year and over time. Hardcoding the
+    2026 shape crashed on 2019 with 'does not have a column named
+    hiringpaths_1'.
+    """
+
+    def _schema(self, tmp_path, columns):
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+        path = tmp_path / "mirror.parquet"
+        pq.write_table(pa.table({n: pa.array([None], type=t)
+                                 for n, t in columns.items()}), path)
+        return str(path)
+
+    def test_the_suffixed_varchar_wins_when_present(self, tmp_path):
+        import pyarrow as pa
+        path = self._schema(tmp_path, {"hiringpaths_1": pa.string(),
+                                       "hiringpaths": pa.string(),
+                                       "HiringPaths": pa.string()})
+        assert resolve_list_columns(path)["hiringPaths"] == "h.hiringpaths_1"
+
+    def test_falls_back_when_the_suffixed_one_is_absent(self, tmp_path):
+        # 2019, 2021, 2022, 2023 have only the capitalised column.
+        import pyarrow as pa
+        path = self._schema(tmp_path, {"HiringPaths": pa.string()})
+        assert resolve_list_columns(path)["hiringPaths"] == "h.HiringPaths"
+
+    def test_the_current_lowercase_spelling(self, tmp_path):
+        import pyarrow as pa
+        path = self._schema(tmp_path, {"hiringpaths": pa.string()})
+        assert resolve_list_columns(path)["hiringPaths"] == "h.hiringpaths"
+
+    def test_a_null_typed_column_does_not_win(self, tmp_path):
+        # Present but entirely empty, which is what the capitalised ones are
+        # in the recent mirrors. It must lose to a real string column.
+        import pyarrow as pa
+        path = self._schema(tmp_path, {"HiringPaths": pa.null(),
+                                       "hiringpaths": pa.string()})
+        assert resolve_list_columns(path)["hiringPaths"] == "h.hiringpaths"
+
+    def test_large_string_counts(self, tmp_path):
+        # pyarrow distinguishes string from large_string; the mirror uses both.
+        import pyarrow as pa
+        path = self._schema(tmp_path, {"hiringpaths": pa.large_string()})
+        assert resolve_list_columns(path)["hiringPaths"] == "h.hiringpaths"
+
+    def test_no_candidate_at_all_yields_null_not_a_crash(self, tmp_path):
+        import pyarrow as pa
+        path = self._schema(tmp_path, {"positionTitle": pa.string()})
+        assert resolve_list_columns(path)["hiringPaths"] == "CAST(NULL AS VARCHAR)"
+
+
 class TestPublishedSchema:
-    def test_the_job_title_is_selected(self):
+    def _fields(self, tmp_path):
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+        path = tmp_path / "m.parquet"
+        pq.write_table(pa.table({"hiringpaths_1": pa.array([None], pa.string())}),
+                       path)
+        return metadata_fields(str(path))
+
+    def test_the_job_title_is_selected(self, tmp_path):
         # The field list this replaced omitted positionTitle, so the published
         # dataset had no job title in it at all.
-        assert "h.positionTitle," in METADATA_FIELDS
-        assert "h.hiringSubelementName," in METADATA_FIELDS
+        fields = self._fields(tmp_path)
+        assert "h.positionTitle," in fields
+        assert "h.hiringSubelementName," in fields
 
-    def test_bookkeeping_columns_are_not_published(self):
-        for column in ("inserted_at", "last_seen", "usajobs_control_number"):
-            assert f"h.{column}" not in METADATA_FIELDS
+    def test_bookkeeping_columns_are_not_published(self, tmp_path):
+        fields = self._fields(tmp_path)
+        for column in ("inserted_at", "last_seen", "usajobs_control_number",
+                       "backfilled"):
+            assert f"h.{column}" not in fields
 
-    def test_the_empty_integer_columns_are_not_published(self):
-        # HiringPaths / JobCategories / PositionLocations are empty integer
-        # columns in the mirror, superseded by the *_1 varchars.
-        assert "h.HiringPaths" not in METADATA_FIELDS
-        assert "h.hiringpaths_1" in METADATA_FIELDS
+    def test_who_may_apply_is_cast_for_a_stable_column_type(self, tmp_path):
+        # VARCHAR through 2024, empty INTEGER from 2025. Without the cast the
+        # month files disagree and the dataset cannot be read as a whole.
+        assert "CAST(h.whoMayApply AS VARCHAR)" in self._fields(tmp_path)
 
     def test_every_announcement_section_is_published(self):
         for section in ("jobSummary", "majorDuties", "qualificationSummary",
