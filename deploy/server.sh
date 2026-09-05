@@ -18,13 +18,25 @@
 set -euo pipefail
 
 NAME="${WORKER_NAME:-usajobs-worker}"
-TYPE="${WORKER_TYPE:-cx32}"          # 4 vCPU / 8 GB — the compact step peaks ~1.6 GB
+# cx33: 4 vCPU / 8 GB / 80 GB, EUR 9.99/mo or 0.016/hr as of 2026-09.
+# 8 GB rather than 4 because compact() concatenates a month's shards in pandas
+# and peaks near 1.6 GB. It is the cheapest 8 GB type; cax21 is ARM and dearer,
+# cpx32 is four times the price. Check `hcloud server-type list` if it 404s --
+# the line is versioned and cx32 was retired.
+TYPE="${WORKER_TYPE:-cx33}"
 IMAGE="${WORKER_IMAGE:-ubuntu-24.04}"
-LOCATION="${WORKER_LOCATION:-nbg1}"  # override if a location is out of stock
+# nbg1 was out of stock on 2026-09-05 ("error during placement,
+# resource_unavailable"), which is a normal thing for Hetzner to be. Try the
+# others if this one refuses: fsn1 hel1 (EU), ash hil (US), sin.
+LOCATION="${WORKER_LOCATION:-fsn1}"
 SSH_KEY_NAME="${WORKER_SSH_KEY:-}"   # name of the key as hcloud knows it
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-[ -f "$HERE/.hcloud.env" ] && . "$HERE/.hcloud.env"
+# set -a so the token is exported, not just set: hcloud is a child process and
+# a plain shell variable never reaches it.
+if [ -f "$HERE/.hcloud.env" ]; then
+  set -a; . "$HERE/.hcloud.env"; set +a
+fi
 
 need() { command -v "$1" >/dev/null || { echo "missing: $1"; exit 1; }; }
 

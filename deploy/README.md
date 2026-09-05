@@ -42,7 +42,7 @@ ssh root@$IP 'bash -s' < deploy/install-backfill.sh
 
 ## Cost
 
-`cx32` (4 vCPU, 8 GB) is around €7–8/month, **billed hourly**. The backlog is
+`cx33` (4 vCPU, 8 GB) is €9.99/month or €0.016/hour, **billed hourly**. The backlog is
 about four days of work, so running it and destroying the box costs roughly a
 euro or two. The monthly figure is a cap, not a commitment — check the exact
 price in the create form, and destroy the server when the work is done.
