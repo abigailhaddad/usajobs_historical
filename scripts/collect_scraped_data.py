@@ -47,9 +47,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cap_alert import check_cap
 from collect_current_data import (get_year_from_date, group_jobs_by_year,
                                   load_existing_jobs, save_jobs_to_parquet)
-from usajobs_scrape import (MAX_RESULTS, SECTION_FIELDS, fetch_job_page,
-                            new_session, normalize_search_job, open_inventory,
-                            parse_job_page, search_slice)
+from usajobs_scrape import (MAX_RESULTS, SECTION_FIELDS, diagnose_structure,
+                            fetch_job_page, new_session, normalize_search_job,
+                            open_inventory, parse_job_page, search_slice)
 
 # Under this fraction of the inventory the facets promised, something in
 # discovery is silently dropping postings and the run should be looked at.
@@ -66,6 +66,18 @@ WARNING_FILE = os.path.join(os.path.dirname(__file__), "..", "logs",
 # pages were parsing at 12/12.
 HEALTH_FILE = os.path.join(os.path.dirname(__file__), "..", "logs",
                            "scrape_field_health.json")
+
+# When a section stops parsing, the fill rate alone only says which field
+# broke. These keep a page it broke on, so the alarm carries its own evidence
+# and diagnosing it does not mean opening a browser.
+SAMPLE_DIR = os.path.join(os.path.dirname(__file__), "..", "logs",
+                          "scrape_samples")
+MAX_SAMPLES = 2
+
+# education and benefits are legitimately absent on plenty of announcements,
+# so a page missing only those is not evidence of anything.
+_ALWAYS_EXPECTED = [f for f in SECTION_FIELDS
+                    if f not in ("education", "benefits")]
 
 # 'education' is genuinely absent from about one announcement in six.
 MIN_FILL = {"education": 0.50}
@@ -191,6 +203,7 @@ def add_details(rows: List[Dict], known: set, workers: int,
     fetched = 0
     failures = set()
     gone = set()
+    samples = []
     lock = threading.Lock()
     started = time.time()
 
@@ -222,6 +235,9 @@ def add_details(rows: List[Dict], known: set, workers: int,
                 row[key] = value
         with lock:
             fetched += 1
+            if (len(samples) < MAX_SAMPLES
+                    and any(not detail.get(f) for f in _ALWAYS_EXPECTED)):
+                samples.append((cn, html))
 
     with ThreadPoolExecutor(max_workers=workers) as pool:
         list(tqdm(pool.map(work, todo), total=len(todo),
@@ -235,11 +251,11 @@ def add_details(rows: List[Dict], known: set, workers: int,
 
     parsed = [r for r in todo
               if r["usajobs_control_number"] not in failures | gone]
-    record_field_health(parsed)
+    record_field_health(parsed, samples)
     return skipped | failures
 
 
-def record_field_health(parsed: List[Dict]) -> None:
+def record_field_health(parsed: List[Dict], samples=None) -> None:
     """Fill rates for the announcement sections on the pages parsed this run.
 
     This is the only check on whether the HTML parse still works — the API has
@@ -260,6 +276,7 @@ def record_field_health(parsed: List[Dict]) -> None:
         json.dump({"measured_at": datetime.now().isoformat(),
                    "pages_parsed": len(parsed), "fields": stats}, f, indent=2)
 
+    below = []
     print(f"Announcement section fill over {len(parsed):,} pages parsed:")
     for field, st in stats.items():
         floor = MIN_FILL.get(field, MIN_FILL_DEFAULT)
@@ -267,9 +284,47 @@ def record_field_health(parsed: List[Dict]) -> None:
         print(f"   {st['filled']:6,}/{st['parsed']:,}  {st['rate']:6.1%}  "
               f"{field}{flag}")
         if st["rate"] < floor:
+            below.append(field)
             warn(f"Announcement section '{field}' parsed out of only "
                  f"{st['rate']:.1%} of {len(parsed):,} pages fetched this run; "
                  f"floor is {floor:.0%}. The page markup has probably changed.")
+
+    if below:
+        report_structure(samples or [], below)
+
+
+def report_structure(samples, below) -> None:
+    """Say what the page looks like now, and keep a copy of one.
+
+    A fill rate says which field broke. This says why: which section ids the
+    page still has, which headings sit inside Requirements, and which of those
+    the parser cannot map -- that last list is the answer whenever a heading
+    gets renamed. Without it the alarm means opening a browser.
+    """
+    if not samples:
+        warn(f"{len(below)} section(s) below floor but no sample page was "
+             f"kept, because every page parsed cleanly. The shortfall is in "
+             f"which pages were fetched, not in the markup.")
+        return
+
+    os.makedirs(SAMPLE_DIR, exist_ok=True)
+    for cn, html in samples:
+        with open(os.path.join(SAMPLE_DIR, f"{cn}.html"), "w",
+                  encoding="utf-8") as f:
+            f.write(html)
+
+    cn, html = samples[0]
+    try:
+        structure = diagnose_structure(html)
+    except Exception as e:
+        warn(f"Could not diagnose the sample page {cn}: {e}")
+        return
+
+    warn(f"Structure of {cn}, a page where a section did not parse: "
+         + json.dumps(structure, separators=(",", ":")))
+    print(f"\nStructure of {cn} (full page saved under {SAMPLE_DIR}):")
+    for key, value in structure.items():
+        print(f"   {key}: {value}")
 
 
 def main() -> None:
