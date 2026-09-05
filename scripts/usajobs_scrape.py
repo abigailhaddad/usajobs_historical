@@ -327,6 +327,38 @@ SECTION_FIELDS = [
 ]
 
 
+def diagnose_structure(html: str) -> Dict:
+    """What the page's structure looks like now, versus what the parser expects.
+
+    This is what turns a fill-rate alarm into a diagnosis. The tripwire can
+    only say "qualificationSummary stopped parsing"; this says which section
+    ids the page actually has, which <h3> headings are inside Requirements, and
+    which of those the parser has no mapping for -- which is the answer when a
+    heading gets renamed.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+
+    present_ids = sorted({d.get("id") for d in soup.select("[id^=joa-]")})
+    expected_ids = sorted(set(_SECTIONS) | {"joa-requirements"})
+
+    requirements = soup.find(id="joa-requirements")
+    headings = ([_WS.sub(" ", h.get_text(" ")).strip()
+                 for h in requirements.find_all("h3")] if requirements else [])
+    unmapped = [h for h in headings if h.lower() not in _REQUIREMENT_PARTS]
+    missing_headings = [k for k in _REQUIREMENT_PARTS
+                        if k not in {h.lower() for h in headings}]
+
+    return {
+        "section_ids_present": present_ids,
+        "section_ids_expected_but_absent": [i for i in expected_ids
+                                            if i not in present_ids],
+        "requirements_headings": headings,
+        "headings_the_parser_cannot_map": unmapped,
+        "expected_headings_not_on_the_page": missing_headings,
+        "page_bytes": len(html),
+    }
+
+
 def parse_sections(soup: BeautifulSoup) -> Dict[str, str]:
     """The long-text fields, keyed by the name the row will carry."""
     out: Dict[str, str] = {}
