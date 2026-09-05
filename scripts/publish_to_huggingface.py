@@ -79,6 +79,9 @@ BUILD_DIR = Path(__file__).resolve().parent.parent / "build" / "hf"
 #   HiringPaths     every year, but empty or null-typed in the recent ones
 #   hiringpaths     the current 2026 mirror
 # Order is most- to least-specific; whichever is a string type and present wins.
+# Candidate names as DUCKDB reports them, most- to least-specific. The `_1`
+# forms are duckdb's own de-collision of a case-insensitive clash in the file;
+# they are not column names in the parquet.
 _LIST_COLUMNS = {
     "hiringPaths": ("hiringpaths_1", "hiringpaths", "HiringPaths"),
     "jobCategories": ("jobcategories_1", "jobcategories", "JobCategories"),
@@ -87,32 +90,35 @@ _LIST_COLUMNS = {
 }
 
 
-def resolve_list_columns(hist_path):
+def resolve_list_columns(con, hist_path):
     """Pick the column that actually holds each list field in this file.
 
-    Prefers the *_1 varchar, falls back to the capitalised one, and skips any
-    candidate that is not VARCHAR -- in 2026 the capitalised columns exist but
-    are empty integers.
-    """
-    import pyarrow as pa
-    import pyarrow.parquet as pq
+    Resolved through duckdb's view of the schema, not pyarrow's, because the
+    two disagree in a way that matters. The mirror carries both `HiringPaths`
+    (a vestigial, entirely null column) and `hiringpaths` (the real data). SQL
+    identifiers are case-insensitive, so duckdb sees a collision and exposes
+    the second as `hiringpaths_1` -- and a query saying `h.hiringpaths` binds
+    to the FIRST match, which is the empty one.
 
-    schema = pq.read_schema(hist_path)
-    # large_string as well as string: pyarrow distinguishes them and the
-    # mirror uses both. A column typed `null` is present but entirely empty,
-    # which is exactly what the capitalised ones are in recent years, so it
-    # must not win.
-    varchar = {f.name for f in schema
-               if pa.types.is_string(f.type) or pa.types.is_large_string(f.type)}
+    Reading the parquet schema and emitting `h.hiringpaths` therefore produced
+    175,926 rows of NULL hiring paths while looking entirely correct. The name
+    to emit is the one duckdb reports.
+
+    Years differ in which columns exist at all: 2019, 2021, 2022 and 2023 have
+    a single spelling and so no collision and no `_1`, which is what crashed
+    the publisher on 2019.
+    """
+    types = {n: t for n, t, *_ in
+             con.execute(f"DESCRIBE SELECT * FROM read_parquet('{hist_path}')").fetchall()}
     out = {}
     for alias, candidates in _LIST_COLUMNS.items():
-        pick = next((c for c in candidates if c in varchar), None)
+        pick = next((c for c in candidates if types.get(c) == "VARCHAR"), None)
         out[alias] = f"h.{pick}" if pick else "CAST(NULL AS VARCHAR)"
     return out
 
 
-def metadata_fields(hist_path):
-    cols = resolve_list_columns(hist_path)
+def metadata_fields(con, hist_path):
+    cols = resolve_list_columns(con, hist_path)
     return f"""
     h.usajobsControlNumber::varchar AS usajobsControlNumber,
     h.positionTitle,
@@ -249,7 +255,7 @@ def parquet_columns(path):
     return set(pq.read_schema(path).names)
 
 
-def select_sql(hist_path: str, scraped_path: str, month: str,
+def select_sql(con, hist_path: str, scraped_path: str, month: str,
                prior_path: str = None) -> str:
     """Fresh metadata joined to announcement text from wherever it still lives.
 
@@ -291,7 +297,7 @@ def select_sql(hist_path: str, scraped_path: str, month: str,
     text_cols = ",\n    ".join(f"t.{c}" for c in TEXT_FIELDS)
     return f"""
         WITH {", ".join(parts)}, txt AS ({union})
-        SELECT {metadata_fields(hist_path)},
+        SELECT {metadata_fields(con, hist_path)},
     {text_cols}
         FROM read_parquet('{hist_path}') h
         JOIN txt t ON h.usajobsControlNumber::varchar = t.cn
@@ -479,7 +485,7 @@ def main() -> int:
         # COPY streams straight to disk. Materializing a month in Python would
         # be ~800 MB of announcement text.
         con.execute(f"""
-            COPY ({select_sql(str(hist), str(scraped), month, priors.get(month))}
+            COPY ({select_sql(con, str(hist), str(scraped), month, priors.get(month))}
                   ORDER BY usajobsControlNumber)
             TO '{dest}' (FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 19);
         """)

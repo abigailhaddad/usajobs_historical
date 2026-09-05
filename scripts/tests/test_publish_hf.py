@@ -132,68 +132,74 @@ class TestGuardUsesTheExistingFile:
 
 
 class TestResolveListColumns:
-    """Regression for the 2019 crash.
+    """Regression for two bugs, one of which hid inside the fix for the other.
 
-    Each list-valued field has been spelled three ways in the mirror, and
-    which one holds the data varies by year and over time. Hardcoding the
-    2026 shape crashed on 2019 with 'does not have a column named
-    hiringpaths_1'.
+    First: hardcoding the 2026 column name crashed on 2019 with 'does not have
+    a column named hiringpaths_1'.
+
+    Then: resolving against the *parquet* schema and emitting `h.hiringpaths`
+    silently produced 175,926 rows of NULL, because the file carries both
+    `HiringPaths` (vestigial, all null) and `hiringpaths` (the real data), SQL
+    identifiers are case-insensitive, and the query bound to the first match.
+    duckdb exposes the second as `hiringpaths_1`, and that is the name to emit.
     """
 
-    def _schema(self, tmp_path, columns):
+    def _mirror(self, tmp_path, columns):
         import pyarrow as pa
         import pyarrow.parquet as pq
         path = tmp_path / "mirror.parquet"
-        pq.write_table(pa.table({n: pa.array([None], type=t)
-                                 for n, t in columns.items()}), path)
+        pq.write_table(pa.table({n: pa.array([v], type=t)
+                                 for n, (t, v) in columns.items()}), path)
         return str(path)
 
-    def test_the_suffixed_varchar_wins_when_present(self, tmp_path):
-        import pyarrow as pa
-        path = self._schema(tmp_path, {"hiringpaths_1": pa.string(),
-                                       "hiringpaths": pa.string(),
-                                       "HiringPaths": pa.string()})
-        assert resolve_list_columns(path)["hiringPaths"] == "h.hiringpaths_1"
+    def test_the_2026_shape_picks_the_populated_column(self, tmp_path):
+        # Both spellings present; the capitalised one is an empty null column.
+        # duckdb de-collides them and only the _1 form holds data.
+        import duckdb, pyarrow as pa
+        path = self._mirror(tmp_path, {
+            "HiringPaths": (pa.null(), None),
+            "hiringpaths": (pa.string(), '[{"hiringPath": "The public"}]')})
+        con = duckdb.connect()
+        picked = resolve_list_columns(con, path)["hiringPaths"]
+        assert picked == "h.hiringpaths_1"
+        # and it must actually select the data, not the empty column
+        got = con.execute(
+            f"SELECT {picked} FROM read_parquet('{path}') h").fetchone()[0]
+        assert got == '[{"hiringPath": "The public"}]'
 
-    def test_falls_back_when_the_suffixed_one_is_absent(self, tmp_path):
-        # 2019, 2021, 2022, 2023 have only the capitalised column.
-        import pyarrow as pa
-        path = self._schema(tmp_path, {"HiringPaths": pa.string()})
-        assert resolve_list_columns(path)["hiringPaths"] == "h.HiringPaths"
+    def test_the_2019_shape_has_no_collision(self, tmp_path):
+        # A single spelling, so duckdb adds no suffix and the _1 form is absent.
+        import duckdb, pyarrow as pa
+        path = self._mirror(tmp_path, {
+            "HiringPaths": (pa.string(), '[{"hiringPath": "The public"}]')})
+        con = duckdb.connect()
+        picked = resolve_list_columns(con, path)["hiringPaths"]
+        assert picked == "h.HiringPaths"
+        got = con.execute(
+            f"SELECT {picked} FROM read_parquet('{path}') h").fetchone()[0]
+        assert got == '[{"hiringPath": "The public"}]'
 
-    def test_the_current_lowercase_spelling(self, tmp_path):
-        import pyarrow as pa
-        path = self._schema(tmp_path, {"hiringpaths": pa.string()})
-        assert resolve_list_columns(path)["hiringPaths"] == "h.hiringpaths"
-
-    def test_a_null_typed_column_does_not_win(self, tmp_path):
-        # Present but entirely empty, which is what the capitalised ones are
-        # in the recent mirrors. It must lose to a real string column.
-        import pyarrow as pa
-        path = self._schema(tmp_path, {"HiringPaths": pa.null(),
-                                       "hiringpaths": pa.string()})
-        assert resolve_list_columns(path)["hiringPaths"] == "h.hiringpaths"
-
-    def test_large_string_counts(self, tmp_path):
-        # pyarrow distinguishes string from large_string; the mirror uses both.
-        import pyarrow as pa
-        path = self._schema(tmp_path, {"hiringpaths": pa.large_string()})
-        assert resolve_list_columns(path)["hiringPaths"] == "h.hiringpaths"
+    def test_a_null_typed_column_never_wins(self, tmp_path):
+        import duckdb, pyarrow as pa
+        path = self._mirror(tmp_path, {"HiringPaths": (pa.null(), None)})
+        assert resolve_list_columns(duckdb.connect(), path)["hiringPaths"] \
+            == "CAST(NULL AS VARCHAR)"
 
     def test_no_candidate_at_all_yields_null_not_a_crash(self, tmp_path):
-        import pyarrow as pa
-        path = self._schema(tmp_path, {"positionTitle": pa.string()})
-        assert resolve_list_columns(path)["hiringPaths"] == "CAST(NULL AS VARCHAR)"
+        import duckdb, pyarrow as pa
+        path = self._mirror(tmp_path, {"positionTitle": (pa.string(), "x")})
+        cols = resolve_list_columns(duckdb.connect(), path)
+        assert all(v == "CAST(NULL AS VARCHAR)" for v in cols.values())
 
 
 class TestPublishedSchema:
     def _fields(self, tmp_path):
-        import pyarrow as pa
+        import duckdb, pyarrow as pa
         import pyarrow.parquet as pq
         path = tmp_path / "m.parquet"
-        pq.write_table(pa.table({"hiringpaths_1": pa.array([None], pa.string())}),
+        pq.write_table(pa.table({"hiringpaths": pa.array([None], pa.string())}),
                        path)
-        return metadata_fields(str(path))
+        return metadata_fields(duckdb.connect(), str(path))
 
     def test_the_job_title_is_selected(self, tmp_path):
         # The field list this replaced omitted positionTitle, so the published
