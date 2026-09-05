@@ -200,13 +200,24 @@ def wanted_postings(data_dir, year):
             for r in df.itertuples()}
 
 
+# Shards folded per call to save_jobs_to_parquet. The whole point is that peak
+# memory tracks this rather than the number of shards waiting.
+COMPACT_BATCH = 4
+
+
 def compact(data_dir, year):
     """Fold shards into the main parquet, then delete them.
 
-    save_jobs_to_parquet rewrites the whole file, so this runs once at the end
-    rather than per batch — at a year's scale, rewriting a growing multi-hundred
-    megabyte parquet after every batch is the difference between minutes and
-    hours.
+    Folds a few shards at a time. Reading every shard at once and calling
+    .to_dict("records") on the result was killed by the OOM killer twice on an
+    8 GB box: a month is ~13 shards of 2,000 rows, each row carrying ~35 KB of
+    announcement text, and a publish failure leaves the next month's shards
+    stacked on top -- 49 were pending when this was written, about 3.4 GB of
+    text before pandas overhead and the dict conversion on top of that.
+
+    Rewriting the main parquet per batch is cheap here precisely because
+    publishing prunes it: between months it is a couple of megabytes, and
+    within a month it only grows to what has not been published yet.
     """
     shards = shard_dir(data_dir, year)
     if not os.path.isdir(shards):
@@ -215,20 +226,30 @@ def compact(data_dir, year):
     if not files:
         return 0
 
-    print(f"Folding {len(files)} shard(s) into scraped_jobs_{year}.parquet")
-    frames = [pd.read_parquet(os.path.join(shards, f)) for f in files]
-    rows = pd.concat(frames, ignore_index=True).drop_duplicates(
-        "usajobs_control_number")
+    path = os.path.join(data_dir, f"scraped_jobs_{year}.parquet")
+    print(f"Folding {len(files)} shard(s) into scraped_jobs_{year}.parquet "
+          f"in batches of {COMPACT_BATCH}")
 
-    # save_jobs_to_parquet stamps inserted_at/last_seen and merges on control
-    # number, so a posting already in the file is updated rather than doubled.
-    save_jobs_to_parquet(rows.to_dict("records"),
-                         os.path.join(data_dir, f"scraped_jobs_{year}.parquet"))
+    total = 0
+    for start in range(0, len(files), COMPACT_BATCH):
+        batch = files[start:start + COMPACT_BATCH]
+        frame = pd.concat(
+            [pd.read_parquet(os.path.join(shards, f)) for f in batch],
+            ignore_index=True).drop_duplicates("usajobs_control_number")
 
-    for f in files:
-        os.remove(os.path.join(shards, f))
-    os.rmdir(shards)
-    return len(rows)
+        # save_jobs_to_parquet stamps inserted_at/last_seen and merges on
+        # control number, so a posting already in the file is updated rather
+        # than doubled.
+        save_jobs_to_parquet(frame.to_dict("records"), path)
+        total += len(frame)
+        del frame
+
+        for f in batch:
+            os.remove(os.path.join(shards, f))
+
+    if not os.listdir(shards):
+        os.rmdir(shards)
+    return total
 
 
 def months_awaiting_publish(data_dir, year):
