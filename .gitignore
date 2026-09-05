@@ -60,3 +60,6 @@ questionnaires/session_base64.txt
 # HuggingFace publish staging and page-backfill shards
 build/
 data/.scraped_shards_*/
+
+# Hetzner API token for deploy/server.sh
+deploy/.hcloud.env
