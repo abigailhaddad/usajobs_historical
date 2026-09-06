@@ -41,48 +41,24 @@ BUILD_DIR = Path(__file__).resolve().parent.parent / "build" / "hf"
 
 # Structured fields, from the historical parquet.
 #
-# Against the field list this replaces, positionTitle and hiringSubelementName
-# are new — the published dataset had no job title in it at all.
-#
-# Not selected: usajobs_control_number (duplicates usajobsControlNumber);
-# HiringPaths / JobCategories / PositionLocations, which are empty integer
-# columns superseded by the *_1 varchars; inserted_at / last_seen, which are
-# bookkeeping for this pipeline's own collection runs.
-# Structured fields, from the historical parquet.
-#
-# The mirror's schema is not stable across years, so the list-valued columns
-# are resolved per file rather than hardcoded:
-#
-#   hiringpaths_1 / jobcategories_1 / positionlocations_1
-#       VARCHAR in 2017, 2018, 2020, 2024, 2025, 2026 -- absent in 2019,
-#       2021, 2022, 2023
-#   HiringPaths / JobCategories / PositionLocations
-#       VARCHAR in every year except 2026, where they are empty integers
-#
-# Hardcoding the 2026 shape crashed on 2019 with 'Table "h" does not have a
-# column named "hiringpaths_1"'. Preferring the *_1 varchar and falling back to
-# the capitalised one covers every year.
-#
-# whoMayApply is cast because it is VARCHAR through 2024 and an empty INTEGER
-# from 2025 -- without the cast, month files disagree on its type and reading
-# the dataset as a whole breaks.
-#
-# Against the field list this replaces, positionTitle and hiringSubelementName
-# are new -- the published dataset had no job title in it at all.
+# positionTitle and hiringSubelementName are here because the field list this
+# replaced omitted them -- the published dataset had no job title in it at all.
 #
 # Not selected: usajobs_control_number (duplicates usajobsControlNumber);
 # inserted_at / last_seen, bookkeeping for this pipeline's own collection runs;
 # backfilled, which only exists in 2024 and 2025.
-# Three spellings have been observed for each of these, and which one holds
-# the data changes both across years and over time as the mirror is rewritten:
-#   hiringpaths_1   2017, 2018, 2020, 2024, 2025 and 2026 until 2026-09-05
-#   HiringPaths     every year, but empty or null-typed in the recent ones
-#   hiringpaths     the current 2026 mirror
-# Order is most- to least-specific; whichever is a string type and present wins.
-# Candidate names as DUCKDB reports them. Order does not matter -- the
-# fullest column wins -- but both spellings have to be listed. The `_1` forms
-# are duckdb's own de-collision of a case-insensitive clash in the file; they
-# are not column names in any parquet.
+#
+# whoMayApply is cast because it is VARCHAR through 2024 and an empty INTEGER
+# from 2025. Without the cast the published month files disagree on its type
+# and the dataset cannot be read as a whole.
+#
+# The list-valued columns are resolved per file rather than named here; see
+# resolve_list_columns for why nothing about the name is trustworthy.
+#
+# Candidate names below are as DUCKDB reports them. Order does not matter --
+# the fullest column wins -- but every spelling has to be listed. The `_1`
+# forms are duckdb's own de-collision of a case-insensitive clash in the file;
+# they are not column names in any parquet.
 _LIST_COLUMNS = {
     "hiringPaths": ("hiringpaths_1", "hiringpaths", "HiringPaths"),
     "jobCategories": ("jobcategories_1", "jobcategories", "JobCategories"),
@@ -279,13 +255,15 @@ def select_sql(con, hist_path: str, scraped_path: str, month: str,
     over the published copy; hence the WHERE on the local side.
     """
     cols = ",\n        ".join(TEXT_FIELDS)
-    parts = [f"""local_text AS (
+    parts, union = [], ""
+    if scraped_path and os.path.exists(scraped_path):
+        parts.append(f"""local_text AS (
         SELECT usajobs_control_number AS cn,
         {cols}
         FROM read_parquet('{scraped_path}')
         WHERE text IS NOT NULL
-    )"""]
-    union = "SELECT * FROM local_text"
+    )""")
+        union = "SELECT * FROM local_text"
     if prior_path:
         # A month published before a column existed does not have it. That is
         # the normal case on the first pass: every month on the dataset today
@@ -296,13 +274,15 @@ def select_sql(con, hist_path: str, scraped_path: str, month: str,
         prior_cols = ",\n        ".join(
             c if c in available else f"CAST(NULL AS VARCHAR) AS {c}"
             for c in TEXT_FIELDS)
+        exclude = ("WHERE usajobsControlNumber NOT IN (SELECT cn FROM local_text)"
+                   if union else "")
         parts.append(f"""prior_text AS (
         SELECT usajobsControlNumber AS cn,
         {prior_cols}
         FROM read_parquet('{prior_path}')
-        WHERE usajobsControlNumber NOT IN (SELECT cn FROM local_text)
+        {exclude}
     )""")
-        union += " UNION ALL SELECT * FROM prior_text"
+        union += (" UNION ALL " if union else "") + "SELECT * FROM prior_text"
 
     text_cols = ",\n    ".join(f"t.{c}" for c in TEXT_FIELDS)
     return f"""
@@ -416,10 +396,16 @@ def main() -> int:
     hist = data_dir / f"historical_jobs_{args.year}.parquet"
     scraped = data_dir / f"scraped_jobs_{args.year}.parquet"
 
-    for path in (hist, scraped):
-        if not path.exists():
-            print(f"Missing {path} — nothing to publish.")
-            return 0
+    if not hist.exists():
+        print(f"Missing {hist} — nothing to publish.")
+        return 0
+    # The scraped file is optional for a deliberate one-month republish: its
+    # text may have been pruned after publishing, or never fetched on this
+    # machine at all, in which case the dataset's own copy supplies it.
+    republishing = bool(args.month and args.refresh_all)
+    if not scraped.exists() and not republishing:
+        print(f"Missing {scraped} — nothing to publish.")
+        return 0
 
     # HF_TOKEN in CI; the cached login from `huggingface-cli login` locally.
     from huggingface_hub import get_token
@@ -429,8 +415,9 @@ def main() -> int:
         return 0
 
     con = connection()
-    months = available_months(con, str(hist), str(scraped))
-    if not months:
+    months = (available_months(con, str(hist), str(scraped))
+              if scraped.exists() else {})
+    if not months and not republishing:
         print("No postings have both metadata and scraped text yet.")
         return 0
 
@@ -443,11 +430,17 @@ def main() -> int:
 
     if args.month:
         months = {m: cns for m, cns in months.items() if m == args.month}
-        if not months:
+        if not months and not republishing:
             print(f"No postings opened in {args.month} have scraped text.")
             return 0
 
-    if args.refresh_all:
+    if args.month and args.refresh_all:
+        # A deliberate republish of one month. Not gated on local text: the
+        # point is usually to redo the metadata join for a month whose text
+        # was pruned after publishing, or was never fetched on this machine.
+        todo = [args.month]
+        print(f"Republishing {args.month} from the dataset's own text")
+    elif args.refresh_all:
         todo = sorted(months)
         print(f"Refreshing all {len(todo)} month(s)")
     else:
@@ -467,9 +460,9 @@ def main() -> int:
                 f"SELECT usajobsControlNumber::varchar "
                 f"FROM read_parquet('{prior}')").fetchall()}
             print(f"  {month}: {len(prior_cns):,} already published, "
-                  f"{len(months[month] - prior_cns):,} new")
+                  f"{len(months.get(month, set()) - prior_cns):,} new")
             prior_sets[month] = prior_cns
-        availability[month] = months[month] | prior_cns
+        availability[month] = months.get(month, set()) | prior_cns
 
     month_of = month_of_every_posting(con, str(hist))
     safe, refused = partition_safe_months(todo, availability, have, month_of,
@@ -507,7 +500,7 @@ def main() -> int:
     # Only control numbers in months we actually wrote, plus whatever was
     # already published. Adding one whose month was refused would claim the
     # dataset holds a posting that is not in any file.
-    written_cns = {cn for m in todo for cn in months[m]}
+    written_cns = {cn for m in todo for cn in months.get(m, set())}
     manifest = sorted(have | written_cns)
     (BUILD_DIR / "manifest.csv").write_text(
         "usajobsControlNumber\n" + "\n".join(manifest) + "\n")
