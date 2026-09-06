@@ -88,9 +88,14 @@ cmd_status() {
   echo
   echo "Type $TYPE is billed hourly; 'destroy' stops the meter."
   local ip; ip=$(server_ip 2>/dev/null) || return 0
-  ssh -o ConnectTimeout=5 "root@$ip" \
-    'systemctl is-active usajobs-backfill 2>/dev/null || true' 2>/dev/null \
-    | sed 's/^/backfill service: /'
+  echo
+  # Deliberately not `systemctl is-active`. That reported "activating" for
+  # seven hours on 2026-09-06 while the run published nothing: it was failing,
+  # restarting cleanly, and carrying more text into each attempt. Progress is
+  # the signal, not liveness.
+  ssh -o ConnectTimeout=10 "root@$ip" \
+    "cd /srv/repos/usajobs_historical && ./.venv/bin/python scripts/backfill_status.py --hours ${STATUS_HOURS:-6}" \
+    2>/dev/null || echo "(could not read backfill status)"
 }
 
 cmd_logs() { ssh "root@$(server_ip)" 'journalctl -u usajobs-backfill -f -n 60'; }

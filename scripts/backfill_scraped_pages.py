@@ -277,6 +277,12 @@ def months_awaiting_publish(data_dir, year):
     return [r[0] for r in rows]
 
 
+# Two failures in a row means the next attempt is carrying two months of
+# unpruned text into the join, and the one after that three. Stopping is the
+# only thing that does not make it worse.
+MAX_CONSECUTIVE_PUBLISH_FAILURES = 2
+
+
 def publish_month(data_dir, year, month):
     """Push one month to HuggingFace, which also drops its text from disk.
 
@@ -305,6 +311,8 @@ def publish_month(data_dir, year, month):
     if result.returncode != 0:
         print(f"  publish of {month} did not complete cleanly — its text "
               f"stays on disk and the next run retries it")
+        return False
+    return True
 
 
 def main() -> int:
@@ -428,6 +436,7 @@ def main() -> int:
             if len(batch) >= SHARD_ROWS:
                 flush()
 
+    consecutive_failures = 0
     for month, cns in sorted(by_month.items()):
         with ThreadPoolExecutor(max_workers=args.workers) as pool:
             list(tqdm(pool.map(work, cns), total=len(cns),
@@ -435,8 +444,23 @@ def main() -> int:
         flush()
         compact(args.data_dir, args.year)
         sys.stdout.flush()
-        if not args.no_publish:
-            publish_month(args.data_dir, args.year, month)
+        if args.no_publish:
+            continue
+
+        if publish_month(args.data_dir, args.year, month):
+            consecutive_failures = 0
+            continue
+
+        consecutive_failures += 1
+        if consecutive_failures >= MAX_CONSECUTIVE_PUBLISH_FAILURES:
+            # Carrying on from here only makes the next join bigger. On
+            # 2026-09-06 that spiral ran seven hours and published nothing
+            # while the service reported itself alive the whole time.
+            warn(f"Stopping {args.year}: {consecutive_failures} publishes "
+                 f"failed in a row, and each failure leaves a month's text "
+                 f"unpruned for the next one to carry. Fix the publish before "
+                 f"rerunning.")
+            return 1
 
     elapsed = (time.time() - started) / 60
     print(f"\nFetched {len(todo) - gone - failed:,} pages in {elapsed:.1f} min, "
