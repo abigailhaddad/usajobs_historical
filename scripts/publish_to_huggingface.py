@@ -79,9 +79,10 @@ BUILD_DIR = Path(__file__).resolve().parent.parent / "build" / "hf"
 #   HiringPaths     every year, but empty or null-typed in the recent ones
 #   hiringpaths     the current 2026 mirror
 # Order is most- to least-specific; whichever is a string type and present wins.
-# Candidate names as DUCKDB reports them, most- to least-specific. The `_1`
-# forms are duckdb's own de-collision of a case-insensitive clash in the file;
-# they are not column names in the parquet.
+# Candidate names as DUCKDB reports them. Order does not matter -- the
+# fullest column wins -- but both spellings have to be listed. The `_1` forms
+# are duckdb's own de-collision of a case-insensitive clash in the file; they
+# are not column names in any parquet.
 _LIST_COLUMNS = {
     "hiringPaths": ("hiringpaths_1", "hiringpaths", "HiringPaths"),
     "jobCategories": ("jobcategories_1", "jobcategories", "JobCategories"),
@@ -93,27 +94,36 @@ _LIST_COLUMNS = {
 def resolve_list_columns(con, hist_path):
     """Pick the column that actually holds each list field in this file.
 
-    Resolved through duckdb's view of the schema, not pyarrow's, because the
-    two disagree in a way that matters. The mirror carries both `HiringPaths`
-    (a vestigial, entirely null column) and `hiringpaths` (the real data). SQL
-    identifiers are case-insensitive, so duckdb sees a collision and exposes
-    the second as `hiringpaths_1` -- and a query saying `h.hiringpaths` binds
-    to the FIRST match, which is the empty one.
+    Chosen by which candidate has the most non-null values, because nothing
+    about the name is a reliable signal. Two earlier rules both failed:
 
-    Reading the parquet schema and emitting `h.hiringpaths` therefore produced
-    175,926 rows of NULL hiring paths while looking entirely correct. The name
-    to emit is the one duckdb reports.
+      hardcoding `hiringpaths_1`   crashed on 2019, which has no such column
+      preferring `hiringpaths_1`   published nulls for 2017 and 2018, where
+                                   HiringPaths holds 237,145 and 328,111 rows
+                                   and hiringpaths_1 holds 1 and 1,245
 
-    Years differ in which columns exist at all: 2019, 2021, 2022 and 2023 have
-    a single spelling and so no collision and no `_1`, which is what crashed
-    the publisher on 2019.
+    Measured across 2017-2026, HiringPaths is the populated column in every
+    year except 2026, where it is empty and hiringpaths_1 has all 175,920.
+    So the name tells you nothing and the data tells you everything.
+
+    Resolution happens in duckdb's namespace, not the parquet's: the file
+    carries two columns differing only in case, SQL identifiers are
+    case-insensitive, and duckdb exposes the second as `hiringpaths_1`. Reading
+    pyarrow's names and emitting them into SQL binds to the wrong one.
     """
     types = {n: t for n, t, *_ in
              con.execute(f"DESCRIBE SELECT * FROM read_parquet('{hist_path}')").fetchall()}
     out = {}
     for alias, candidates in _LIST_COLUMNS.items():
-        pick = next((c for c in candidates if types.get(c) == "VARCHAR"), None)
-        out[alias] = f"h.{pick}" if pick else "CAST(NULL AS VARCHAR)"
+        best, best_n = None, 0
+        for c in candidates:
+            if types.get(c) != "VARCHAR":
+                continue
+            n = con.execute(
+                f'SELECT count("{c}") FROM read_parquet(\'{hist_path}\')').fetchone()[0]
+            if n > best_n:
+                best, best_n = c, n
+        out[alias] = f"h.{best}" if best else "CAST(NULL AS VARCHAR)"
     return out
 
 

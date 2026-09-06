@@ -148,46 +148,56 @@ class TestResolveListColumns:
         import pyarrow as pa
         import pyarrow.parquet as pq
         path = tmp_path / "mirror.parquet"
-        pq.write_table(pa.table({n: pa.array([v], type=t)
+        pq.write_table(pa.table({n: pa.array(v, type=t)
                                  for n, (t, v) in columns.items()}), path)
         return str(path)
 
-    def test_the_2026_shape_picks_the_populated_column(self, tmp_path):
-        # Both spellings present; the capitalised one is an empty null column.
-        # duckdb de-collides them and only the _1 form holds data.
+    def test_the_fullest_column_wins_not_the_suffixed_one(self, tmp_path):
+        # The 2017/2018 shape: both spellings are VARCHAR, and the one duckdb
+        # suffixes is the near-empty one. Preferring _1 by name published
+        # 237,145 rows of NULL for 2017.
         import duckdb, pyarrow as pa
         path = self._mirror(tmp_path, {
-            "HiringPaths": (pa.null(), None),
-            "hiringpaths": (pa.string(), '[{"hiringPath": "The public"}]')})
-        con = duckdb.connect()
-        picked = resolve_list_columns(con, path)["hiringPaths"]
-        assert picked == "h.hiringpaths_1"
-        # and it must actually select the data, not the empty column
-        got = con.execute(
-            f"SELECT {picked} FROM read_parquet('{path}') h").fetchone()[0]
-        assert got == '[{"hiringPath": "The public"}]'
-
-    def test_the_2019_shape_has_no_collision(self, tmp_path):
-        # A single spelling, so duckdb adds no suffix and the _1 form is absent.
-        import duckdb, pyarrow as pa
-        path = self._mirror(tmp_path, {
-            "HiringPaths": (pa.string(), '[{"hiringPath": "The public"}]')})
+            "HiringPaths": (pa.string(), ["a", "b", "c"]),
+            "hiringpaths": (pa.string(), [None, None, "x"])})
         con = duckdb.connect()
         picked = resolve_list_columns(con, path)["hiringPaths"]
         assert picked == "h.HiringPaths"
         got = con.execute(
-            f"SELECT {picked} FROM read_parquet('{path}') h").fetchone()[0]
-        assert got == '[{"hiringPath": "The public"}]'
+            f"SELECT {picked} FROM read_parquet('{path}') h").fetchall()
+        assert [r[0] for r in got] == ["a", "b", "c"]
 
-    def test_a_null_typed_column_never_wins(self, tmp_path):
+    def test_the_2026_shape_picks_the_suffixed_one(self, tmp_path):
+        # Here the capitalised column is the empty one, so the suffixed form
+        # wins on data even though it loses on name order.
         import duckdb, pyarrow as pa
-        path = self._mirror(tmp_path, {"HiringPaths": (pa.null(), None)})
+        path = self._mirror(tmp_path, {
+            "HiringPaths": (pa.null(), [None, None, None]),
+            "hiringpaths": (pa.string(), ["a", "b", "c"])})
+        con = duckdb.connect()
+        picked = resolve_list_columns(con, path)["hiringPaths"]
+        assert picked == "h.hiringpaths_1"
+        got = con.execute(
+            f"SELECT {picked} FROM read_parquet('{path}') h").fetchall()
+        assert [r[0] for r in got] == ["a", "b", "c"]
+
+    def test_the_2019_shape_has_no_collision(self, tmp_path):
+        import duckdb, pyarrow as pa
+        path = self._mirror(tmp_path, {
+            "HiringPaths": (pa.string(), ["a", "b", "c"])})
+        assert resolve_list_columns(duckdb.connect(), path)["hiringPaths"] \
+            == "h.HiringPaths"
+
+    def test_an_entirely_empty_candidate_never_wins(self, tmp_path):
+        import duckdb, pyarrow as pa
+        path = self._mirror(tmp_path, {
+            "HiringPaths": (pa.string(), [None, None, None])})
         assert resolve_list_columns(duckdb.connect(), path)["hiringPaths"] \
             == "CAST(NULL AS VARCHAR)"
 
     def test_no_candidate_at_all_yields_null_not_a_crash(self, tmp_path):
         import duckdb, pyarrow as pa
-        path = self._mirror(tmp_path, {"positionTitle": (pa.string(), "x")})
+        path = self._mirror(tmp_path, {"positionTitle": (pa.string(), ["x"] * 3)})
         cols = resolve_list_columns(duckdb.connect(), path)
         assert all(v == "CAST(NULL AS VARCHAR)" for v in cols.values())
 
