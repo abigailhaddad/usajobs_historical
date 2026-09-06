@@ -456,10 +456,11 @@ def main() -> int:
             # Carrying on from here only makes the next join bigger. On
             # 2026-09-06 that spiral ran seven hours and published nothing
             # while the service reported itself alive the whole time.
-            warn(f"Stopping {args.year}: {consecutive_failures} publishes "
-                 f"failed in a row, and each failure leaves a month's text "
-                 f"unpruned for the next one to carry. Fix the publish before "
-                 f"rerunning.")
+            print(f"STOPPING {args.year}: {consecutive_failures} publishes "
+                  f"failed in a row. Each failure leaves a month's text "
+                  f"unpruned for the next one to carry, so continuing only "
+                  f"makes the next join bigger. Fix the publish, then rerun.",
+                  flush=True)
             return 1
 
     elapsed = (time.time() - started) / 60

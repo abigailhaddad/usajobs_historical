@@ -249,7 +249,13 @@ def connection():
     spill = BUILD_DIR / "duckdb-spill"
     spill.mkdir(parents=True, exist_ok=True)
     con.execute(f"SET temp_directory='{spill}'")
-    con.execute(f"SET memory_limit='{os.environ.get('DUCKDB_MEMORY_LIMIT', '3GB')}'")
+    con.execute(f"SET memory_limit='{os.environ.get('DUCKDB_MEMORY_LIMIT', '4GB')}'")
+    # Both suggested by duckdb itself when it ran out at 2.7 GiB. Insertion
+    # order costs a full buffer of the result, and fewer threads means fewer
+    # concurrent buffers -- neither matters for a job that is IO-bound on the
+    # upload anyway.
+    con.execute("SET preserve_insertion_order=false")
+    con.execute(f"SET threads={os.environ.get('DUCKDB_THREADS', '2')}")
     return con
 
 
@@ -505,8 +511,11 @@ def main() -> int:
         # COPY streams straight to disk. Materializing a month in Python would
         # be ~800 MB of announcement text.
         con.execute(f"""
-            COPY ({select_sql(con, str(hist), str(scraped), month, priors.get(month))}
-                  ORDER BY usajobsControlNumber)
+            -- Deliberately unordered. ORDER BY forced duckdb to materialise
+            -- and sort ~2 GB of announcement text, which is what exhausted
+            -- the memory limit; row order in a parquet is not meaningful to
+            -- consumers and anyone who wants it can sort on read.
+            COPY ({select_sql(con, str(hist), str(scraped), month, priors.get(month))})
             -- level 19 buffers far more than it saves here; 12 is within a
             -- few percent on this data and materially cheaper in memory.
             TO '{dest}' (FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 12);
