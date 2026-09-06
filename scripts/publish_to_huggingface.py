@@ -231,8 +231,25 @@ def parse_args():
 
 
 def connection():
+    """A duckdb connection that spills to disk rather than being OOM-killed.
+
+    The month COPY joins the historical mirror against twelve announcement-text
+    columns and sorts the result. A month is ~30k rows of ~40 KB of text, and
+    when a publish fails its text is not pruned, so the next attempt carries
+    both months: 58,426 rows, around 2.3 GB, before the sort materialises it
+    again. That took the process out three times on an 8 GB box, and each death
+    made the next attempt bigger.
+
+    memory_limit makes duckdb spill instead of dying, and temp_directory gives
+    it somewhere to spill to. The limit is well under the box's 8 GB because
+    the fetch workers and pyarrow need room alongside it.
+    """
     con = duckdb.connect()
     con.execute("INSTALL httpfs; LOAD httpfs; SET http_retries=5;")
+    spill = BUILD_DIR / "duckdb-spill"
+    spill.mkdir(parents=True, exist_ok=True)
+    con.execute(f"SET temp_directory='{spill}'")
+    con.execute(f"SET memory_limit='{os.environ.get('DUCKDB_MEMORY_LIMIT', '3GB')}'")
     return con
 
 
@@ -490,7 +507,9 @@ def main() -> int:
         con.execute(f"""
             COPY ({select_sql(con, str(hist), str(scraped), month, priors.get(month))}
                   ORDER BY usajobsControlNumber)
-            TO '{dest}' (FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 19);
+            -- level 19 buffers far more than it saves here; 12 is within a
+            -- few percent on this data and materially cheaper in memory.
+            TO '{dest}' (FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 12);
         """)
         rows = con.execute(
             f"SELECT count(*) FROM read_parquet('{dest}')").fetchone()[0]
