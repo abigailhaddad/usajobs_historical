@@ -522,7 +522,9 @@ def main() -> int:
                        f"{len(manifest):,} total")
     print(f"\nPushed {len(written)} month(s) to {args.repo}")
 
-    if not args.keep_text:
+    # Nothing to prune when the text never was local -- a republish takes it
+    # from the dataset, so there is no file here to shrink.
+    if not args.keep_text and scraped.exists():
         cleared = prune_published_text(str(scraped), written_cns)
         after = os.path.getsize(scraped) / 1e6
         print(f"Dropped local text for {cleared:,} published postings; "
