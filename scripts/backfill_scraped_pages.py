@@ -364,14 +364,31 @@ def main() -> int:
               f"niceness +{args.nice}")
 
     # Push anything a previous run fetched but did not get to publish, before
-    # spending hours on new pages. Only months with no work left, so a month
-    # that is about to be fetched is not published twice.
+    # spending hours on pages that may already be on disk.
+    #
+    # Every month with local text, not just the ones with no fetching left:
+    # --known-from-hf reads the manifest, so a month that was fetched and then
+    # failed to publish still looks entirely unfetched and gets crawled again
+    # from scratch. 2018-09 was about to re-fetch 27,386 pages it already held.
+    # Publishing first puts them in the manifest, and todo is then recomputed
+    # so they drop out.
     if not args.no_publish:
-        pending = [m for m in months_awaiting_publish(args.data_dir, args.year)
-                   if m not in {wanted[cn][:7] for cn in todo}]
+        pending = months_awaiting_publish(args.data_dir, args.year)
+        if args.month:
+            pending = [m for m in pending if m == args.month]
         for month in pending:
-            print(f"Publishing {month}, fetched by an earlier run")
+            print(f"Publishing {month}, fetched by an earlier run", flush=True)
             publish_month(args.data_dir, args.year, month)
+
+        if pending:
+            known = published_control_numbers() if args.known_from_hf \
+                else stored_control_numbers(args.data_dir, args.year)
+            todo = sorted(cn for cn in wanted if cn not in known)
+            if args.limit:
+                todo = todo[:args.limit]
+            print(f"After publishing, {len(todo):,} left to fetch")
+            if not todo:
+                return 0
 
     # Work a month at a time and publish each one as it lands. Fetching the
     # whole year first would pile up 920 MB of announcement text on disk before
