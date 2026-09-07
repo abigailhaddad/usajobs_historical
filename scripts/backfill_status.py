@@ -73,9 +73,12 @@ def analyse(lines, hours):
         problems.append(
             f"nothing published in {hours:g}h — the service can be alive and "
             f"restarting cleanly while publishing nothing at all")
-    if joins and max(joins) > SPIRAL_ROWS:
+    # The latest join, not the largest. A spiral is a join that is big *now*;
+    # the maximum over the window keeps alarming long after it has unwound,
+    # which is how an alarm stops being worth reading.
+    if joins and joins[-1] > SPIRAL_ROWS:
         problems.append(
-            f"publish join reached {max(joins):,} rows, above {SPIRAL_ROWS:,} "
+            f"the last publish joined {joins[-1]:,} rows, above {SPIRAL_ROWS:,} "
             f"— a failed publish leaves its text unpruned and the next attempt "
             f"carries both months")
     if ooms:
@@ -99,8 +102,9 @@ def main() -> int:
     print(f"  OOM kills          {stats['ooms']}")
     print(f"  run restarts       {stats['restarts']}")
     if stats["joins"]:
-        print(f"  publish join rows  {stats['joins'][-1]:,} "
-              f"(max {max(stats['joins']):,})")
+        trend = "" if len(stats["joins"]) < 2 else \
+            f", was {stats['joins'][0]:,} at the start of the window"
+        print(f"  publish join rows  {stats['joins'][-1]:,} now{trend}")
 
     if problems:
         print("\nNOT HEALTHY")

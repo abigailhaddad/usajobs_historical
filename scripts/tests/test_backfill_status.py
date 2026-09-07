@@ -39,6 +39,13 @@ class TestVerdict:
         _, problems = analyse(lines(published=1, joins=(31_041, 58_426)), 6)
         assert any("carries both months" in p for p in problems)
 
+    def test_a_spiral_that_has_unwound_stops_alarming(self):
+        # The window still contains the old 58,426, but the last publish
+        # joined 2,000. Alarming on the maximum keeps a recovered run marked
+        # unhealthy for hours, which is how an alarm stops being read.
+        _, problems = analyse(lines(published=4, joins=(58_426, 27_385, 2_000)), 6)
+        assert not any("carries both" in p for p in problems)
+
     def test_one_month_of_join_rows_is_not_a_spiral(self):
         _, problems = analyse(lines(published=2, joins=(31_041,)), 6)
         assert not any("carries both" in p for p in problems)
