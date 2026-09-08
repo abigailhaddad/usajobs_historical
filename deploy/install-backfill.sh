@@ -59,8 +59,20 @@ ExecStart=$DIR/deploy/run-backfill.sh
 # rather than letting the kernel pick a victim. Two OOM kills in six hours on
 # 2026-09-07 were the kernel's doing at 7.7 GB; the publish never needed that
 # much, it simply had no ceiling to push back against.
-MemoryHigh=4G
-MemoryMax=6G
+#
+# 4G was too tight and turned those crashes into something quieter and worse.
+# The fetch parent sat at 2.7 GB while the publish child needed 1.9, so the
+# cgroup reclaimed without pause -- 96% full memory pressure -- and evicted
+# the parquet pages the publish was mid-read on. It ran 2h36m for 2m27s of
+# CPU. The parent now trims its heap before spawning the child (see
+# release_memory in backfill_scraped_pages.py); this leaves headroom so a bad
+# month throttles instead of grinding.
+MemoryHigh=6G
+MemoryMax=7G
+# With 4G of swap on the box, reclaim can page out the parent's idle heap
+# instead of evicting the file pages the child is actively reading. Capped so
+# a runaway swaps a little and then dies rather than swapping the box flat.
+MemorySwapMax=4G
 # Every step is resumable, so restarting after a crash re-reads what is
 # already published and continues rather than redoing work.
 Restart=on-failure

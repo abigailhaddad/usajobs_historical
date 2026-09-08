@@ -37,6 +37,8 @@ or on the next run with --compact-only.
 """
 
 import argparse
+import ctypes
+import gc
 import os
 import sys
 import threading
@@ -283,6 +285,42 @@ def months_awaiting_publish(data_dir, year):
     return [r[0] for r in rows]
 
 
+def resident_mb():
+    """RSS in MB, or None where /proc is not available."""
+    try:
+        with open("/proc/self/statm") as fh:
+            return int(fh.read().split()[1]) * os.sysconf("SC_PAGE_SIZE") / 2**20
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def release_memory():
+    """Hand freed heap back to the OS before a child process needs it.
+
+    The fetch loop churns millions of ~35 KB announcement strings through six
+    threads. Python frees them, but glibc keeps the arenas, so RSS sits near
+    2.7 GB when the real working set is a few hundred MB. That is invisible
+    until a memory ceiling exists: with the parent idle at 2.7 GB and the
+    publish child at 1.9 GB against MemoryHigh=4G, the cgroup reclaimed
+    continuously and evicted the very parquet pages the publish was reading.
+    On 2026-09-08 that left a month republish in uninterruptible sleep for
+    2h36m, using 2m27s of CPU and re-reading 9.5 GB off disk to satisfy
+    264 MB of logical reads.
+
+    gc.collect() drops the cycles; malloc_trim returns the arenas.
+    """
+    before = resident_mb()
+    gc.collect()
+    try:
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except (OSError, AttributeError):
+        pass  # not glibc; the collect above is all we get
+    after = resident_mb()
+    if before is not None and after is not None and before - after > 50:
+        print(f"  released {before - after:,.0f} MB back to the OS "
+              f"({before:,.0f} -> {after:,.0f} MB resident)")
+
+
 # Two failures in a row means the next attempt is carrying two months of
 # unpruned text into the join, and the one after that three. Stopping is the
 # only thing that does not make it worse.
@@ -304,6 +342,9 @@ def publish_month(data_dir, year, month):
         return
     script = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                           "publish_to_huggingface.py")
+    # The child needs ~2 GB and shares this process's memory ceiling, so give
+    # it the room this one is only holding out of habit.
+    release_memory()
     # --refresh-all, scoped to this one month by --month. The manifest records
     # which announcements are published, not what is in them, so a month whose
     # postings were already listed would otherwise be skipped — which is
@@ -420,6 +461,16 @@ def main() -> int:
     print(f"  across {len(by_month)} month(s): "
           + ", ".join(f"{m} ({len(c):,})" for m, c in sorted(by_month.items())))
 
+    # by_month is the plan now, so the tables it was built from are dead
+    # weight -- and they are not small: `known` is every control number on the
+    # dataset (1.15M and growing), `wanted` every posting in the mirror year.
+    # They stay resident through hours of fetching and, worse, through the
+    # publish child that has to fit beside them.
+    todo_count = len(todo)
+    open_dates = {cn: wanted[cn] for cns in by_month.values() for cn in cns}
+    del wanted, known, todo
+    release_memory()
+
     shards = shard_dir(args.data_dir, args.year)
     os.makedirs(shards, exist_ok=True)
     run_id = uuid.uuid4().hex[:8]
@@ -467,7 +518,7 @@ def main() -> int:
         # for: a redirect would otherwise file the row under the wrong posting.
         row["usajobs_control_number"] = cn
         row["usajobsControlNumber"] = int(cn)
-        row["positionOpenDate"] = row.get("positionOpenDate") or wanted[cn]
+        row["positionOpenDate"] = row.get("positionOpenDate") or open_dates[cn]
         with lock:
             batch.append(row)
             if len(batch) >= SHARD_ROWS:
@@ -501,7 +552,7 @@ def main() -> int:
             return 1
 
     elapsed = (time.time() - started) / 60
-    print(f"\nFetched {len(todo) - gone - failed:,} pages in {elapsed:.1f} min, "
+    print(f"\nFetched {todo_count - gone - failed:,} pages in {elapsed:.1f} min, "
           f"{failed} failed, {gone} already removed (404)")
     print(f"  used {governor.report()}")
     if failed:
