@@ -85,3 +85,25 @@ class TestRate:
         _, problems = analyse(lines(published=0), 12)
         assert len(problems) == 1
         assert "nothing published" in problems[0]
+
+
+class TestRestartCounting:
+    """A year-loop marker is not a restart.
+
+    Counting "=== 2020 ===" as a restart reported 8 in a window that had 2,
+    which made a healthy run look like it was thrashing and sent me chasing a
+    loop that was not there.
+    """
+
+    def test_year_markers_are_not_restarts(self):
+        stats, _ = analyse(["=== 2018 ===", "=== 2019 ===", "=== 2020 ==="]
+                           + lines(published=4), 4)
+        assert stats["restarts"] == 0
+        assert stats["years"] == 3
+
+    def test_real_restarts_are_counted(self):
+        stats, _ = analyse(
+            ["Starting usajobs-backfill.service - USAJOBS backfill",
+             "=== 2020 ==="] + lines(published=4), 4)
+        assert stats["restarts"] == 1
+        assert stats["years"] == 1
