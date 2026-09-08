@@ -195,6 +195,39 @@ def published_control_numbers():
         return {r[0] for r in _csv.reader(f) if r and r[0] != "usajobsControlNumber"}
 
 
+def published_months():
+    """Months that already have a file on the dataset, as YYYY-MM.
+
+    This is the difference between a month the publisher can rebuild safely and
+    one it will refuse. When a month file exists, publish_to_huggingface reads
+    the already-published text out of it, so a posting missing locally costs
+    nothing. When it does not, the publisher falls back to the manifest and
+    refuses to rebuild rather than drop rows it cannot reproduce.
+
+    Returns None if the listing fails, which callers should read as "assume
+    every month is published" -- the conservative direction, since the cost of
+    guessing wrong that way is a refusal that the next run retries, not a
+    re-fetch of tens of thousands of pages.
+    """
+    from huggingface_hub import get_token, list_repo_files
+    repo = os.environ.get("HF_DATASET_REPO", "abigailhaddad/usajobs-scraping")
+    token = os.environ.get("HF_TOKEN") or get_token()
+    try:
+        files = list_repo_files(repo, repo_type="dataset", token=token)
+    except Exception as e:
+        print(f"  could not list the dataset ({e}) — assuming every month is "
+              f"published")
+        return None
+    months = set()
+    for f in files:
+        name = os.path.basename(f)
+        if f.startswith("data/") and name.endswith(".parquet"):
+            stem = name[:-len(".parquet")]
+            if len(stem) == 7 and stem[4] == "_":
+                months.add(stem.replace("_", "-"))
+    return months
+
+
 def stored_control_numbers(data_dir, year):
     """Control numbers already scraped: in the main parquet or in any shard."""
     known = set()
@@ -539,6 +572,42 @@ def main() -> int:
         if not by_month:
             print("  nothing above the threshold this year")
             return 0
+    # A month file is republished wholesale, so the rebuild has to contain
+    # every announcement the dataset already holds for that month, or
+    # publish_to_huggingface refuses it rather than silently delete rows.
+    #
+    # --known-from-hf is what creates the gap: it drops everything in the
+    # manifest from todo, so a posting already on the dataset is never fetched
+    # -- and if it lives in some other month's published file, or in no month
+    # file yet, the rebuild has no copy of it and the publish refuses. That
+    # cost 2020-04 a full 27,491-page fetch on 2026-09-08 over exactly one
+    # posting, and the same refusal is what the 2018 and 2019 runs hit.
+    #
+    # So pull those back in. Measured at 1 posting across all of 2020, against
+    # a month's fetch that otherwise cannot be published.
+    if args.known_from_hf and not args.no_publish:
+        # Only months with no file on the dataset. Where a month file exists
+        # the publisher reads its text for anything missing locally, so adding
+        # these would re-fetch for nothing -- and on a recent year, where the
+        # daily collection has already published most of a month, "for nothing"
+        # would be tens of thousands of pages.
+        on_dataset = published_months()
+        unpublished = {m for m in by_month
+                       if on_dataset is not None and m not in on_dataset}
+        stored = stored_control_numbers(args.data_dir, args.year) \
+            if unpublished else set()
+        needed = {}
+        for cn, opened in wanted.items():
+            month = opened[:7]
+            if month in unpublished and cn in known and cn not in stored:
+                needed.setdefault(month, []).append(cn)
+        if needed:
+            print("  adding already-published posting(s) the wholesale month "
+                  "rebuild needs locally: "
+                  + ", ".join(f"{m} ({len(c)})" for m, c in sorted(needed.items())))
+            for month, cns in needed.items():
+                by_month[month].extend(cns)
+
     print(f"  across {len(by_month)} month(s): "
           + ", ".join(f"{m} ({len(c):,})" for m, c in sorted(by_month.items())))
 
@@ -547,7 +616,7 @@ def main() -> int:
     # dataset (1.15M and growing), `wanted` every posting in the mirror year.
     # They stay resident through hours of fetching and, worse, through the
     # publish child that has to fit beside them.
-    todo_count = len(todo)
+    todo_count = sum(len(c) for c in by_month.values())
     open_dates = {cn: wanted[cn] for cns in by_month.values() for cn in cns}
     del wanted, known, todo
     release_memory()
