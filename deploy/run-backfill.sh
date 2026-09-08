@@ -25,6 +25,10 @@ set -uo pipefail
 
 YEARS="${BACKFILL_YEARS:-2018 2019 2020 2021 2022 2023 2024 2025}"
 WORKERS="${BACKFILL_WORKERS:-6}"
+# Processes that parse pages. Empty means "one per core past the first", which
+# is 3 on a cx33. This is the throughput knob; WORKERS above is the request
+# rate. Set to 1 to go back to parsing on the fetch threads.
+PARSE_WORKERS="${BACKFILL_PARSE_WORKERS:--1}"
 # A month is republished wholesale, so a year whose only outstanding work is a
 # few stragglers costs several full month rebuilds -- and pays that again on
 # every restart, before reaching any year with real work left. Deferred here
@@ -53,6 +57,7 @@ for year in $YEARS; do
       --known-from-hf \
       --workers "$WORKERS" \
       --min-month-work "$MIN_MONTH_WORK" \
+      --parse-workers "$PARSE_WORKERS" \
       --max-cpu 0 \
       --nice 0
   status=$?
