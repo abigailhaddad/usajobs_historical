@@ -431,8 +431,25 @@ _ROW_BATCH = 2000
 
 
 def _unified_schema(existing_schema, new_schema):
-    """Existing columns in their original order, plus any genuinely new ones."""
-    fields = list(existing_schema)
+    """Existing columns in their original order, plus any genuinely new ones.
+
+    A column the old file never had a value for is typed `null`, and nothing
+    casts to `null` -- so keeping the old type would fail the moment real
+    values arrive. When that happens the incoming type wins:
+
+      Unsupported cast from large_string to null using function cast_null
+
+    That error dropped the write into the in-memory fallback, which reads the
+    whole parquet at once and got the run killed on a memory-capped box.
+    """
+    incoming = {f.name: f for f in new_schema}
+    fields = []
+    for field in existing_schema:
+        other = incoming.get(field.name)
+        if other is not None and pa.types.is_null(field.type) \
+                and not pa.types.is_null(other.type):
+            field = other
+        fields.append(field)
     known = {f.name for f in fields}
     for field in new_schema:
         if field.name not in known:
@@ -452,7 +469,14 @@ def _conform(table, schema):
         if field.name in table.column_names:
             col = table.column(field.name)
             if col.type != field.type:
-                col = col.cast(field.type)
+                # An all-null column in this batch casts to anything; a real
+                # one cannot become `null`. The unified schema already prefers
+                # the concrete type, so this is the batch-level counterpart.
+                if pa.types.is_null(field.type):
+                    col = pa.chunked_array([pa.nulls(table.num_rows,
+                                                     type=field.type)])
+                else:
+                    col = col.cast(field.type)
         else:
             col = pa.chunked_array([pa.nulls(table.num_rows, type=field.type)])
         columns.append(col)

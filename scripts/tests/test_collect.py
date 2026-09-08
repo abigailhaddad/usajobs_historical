@@ -79,3 +79,43 @@ class TestFlattenGradeFields:
 
         assert flat["minimumGrade"] is None
         assert flat["maximumGrade"] is None
+
+
+class TestUnifiedSchemaNullPromotion:
+    """Regression for a run killed on 2026-09-08.
+
+    A column the old file never held a value for is typed `null`. Nothing
+    casts to `null`, so once real values arrived the streaming merge failed
+    with "Unsupported cast from large_string to null" and fell back to the
+    in-memory path, which reads the whole parquet and hit the memory ceiling.
+    """
+
+    def _schemas(self, existing, new):
+        import pyarrow as pa
+        from collect_current_data import _unified_schema
+        return _unified_schema(pa.schema(existing), pa.schema(new))
+
+    def test_a_concrete_type_beats_a_null_one(self):
+        import pyarrow as pa
+        s = self._schemas([("text", pa.null())], [("text", pa.large_string())])
+        assert s.field("text").type == pa.large_string()
+
+    def test_an_existing_concrete_type_is_kept(self):
+        import pyarrow as pa
+        s = self._schemas([("text", pa.string())], [("text", pa.null())])
+        assert s.field("text").type == pa.string()
+
+    def test_column_order_is_preserved(self):
+        import pyarrow as pa
+        s = self._schemas(
+            [("a", pa.string()), ("b", pa.null())],
+            [("b", pa.string()), ("c", pa.int64())])
+        assert s.names == ["a", "b", "c"]
+
+    def test_conform_can_write_a_real_column_into_a_null_field(self):
+        import pyarrow as pa
+        from collect_current_data import _conform
+        table = pa.table({"text": pa.array(["a", "b"], pa.large_string())})
+        out = _conform(table, pa.schema([("text", pa.null())]))
+        assert out.num_rows == 2
+        assert out.schema.field("text").type == pa.null()
