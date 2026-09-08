@@ -52,18 +52,9 @@ for year in $YEARS; do
   rm -f "data/historical_jobs_${year}.parquet"
 done
 
-# Sweep: the deferred stragglers, now that the bulk is in.
-echo "=== sweeping deferred months ==="
-for year in $YEARS; do
-  if [ ! -s "data/historical_jobs_${year}.parquet" ]; then
-    curl -sSf --retry 5 --retry-delay 10 \
-      -o "data/historical_jobs_${year}.parquet" \
-      "$MIRROR/historical_jobs_${year}.parquet" || continue
-  fi
-  ./.venv/bin/python -u scripts/backfill_scraped_pages.py \
-      --year "$year" --known-from-hf --workers "$WORKERS" \
-      --max-cpu 0 --nice 0
-  rm -f "data/historical_jobs_${year}.parquet"
-done
+# No sweep for the deferred months. Each holds a handful of postings -- about
+# ten in total across 2018 and 2019 -- and publishing one rewrites and
+# re-uploads a whole 28,000-row month file. Not worth it against 3.2 million.
+# Run with BACKFILL_MIN_MONTH_WORK=0 if they are ever wanted.
 
 echo "=== all years done ==="
