@@ -73,6 +73,12 @@ def parse_args():
     p.add_argument("--nice", type=int, default=10,
                    help="Process niceness, 0-19 (default 10). Higher yields "
                         "more readily to whatever else is running.")
+    p.add_argument("--min-month-work", type=int, default=0,
+                   help="Skip months with fewer than this many pages to fetch. "
+                        "A month is republished wholesale, so rebuilding a "
+                        "28,000-row file for 3 stragglers costs minutes and "
+                        "happens again on every restart. Run a final pass at 0 "
+                        "to sweep them up.")
     p.add_argument("--known-from-hf", action="store_true",
                    help="Take the already-scraped set from the HuggingFace "
                         "manifest rather than the local parquet. That makes a "
@@ -397,6 +403,20 @@ def main() -> int:
     by_month = {}
     for cn in todo:
         by_month.setdefault(wanted[cn][:7], []).append(cn)
+
+    if args.min_month_work:
+        tiny = {m: c for m, c in by_month.items()
+                if len(c) < args.min_month_work}
+        if tiny:
+            # Each of these would rebuild and re-upload a whole month file for
+            # a few postings, and would do it again after the next restart.
+            print(f"  deferring {len(tiny)} month(s) with under "
+                  f"{args.min_month_work} pages: "
+                  + ", ".join(f"{m} ({len(c)})" for m, c in sorted(tiny.items())))
+            by_month = {m: c for m, c in by_month.items() if m not in tiny}
+        if not by_month:
+            print("  nothing above the threshold this year")
+            return 0
     print(f"  across {len(by_month)} month(s): "
           + ", ".join(f"{m} ({len(c):,})" for m, c in sorted(by_month.items())))
 
