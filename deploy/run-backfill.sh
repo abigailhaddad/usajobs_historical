@@ -14,6 +14,11 @@ set -uo pipefail
 
 YEARS="${BACKFILL_YEARS:-2018 2019 2020 2021 2022 2023 2024 2025}"
 WORKERS="${BACKFILL_WORKERS:-6}"
+# A month is republished wholesale, so a year whose only outstanding work is a
+# few stragglers costs several full month rebuilds -- and pays that again on
+# every restart, before reaching any year with real work left. Deferred here
+# and swept up by a final pass.
+MIN_MONTH_WORK="${BACKFILL_MIN_MONTH_WORK:-200}"
 REPO="${REPO_DIR:-/srv/repos/usajobs_historical}"
 MIRROR="https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/data"
 
@@ -36,6 +41,7 @@ for year in $YEARS; do
       --year "$year" \
       --known-from-hf \
       --workers "$WORKERS" \
+      --min-month-work "$MIN_MONTH_WORK" \
       --max-cpu 0 \
       --nice 0
   status=$?
@@ -43,6 +49,20 @@ for year in $YEARS; do
 
   # The year's text is on HuggingFace now and pruned locally; the mirror copy
   # is the only thing worth reclaiming.
+  rm -f "data/historical_jobs_${year}.parquet"
+done
+
+# Sweep: the deferred stragglers, now that the bulk is in.
+echo "=== sweeping deferred months ==="
+for year in $YEARS; do
+  if [ ! -s "data/historical_jobs_${year}.parquet" ]; then
+    curl -sSf --retry 5 --retry-delay 10 \
+      -o "data/historical_jobs_${year}.parquet" \
+      "$MIRROR/historical_jobs_${year}.parquet" || continue
+  fi
+  ./.venv/bin/python -u scripts/backfill_scraped_pages.py \
+      --year "$year" --known-from-hf --workers "$WORKERS" \
+      --max-cpu 0 --nice 0
   rm -f "data/historical_jobs_${year}.parquet"
 done
 
