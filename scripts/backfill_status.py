@@ -64,7 +64,11 @@ def analyse(lines, hours):
     testable without a systemd box to read from."""
     published = [l for l in lines if "Pushed 1 month" in l]
     ooms = [l for l in lines if "oom-kill" in l or "OOM killer" in l]
-    starts = [l for l in lines if "Starting usajobs" in l or l.startswith("=== ")]
+    # Only real service starts. "=== 2020 ===" is the year loop moving on,
+    # which is normal progress -- counting those as restarts reported 8 when
+    # there had been 2, and made a healthy run look like it was thrashing.
+    starts = [l for l in lines if "Starting usajobs" in l]
+    years = [l for l in lines if l.startswith("=== ")]
     joins = [int(m.group(1).replace(",", "")) for l in lines
              if (m := re.search(r"Local join has ([\d,]+)", l))]
     pages = [int(m.group(1).replace(",", "")) for l in lines
@@ -72,7 +76,7 @@ def analyse(lines, hours):
 
     stats = {"published": len(published), "pages": sum(pages),
              "months_fetched": len(pages), "ooms": len(ooms),
-             "restarts": len(starts), "joins": joins}
+             "restarts": len(starts), "years": len(years), "joins": joins}
 
     problems = []
     if not published:
@@ -109,10 +113,14 @@ def main() -> int:
     stats, problems = analyse(lines, args.hours)
     print(f"Last {args.hours:g} hours")
     print(f"  months published   {stats['published']}")
+    # Only completed months report a page count, so a month still in flight
+    # contributes nothing here. Zero with a healthy publish rate means the
+    # current month simply has not finished yet.
     print(f"  pages fetched      {stats['pages']:,} across "
-          f"{stats['months_fetched']} month(s)")
+          f"{stats['months_fetched']} completed month(s)")
     print(f"  OOM kills          {stats['ooms']}")
-    print(f"  run restarts       {stats['restarts']}")
+    print(f"  service restarts   {stats['restarts']}")
+    print(f"  years entered      {stats['years']}")
     if stats["joins"]:
         trend = "" if len(stats["joins"]) < 2 else \
             f", was {stats['joins'][0]:,} at the start of the window"
