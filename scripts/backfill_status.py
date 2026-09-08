@@ -33,6 +33,12 @@ import sys
 # Meaningfully above it means an earlier month's text was never pruned.
 SPIRAL_ROWS = 40_000
 
+# A month takes roughly 50-80 minutes end to end, so a healthy run clears
+# about one an hour. Well under that means it is technically publishing and
+# effectively stalled -- which reported "Healthy" for twelve hours while a
+# schema error was dropping every write into an in-memory fallback.
+MIN_MONTHS_PER_HOUR = 0.35
+
 
 def parse_args():
     p = argparse.ArgumentParser(description="Report backfill progress")
@@ -83,6 +89,12 @@ def analyse(lines, hours):
             f"carries both months")
     if ooms:
         problems.append(f"{len(ooms)} OOM kill(s)")
+    rate = len(published) / hours if hours else 0
+    if published and rate < MIN_MONTHS_PER_HOUR:
+        problems.append(
+            f"only {len(published)} month(s) in {hours:g}h "
+            f"({rate:.2f}/h, expected around {MIN_MONTHS_PER_HOUR:.2f}) — "
+            f"publishing, but far slower than the work should take")
     return stats, problems
 
 

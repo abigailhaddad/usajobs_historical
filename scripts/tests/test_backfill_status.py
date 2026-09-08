@@ -64,3 +64,24 @@ class TestVerdict:
     def test_the_spiral_threshold_sits_above_a_real_month(self):
         # The largest month in the corpus is 2018-10 at 31,358.
         assert SPIRAL_ROWS > 31_358
+
+
+class TestRate:
+    """A run can publish and still be stalled. On 2026-09-08 a schema error
+    dropped every write into an in-memory fallback that kept getting killed:
+    two months in twelve hours, and the check said Healthy because it only
+    asked whether anything had published at all.
+    """
+
+    def test_a_crawl_is_flagged_even_though_it_publishes(self):
+        _, problems = analyse(lines(published=2, joins=(24_970,)), 12)
+        assert any("far slower" in p for p in problems)
+
+    def test_a_normal_rate_is_not_flagged(self):
+        _, problems = analyse(lines(published=9, joins=(24_970,)), 12)
+        assert problems == []
+
+    def test_publishing_nothing_reports_that_rather_than_the_rate(self):
+        _, problems = analyse(lines(published=0), 12)
+        assert len(problems) == 1
+        assert "nothing published" in problems[0]
