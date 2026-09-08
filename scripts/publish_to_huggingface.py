@@ -485,6 +485,16 @@ def main() -> int:
             print(f"  {month}: {len(prior_cns):,} already published, "
                   f"{len(months.get(month, set()) - prior_cns):,} new")
             prior_sets[month] = prior_cns
+
+            # If the local scrape already covers everything the published file
+            # holds, the prior adds no text and only costs memory. Reading it
+            # anyway meant materialising the month's announcement text twice --
+            # ~1.2 GB each -- which is what drove the publish into constant
+            # spilling and took a month from minutes to nearly an hour.
+            if prior_cns and prior_cns <= months.get(month, set()):
+                print(f"    local copy covers all of it; skipping the "
+                      f"published text")
+                priors[month] = None
         availability[month] = months.get(month, set()) | prior_cns
 
     month_of = month_of_every_posting(con, str(hist))
