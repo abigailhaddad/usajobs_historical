@@ -50,9 +50,10 @@ Type=oneshot
 User=$WORKER
 WorkingDirectory=$DIR
 EnvironmentFile=/etc/usajobs-backfill.env
-# duckdb spills past this rather than growing; well under MemoryMax so the
-# fetch workers and pyarrow have room beside it.
-Environment=DUCKDB_MEMORY_LIMIT=2GB
+# duckdb spills past this rather than growing, but it still needs room to
+# work: at 2GB it died at 1.8 GiB on an ordinary month publish that had been
+# fine at 4. 3GB sits under MemoryHigh with space for pyarrow beside it.
+Environment=DUCKDB_MEMORY_LIMIT=3GB
 ExecStart=$DIR/deploy/run-backfill.sh
 # Let the cgroup apply back-pressure and, at worst, kill just this service
 # rather than letting the kernel pick a victim. Two OOM kills in six hours on
