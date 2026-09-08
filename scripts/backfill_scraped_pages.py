@@ -12,16 +12,26 @@ The posting list comes from data/historical_jobs_{year}.parquet: the historical
 API needs no key and reports closed postings, so it is the complete list of
 what exists.
 
-Long-running by design — roughly 160k pages for a full year, about three hours
-at the default concurrency. Run it on its own, not inside the daily workflow.
+Long-running by design — roughly 160k pages for a full year. Run it on its own,
+not inside the daily workflow.
 
-It is network-bound, not CPU-bound: a page costs ~32 ms to parse, so a full
-year is about 86 CPU-minutes spread over those three hours, or roughly half of
-one core. It still runs niced and under a CPU governor by default, so it stays
-out of the way of whatever else the machine is doing. --max-cpu is a share of
-ONE core, not of the machine: at the default 50 the governor barely bites,
-since the fetch rate already holds it near there. Halving it roughly doubles
-the wall clock.
+It is CPU-bound, not network-bound, which is the opposite of what this file
+used to claim. A page costs ~209 ms of CPU on the cx33 that runs the backlog:
+~122 ms to parse plus ~87 ms for TLS, gzip on a 114 KB page and the zstd shard
+write. The ~32 ms figure this docstring used to quote was measured on a
+developer laptop, and that laptop is 4.4x faster per core than a shared vCPU.
+
+That matters because the GIL confines all of it to one core. Measured on the
+box mid-run: 91.3% of a single core, load average 0.96 with three cores idle,
+3.7 pages/sec against a ceiling of 1/0.209 = 4.8 no matter how many threads
+--workers opens. --parse-workers is therefore the throughput knob; --workers
+sets how many requests usajobs.gov sees at once, which is a separate decision.
+Measured 4.41 -> 9.67 pages/sec moving parsing to three processes.
+
+It still runs niced and under a CPU governor by default, so it stays out of the
+way of whatever else the machine is doing. --max-cpu is a share of ONE core,
+not of the machine. Note that the governor measures this process only, so it
+does not see the parse workers.
 
 Resumable and crash-safe. Pages land in immutable shard files tagged with a
 per-run id; a rerun skips every control number already in a shard or in the
@@ -114,8 +124,12 @@ class CpuGovernor:
     Measures the process's own CPU time against wall time and sleeps the
     calling worker when the ratio runs ahead of target. That lowers the duty
     cycle rather than the cost per page: the same work happens, spread over
-    more wall clock, which is what "use less CPU" means for a job that is
-    already network-bound.
+    more wall clock.
+
+    time.process_time() counts this process only, so with --parse-workers above
+    1 the governor no longer sees most of the CPU cost — the parsing it used to
+    account for now happens in children. Treat it as a throttle on the fetch
+    loop, not on the job's total CPU.
 
     time.process_time() counts every thread, so the target is a share of one
     core regardless of --workers.

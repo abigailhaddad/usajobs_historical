@@ -52,11 +52,24 @@ and peaks near 1.6 GB.
 
 ## Rate
 
-`run-backfill.sh` uses 6 concurrent fetches — about 8–9 pages/sec, so
-2018–2025 (~2.9M pages) takes roughly four days. usajobs.gov has served
-300k+ pages at this rate with zero failures and zero 404s. Raising
-`BACKFILL_WORKERS` is a decision about load on their servers, not about the
-box.
+`run-backfill.sh` uses 6 concurrent fetches and parses in worker processes.
+
+The job is **CPU-bound, not network-bound** — the opposite of what this file
+used to say. A page costs ~209 ms of CPU on a cx33 (~122 ms parsing, ~87 ms for
+TLS, gzip and the shard write), and the GIL confined all of it to one core:
+measured 91.3% of a single core with three idle and 3.7 pages/sec, against a
+hard ceiling of 4.8 regardless of `BACKFILL_WORKERS`. The old "8–9 pages/sec,
+four days" figure came from a developer laptop, which is 4.4x faster per core.
+
+Parsing now runs in a process pool (`--parse-workers`, default one per core
+past the first). Measured 4.41 → 9.67 pages/sec on the box.
+
+lxml was tried and rejected: 129.5 ms/page against `html.parser`'s 113.4 here,
+and it changes parse output.
+
+With parsing off the critical path, `BACKFILL_WORKERS` is finally what it was
+always described as — the number of concurrent requests, and so a decision
+about load on usajobs.gov. Lower it to fetch more slowly.
 
 ## Resumability
 
