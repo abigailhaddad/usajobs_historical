@@ -41,10 +41,11 @@ import ctypes
 import gc
 import os
 import sys
+import multiprocessing
 import threading
 import time
 import uuid
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from datetime import datetime
 
 import pandas as pd
@@ -94,6 +95,12 @@ def parse_args():
                         "for a year — so by default each month is published and "
                         "its text dropped locally, keeping the working set to "
                         "about one month.")
+    p.add_argument("--parse-workers", type=int, default=-1,
+                   help="Processes used to parse pages (default: one per core "
+                        "beyond the first; 0 or 1 parses inline). Parsing is "
+                        "the bottleneck and the GIL confines it to one core, "
+                        "so this is the knob that changes throughput -- "
+                        "--workers is not.")
     p.add_argument("--dry-run", action="store_true",
                    help="Report what is missing and fetch nothing")
     p.add_argument("--compact-only", action="store_true",
@@ -283,6 +290,66 @@ def months_awaiting_publish(data_dir, year):
         ORDER BY 1
     """).fetchall()
     return [r[0] for r in rows]
+
+
+def parse_pool_size(requested):
+    """How many processes should parse pages.
+
+    Negative means "decide": one per core past the first, so the fetch threads
+    keep a core to themselves. Capped at 4 -- past that the parent cannot feed
+    them, since it still pays ~87 ms per page for TLS, gzip and the shard
+    write.
+    """
+    if requested >= 0:
+        return requested
+    return max(1, min(4, (os.cpu_count() or 2) - 1))
+
+
+class ParsePool:
+    """Parse announcement pages in worker processes.
+
+    The fetch loop looks network-bound and is not. On the cx33 that runs this,
+    parse_job_page costs 122 ms of CPU per page -- the 32 ms in usajobs_scrape's
+    docstring is a developer-laptop number, and the shared vCPU is 4.4x slower
+    than that laptop. With ~87 ms more per page for TLS, gzip on a 114 KB page
+    and the zstd shard write, a page costs ~209 ms of CPU, and the GIL confines
+    all of it to one core: measured 91.3% of a single core, load average 0.96,
+    three cores idle, 3.7 pages/sec against a hard ceiling of 4.8. Raising
+    --workers cannot beat that, which is what the old comment about it being
+    "a decision about load on their servers" got backwards.
+
+    Parsing is 122 of those 209 ms, so moving it off the main interpreter is
+    what buys throughput. The threads block on a future, releasing the GIL, and
+    the parent is left doing only the fetch and the write.
+
+    spawn rather than fork: the pool is used from a ThreadPoolExecutor, and
+    forking a process that already has threads is a deadlock waiting to happen.
+    Spawn costs a few seconds of re-import per worker, once per month, against
+    hours of fetching.
+    """
+
+    def __init__(self, size):
+        self.size = size
+        self.pool = None
+        if size > 1:
+            self.pool = ProcessPoolExecutor(
+                max_workers=size, mp_context=multiprocessing.get_context("spawn"))
+
+    def parse(self, html):
+        if self.pool is None:
+            return parse_job_page(html)
+        return self.pool.submit(parse_job_page, html).result()
+
+    def close(self):
+        """Shut the workers down before publishing.
+
+        The publish child wants ~3 GB on its own; leaving three idle parsers
+        holding a pandas import each beside it is how a memory ceiling gets
+        hit for no reason.
+        """
+        if self.pool is not None:
+            self.pool.shutdown(wait=True)
+            self.pool = None
 
 
 def resident_mb():
@@ -507,7 +574,7 @@ def main() -> int:
             return
 
         try:
-            row = parse_job_page(html)
+            row = parsers.parse(html)
         except Exception as e:
             with lock:
                 failed += 1
@@ -524,11 +591,21 @@ def main() -> int:
             if len(batch) >= SHARD_ROWS:
                 flush()
 
+    n_parsers = parse_pool_size(args.parse_workers)
+    print(f"  parsing in {n_parsers} process(es)" if n_parsers > 1
+          else "  parsing inline (GIL-bound; see --parse-workers)")
+
     consecutive_failures = 0
     for month, cns in sorted(by_month.items()):
-        with ThreadPoolExecutor(max_workers=args.workers) as pool:
-            list(tqdm(pool.map(work, cns), total=len(cns),
-                      desc=f"{month}", unit="page"))
+        # Per month, not once for the year: the workers are torn down before
+        # each publish so they are not holding memory the publish child needs.
+        parsers = ParsePool(n_parsers)
+        try:
+            with ThreadPoolExecutor(max_workers=args.workers) as pool:
+                list(tqdm(pool.map(work, cns), total=len(cns),
+                          desc=f"{month}", unit="page"))
+        finally:
+            parsers.close()
         flush()
         compact(args.data_dir, args.year)
         sys.stdout.flush()
