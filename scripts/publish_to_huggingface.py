@@ -265,7 +265,7 @@ def parquet_columns(path):
 
 
 def select_sql(con, hist_path: str, scraped_path: str, month: str,
-               prior_path: str = None) -> str:
+               prior_path: str = None, days: tuple = None) -> str:
     """Fresh metadata joined to announcement text from wherever it still lives.
 
     Text comes from the local scrape when it has it, and otherwise from the
@@ -276,15 +276,38 @@ def select_sql(con, hist_path: str, scraped_path: str, month: str,
 
     A local row whose text has been pruned has NULL text, so it must not win
     over the published copy; hence the WHERE on the local side.
+
+    `days` narrows the whole query to a ('01', '15')-style range of open dates.
+    It has to narrow the text sides too, not just the metadata: the text is the
+    expensive half, and a day filter that only applies to the mirror leaves
+    duckdb reading every unpublished row in the local scrape regardless. That
+    is what makes a split build actually cheaper rather than merely slower.
     """
     cols = ",\n        ".join(TEXT_FIELDS)
+    day_clause = ""
+    wanted_cte = ""
+    local_day = ""
+    prior_day = ""
+    if days:
+        lo, hi = days
+        day_clause = (f" AND substr(h.positionOpenDate, 9, 2) "
+                      f"BETWEEN '{lo}' AND '{hi}'")
+        wanted_cte = f"""wanted AS (
+        SELECT usajobsControlNumber::varchar AS cn
+        FROM read_parquet('{hist_path}')
+        WHERE substr(positionOpenDate, 1, 7) = '{month}'
+          AND substr(positionOpenDate, 9, 2) BETWEEN '{lo}' AND '{hi}'
+    ), """
+        local_day = " AND usajobs_control_number IN (SELECT cn FROM wanted)"
+        prior_day = " AND usajobsControlNumber::varchar IN (SELECT cn FROM wanted)"
+
     parts, union = [], ""
     if scraped_path and os.path.exists(scraped_path):
         parts.append(f"""local_text AS (
         SELECT usajobs_control_number AS cn,
         {cols}
         FROM read_parquet('{scraped_path}')
-        WHERE text IS NOT NULL
+        WHERE text IS NOT NULL{local_day}
     )""")
         union = "SELECT * FROM local_text"
     if prior_path:
@@ -299,6 +322,9 @@ def select_sql(con, hist_path: str, scraped_path: str, month: str,
             for c in TEXT_FIELDS)
         exclude = ("WHERE usajobsControlNumber NOT IN (SELECT cn FROM local_text)"
                    if union else "")
+        if prior_day:
+            exclude = (exclude + prior_day) if exclude \
+                else f"WHERE 1=1{prior_day}"
         parts.append(f"""prior_text AS (
         SELECT usajobsControlNumber AS cn,
         {prior_cols}
@@ -309,13 +335,88 @@ def select_sql(con, hist_path: str, scraped_path: str, month: str,
 
     text_cols = ",\n    ".join(f"t.{c}" for c in TEXT_FIELDS)
     return f"""
-        WITH {", ".join(parts)}, txt AS ({union})
+        WITH {wanted_cte}{", ".join(parts)}, txt AS ({union})
         SELECT {metadata_fields(con, hist_path)},
     {text_cols}
         FROM read_parquet('{hist_path}') h
         JOIN txt t ON h.usajobsControlNumber::varchar = t.cn
-        WHERE substr(h.positionOpenDate, 1, 7) = '{month}'
+        WHERE substr(h.positionOpenDate, 1, 7) = '{month}'{day_clause}
     """
+
+
+# A month is built in slices of about this many postings. Measured on 2022-03:
+# 41,871 rows in one pass exhausted a 2.7 GiB duckdb limit, and a 21k-row slice
+# still wanted 1.3 GiB, so the cost runs at roughly 60 KB of working memory per
+# row. 12,000 keeps a slice near 700 MB, which leaves several times over under
+# the 4.5 GB the unit grants and does not creep as months grow.
+SLICE_ROWS = 12000
+
+
+def day_partitions(con, hist_path, month, target=SLICE_ROWS):
+    """Contiguous day ranges that each hold roughly `target` postings.
+
+    Balanced by actual counts rather than by splitting the calendar in half:
+    postings cluster hard around the start and end of a month, so even halves
+    of the date range are not even halves of the work.
+
+    Returns [] when the month fits in one pass, which keeps the common case on
+    the original single-COPY path.
+    """
+    rows = con.execute(f"""
+        SELECT substr(positionOpenDate, 9, 2) AS d, count(*) AS n
+        FROM read_parquet('{hist_path}')
+        WHERE substr(positionOpenDate, 1, 7) = '{month}'
+        GROUP BY 1 ORDER BY 1
+    """).fetchall()
+    total = sum(n for _, n in rows)
+    if total <= target or not rows:
+        return []
+
+    ranges, lo, run = [], None, 0
+    for day, n in rows:
+        if lo is None:
+            lo = day
+        run += n
+        if run >= target:
+            ranges.append((lo, day))
+            lo, run = None, 0
+    # A trailing remainder becomes its own slice. Folding it into the previous
+    # one looks tidier and defeats the point: a month that is 30k on the 1st
+    # and 12k over the rest would merge back into a single 42k pass.
+    if run:
+        ranges.append((lo, rows[-1][0]))
+    # Widen the ends so the ranges provably cover the whole month, including
+    # any day the mirror has no rows for. Gaps here would silently drop rows.
+    ranges[0] = ("01", ranges[0][1])
+    ranges[-1] = (ranges[-1][0], "31")
+    # One slice is the single-pass build with extra steps. Note that a single
+    # day bigger than the target cannot be divided any further than this --
+    # day granularity is the floor, and such a month still needs the memory.
+    return ranges if len(ranges) > 1 else []
+
+
+def stitch(parts, dest):
+    """Concatenate slice files into one month file, a row group at a time.
+
+    pyarrow rather than a second duckdb pass on purpose: this streams, so peak
+    memory is one row group instead of the month that was too big to build in
+    the first place.
+    """
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    writer = None
+    try:
+        for part in parts:
+            pf = pq.ParquetFile(part)
+            if writer is None:
+                writer = pq.ParquetWriter(dest, pf.schema_arrow,
+                                          compression="zstd",
+                                          compression_level=12)
+            for batch in pf.iter_batches(batch_size=2000):
+                writer.write_table(pa.Table.from_batches([batch]))
+    finally:
+        if writer is not None:
+            writer.close()
 
 
 def download_month(repo, month, token):
@@ -520,16 +621,41 @@ def main() -> int:
         dest.parent.mkdir(parents=True, exist_ok=True)
         # COPY streams straight to disk. Materializing a month in Python would
         # be ~800 MB of announcement text.
-        con.execute(f"""
-            -- Deliberately unordered. ORDER BY forced duckdb to materialise
-            -- and sort ~2 GB of announcement text, which is what exhausted
-            -- the memory limit; row order in a parquet is not meaningful to
-            -- consumers and anyone who wants it can sort on read.
-            COPY ({select_sql(con, str(hist), str(scraped), month, priors.get(month))})
-            -- level 19 buffers far more than it saves here; 12 is within a
-            -- few percent on this data and materially cheaper in memory.
-            TO '{dest}' (FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 12);
-        """)
+        #
+        # Deliberately unordered. ORDER BY forced duckdb to materialise and
+        # sort ~2 GB of announcement text, which is what exhausted the memory
+        # limit; row order in a parquet is not meaningful to consumers and
+        # anyone who wants it can sort on read.
+        #
+        # Compression level 19 buffers far more than it saves here; 12 is
+        # within a few percent on this data and materially cheaper in memory.
+        copy_opts = "(FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 12)"
+
+        # Big months are built in day slices and stitched. Streaming COPY still
+        # has to hold the join, and the text is 35 KB a row: 2022-03 was 41,871
+        # rows and took a 2.7 GiB duckdb limit out in one pass. Raising the
+        # limit only moves that wall, since months keep growing -- 2022 runs
+        # 35-42k against 2021's ~31k.
+        slices = day_partitions(con, str(hist), month)
+        if slices:
+            print(f"  {month}: {len(slices)} slices "
+                  + ", ".join(f"{lo}-{hi}" for lo, hi in slices))
+            parts = []
+            try:
+                for i, days in enumerate(slices, 1):
+                    part = dest.with_suffix(f".part{i:02d}.parquet")
+                    con.execute(
+                        f"COPY ({select_sql(con, str(hist), str(scraped), month, priors.get(month), days)}) "
+                        f"TO '{part}' {copy_opts};")
+                    parts.append(part)
+                stitch(parts, dest)
+            finally:
+                for part in parts:
+                    part.unlink(missing_ok=True)
+        else:
+            con.execute(
+                f"COPY ({select_sql(con, str(hist), str(scraped), month, priors.get(month))}) "
+                f"TO '{dest}' {copy_opts};")
         rows = con.execute(
             f"SELECT count(*) FROM read_parquet('{dest}')").fetchone()[0]
         print(f"  {name}: {rows:,} rows, {dest.stat().st_size/1e6:.1f} MB")
