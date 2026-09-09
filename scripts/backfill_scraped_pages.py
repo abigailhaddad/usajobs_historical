@@ -12,16 +12,26 @@ The posting list comes from data/historical_jobs_{year}.parquet: the historical
 API needs no key and reports closed postings, so it is the complete list of
 what exists.
 
-Long-running by design — roughly 160k pages for a full year, about three hours
-at the default concurrency. Run it on its own, not inside the daily workflow.
+Long-running by design — roughly 160k pages for a full year. Run it on its own,
+not inside the daily workflow.
 
-It is network-bound, not CPU-bound: a page costs ~32 ms to parse, so a full
-year is about 86 CPU-minutes spread over those three hours, or roughly half of
-one core. It still runs niced and under a CPU governor by default, so it stays
-out of the way of whatever else the machine is doing. --max-cpu is a share of
-ONE core, not of the machine: at the default 50 the governor barely bites,
-since the fetch rate already holds it near there. Halving it roughly doubles
-the wall clock.
+It is CPU-bound, not network-bound, which is the opposite of what this file
+used to claim. A page costs ~209 ms of CPU on the cx33 that runs the backlog:
+~122 ms to parse plus ~87 ms for TLS, gzip on a 114 KB page and the zstd shard
+write. The ~32 ms figure this docstring used to quote was measured on a
+developer laptop, and that laptop is 4.4x faster per core than a shared vCPU.
+
+That matters because the GIL confines all of it to one core. Measured on the
+box mid-run: 91.3% of a single core, load average 0.96 with three cores idle,
+3.7 pages/sec against a ceiling of 1/0.209 = 4.8 no matter how many threads
+--workers opens. --parse-workers is therefore the throughput knob; --workers
+sets how many requests usajobs.gov sees at once, which is a separate decision.
+Measured 4.41 -> 9.67 pages/sec moving parsing to three processes.
+
+It still runs niced and under a CPU governor by default, so it stays out of the
+way of whatever else the machine is doing. --max-cpu is a share of ONE core,
+not of the machine. Note that the governor measures this process only, so it
+does not see the parse workers.
 
 Resumable and crash-safe. Pages land in immutable shard files tagged with a
 per-run id; a rerun skips every control number already in a shard or in the
@@ -37,12 +47,15 @@ or on the next run with --compact-only.
 """
 
 import argparse
+import ctypes
+import gc
 import os
 import sys
+import multiprocessing
 import threading
 import time
 import uuid
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from datetime import datetime
 
 import pandas as pd
@@ -92,6 +105,12 @@ def parse_args():
                         "for a year — so by default each month is published and "
                         "its text dropped locally, keeping the working set to "
                         "about one month.")
+    p.add_argument("--parse-workers", type=int, default=-1,
+                   help="Processes used to parse pages (default: one per core "
+                        "beyond the first; 0 or 1 parses inline). Parsing is "
+                        "the bottleneck and the GIL confines it to one core, "
+                        "so this is the knob that changes throughput -- "
+                        "--workers is not.")
     p.add_argument("--dry-run", action="store_true",
                    help="Report what is missing and fetch nothing")
     p.add_argument("--compact-only", action="store_true",
@@ -105,8 +124,12 @@ class CpuGovernor:
     Measures the process's own CPU time against wall time and sleeps the
     calling worker when the ratio runs ahead of target. That lowers the duty
     cycle rather than the cost per page: the same work happens, spread over
-    more wall clock, which is what "use less CPU" means for a job that is
-    already network-bound.
+    more wall clock.
+
+    time.process_time() counts this process only, so with --parse-workers above
+    1 the governor no longer sees most of the CPU cost — the parsing it used to
+    account for now happens in children. Treat it as a throttle on the fetch
+    loop, not on the job's total CPU.
 
     time.process_time() counts every thread, so the target is a share of one
     core regardless of --workers.
@@ -170,6 +193,39 @@ def published_control_numbers():
         return set()
     with open(path) as f:
         return {r[0] for r in _csv.reader(f) if r and r[0] != "usajobsControlNumber"}
+
+
+def published_months():
+    """Months that already have a file on the dataset, as YYYY-MM.
+
+    This is the difference between a month the publisher can rebuild safely and
+    one it will refuse. When a month file exists, publish_to_huggingface reads
+    the already-published text out of it, so a posting missing locally costs
+    nothing. When it does not, the publisher falls back to the manifest and
+    refuses to rebuild rather than drop rows it cannot reproduce.
+
+    Returns None if the listing fails, which callers should read as "assume
+    every month is published" -- the conservative direction, since the cost of
+    guessing wrong that way is a refusal that the next run retries, not a
+    re-fetch of tens of thousands of pages.
+    """
+    from huggingface_hub import get_token, list_repo_files
+    repo = os.environ.get("HF_DATASET_REPO", "abigailhaddad/usajobs-scraping")
+    token = os.environ.get("HF_TOKEN") or get_token()
+    try:
+        files = list_repo_files(repo, repo_type="dataset", token=token)
+    except Exception as e:
+        print(f"  could not list the dataset ({e}) — assuming every month is "
+              f"published")
+        return None
+    months = set()
+    for f in files:
+        name = os.path.basename(f)
+        if f.startswith("data/") and name.endswith(".parquet"):
+            stem = name[:-len(".parquet")]
+            if len(stem) == 7 and stem[4] == "_":
+                months.add(stem.replace("_", "-"))
+    return months
 
 
 def stored_control_numbers(data_dir, year):
@@ -283,6 +339,102 @@ def months_awaiting_publish(data_dir, year):
     return [r[0] for r in rows]
 
 
+def parse_pool_size(requested):
+    """How many processes should parse pages.
+
+    Negative means "decide": one per core past the first, so the fetch threads
+    keep a core to themselves. Capped at 4 -- past that the parent cannot feed
+    them, since it still pays ~87 ms per page for TLS, gzip and the shard
+    write.
+    """
+    if requested >= 0:
+        return requested
+    return max(1, min(4, (os.cpu_count() or 2) - 1))
+
+
+class ParsePool:
+    """Parse announcement pages in worker processes.
+
+    The fetch loop looks network-bound and is not. On the cx33 that runs this,
+    parse_job_page costs 122 ms of CPU per page -- the 32 ms in usajobs_scrape's
+    docstring is a developer-laptop number, and the shared vCPU is 4.4x slower
+    than that laptop. With ~87 ms more per page for TLS, gzip on a 114 KB page
+    and the zstd shard write, a page costs ~209 ms of CPU, and the GIL confines
+    all of it to one core: measured 91.3% of a single core, load average 0.96,
+    three cores idle, 3.7 pages/sec against a hard ceiling of 4.8. Raising
+    --workers cannot beat that, which is what the old comment about it being
+    "a decision about load on their servers" got backwards.
+
+    Parsing is 122 of those 209 ms, so moving it off the main interpreter is
+    what buys throughput. The threads block on a future, releasing the GIL, and
+    the parent is left doing only the fetch and the write.
+
+    spawn rather than fork: the pool is used from a ThreadPoolExecutor, and
+    forking a process that already has threads is a deadlock waiting to happen.
+    Spawn costs a few seconds of re-import per worker, once per month, against
+    hours of fetching.
+    """
+
+    def __init__(self, size):
+        self.size = size
+        self.pool = None
+        if size > 1:
+            self.pool = ProcessPoolExecutor(
+                max_workers=size, mp_context=multiprocessing.get_context("spawn"))
+
+    def parse(self, html):
+        if self.pool is None:
+            return parse_job_page(html)
+        return self.pool.submit(parse_job_page, html).result()
+
+    def close(self):
+        """Shut the workers down before publishing.
+
+        The publish child wants ~3 GB on its own; leaving three idle parsers
+        holding a pandas import each beside it is how a memory ceiling gets
+        hit for no reason.
+        """
+        if self.pool is not None:
+            self.pool.shutdown(wait=True)
+            self.pool = None
+
+
+def resident_mb():
+    """RSS in MB, or None where /proc is not available."""
+    try:
+        with open("/proc/self/statm") as fh:
+            return int(fh.read().split()[1]) * os.sysconf("SC_PAGE_SIZE") / 2**20
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def release_memory():
+    """Hand freed heap back to the OS before a child process needs it.
+
+    The fetch loop churns millions of ~35 KB announcement strings through six
+    threads. Python frees them, but glibc keeps the arenas, so RSS sits near
+    2.7 GB when the real working set is a few hundred MB. That is invisible
+    until a memory ceiling exists: with the parent idle at 2.7 GB and the
+    publish child at 1.9 GB against MemoryHigh=4G, the cgroup reclaimed
+    continuously and evicted the very parquet pages the publish was reading.
+    On 2026-09-08 that left a month republish in uninterruptible sleep for
+    2h36m, using 2m27s of CPU and re-reading 9.5 GB off disk to satisfy
+    264 MB of logical reads.
+
+    gc.collect() drops the cycles; malloc_trim returns the arenas.
+    """
+    before = resident_mb()
+    gc.collect()
+    try:
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except (OSError, AttributeError):
+        pass  # not glibc; the collect above is all we get
+    after = resident_mb()
+    if before is not None and after is not None and before - after > 50:
+        print(f"  released {before - after:,.0f} MB back to the OS "
+              f"({before:,.0f} -> {after:,.0f} MB resident)")
+
+
 # Two failures in a row means the next attempt is carrying two months of
 # unpruned text into the join, and the one after that three. Stopping is the
 # only thing that does not make it worse.
@@ -304,6 +456,9 @@ def publish_month(data_dir, year, month):
         return
     script = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                           "publish_to_huggingface.py")
+    # The child needs ~2 GB and shares this process's memory ceiling, so give
+    # it the room this one is only holding out of habit.
+    release_memory()
     # --refresh-all, scoped to this one month by --month. The manifest records
     # which announcements are published, not what is in them, so a month whose
     # postings were already listed would otherwise be skipped — which is
@@ -417,8 +572,54 @@ def main() -> int:
         if not by_month:
             print("  nothing above the threshold this year")
             return 0
+    # A month file is republished wholesale, so the rebuild has to contain
+    # every announcement the dataset already holds for that month, or
+    # publish_to_huggingface refuses it rather than silently delete rows.
+    #
+    # --known-from-hf is what creates the gap: it drops everything in the
+    # manifest from todo, so a posting already on the dataset is never fetched
+    # -- and if it lives in some other month's published file, or in no month
+    # file yet, the rebuild has no copy of it and the publish refuses. That
+    # cost 2020-04 a full 27,491-page fetch on 2026-09-08 over exactly one
+    # posting, and the same refusal is what the 2018 and 2019 runs hit.
+    #
+    # So pull those back in. Measured at 1 posting across all of 2020, against
+    # a month's fetch that otherwise cannot be published.
+    if args.known_from_hf and not args.no_publish:
+        # Only months with no file on the dataset. Where a month file exists
+        # the publisher reads its text for anything missing locally, so adding
+        # these would re-fetch for nothing -- and on a recent year, where the
+        # daily collection has already published most of a month, "for nothing"
+        # would be tens of thousands of pages.
+        on_dataset = published_months()
+        unpublished = {m for m in by_month
+                       if on_dataset is not None and m not in on_dataset}
+        stored = stored_control_numbers(args.data_dir, args.year) \
+            if unpublished else set()
+        needed = {}
+        for cn, opened in wanted.items():
+            month = opened[:7]
+            if month in unpublished and cn in known and cn not in stored:
+                needed.setdefault(month, []).append(cn)
+        if needed:
+            print("  adding already-published posting(s) the wholesale month "
+                  "rebuild needs locally: "
+                  + ", ".join(f"{m} ({len(c)})" for m, c in sorted(needed.items())))
+            for month, cns in needed.items():
+                by_month[month].extend(cns)
+
     print(f"  across {len(by_month)} month(s): "
           + ", ".join(f"{m} ({len(c):,})" for m, c in sorted(by_month.items())))
+
+    # by_month is the plan now, so the tables it was built from are dead
+    # weight -- and they are not small: `known` is every control number on the
+    # dataset (1.15M and growing), `wanted` every posting in the mirror year.
+    # They stay resident through hours of fetching and, worse, through the
+    # publish child that has to fit beside them.
+    todo_count = sum(len(c) for c in by_month.values())
+    open_dates = {cn: wanted[cn] for cns in by_month.values() for cn in cns}
+    del wanted, known, todo
+    release_memory()
 
     shards = shard_dir(args.data_dir, args.year)
     os.makedirs(shards, exist_ok=True)
@@ -456,7 +657,7 @@ def main() -> int:
             return
 
         try:
-            row = parse_job_page(html)
+            row = parsers.parse(html)
         except Exception as e:
             with lock:
                 failed += 1
@@ -467,17 +668,27 @@ def main() -> int:
         # for: a redirect would otherwise file the row under the wrong posting.
         row["usajobs_control_number"] = cn
         row["usajobsControlNumber"] = int(cn)
-        row["positionOpenDate"] = row.get("positionOpenDate") or wanted[cn]
+        row["positionOpenDate"] = row.get("positionOpenDate") or open_dates[cn]
         with lock:
             batch.append(row)
             if len(batch) >= SHARD_ROWS:
                 flush()
 
+    n_parsers = parse_pool_size(args.parse_workers)
+    print(f"  parsing in {n_parsers} process(es)" if n_parsers > 1
+          else "  parsing inline (GIL-bound; see --parse-workers)")
+
     consecutive_failures = 0
     for month, cns in sorted(by_month.items()):
-        with ThreadPoolExecutor(max_workers=args.workers) as pool:
-            list(tqdm(pool.map(work, cns), total=len(cns),
-                      desc=f"{month}", unit="page"))
+        # Per month, not once for the year: the workers are torn down before
+        # each publish so they are not holding memory the publish child needs.
+        parsers = ParsePool(n_parsers)
+        try:
+            with ThreadPoolExecutor(max_workers=args.workers) as pool:
+                list(tqdm(pool.map(work, cns), total=len(cns),
+                          desc=f"{month}", unit="page"))
+        finally:
+            parsers.close()
         flush()
         compact(args.data_dir, args.year)
         sys.stdout.flush()
@@ -501,7 +712,7 @@ def main() -> int:
             return 1
 
     elapsed = (time.time() - started) / 60
-    print(f"\nFetched {len(todo) - gone - failed:,} pages in {elapsed:.1f} min, "
+    print(f"\nFetched {todo_count - gone - failed:,} pages in {elapsed:.1f} min, "
           f"{failed} failed, {gone} already removed (404)")
     print(f"  used {governor.report()}")
     if failed:

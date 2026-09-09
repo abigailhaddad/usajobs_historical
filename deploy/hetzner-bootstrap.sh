@@ -33,6 +33,21 @@ ufw --force enable >/dev/null
 echo "==> unattended security updates"
 dpkg-reconfigure -f noninteractive unattended-upgrades >/dev/null 2>&1 || true
 
+echo "==> swap"
+# Hetzner ships these with none. Without swap the kernel's only way to satisfy
+# a memory-hungry job is to evict page cache, so a process reading a large
+# parquet under cgroup pressure re-reads it from disk indefinitely -- 9.5 GB of
+# block reads to serve 264 MB of logical ones, on 2026-09-08. Swap gives
+# reclaim somewhere to put idle anonymous pages instead.
+if ! swapon --show --noheadings | grep -q .; then
+  fallocate -l 4G /swapfile
+  chmod 600 /swapfile
+  mkswap -q /swapfile
+  swapon /swapfile
+  grep -q "^/swapfile" /etc/fstab || echo "/swapfile none swap sw 0 0" >> /etc/fstab
+fi
+swapon --show
+
 echo "==> worker user and $REPOS"
 id -u "$WORKER" >/dev/null 2>&1 || useradd --create-home --shell /bin/bash "$WORKER"
 mkdir -p "$REPOS"
