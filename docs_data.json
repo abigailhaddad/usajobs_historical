@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-09-08T12:56:41.735974",
-  "total_jobs": 3987595,
+  "generated_at": "2026-09-09T13:56:04.805535",
+  "total_jobs": 3989494,
   "total_fields": 47,
   "file_size": "1.4GB",
-  "latest_job_date": "2026-09-08",
+  "latest_job_date": "2026-09-09",
   "data_coverage": [
     {
       "year": 2013,
@@ -94,13 +94,13 @@
       "total_jobs": 256094,
       "jobs_opened": 256094,
       "jobs_closed": 240107,
-      "coverage": "Current through September 08, 2026"
+      "coverage": "Current through September 09, 2026"
     },
     {
       "year": 2026,
-      "total_jobs": 348306,
-      "jobs_opened": 348306,
-      "jobs_closed": 345601,
+      "total_jobs": 350205,
+      "jobs_opened": 350205,
+      "jobs_closed": 347469,
       "coverage": "Closing dates only"
     }
   ],
@@ -116,7 +116,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0890\"}, {\"series\": \"0471\"}], [{\"series\": \"1310\"}, {\"series\": \"0801\"}, {\"series\": \"1515\"}, {\"series\": \"1520\"}, {\"series\": \"1550\"}], [{\"series\": \"0830\"}, {\"series\": \"0482\"}, {\"series\": \"0101\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"0819\"}, {\"series\": \"0850\"}, {\"series\": \"1315\"}, {\"series\": \"0807\"}, {\"series\": \"0110\"}, {\"series\": \"0810\"}, {\"series\": \"0486\"}, {\"series\": \"0808\"}, {\"series\": \"0401\"}, {\"series\": \"1350\"}, {\"series\": \"0408\"}, {\"series\": \"0020\"}, {\"series\": \"0193\"}, {\"series\": \"0150\"}], [{\"series\": \"0810\"}, {\"series\": \"1301\"}, {\"series\": \"0819\"}, {\"series\": \"0401\"}] (4424 unique)",
+      "examples": "[{\"series\": \"0830\"}, {\"series\": \"0801\"}, {\"series\": \"0850\"}, {\"series\": \"0020\"}, {\"series\": \"0808\"}, {\"series\": \"0807\"}, {\"series\": \"0810\"}, {\"series\": \"1301\"}], [{\"series\": \"0810\"}, {\"series\": \"0830\"}, {\"series\": \"0808\"}, {\"series\": \"0850\"}, {\"series\": \"0801\"}], [{\"series\": \"0801\"}, {\"series\": \"0855\"}, {\"series\": \"0850\"}, {\"series\": \"1550\"}, {\"series\": \"0854\"}], [{\"series\": \"0830\"}, {\"series\": \"0801\"}, {\"series\": \"0808\"}, {\"series\": \"0819\"}, {\"series\": \"1301\"}, {\"series\": \"1350\"}, {\"series\": \"0810\"}] (4424 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 4424
@@ -140,7 +140,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Air Force\\Air Mobility Command, Department of Veterans Affairs\\Deputy Assistant Secretary for FMBTS, Department of Housing and Urban Development\\Assistant Secretary for Community Planning and Development, National Foundation on the Arts and the Humanities\\National Endowment for the Humanities (542 unique)",
+      "examples": "Department of the Army\\U.S. Army Central, Department of the Navy\\United States Fleet Forces Command, Nuclear Waste Technical Review Board, Department of Education\\National Assessment Governing Board (542 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 542
@@ -164,7 +164,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "ATJ-24-12396956-DE, HHS-CDC-IMP-24-12530472, BPA VRA GL9/11 25-3, FSACO-12595721-25-WA-HA (363816 unique)",
+      "examples": "24-2473-SE-RF-M, CBSY-12432326-24-AD, EPA-R2-DE-2025-0005, 24-R6-12227378-G-TR (363816 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363816
@@ -172,7 +172,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Seasonal, Intermittent, Multiple, Detail (16 unique)",
+      "examples": "Multiple, Presidential Management Fellows, Temporary Promotion, Recent graduates (16 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 16
@@ -204,7 +204,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "AF6V, AF03, AG07, ARX6 (528 unique)",
+      "examples": "GQ00, AG10, HD00, EDEN (528 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 528
@@ -212,7 +212,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "National Telecommunications and Information Administration, Space Development Agency, John C. Stennis Space Center, Space Systems Command (502 unique)",
+      "examples": "Pipeline and Hazardous Materials Safety Administration, Defense Microelectronics Activity, Bureau of International Labor Affairs, Commander, Naval Information Warfare Systems Command (NAVWARSYSCOM) (502 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 502
@@ -220,7 +220,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "SZ, TN, RF, AM (122 unique)",
+      "examples": "AA, DJ, NV, LP (122 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 122
@@ -228,7 +228,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Housing and Urban Development, Department of Defense, Department of Energy, Department of Commerce (26 unique)",
+      "examples": "Executive Office of the President, Department of Justice, Court Services and Offender Supervision Agency for DC, Department of Agriculture (26 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 26
@@ -236,7 +236,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Office of Equal Employment Opportunity (OEEO), USAF RL/AFTAC/709 SAG/LOXS, Office of Inspector General, Office of Chief Counsel, Woodrow Wilson Keeble Memorial Health Care Center, Sisseton SD, Medical Records Department (59972 unique)",
+      "examples": "U.S. Army Counterintelligence Command Operations Support Battalion, FMWR - Business and Recreation Division -  Off-Grid, G9 CFMO-Draper, UT, Office of Refugee, Asylum and International Operations, Asylum Division. (59972 unique)",
       "completeness_percent": 62,
       "completeness_class": "poor",
       "unique_count": 59972
@@ -252,7 +252,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-20T11:58:45.376410, 2025-07-05T13:47:41.958052, 2025-09-19T22:59:09.279614, 2025-09-20T12:36:50.093602 (367192 unique)",
+      "examples": "2025-09-20T12:17:31.794173, 2025-09-20T12:28:37.504293, 2025-09-20T12:24:39.398287, 2025-09-20T11:40:47.459876 (367192 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 367192
@@ -268,7 +268,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-20T12:07:01.897965, 2025-09-20T12:08:55.221563, 2025-07-05T13:59:26.173656, 2025-09-20T11:49:34.576870 (359917 unique)",
+      "examples": "2025-09-20T11:58:45.353087, 2025-09-20T12:17:31.785333, 2025-07-05T12:59:13.258999, 2025-09-20T11:57:01.729695 (359917 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 359917
@@ -276,7 +276,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "AQ, GL, 2, 61 (127 unique)",
+      "examples": "29, KH, 2, 36 (127 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 127
@@ -292,7 +292,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "HJ, DJ, 43, GL (125 unique)",
+      "examples": "30, 70, 02, 17 (125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 125
@@ -308,7 +308,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "SN, MS, CE, NG (191 unique)",
+      "examples": "WS, BB, IH, PB (191 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 191
@@ -316,7 +316,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-07-14, 2024-03-20, 2024-05-26, 2024-05-25 (671 unique)",
+      "examples": "2025-11-26, 2024-01-19, 2024-11-29, 2025-12-29 (671 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 671
@@ -324,7 +324,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-06-13, 2025-03-18, 2025-03-06, 2024-09-22 (596 unique)",
+      "examples": "2025-05-02, 2025-08-19, 2025-07-08, 2024-01-19 (596 unique)",
       "completeness_percent": 9,
       "completeness_class": "poor",
       "unique_count": 596
@@ -332,7 +332,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-01-07, 2024-12-05, 2024-11-13, 2024-03-08 (365 unique)",
+      "examples": "2024-05-30, 2024-11-05, 2024-10-23, 2024-07-06 (365 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 365
@@ -348,7 +348,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Environmental Service Technician Leader--Critical Skills Incentive Authorized--, Diagnostic Radiologic Technologist (Special Procedures) - EDRP Authorized, Tax Examining Technician - Seasonal - 9 Month Roster, Environmental Engineer GEMS TCF- Recent Graduate (77992 unique)",
+      "examples": "Statistician Demography, Student Trainee (Public Affairs Specialist), Occupational  Therapist - Clinical Specialist - Assistive Technology, Automated Examination Specialist (77992 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77992
@@ -364,7 +364,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "31, 8, none, 12 (115 unique)",
+      "examples": "12, PB04, No, 31 (115 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115
@@ -428,7 +428,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "few, 46, 48, 63 (157 unique)",
+      "examples": "120, 89, 28, 147 (157 unique)",
       "completeness_percent": 90,
       "completeness_class": "warning",
       "unique_count": 157
