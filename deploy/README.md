@@ -78,8 +78,66 @@ already published, so a restart continues rather than redoing work, and within
 a month pages land in shards that fold in at the end. A crash or reboot costs
 at most one month's partial fetch. The unit restarts on failure.
 
+## What cost us time
+
+Most of this is not about scraping. It is what a long Python job on a cheap
+shared-vCPU box does that a laptop does not, and it will apply to the next
+thing put on one of these.
+
+**The vCPU is about four times slower per core than a dev machine.** Every
+timing in this repo was originally measured on a laptop and every one of them
+was wrong here — a page that parses in 28 ms locally takes 122 ms on the box.
+Re-measure on the box before believing any performance claim, including the
+ones in these files.
+
+**A `ThreadPoolExecutor` is a one-core ceiling for anything with real per-item
+CPU.** The tell is `%CPU` near 100 with `load average` near 1.0 on a four-core
+box: the threads are queueing on the GIL, not on the network. Work that looks
+I/O-bound usually is not once the CPU is this slow. Move the expensive part to
+a `ProcessPoolExecutor` — `spawn`, not `fork`, if any thread pool exists — and
+tear it down before anything memory-hungry runs.
+
+**These boxes ship with no swap, and that turns a memory limit into a trap.**
+With no swap, the only thing the kernel can reclaim under a cgroup ceiling is
+page cache — so a process that needs memory evicts the file pages it is itself
+reading, and re-reads them forever. The tell is a process in `D` state using
+almost no CPU while `read_bytes` in `/proc/PID/io` runs far ahead of `rchar`,
+with `memory.pressure` near 100. `hetzner-bootstrap.sh` now adds 4 GB.
+
+**A `MemoryHigh` set too low is worse than no limit at all.** An OOM kill is
+loud and the unit restarts. Throttling is silent: the job stays "running" and
+does nothing. If you add a ceiling to stop OOM kills, check afterwards that the
+job still finishes, not just that it stopped dying.
+
+**Python does not hand freed memory back to the OS.** glibc keeps the arenas,
+so RSS tracks how much a process has churned rather than what it currently
+holds — 2.2 GB resident against a few hundred MB live is normal after a few
+hours of string-heavy work. It costs nothing until a ceiling exists or a child
+process needs room, at which point `gc.collect()` plus `malloc_trim(0)` before
+the spawn is the fix.
+
+**Liveness is not progress, and a progress check can outlive a stall.**
+`systemctl is-active` reported `activating` through seven hours of failure, and
+a status script averaging over six hours reported "Healthy" through a
+two-and-a-half-hour stall, because its window still held the successes from
+before. Check `memory.pressure` and the working child's CPU against its elapsed
+time.
+
+**`systemctl enable --now` never returns for a long `Type=oneshot` unit.** It
+waits for `ExecStart`, which here is days. Use `enable` then `start
+--no-block`, or the install looks hung while the job runs fine behind it.
+
+**Do not update a checkout while bash is running a script out of it.** Bash
+reads a script incrementally by byte offset, so rewriting the file under a
+running instance can drop it into the middle of a different line. Stop, update,
+start — as one operation.
+
+**Anything unattended belongs on the box, not in an editor session.** Agent
+watches and timers die with the session that made them; a `systemd-run`
+transient unit does not.
+
 ## Adding another repo
 
-`hetzner-bootstrap.sh` is generic — a worker user, `/srv/repos`, a venv per
-checkout. `install-backfill.sh` is the per-repo half and is meant to be copied:
-change `REPO_URL`, the pip line, and the unit body.
+`hetzner-bootstrap.sh` is generic — a worker user, swap, `/srv/repos`, a venv
+per checkout. `install-backfill.sh` is the per-repo half and is meant to be
+copied: change `REPO_URL`, the pip line, and the unit body.
