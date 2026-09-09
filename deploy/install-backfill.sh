@@ -86,7 +86,12 @@ WantedBy=multi-user.target
 UNIT
 
 systemctl daemon-reload
-systemctl enable --now usajobs-backfill.service
+# enable, then start --no-block. `enable --now` waits for ExecStart to finish,
+# and this is a Type=oneshot unit whose ExecStart is the whole backfill --
+# days. The install would sit there looking hung with the job running fine
+# behind it, which is exactly what it did on 2026-09-09.
+systemctl enable usajobs-backfill.service
+systemctl start --no-block usajobs-backfill.service
 
 echo
 echo "Started. Watch it with:"
