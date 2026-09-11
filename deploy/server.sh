@@ -10,7 +10,8 @@
 #   ./deploy/server.sh status          # what exists, and what it costs
 #   ./deploy/server.sh logs            # follow the backfill
 #   ./deploy/server.sh ssh             # shell on it
-#   ./deploy/server.sh destroy         # stop paying for it
+#   ./deploy/server.sh destroy         # stop paying for it (prompts)
+#   ./deploy/server.sh destroy --yes   # ... without the prompt
 #
 # Billing is hourly with a monthly cap, so a job that runs four days costs
 # roughly a seventh of the monthly price. Destroy it when the work is done.
@@ -103,6 +104,18 @@ cmd_ssh()  { ssh "root@$(server_ip)"; }
 
 cmd_destroy() {
   local ip; ip=$(server_ip) || { echo "$NAME does not exist"; return 0; }
+  if [ "${1:-}" = "--yes" ]; then
+    hc server delete "$NAME"
+    return
+  fi
+  # Without a terminal `read` gets EOF, leaves $ok empty, and takes the cancel
+  # branch. That is the right default but a terrible failure mode: on
+  # 2026-09-11 it printed nothing at all and looked exactly like a successful
+  # destroy, while the box carried on billing. Say so instead.
+  [ -t 0 ] || {
+    echo "destroy needs a terminal for the confirmation prompt."
+    echo "Non-interactively, say so explicitly:  $0 destroy --yes"
+    return 1; }
   read -r -p "Destroy $NAME ($ip)? Everything on it is lost. [y/N] " ok
   [ "$ok" = "y" ] || { echo "cancelled"; return 0; }
   hc server delete "$NAME"
@@ -114,6 +127,6 @@ case "${1:-}" in
   status)    cmd_status ;;
   logs)      cmd_logs ;;
   ssh)       cmd_ssh ;;
-  destroy)   cmd_destroy ;;
+  destroy)   cmd_destroy "${2:-}" ;;
   *) sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' ; exit 1 ;;
 esac
