@@ -12,7 +12,9 @@ import sys
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from publish_to_huggingface import (TEXT_FIELDS, metadata_fields,
+from publish_to_huggingface import (EXIT_REFUSED, NON_STRING_COLUMNS,
+                                    TEXT_FIELDS,
+                                    check_types, metadata_fields,
                                     partition_safe_months,
                                     prune_published_text, resolve_list_columns)
 
@@ -215,8 +217,8 @@ class TestPublishedSchema:
         # The field list this replaced omitted positionTitle, so the published
         # dataset had no job title in it at all.
         fields = self._fields(tmp_path)
-        assert "h.positionTitle," in fields
-        assert "h.hiringSubelementName," in fields
+        assert "AS positionTitle" in fields
+        assert "AS hiringSubelementName" in fields
 
     def test_bookkeeping_columns_are_not_published(self, tmp_path):
         fields = self._fields(tmp_path)
@@ -229,11 +231,86 @@ class TestPublishedSchema:
         # month files disagree and the dataset cannot be read as a whole.
         assert "CAST(h.whoMayApply AS VARCHAR)" in self._fields(tmp_path)
 
+    def test_every_metadata_column_is_cast(self, tmp_path):
+        # Not just whoMayApply. duckdb types a column of untyped NULLs as
+        # INT32, so any metadata field that happens to be empty for a month
+        # publishes the wrong type for that month unless it is cast.
+        fields = self._fields(tmp_path)
+        for column in ("hiringSubelementName", "serviceType",
+                       "announcementClosingTypeCode",
+                       "announcementClosingTypeDescription", "totalOpenings"):
+            assert f"CAST(h.{column} AS VARCHAR)" in fields
+
+    def test_the_numeric_columns_stay_numeric(self, tmp_path):
+        fields = self._fields(tmp_path)
+        assert "CAST(h.agencyLevel AS BIGINT)" in fields
+        assert "CAST(h.minimumSalary AS DOUBLE)" in fields
+        assert "CAST(h.maximumSalary AS DOUBLE)" in fields
+
     def test_every_announcement_section_is_published(self):
         for section in ("jobSummary", "majorDuties", "qualificationSummary",
                         "education", "requiredDocuments", "howToApply", "text"):
             assert section in TEXT_FIELDS
         assert len(TEXT_FIELDS) == 12
+
+
+class TestCheckTypes:
+    """The guard that refuses to upload a month with drifted column types.
+
+    whoMayApply shipped as INT32 for four 2026 months and four other columns
+    shipped as unannotated binary for the two 2013 months, because each was
+    entirely null there and nothing pinned the type. Every one of those files
+    reads fine alone -- only the union of them is wrong, which is why it went
+    unnoticed for years.
+    """
+    def _write(self, tmp_path, columns):
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+        path = tmp_path / "m.parquet"
+        pq.write_table(pa.table(columns), path)
+        return path
+
+    def _good(self):
+        import pyarrow as pa
+        return {"usajobsControlNumber": pa.array(["1"], pa.string()),
+                "whoMayApply": pa.array([None], pa.string()),
+                "agencyLevel": pa.array([2], pa.int64()),
+                "minimumSalary": pa.array([1.0], pa.float64())}
+
+    def test_the_published_types_pass(self, tmp_path):
+        check_types(self._write(tmp_path, self._good()))
+
+    def test_an_all_null_string_column_typed_as_int_is_refused(self, tmp_path):
+        import pyarrow as pa
+        columns = self._good()
+        columns["whoMayApply"] = pa.array([None], pa.int32())
+        with pytest.raises(SystemExit, match="whoMayApply"):
+            check_types(self._write(tmp_path, columns))
+
+    def test_binary_is_refused_too(self, tmp_path):
+        # The 2013 flavour: BYTE_ARRAY with no UTF8 annotation.
+        import pyarrow as pa
+        columns = self._good()
+        columns["serviceType"] = pa.array([None], pa.binary())
+        with pytest.raises(SystemExit, match="serviceType"):
+            check_types(self._write(tmp_path, columns))
+
+    def test_a_numeric_column_turned_string_is_refused(self, tmp_path):
+        import pyarrow as pa
+        columns = self._good()
+        columns["agencyLevel"] = pa.array(["2"], pa.string())
+        with pytest.raises(SystemExit, match="agencyLevel"):
+            check_types(self._write(tmp_path, columns))
+
+    def test_every_non_string_column_is_one_duckdb_can_cast_to(self):
+        assert set(NON_STRING_COLUMNS.values()) <= {"BIGINT", "DOUBLE"}
+
+    def test_refusal_has_its_own_exit_code(self):
+        # The daily workflow warns on a refused month and fails on anything
+        # else, so refusal must not collide with 0 or with the 1 an uncaught
+        # exception exits with -- a drifted type has to stay distinguishable
+        # from "backfill is still running".
+        assert EXIT_REFUSED not in (0, 1)
 
 
 class TestPrunePublishedText:

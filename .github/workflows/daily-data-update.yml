@@ -473,11 +473,23 @@ jobs:
         # only republishes the months that gained rows.
         REFRESH=""
         [ "$(date -u +%d)" = "01" ] && REFRESH="--refresh-all"
-        # Never fails the run: the dataset is downstream of everything that
-        # matters here, and publish_to_huggingface.py exits non-zero when it
-        # refuses a month rather than shrink it.
-        python scripts/publish_to_huggingface.py $REFRESH || \
-          echo "::warning::HuggingFace publish did not complete cleanly"
+        # A refused month (exit 3) is expected while a backfill is still
+        # filling in text, and the dataset is downstream of everything that
+        # matters here -- so that only warns. Anything else non-zero means
+        # nothing was published at all: a column type that drifted, or a
+        # traceback. Those used to be swallowed by the same `||` and showed up
+        # as an annotation nobody reads, which is how six month files sat on
+        # the dataset with the wrong types for years.
+        set +e
+        python scripts/publish_to_huggingface.py $REFRESH
+        status=$?
+        set -e
+        if [ "$status" = "3" ]; then
+          echo "::warning::HuggingFace publish refused a month rather than shrink it"
+        elif [ "$status" != "0" ]; then
+          echo "::error::HuggingFace publish failed (exit $status) — nothing was published"
+          echo "HF_PUBLISH_FAILED=1" >> "$GITHUB_ENV"
+        fi
 
     - name: Commit and push to data-updates branch
       # Only runs if tests pass
@@ -640,6 +652,17 @@ jobs:
         exit 1
       env:
         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+    # Deferred to here rather than failing the publish step itself: none of
+    # the steps between have `if: always()`, so exiting up there would skip the
+    # R2 sync, the PR and the site update, all of which are independent of
+    # HuggingFace. Sits before "Check for failures" so that step's `failure()`
+    # still sees a failed job and opens the issue.
+    - name: Fail the run if the HuggingFace publish failed
+      if: always() && env.HF_PUBLISH_FAILED == '1'
+      run: |
+        echo "The HuggingFace publish did not complete — see the error above."
+        exit 1
 
     - name: Check for failures
       if: failure() || (env.CHANGES_MADE == 'true' && steps.data_tests.outcome == 'failure')
