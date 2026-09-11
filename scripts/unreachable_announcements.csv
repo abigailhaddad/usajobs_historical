@@ -4,7 +4,7 @@
 # from the same months, five seconds apart: every good page returned ~100 KB
 # and every one of these returned 503, which rules out rate limiting.
 #
-# They are the entire gap in the 2018-2025 backfill: 22 of 2,807,885.
+# They are the entire explained gap in 2013-2025: 25 of 3,049,079.
 #
 # Without this list an audit finds 22 missing announcements and the obvious
 # move is to rebuild all nineteen month files to add them -- about 2.5 GB of
@@ -34,3 +34,6 @@ usajobs_control_number,month,status,checked
 792728700,2024-05,503,2026-09-11
 811395400,2024-09,503,2026-09-11
 827765100,2025-01,503,2026-09-11
+469518400,2017-05,503,2026-09-11
+484918500,2017-11,503,2026-09-11
+485458400,2017-11,503,2026-09-11

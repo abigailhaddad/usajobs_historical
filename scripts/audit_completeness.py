@@ -114,18 +114,31 @@ def main() -> int:
         every |= cns
     total = len(every)
     unreachable = known_unreachable()
-    gaps, unexplained, seen = [], [], set()
+    # The current year is still being collected, so a gap there means "not
+    # fetched yet", not "missing". Reported, but it does not fail the audit --
+    # otherwise this can never come back clean.
+    from datetime import date
+    current_year = str(date.today().year)
+    gaps, unexplained, in_flight, seen = [], [], [], set()
     for month in sorted(expected):
         for cn in sorted(expected[month] - have):
             if cn in seen:
                 continue
             seen.add(cn)
-            (gaps if cn in unreachable else unexplained).append((month, cn))
+            if cn in unreachable:
+                gaps.append((month, cn))
+            elif month[:4] == current_year:
+                in_flight.append((month, cn))
+            else:
+                unexplained.append((month, cn))
 
+    published = total - len(gaps) - len(unexplained) - len(in_flight)
     print(f"mirror postings: {total:,}")
-    print(f"published:       {total - len(gaps) - len(unexplained):,} "
-          f"({100 * (total - len(gaps) - len(unexplained)) / total:.4f}%)")
+    print(f"published:       {published:,} ({100 * published / total:.4f}%)")
     print(f"known unreachable: {len(gaps)}")
+    if in_flight:
+        print(f"{current_year} not yet collected: {len(in_flight)}  "
+              f"(the daily pipeline's, not a backfill gap)")
     print(f"UNEXPLAINED:       {len(unexplained)}")
 
     missing_files = [m for m in sorted(expected) if m not in files]
