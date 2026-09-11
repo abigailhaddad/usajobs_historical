@@ -303,13 +303,24 @@ def select_sql(con, hist_path: str, scraped_path: str, month: str,
 
     parts, union = [], ""
     if scraped_path and os.path.exists(scraped_path):
-        parts.append(f"""local_text AS (
+        # Select what the file has and null the rest, exactly as the prior file
+        # is handled below. save_jobs_to_parquet writes the keys the parsed
+        # pages happened to carry, so a column only exists if some posting in
+        # the file had it. With 30,000 postings a month something always does;
+        # with the six that 2014-10 holds, whole columns are simply absent and
+        # naming one is a binder error.
+        local_have = parquet_columns(scraped_path)
+        local_cols = ",\n        ".join(
+            c if c in local_have else f"CAST(NULL AS VARCHAR) AS {c}"
+            for c in TEXT_FIELDS)
+        if "text" in local_have:
+            parts.append(f"""local_text AS (
         SELECT usajobs_control_number AS cn,
-        {cols}
+        {local_cols}
         FROM read_parquet('{scraped_path}')
         WHERE text IS NOT NULL{local_day}
     )""")
-        union = "SELECT * FROM local_text"
+            union = "SELECT * FROM local_text"
     if prior_path:
         # A month published before a column existed does not have it. That is
         # the normal case on the first pass: every month on the dataset today

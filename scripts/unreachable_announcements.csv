@@ -1,0 +1,39 @@
+# Announcements in the historical mirror that usajobs.gov will not serve, so
+# they are absent from the published dataset and always will be. Verified
+# 2026-09-11 by fetching each one interleaved with known-good control numbers
+# from the same months, five seconds apart: every good page returned ~100 KB
+# and every one of these returned 503, which rules out rate limiting.
+#
+# They are the entire explained gap in 2013-2025: 25 of 3,049,079.
+#
+# Without this list an audit finds 22 missing announcements and the obvious
+# move is to rebuild all nineteen month files to add them -- about 2.5 GB of
+# download and the same again of upload, to add nothing. Measured: republishing
+# 2018-04 for its one missing posting took 141 seconds and wrote the same
+# 28,048 rows.
+usajobs_control_number,month,status,checked
+496112500,2018-04,503,2026-09-11
+510263200,2018-09,503,2026-09-11
+518254800,2018-11,503,2026-09-11
+520981300,2019-01,503,2026-09-11
+524719700,2019-02,503,2026-09-11
+524721000,2019-02,503,2026-09-11
+525043500,2019-02,503,2026-09-11
+525981200,2019-03,503,2026-09-11
+535373300,2019-05,503,2026-09-11
+547804400,2019-10,503,2026-09-11
+553566100,2019-12,503,2026-09-11
+569272000,2020-05,503,2026-09-11
+1282412,2020-07,404,2026-09-11
+573458100,2020-07,503,2026-09-11
+604259500,2021-06,503,2026-09-11
+668850500,2022-08,503,2026-09-11
+735923900,2023-07,503,2026-09-11
+779745400,2024-03,503,2026-09-11
+786265400,2024-04,503,2026-09-11
+792728700,2024-05,503,2026-09-11
+811395400,2024-09,503,2026-09-11
+827765100,2025-01,503,2026-09-11
+469518400,2017-05,503,2026-09-11
+484918500,2017-11,503,2026-09-11
+485458400,2017-11,503,2026-09-11
