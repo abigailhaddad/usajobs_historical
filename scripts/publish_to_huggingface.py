@@ -344,6 +344,14 @@ def select_sql(con, hist_path: str, scraped_path: str, month: str,
     )""")
         union += (" UNION ALL " if union else "") + "SELECT * FROM prior_text"
 
+    if not parts:
+        # No local text and no published file: there is nothing to build this
+        # month from. Say so, rather than emitting SQL with an empty WITH and
+        # letting duckdb report a syntax error several frames away.
+        raise ValueError(
+            f"no text available for {month}: the local scrape has none and "
+            f"the dataset has no file for it")
+
     text_cols = ",\n    ".join(f"t.{c}" for c in TEXT_FIELDS)
     return f"""
         WITH {wanted_cte}{", ".join(parts)}, txt AS ({union})

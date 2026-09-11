@@ -45,13 +45,37 @@ def known_unreachable():
 
 
 def mirror_path(year, cache_dir):
-    """The year's mirror, downloaded if this machine does not have it."""
+    """The year's mirror, downloaded if this machine does not have it.
+
+    The User-Agent is not decoration: R2 answers 403 to urllib's default.
+
+    Downloads to a temporary name and renames, so an interrupted run leaves no
+    truncated parquet for the next one to read as real. A half-written mirror
+    would under-report the postings that exist, which in this script means
+    silently claiming the dataset is more complete than it is.
+    """
     import urllib.request
     os.makedirs(cache_dir, exist_ok=True)
     path = os.path.join(cache_dir, f"historical_jobs_{year}.parquet")
-    if not os.path.exists(path) or os.path.getsize(path) == 0:
-        print(f"  downloading the {year} mirror", flush=True)
-        urllib.request.urlretrieve(f"{MIRROR}/historical_jobs_{year}.parquet", path)
+    if os.path.exists(path) and os.path.getsize(path) > 0:
+        return path
+
+    print(f"  downloading the {year} mirror", flush=True)
+    url = f"{MIRROR}/historical_jobs_{year}.parquet"
+    req = urllib.request.Request(url, headers={"User-Agent": "usajobs-audit/1.0"})
+    tmp = path + ".partial"
+    try:
+        with urllib.request.urlopen(req) as response, open(tmp, "wb") as fh:
+            while True:
+                chunk = response.read(1 << 20)
+                if not chunk:
+                    break
+                fh.write(chunk)
+        os.replace(tmp, path)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+        raise
     return path
 
 
