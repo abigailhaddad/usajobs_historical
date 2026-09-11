@@ -42,10 +42,14 @@ ssh root@$IP 'bash -s' < deploy/install-backfill.sh
 
 ## Cost
 
-`cx33` (4 vCPU, 8 GB) is €9.99/month or €0.016/hour, **billed hourly**. The backlog is
-about four days of work, so running it and destroying the box costs roughly a
-euro or two. The monthly figure is a cap, not a commitment — check the exact
-price in the create form, and destroy the server when the work is done.
+`cx33` (4 vCPU, 8 GB) is €9.99/month or €0.016/hour, **billed hourly**. The
+monthly figure is a cap, not a commitment — check the exact price in the create
+form, and destroy the server when the work is done.
+
+For scale: the 2013–2026 announcement backfill was ~3.2M pages and cost about
+€2.50 of box time end to end, spread over six days. Most of those days were
+spent on the three bugs in **What cost us time** below rather than on fetching;
+at the rate it finished at, the work itself is closer to two.
 
 8 GB rather than 4 because `compact()` concatenates a month's shards in pandas
 and peaks near 1.6 GB.
@@ -62,7 +66,8 @@ hard ceiling of 4.8 regardless of `BACKFILL_WORKERS`. The old "8–9 pages/sec,
 four days" figure came from a developer laptop, which is 4.4x faster per core.
 
 Parsing now runs in a process pool (`--parse-workers`, default one per core
-past the first). Measured 4.41 → 9.67 pages/sec on the box.
+past the first). Measured 4.41 → 9.67 pages/sec in an A/B on the box, and it
+held 9.8–11 pages/sec in production for the rest of the backfill.
 
 lxml was tried and rejected: 129.5 ms/page against `html.parser`'s 113.4 here,
 and it changes parse output.
@@ -135,6 +140,42 @@ start — as one operation.
 **Anything unattended belongs on the box, not in an editor session.** Agent
 watches and timers die with the session that made them; a `systemd-run`
 transient unit does not.
+
+**Raising a memory limit moves the wall; it does not remove it.** duckdb ran
+out building a month of announcement text, and the budget had already been
+raised once for the same reason. The input keeps growing — months went from
+~31k postings in 2021 to 35–42k in 2022 — so the fix was to slice the work by
+day and stitch the pieces, which makes peak memory a property of the slice
+instead of the month. Reach for that the second time you raise a limit, not the
+fourth.
+
+**A check scoped to the thing it is checking can only agree with it.** The
+backfill ran a hardcoded 2018–2025 and the completeness audit defaulted to the
+same years, so it reported the dataset complete while 2013–2016 had never been
+fetched at all — 4,048 postings. Nothing was broken; the question was just never
+asked. Derive a check's scope from the source of truth, not from the job.
+
+**Schema is data-dependent when you write dicts.** `save_jobs_to_parquet` stores
+whatever keys the parsed pages carried, so a column exists only if some row had
+it. Across 30,000 rows something always does, and the code had never met a
+smaller input. At six rows whole columns are absent, and naming one is a binder
+error rather than a null. Anything that reads such a file should select what is
+there and fill the rest.
+
+## Checking the result
+
+`python scripts/audit_completeness.py` compares every posting in the historical
+mirror against the dataset's manifest and exits non-zero on a gap it cannot
+account for. It is the answer to "did the backfill actually finish", and it is
+cheap — a couple of MB for the manifest plus ~40 MB per year of mirror.
+
+`scripts/unreachable_announcements.csv` holds the postings usajobs.gov will not
+serve, so a clean run reports them rather than looking like a hole. Twenty-five
+as of 2026-09-11: twenty-four 503s and one 404, unchanged across days. Adding
+one costs a whole month-file rebuild for a single row, so confirm a gap is real
+before chasing it — and confirm it against a known-good control number from the
+same month, because a batch of simultaneous 503s looks exactly like rate
+limiting and is not.
 
 ## Adding another repo
 
