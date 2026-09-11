@@ -48,9 +48,8 @@ BUILD_DIR = Path(__file__).resolve().parent.parent / "build" / "hf"
 # inserted_at / last_seen, bookkeeping for this pipeline's own collection runs;
 # backfilled, which only exists in 2024 and 2025.
 #
-# whoMayApply is cast because it is VARCHAR through 2024 and an empty INTEGER
-# from 2025. Without the cast the published month files disagree on its type
-# and the dataset cannot be read as a whole.
+# Every column is cast to the type it is published as; see NON_STRING_COLUMNS
+# for why, and for the six files that were published before it was.
 #
 # The list-valued columns are resolved per file rather than named here; see
 # resolve_list_columns for why nothing about the name is trustworthy.
@@ -103,28 +102,75 @@ def resolve_list_columns(con, hist_path):
     return out
 
 
+# The type every published column must have, for anything not VARCHAR.
+#
+# Enforced rather than assumed because duckdb types a column of untyped NULLs
+# as INT32, so a month where a metadata field happens to be entirely empty
+# publishes a different type for it than every other month does.
+#
+# Not hypothetical. whoMayApply went out as INT32 for 2026-01, -03, -04 and -05
+# before the cast below existed, and hiringSubelementName, serviceType and the
+# two announcementClosingType columns went out as unannotated BYTE_ARRAY for
+# 2013-09 and 2013-10, whose one and six rows leave them null.
+#
+# What that costs: arrow unifies string and binary to binary, and the 2013
+# files sort first, so all four of those columns read back as *bytes* for
+# everyone using the dataset -- which is what the HuggingFace viewer reports
+# for them. datasets-server has also been unable to build its index for this
+# dataset ("the dataset index is loading", then "the dataset index is corrupted
+# and being rebuilt"), which takes filter and search down; whether the drift is
+# the cause of that is unproven, but it is the only schema defect the dataset
+# has.
+# A refused month is an expected state, not a fault: it is what the guard does
+# while backfill_scraped_pages.py is still filling in a month's text, and the
+# daily workflow should note it and move on. Every other non-zero exit -- a
+# column type that drifted, an unhandled traceback -- means nothing was
+# published at all, which is worth waking someone for. Giving refusal its own
+# code is what lets the workflow tell those apart; exit 1 stays the loud one
+# because that is what an uncaught exception exits with.
+EXIT_REFUSED = 3
+
+
+NON_STRING_COLUMNS = {
+    "agencyLevel": "BIGINT",
+    "minimumSalary": "DOUBLE",
+    "maximumSalary": "DOUBLE",
+}
+
+
+def typed(column):
+    """`h.x` cast to the type x is published as."""
+    return (f"CAST(h.{column} AS {NON_STRING_COLUMNS.get(column, 'VARCHAR')}) "
+            f"AS {column}")
+
+
 def metadata_fields(con, hist_path):
     cols = resolve_list_columns(con, hist_path)
+    # Order is the dataset's existing column order; the dates sit in the
+    # middle of it, so the pass-through columns come in two runs around them.
+    before = ",\n    ".join(typed(c) for c in (
+        "positionTitle", "announcementNumber",
+        "hiringAgencyCode", "hiringAgencyName",
+        "hiringDepartmentCode", "hiringDepartmentName", "hiringSubelementName",
+        "agencyLevel", "agencyLevelSort",
+        "appointmentType", "workSchedule", "serviceType", "whoMayApply",
+        "payScale", "salaryType", "minimumSalary", "maximumSalary",
+        "minimumGrade", "maximumGrade", "promotionPotential",
+        "supervisoryStatus", "totalOpenings", "positionOpeningStatus",
+        "announcementClosingTypeCode", "announcementClosingTypeDescription",
+    ))
+    after = ",\n    ".join(typed(c) for c in (
+        "travelRequirement", "teleworkEligible", "relocationExpensesReimbursed",
+        "securityClearanceRequired", "securityClearance", "drugTestRequired",
+        "disableApplyOnline", "vendor",
+    ))
     return f"""
     h.usajobsControlNumber::varchar AS usajobsControlNumber,
-    h.positionTitle,
-    h.announcementNumber,
-    h.hiringAgencyCode, h.hiringAgencyName,
-    h.hiringDepartmentCode, h.hiringDepartmentName,
-    h.hiringSubelementName,
-    h.agencyLevel, h.agencyLevelSort,
-    h.appointmentType, h.workSchedule, h.serviceType,
-    CAST(h.whoMayApply AS VARCHAR) AS whoMayApply,
-    h.payScale, h.salaryType, h.minimumSalary, h.maximumSalary,
-    h.minimumGrade, h.maximumGrade, h.promotionPotential, h.supervisoryStatus,
-    h.totalOpenings, h.positionOpeningStatus,
-    h.announcementClosingTypeCode, h.announcementClosingTypeDescription,
+    {before},
     substr(h.positionOpenDate, 1, 10)   AS positionOpenDate,
     substr(h.positionCloseDate, 1, 10)  AS positionCloseDate,
     substr(h.positionExpireDate, 1, 10) AS positionExpireDate,
-    h.travelRequirement, h.teleworkEligible, h.relocationExpensesReimbursed,
-    h.securityClearanceRequired, h.securityClearance, h.drugTestRequired,
-    h.disableApplyOnline, h.vendor,
+    {after},
     {cols['hiringPaths']}        AS hiringPaths,
     {cols['jobCategories']}      AS jobCategories,
     {cols['positionLocations']}  AS positionLocations,
@@ -311,7 +357,8 @@ def select_sql(con, hist_path: str, scraped_path: str, month: str,
         # naming one is a binder error.
         local_have = parquet_columns(scraped_path)
         local_cols = ",\n        ".join(
-            c if c in local_have else f"CAST(NULL AS VARCHAR) AS {c}"
+            f"CAST({c} AS VARCHAR) AS {c}" if c in local_have
+            else f"CAST(NULL AS VARCHAR) AS {c}"
             for c in TEXT_FIELDS)
         if "text" in local_have:
             parts.append(f"""local_text AS (
@@ -329,7 +376,8 @@ def select_sql(con, hist_path: str, scraped_path: str, month: str,
         # up for the UNION.
         available = parquet_columns(prior_path)
         prior_cols = ",\n        ".join(
-            c if c in available else f"CAST(NULL AS VARCHAR) AS {c}"
+            f"CAST({c} AS VARCHAR) AS {c}" if c in available
+            else f"CAST(NULL AS VARCHAR) AS {c}"
             for c in TEXT_FIELDS)
         exclude = ("WHERE usajobsControlNumber NOT IN (SELECT cn FROM local_text)"
                    if union else "")
@@ -436,6 +484,27 @@ def stitch(parts, dest):
     finally:
         if writer is not None:
             writer.close()
+
+
+def check_types(path):
+    """Refuse to upload a month whose columns are not the published types.
+
+    The casts in metadata_fields are what keep this true. This is what turns a
+    future edit that drops one of them into a failed build rather than a
+    dataset that silently stops being indexable -- the failure mode is invisible
+    from here, since every month reads fine on its own and only the union of
+    them breaks.
+    """
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    arrow = {"BIGINT": pa.int64(), "DOUBLE": pa.float64()}
+    wrong = [f"{f.name} is {f.type}, expected {want}"
+             for f in pq.read_schema(path)
+             for want in [arrow.get(NON_STRING_COLUMNS.get(f.name), pa.string())]
+             if f.type != want]
+    if wrong:
+        raise SystemExit(f"{path} has the wrong column types, refusing to "
+                         f"publish it: " + "; ".join(wrong))
 
 
 def download_month(repo, month, token):
@@ -630,7 +699,7 @@ def main() -> int:
 
     if not todo:
         print("Nothing to publish")
-        return 1 if refused else 0
+        return EXIT_REFUSED if refused else 0
 
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
     written = []
@@ -675,6 +744,7 @@ def main() -> int:
             con.execute(
                 f"COPY ({select_sql(con, str(hist), str(scraped), month, priors.get(month))}) "
                 f"TO '{dest}' {copy_opts};")
+        check_types(dest)
         rows = con.execute(
             f"SELECT count(*) FROM read_parquet('{dest}')").fetchone()[0]
         print(f"  {name}: {rows:,} rows, {dest.stat().st_size/1e6:.1f} MB")
@@ -713,7 +783,7 @@ def main() -> int:
         print(f"Dropped local text for {cleared:,} published postings; "
               f"{scraped.name} is now {after:,.0f} MB")
 
-    return 1 if refused else 0
+    return EXIT_REFUSED if refused else 0
 
 
 if __name__ == "__main__":
