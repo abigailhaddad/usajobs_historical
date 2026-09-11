@@ -23,7 +23,12 @@
 
 set -uo pipefail
 
-YEARS="${BACKFILL_YEARS:-2018 2019 2020 2021 2022 2023 2024 2025}"
+# Every year the historical mirror has, not just the ones that happened to be
+# listed here. This said 2018-2025 until 2026-09-11, and 2013-2016 was never
+# fetched as a result -- 4,048 postings, unnoticed because the completeness
+# audit defaulted to the same range and so could only ever agree with it.
+# A year with nothing to do costs one manifest read.
+YEARS="${BACKFILL_YEARS:-2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025}"
 WORKERS="${BACKFILL_WORKERS:-6}"
 # Processes that parse pages. Empty means "one per core past the first", which
 # is 3 on a cx33. This is the throughput knob; WORKERS above is the request
