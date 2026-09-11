@@ -37,7 +37,7 @@ ssh root@$IP 'bash -s' < deploy/install-backfill.sh
 ./deploy/server.sh status    # what exists
 ./deploy/server.sh logs      # follow the job
 ./deploy/server.sh ssh       # shell
-./deploy/server.sh destroy   # stop paying
+./deploy/server.sh destroy   # stop paying (prompts; add --yes to skip)
 ```
 
 ## Cost
