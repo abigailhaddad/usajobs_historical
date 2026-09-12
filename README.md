@@ -4,7 +4,7 @@
 
 **This is not an official USAJobs project.**
 
-**~2.85M job announcements from 2018-2026 via the Historical + Current APIs**
+**3.2M job announcements from 2013-2026 via the Historical + Current APIs**
 
 ## Browse the Data
 
@@ -52,7 +52,7 @@ Files are Parquet format and work with Python, R, or any Parquet-compatible tool
 
 ## Data Coverage
 
-Data collection last run: 2026-09-11. Coverage spans 2018-2026 with approximately 2.85M job postings. Early years (pre-2017) are incomplete, mostly consisting of jobs with closing dates years after the opening dates.
+Data collection last run: 2026-09-11. Coverage runs 2013-2026, and the published announcement dataset holds 3,229,043 announcements. Early years (pre-2017) are incomplete, mostly jobs with closing dates years after the opening dates.
 
 | Year | Jobs Opened | Jobs Closed |
 |------|-------------|-------------|
@@ -70,6 +70,11 @@ Data collection last run: 2026-09-11. Coverage spans 2018-2026 with approximatel
 | 2024 | 367,776 | 352,305 |
 | 2025 | 256,094 | 240,107 |
 | 2026 | 354,433 | 351,655 |
+
+The table sums rows in `historical_jobs_{year}.parquet` and
+`current_jobs_{year}.parquet`, so a posting that appears in both APIs is counted
+twice and the yearly figures run high. Deduplicate by `usajobsControlNumber`
+before quoting them; see the `hiringAgencyName` section below for how.
 
 Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,633 closed that year). 2017 starts with limited data in January-February, then ramps up significantly from March onward. Some job postings may have future opening dates.
 
@@ -119,9 +124,10 @@ The `jobs_5yr.parquet` web dataset already has this fix applied — it is safe t
 ## Scraping usajobs.gov instead of the API (shadow run)
 
 Since 2026-09-02 the daily pipeline also collects the same postings without an
-API key, by scraping usajobs.gov. It writes `data/scraped_jobs_*.parquet`, and
-nothing downstream reads them yet. The point is to find out whether the site
-could replace the Current API if the key ever stopped working.
+API key, by scraping usajobs.gov. It writes `data/scraped_jobs_*.parquet`, which is
+where `publish_to_huggingface.py` gets the announcement text. The other point is
+to find out whether the site could replace the Current API if the key ever
+stopped working.
 
 Two keyless sources. `POST https://www.usajobs.gov/Search/ExecuteSearch` is the
 JSON endpoint behind the search page — no auth, no cookie — and returns about
@@ -137,7 +143,7 @@ It also pulls the announcement body apart by the page's own headings, which the
 API can't do at all: `jobSummary`, `majorDuties`, `conditionsOfEmployment`,
 `qualificationSummary`, `education`, `additionalInformation`,
 `howYouWillBeEvaluated`, `requiredDocuments`, `howToApply`, plus the whole-page
-`text` the [announcement-text dataset](https://github.com/abigailhaddad/joa)
+`text` the [announcement dataset](https://huggingface.co/datasets/abigailhaddad/usajobs-scraping)
 stores. `MatchedObjectDescriptor` drops content the page shows, and even the
 page's own ld+json carries a truncated `qualifications` — 1,503 characters
 against the page's 1,845 on the announcement the tests use. Across a 50-page
@@ -171,7 +177,7 @@ parquets — `repoll_status.py` is the only consumer and it writes them into the
 historical files, from the keyless `/api/historicjoa`. It also can't backfill — search
 only lists open postings, so this accumulates forward from the day it started.
 Closed announcement pages do stay up indefinitely, which is what the
-[announcement-text dataset](https://github.com/abigailhaddad/joa) relies on.
+[announcement dataset](https://huggingface.co/datasets/abigailhaddad/usajobs-scraping) relies on.
 
 Coverage shortfalls and field disagreements past the thresholds in
 `compare_scrape_to_api.py` open a GitHub issue. Neither the scrape nor the
@@ -211,6 +217,30 @@ python scripts/publish_to_huggingface.py --dry-run
 python scripts/publish_to_huggingface.py
 python scripts/publish_to_huggingface.py --refresh-all   # rewrite every month
 ```
+
+### Querying it
+
+DuckDB reads the month files over HTTP, so a query costs the columns it touches
+rather than the 10.5 GB:
+
+```sql
+SELECT count(*)
+FROM read_parquet('hf://datasets/abigailhaddad/usajobs-scraping/data/2025_*.parquet');
+```
+
+Go a year at a time. Globbing all 152 files at once gets an anonymous reader a
+429 partway through.
+
+The dataset viewer's filter and search are a different thing. HuggingFace
+indexes a fixed slice of a dataset this size, and here that slice is 99,059 rows
+out of 3,229,043 — counts off the viewer are about 3% of the data, and the page
+does not say so. Use DuckDB for anything you plan to quote.
+
+Every column is published as a string except `agencyLevel` (BIGINT) and the two
+salary columns (DOUBLE). That is enforced rather than assumed: duckdb types a
+column of untyped NULLs as INT32, so a month where some field happens to be
+entirely empty used to publish the wrong type for it, and `check_types()`
+refuses to upload a month whose columns have drifted.
 
 ### What stays on disk
 
@@ -253,9 +283,14 @@ pruned once published.
 
 ### The rest of the backlog, in Actions
 
-There are ~3.2M postings from 2017 on — about 81 hours of fetching at the rate
-one runner sustains, so it does not belong in a single run. The
-**Backfill Announcement Pages** workflow chunks it one month per job, ~30k
+Done as of 2026-09-11: every announcement the historical mirror knows about is
+published except 22 that usajobs.gov will not serve — 21 that return 503 forever
+and one 404. `scripts/audit_completeness.py` checks this against the manifest
+without downloading the dataset, and exits non-zero if anything new goes
+missing. The known-unreachable list is `scripts/unreachable_announcements.csv`.
+
+The workflow that did it is still there for a future gap. The
+**Backfill Announcement Pages** workflow chunks the work one month per job, ~30k
 pages and ~45 minutes each. Dispatch it with a year, a list, or a range
 (`2017`, `2017,2018`, `2019-2022`).
 
@@ -331,7 +366,7 @@ Old pages are all still served — a sample across 2017, 2019, 2021, 2023 and
 ├── data/                    # Local data (gitignored, stored in R2)
 │   ├── historical_jobs_YEAR.parquet  # Historical jobs by year
 │   ├── current_jobs_YEAR.parquet     # Current jobs by year
-│   └── scraped_jobs_YEAR.parquet     # Scraped shadow collection (unused downstream)
+│   └── scraped_jobs_YEAR.parquet     # Scraped pages; source of the announcement text
 └── logs/                    # Auto-generated pipeline logs
 ```
 

@@ -63,5 +63,7 @@ questionnaires/session_base64.txt
 build/
 data/.scraped_shards_*/
 
-# Hetzner API token for deploy/server.sh
-deploy/.hcloud.env
+# The Hetzner worker box that ran the 2017-2025 page backfill. The backfill is
+# done and the box is destroyed, so the provisioning scripts stay on the laptop
+# rather than in the repo -- including .hcloud.env, which holds an API token.
+deploy/
