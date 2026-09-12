@@ -236,6 +236,10 @@ indexes a fixed slice of a dataset this size, and here that slice is 99,059 rows
 out of 3,229,043 — counts off the viewer are about 3% of the data, and the page
 does not say so. Use DuckDB for anything you plan to quote.
 
+`notebooks/announcement_text_queries.ipynb` works through four questions the API cannot answer —
+who needs a doctorate, where the structured fields and the prose disagree, direct hire authority,
+and one query that looks great and means nothing.
+
 Every column is published as a string except `agencyLevel` (BIGINT) and the two
 salary columns (DOUBLE). That is enforced rather than assumed: duckdb types a
 column of untyped NULLs as INT32, so a month where some field happens to be
