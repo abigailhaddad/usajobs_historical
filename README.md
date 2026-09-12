@@ -4,7 +4,7 @@
 
 **This is not an official USAJobs project.**
 
-**3.2M job announcements from 2013-2026 via the Historical + Current APIs**
+**3,229,683 job announcements from 2013-2026 via the Historical + Current APIs**
 
 ## Browse the Data
 
@@ -67,9 +67,9 @@ Data collection last run: 2026-09-12. Coverage runs 2013-2026, and the published
 | 2021 | 369,151 | 352,375 |
 | 2022 | 441,604 | 419,295 |
 | 2023 | 454,652 | 434,527 |
-| 2024 | 367,776 | 352,305 |
-| 2025 | 256,094 | 240,107 |
-| 2026 | 356,088 | 353,299 |
+| 2024 | 367,192 | 352,305 |
+| 2025 | 168,530 | 161,044 |
+| 2026 | 180,740 | 179,369 |
 
 Counts are distinct announcements, deduplicated by `usajobsControlNumber`
 across both APIs. They used to be row counts added together, which counted
