@@ -31,8 +31,10 @@ API can't do at all: `jobSummary`, `majorDuties`, `requirements`,
 stores. `MatchedObjectDescriptor` drops content the page shows, and even the
 page's own ld+json carries a truncated `qualifications` — 1,503 characters
 against the page's 1,845 on the announcement the tests use. Across a 50-page
-live sample every field but `education` was populated on every announcement,
-and `education` is genuinely missing from about one in six.
+live sample every field but `education` was populated on every announcement.
+Measured on the published dataset instead of that sample, `education` is
+genuinely missing from 10-13% of announcements (2024-06: 10.5%, 2026-08:
+13.2%); `text` and the structured fields are on effectively every row.
 
 `scripts/compare_scrape_to_api.py` diffs the two collections after each run and
 writes a report to `logs/scrape_vs_api_<date>.md`, uploaded as a workflow
