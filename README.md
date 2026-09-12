@@ -1,22 +1,18 @@
 # USAJobs Data Pipeline
 
-**Data collection last run: 2026-09-12**
+**Data collection last run: 2026-09-12** (updated daily from GitHub Actions)
 
 **This is not an official USAJobs project.**
 
 **3,229,683 job announcements from 2013-2026 via the Historical + Current APIs**
-
-## Browse the Data
-
-**[Live site](https://usajobs-historical.abigailhaddad.com)** -- Interactive DataTable with filters, charts (jobs by month, top agencies, grade distribution), multi-column sorting, and shareable filter URLs. Shows a curated subset of 14 columns (title, agency, grade, salary, dates, location, etc.).
 
 ## Getting the Data
 
 | Option | What you get | How |
 |--------|-------------|-----|
 | **[Live site](https://usajobs-historical.abigailhaddad.com)** | 14 key columns, interactive filtering/charts | Just visit the site |
-| **Web dataset** | Same 14 columns as the site, one parquet file | `python download_data.py --web-only` |
-| **Full dataset** | All 40+ fields per job (nested JSON, qualifications, duty descriptions, all original API fields) | `python download_data.py` |
+| **Web dataset** | Same 14 columns as the site, one parquet file (~50MB) | `python download_data.py --web-only` |
+| **Full dataset** | All 40+ fields per job (nested JSON, qualifications, duty descriptions, all original API fields); one file per year, ~1.4GB in total | `python download_data.py` |
 | **Run the pipeline yourself** | Collect your own data from the USAJobs APIs | See [Setup](#setup) below |
 
 ```bash
@@ -38,11 +34,51 @@ df_2024 = pd.read_parquet('data/historical_jobs_2024.parquet')
 print(f"Loaded {len(df_2024):,} federal job postings from 2024")
 print(f"Columns: {len(df_2024.columns)}")  # 40+ fields
 
-# Or the web dataset (smaller, deduplicated, all years in one file)
-df_web = pd.read_parquet('data/jobs_5yr.parquet')
+# Or the web dataset (smaller, deduplicated, 2018-present in one file)
+df_web = pd.read_parquet('data/jobs_5yr.parquet')  # historical name; covers 2018-present
 ```
 
 Files are Parquet format and work with Python, R, or any Parquet-compatible tool.
+
+The 14 columns in the web dataset are `usajobsControlNumber`, `positionTitle`,
+`hiringDepartmentName`, `hiringAgencyName`, `grade`, `minimumSalary`,
+`maximumSalary`, `openDate`, `closeDate`, `appointmentType`, `serviceType`,
+`locations`, `status` and `occupationalSeries`.
+
+`download_data.py` writes each file whole and skips nothing on a re-run, so if a
+download dies partway through, run it again -- it overwrites rather than
+resuming.
+
+## Known limitation: combining historical and current parquets
+
+When combining `historical_jobs_*.parquet` and `current_jobs_*.parquet`, `hiringAgencyName` can differ for the same job:
+
+- **Historical parquets** usually have the specific bureau-level name (e.g. `"Executive Office for U.S. Attorneys and the Office of the U.S. Attorneys"`), but this is not guaranteed — both APIs return only the department-level name (e.g. `"Department of Justice"`) when the posting agency never populated the sub-agency field. This means some jobs genuinely cannot be attributed to a specific bureau, regardless of which API source you use.
+- **Current parquets** sometimes have only the department-level name even when the historical API has the bureau name, because the current API's `OrganizationName` field is not always populated.
+
+Naively unioning both and grouping by `hiringAgencyName` will **double-count** those jobs — once under the specific bureau name (from historical) and once under the department name (from current).
+
+**Correct approach:** Deduplicate by `usajobsControlNumber`, preferring the record where `hiringAgencyName != hiringDepartmentName`, and falling back to either record when neither has a bureau name. The `scripts/parquet_utils.py` module provides ready-to-use helpers:
+
+```python
+# DuckDB (server-side, no download)
+import duckdb
+from scripts.parquet_utils import build_deduped_query
+
+R2 = "https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev"
+years = range(2023, 2027)
+sql = build_deduped_query(
+    hist_urls=[f"{R2}/historical_jobs_{y}.parquet" for y in years],
+    curr_urls=[f"{R2}/current_jobs_{y}.parquet" for y in years],
+    where="hiringDepartmentName = 'Department of Justice'")
+df = duckdb.connect().execute(sql).df()
+
+# Pandas (local files)
+from scripts.parquet_utils import combine_and_fix
+result = combine_and_fix(hist_frames=[hist_df], curr_frames=[curr_df])
+```
+
+The `jobs_5yr.parquet` web dataset already has this fix applied — it is safe to query directly without deduplication.
 
 ## Resources
 
@@ -52,7 +88,8 @@ Files are Parquet format and work with Python, R, or any Parquet-compatible tool
 
 ## Data Coverage
 
-Data collection last run: 2026-09-12. Coverage runs 2013-2026, and the published announcement dataset holds 3,229,043 announcements. Early years (pre-2017) are incomplete, mostly jobs with closing dates years after the opening dates.
+Coverage runs 2013-2026. Early years (pre-2017) are incomplete, mostly jobs
+with closing dates years after the opening dates.
 
 | Year | Jobs Opened | Jobs Closed |
 |------|-------------|-------------|
@@ -72,11 +109,16 @@ Data collection last run: 2026-09-12. Coverage runs 2013-2026, and the published
 | 2026 | 180,740 | 179,369 |
 
 Counts are distinct announcements, deduplicated by `usajobsControlNumber`
-across both APIs. They used to be row counts added together, which counted
-every posting that appears in both APIs twice — for 2026 that was 356,088
-against a real 180,740.
+across both APIs. Each row is deduplicated within its own year file, so a
+posting open across a year boundary is counted in both years and the column
+sums to a few hundred more than the header total.
 
-Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,633 closed that year). 2017 starts with limited data in January-February, then ramps up significantly from March onward. Some job postings may have future opening dates.
+Figures published before September 2026 were row counts added together, which
+counted every posting appearing in both APIs twice — 2026 read 356,088 against
+a real 180,740.
+
+Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,633 closed that year). 2017 starts with limited data in January-February, then ramps up from March onward. Some postings have opening dates in the future, so a filter on
+open date will pick up jobs that have not opened yet.
 
 ## Dual API Integration & Deduplication
 
@@ -84,228 +126,48 @@ This dataset combines data from **two USAJobs APIs**:
 
 - **Historical API** (`/api/historicjoa`): Past job announcements by date range (no auth required)
 - **Current API** (`/api/Search`): Currently active job postings (requires API key)
-- **API Documentation**: [developer.usajobs.gov](https://developer.usajobs.gov/)
 
-Current API jobs generally also appear in the Historical API data, but we collect from both to ensure complete coverage. The `current_jobs_*.parquet` files contain cumulative data -- all jobs that have ever appeared in the Current API, not just currently active ones.
+Current API jobs generally also appear in the Historical API data, but we collect from both anyway. The `current_jobs_*.parquet` files contain cumulative data -- all jobs that have ever appeared in the Current API, not just currently active ones.
 
-### Data Processing
-
-- **Field Rationalization**: Current API fields mapped to historical naming conventions for consistent querying
-- **Data Preservation**: All original fields from both APIs retained alongside rationalized overlay fields
-- **Deduplication**: Use `usajobsControlNumber` to identify records appearing in both APIs
+Current API fields are mapped onto the historical naming, so the same query
+works against either. Nothing is dropped -- the original fields from both APIs
+stay alongside the mapped ones.
 
 Both APIs are rationalized to a common schema and stored in year-based Parquet files in Cloudflare R2.
 
-### ⚠️ Known limitation: hiringAgencyName in current parquets
-
-When combining `historical_jobs_*.parquet` and `current_jobs_*.parquet`, be aware that `hiringAgencyName` can differ for the same job:
-
-- **Historical parquets** usually have the specific bureau-level name (e.g. `"Executive Office for U.S. Attorneys and the Office of the U.S. Attorneys"`), but this is not guaranteed — both APIs return only the department-level name (e.g. `"Department of Justice"`) when the posting agency never populated the sub-agency field. This means some jobs genuinely cannot be attributed to a specific bureau, regardless of which API source you use.
-- **Current parquets** sometimes have only the department-level name even when the historical API has the bureau name, because the current API's `OrganizationName` field is not always populated.
-
-Naively unioning both and grouping by `hiringAgencyName` will **double-count** those jobs — once under the specific bureau name (from historical) and once under the department name (from current).
-
-**Correct approach:** Deduplicate by `usajobsControlNumber`, preferring the record where `hiringAgencyName != hiringDepartmentName`. The `scripts/parquet_utils.py` module provides ready-to-use helpers:
-
-```python
-# DuckDB (server-side, no download)
-from scripts.parquet_utils import build_deduped_query
-sql = build_deduped_query(hist_urls=[...], curr_urls=[...],
-                          where="hiringDepartmentName = 'Department of Justice'")
-df = duckdb.connect().execute(sql).df()
-
-# Pandas (local files)
-from scripts.parquet_utils import combine_and_fix
-result = combine_and_fix(hist_frames=[hist_df], curr_frames=[curr_df])
-```
-
-The `jobs_5yr.parquet` web dataset already has this fix applied — it is safe to query directly without deduplication.
-
-## Scraping usajobs.gov instead of the API (shadow run)
-
-Since 2026-09-02 the daily pipeline also collects the same postings without an
-API key, by scraping usajobs.gov. It writes `data/scraped_jobs_*.parquet`, which is
-where `publish_to_huggingface.py` gets the announcement text. The other point is
-to find out whether the site could replace the Current API if the key ever
-stopped working.
-
-Two keyless sources. `POST https://www.usajobs.gov/Search/ExecuteSearch` is the
-JSON endpoint behind the search page — no auth, no cookie — and returns about
-25 fields per posting plus a facet block. The facets are computed over the
-whole result set rather than the 10,000 the `Total` field reports, so one call
-gives the true open-inventory size and its breakdown by occupational series;
-that's how the collection slices itself under the same 10,000 ceiling the API
-has. Then `GET https://www.usajobs.gov/job/{control_number}` for postings we
-haven't stored, which is server-rendered HTML where every overview field is a
-`<dt>`/`<dd>` pair.
-
-It also pulls the announcement body apart by the page's own headings, which the
-API can't do at all: `jobSummary`, `majorDuties`, `conditionsOfEmployment`,
-`qualificationSummary`, `education`, `additionalInformation`,
-`howYouWillBeEvaluated`, `requiredDocuments`, `howToApply`, plus the whole-page
-`text` the [announcement dataset](https://huggingface.co/datasets/abigailhaddad/usajobs-scraping)
-stores. `MatchedObjectDescriptor` drops content the page shows, and even the
-page's own ld+json carries a truncated `qualifications` — 1,503 characters
-against the page's 1,845 on the announcement the tests use. Across a 50-page
-live sample every field but `education` was populated on every announcement,
-and `education` is genuinely missing from about one in six.
-
-`scripts/compare_scrape_to_api.py` diffs the two collections after each run and
-writes a report to `logs/scrape_vs_api_<date>.md`, uploaded as a workflow
-artifact. On the first full check — all 354 open 2210 postings, 2026-09-02 —
-coverage was 354/354 and all 18 comparable fields matched exactly. The scrape
-also carries `workSchedule`, `promotionPotential` and `supervisoryStatus`,
-which the Current API collection doesn't populate. The text fields have no API
-counterpart to check against, so the report tracks their fill rate instead: if
-usajobs.gov changes its markup they go empty, and that's the signal.
-
-Duty stations come out as a `PositionLocations` column in the historical API's
-`{positionLocationCity, positionLocationState}` shape, so `prep_web_data.py`
-consumes them through the path it already has. Rendered through that same
-extractor, the location string matched the API exactly on 337 of 348 postings.
-The other 11 are the page's own doing rather than a parse failure: a posting
-with 31 API entries across 22 cities renders 12, and some collapse to a label
-like "Location Negotiable After Selection". The search endpoint's own
-`positionLocationCount` matched the API on all 348, so the accurate count is
-kept alongside the page's list in `scrapedLocationCount` and the gap stays
-measurable.
-
-What scraping can't give you: `hiringAgencyCode`, `hiringDepartmentCode`,
-`agencyLevel`, `agencyLevelSort`, `vendor`, `whoMayApply`. Those are API-only
-and the announcement page never shows them. Nothing reads them off the current
-parquets — `repoll_status.py` is the only consumer and it writes them into the
-historical files, from the keyless `/api/historicjoa`. It also can't backfill — search
-only lists open postings, so this accumulates forward from the day it started.
-Closed announcement pages do stay up indefinitely, which is what the
-[announcement dataset](https://huggingface.co/datasets/abigailhaddad/usajobs-scraping) relies on.
-
-Coverage shortfalls and field disagreements past the thresholds in
-`compare_scrape_to_api.py` open a GitHub issue. Neither the scrape nor the
-comparison can fail the daily run.
-
-## The HuggingFace announcement dataset
+## Announcement text (HuggingFace)
 
 [abigailhaddad/usajobs-scraping](https://huggingface.co/datasets/abigailhaddad/usajobs-scraping)
-is one parquet per month plus a manifest, published daily by
-`scripts/publish_to_huggingface.py`. It joins the two halves this pipeline
-already has on disk: structured fields from `historical_jobs_{year}.parquet`,
-and announcement text from `scraped_jobs_{year}.parquet`. Nothing is fetched at
-publish time.
+carries the full announcement text the API does not return: one parquet per
+month, published daily. Eleven parsed sections -- `jobSummary`, `majorDuties`,
+`qualificationSummary`, `education` and the rest -- plus the whole-page `text`.
 
-This replaced a publish path that lived in a separate repo
-([joa](https://github.com/abigailhaddad/joa)) and keyed off the historical
-mirror alone. Two things were wrong with it. Its field list never selected
-`positionTitle`, so the published dataset had no job title in it — easy to miss,
-because its controls CSV aliased `announcementNumber` as "title". And it could
-not carry the eleven structured announcement sections, which come from a parse
-that lives here.
-
-The dataset went from 40 columns to 53: `positionTitle` and
-`hiringSubelementName`, plus `jobSummary`, `majorDuties`, `requirements`,
-`conditionsOfEmployment`, `qualificationSummary`, `education`,
-`additionalInformation`, `benefits`, `howYouWillBeEvaluated`,
-`requiredDocuments` and `howToApply`. The whole-page `text` column stays, so
-anything built against it keeps working — columns are only ever added.
-
-A month file is rewritten wholesale, so the publisher refuses to write a month
-when the local join is missing announcements the dataset already holds, rather
-than silently shrinking it. That is the expected state while the page backfill
-is still running.
-
-```bash
-python scripts/publish_to_huggingface.py --dry-run
-python scripts/publish_to_huggingface.py
-python scripts/publish_to_huggingface.py --refresh-all   # rewrite every month
-```
-
-### Querying it
-
-DuckDB reads the month files over HTTP, so a query costs the columns it touches
-rather than the 10.5 GB:
+It exists because the daily pipeline also scrapes usajobs.gov without an API
+key, alongside the API collection. That scrape is the source of the text, and
+it doubles as a check on whether the site could replace the Current API if the
+key ever stopped working.
 
 ```sql
 SELECT count(*)
 FROM read_parquet('hf://datasets/abigailhaddad/usajobs-scraping/data/2025_*.parquet');
 ```
 
-Go a year at a time. Globbing all 152 files at once gets an anonymous reader a
-429 partway through.
+DuckDB reads the month files over HTTP, so a query costs the columns it touches
+rather than the whole dataset. Go a year at a time -- globbing every file at
+once gets an anonymous reader a 429 partway through.
 
 The dataset viewer's filter and search are a different thing. HuggingFace
-indexes a fixed slice of a dataset this size, and here that slice is 99,059 rows
-out of 3,229,043 — counts off the viewer are about 3% of the data, and the page
-does not say so. Use DuckDB for anything you plan to quote.
+indexes a fixed slice of a dataset this size -- here that was 99,059 rows of
+about 3.2 million -- so counts off the viewer are roughly 3% of the data, and
+the page does not say so. Use DuckDB for anything you plan to quote.
 
-`notebooks/announcement_text_queries.ipynb` works through four questions the API cannot answer —
-who needs a doctorate, where the structured fields and the prose disagree, direct hire authority,
-and one query that looks great and means nothing.
+`notebooks/announcement_text_queries.ipynb` works through four questions the
+API cannot answer: who needs a doctorate, where the structured fields and the
+prose disagree, direct hire authority, and one query that looks great and means
+nothing.
 
-Every column is published as a string except `agencyLevel` (BIGINT) and the two
-salary columns (DOUBLE). That is enforced rather than assumed: duckdb types a
-column of untyped NULLs as INT32, so a month where some field happens to be
-entirely empty used to publish the wrong type for it, and `check_types()`
-refuses to upload a month whose columns have drifted.
-
-### What stays on disk
-
-Announcement text is 97.8% of `scraped_jobs_{year}.parquet` — 5.42 KB of a
-5.54 KB row — so a full year would be 920 MB local against 20 MB for
-everything else in it. HuggingFace is the store for the text instead: after a
-month publishes, the publisher blanks those rows' text columns locally, and
-what stays is the structured shadow the API comparison reads plus anything not
-yet pushed. Measured on real rows, that takes a 162,000-row year from 920 MB to
-34 MB. `--keep-text` opts out.
-
-### Backfilling announcement pages
-
-The scraped collection only starts the day it was switched on, so postings from
-earlier in the year have metadata but no text. usajobs.gov serves closed
-announcements indefinitely, so they can be filled in — roughly 160k pages for a
-full year.
-
-It works a month at a time and publishes each one as it lands, so the working
-set stays near a single month rather than piling up the year, and a killed run
-resumes at month granularity. Within a month it writes immutable shards and
-folds them in once at the end.
-
-It is network-bound, not CPU-bound: a page costs ~32 ms to parse, so a full
-year is about 86 CPU-minutes over those three hours. It runs niced and under a
-CPU governor by default. `--max-cpu` is a share of **one** core, not of the
-machine — measured, an uncapped run sits at 53% of a core, and `--max-cpu 15`
-holds it to 18% at three times the wall clock.
-
-```bash
-python scripts/backfill_scraped_pages.py --year 2026 --dry-run
-python scripts/backfill_scraped_pages.py --year 2026
-python scripts/backfill_scraped_pages.py --year 2026 --max-cpu 20   # gentler
-python scripts/backfill_scraped_pages.py --year 2026 --no-publish   # keep local
-```
-
-2026 ran locally in 175 minutes for 160k pages: zero failures, zero 404s, 68.8
-CPU-minutes, and the local parquet ended at 15 MB because each month's text is
-pruned once published.
-
-### The rest of the backlog, in Actions
-
-Done as of 2026-09-11: every announcement the historical mirror knows about is
-published except 22 that usajobs.gov will not serve — 21 that return 503 forever
-and one 404. `scripts/audit_completeness.py` checks this against the manifest
-without downloading the dataset, and exits non-zero if anything new goes
-missing. The known-unreachable list is `scripts/unreachable_announcements.csv`.
-
-The workflow that did it is still there for a future gap. The
-**Backfill Announcement Pages** workflow chunks the work one month per job, ~30k
-pages and ~45 minutes each. Dispatch it with a year, a list, or a range
-(`2017`, `2017,2018`, `2019-2022`).
-
-Month jobs are stateless. `--known-from-hf` takes the already-done set from the
-dataset's manifest instead of a shared parquet, so nothing is pulled from R2
-beforehand or written back after and jobs cannot race. `max-parallel` is
-deliberately 3: it multiplies with each job's `workers`, so 3 x 6 is already 18
-concurrent requests against the 8 a daily run uses.
-
-Old pages are all still served — a sample across 2017, 2019, 2021, 2023 and
-2025 came back 40/40 alive with every section parsing.
+How the scrape works, what it can't reach, how the text is published and
+pruned, and how the 2013-2025 backfill ran: [docs/scraping.md](docs/scraping.md).
 
 ## Data Storage
 
@@ -352,6 +214,8 @@ Old pages are all still served — a sample across 2017, 2019, 2021, 2023 and
 │   ├── run_parallel.sh          # Run multiple years in parallel
 │   ├── run_single.sh            # Run single date range or current jobs
 │   └── monitor_parallel.sh      # Monitor parallel job progress
+├── docs/
+│   └── scraping.md              # How the scrape and the announcement dataset work
 ├── update/                  # Automated update scripts
 │   ├── update_all.py            # Comprehensive update: data + docs
 │   ├── generate_docs_data.py    # Generate documentation data
@@ -390,12 +254,13 @@ groups: 129.2MB to 51.2MB, 3 row groups to 30. The job-listing query went from
 
 ## Run Pipeline
 
-**Workflow for data updates:**
-
 ```bash
 # Collect current jobs and update documentation
-python update/update_all.py      # Update data + docs
+cd update && python update_all.py
 ```
+
+It has to be run from `update/` -- it resolves everything through `../`, and
+exits immediately if you start it anywhere else.
 
 `update_all.py` runs the scraped collection and the comparison too. To run
 either alone, no API key needed:
@@ -422,7 +287,7 @@ Sometimes the USAJobs API has issues. Monitor your runs and check log files for 
 
 ### Retrying Failed Dates
 
-If dates fail to collect, the system provides specific retry commands:
+`collect_data.py` prints a retry command for every date that failed:
 
 ```bash
 # The system will show failed dates and provide exact retry commands:
@@ -443,8 +308,18 @@ The `questionnaires/` directory monitors federal job questionnaires for new essa
 
 **Dashboard (updated daily)**: https://federalhiringessays.netlify.app/
 
-The system:
-- Daily scrapes questionnaires from USAStaffing and Monster Government
-- Identifies jobs asking "How would you help advance the President's Executive Orders and policy priorities in this role?"
-- Shows trends by agency, location, grade level, and time
-- Updates automatically via GitHub Actions
+It scrapes USAStaffing and Monster Government daily, looking for jobs that ask
+"How would you help advance the President's Executive Orders and policy
+priorities in this role?" The dashboard breaks it out by agency, location,
+grade and date, and updates from Actions.
+
+## License and citation
+
+MIT, see [LICENSE](LICENSE). The data itself is US federal government work.
+
+If you use this in published work:
+
+> Haddad, Abigail. *USAJobs Historical Data Pipeline*, 2026.
+> https://github.com/abigailhaddad/usajobs_historical
+
+Bugs and questions: [open an issue](https://github.com/abigailhaddad/usajobs_historical/issues).

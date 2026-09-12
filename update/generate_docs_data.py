@@ -7,13 +7,14 @@ to automatically update the documentation with accurate field information,
 data coverage statistics, and examples.
 
 Usage:
-    python update/generate_docs_data.py
+    cd update && python generate_docs_data.py
 """
 
 import pandas as pd
 import pyarrow.parquet as pq
 import json
 import os
+import re
 import glob
 from datetime import datetime
 import numpy as np
@@ -194,12 +195,35 @@ def analyze_data_coverage(counts=None):
     
     return coverage_data
 
-def analyze_all_fields():
-    """Analyze all fields from the most recent complete year (2024)
+def newest_complete_year(data_dir='../data'):
+    """The latest year with a historical file that is not the year in progress.
+
+    This used to be the literal 2024, so the field table kept describing 2024's
+    schema long after 2025 finished -- and the schema does move between years
+    (the nested array columns changed case), so a frozen snapshot documents
+    columns that are empty in the data a reader actually has.
+    """
+    years = []
+    for path in glob.glob(os.path.join(data_dir, 'historical_jobs_*.parquet')):
+        m = re.search(r'historical_jobs_(\d{4})\.parquet$', path)
+        if m:
+            years.append(int(m.group(1)))
+    complete = [y for y in years if y < datetime.now().year]
+    if not complete:
+        raise FileNotFoundError(
+            f"No complete-year historical_jobs_*.parquet in {data_dir} "
+            f"(found years: {sorted(years)})")
+    return max(complete)
+
+
+def analyze_all_fields(year=None):
+    """Analyze all fields from the most recent complete year.
 
     One column at a time: peak memory is a single column, not the whole file.
     """
-    path = '../data/historical_jobs_2024.parquet'
+    if year is None:
+        year = newest_complete_year()
+    path = f'../data/historical_jobs_{year}.parquet'
     schema = pq.read_schema(path)
     n_rows = pq.read_metadata(path).num_rows
 
@@ -256,6 +280,7 @@ def analyze_all_fields():
     
     return field_data
 
+
 def get_file_sizes():
     """Calculate total size of parquet files"""
     all_files = glob.glob('../data/historical_jobs_*.parquet') + glob.glob('../data/current_jobs_*.parquet')
@@ -295,7 +320,8 @@ def generate_docs_data():
 
     # Generate all data
     coverage_data = analyze_data_coverage(counts)
-    field_data = analyze_all_fields()
+    field_year = newest_complete_year()
+    field_data = analyze_all_fields(field_year)
     file_size = get_file_sizes()
     latest_date = get_latest_date()
     
@@ -303,6 +329,7 @@ def generate_docs_data():
         'generated_at': datetime.now().isoformat(),
         'total_jobs': total_jobs,
         'total_fields': len(field_data),
+        'field_year': field_year,
         'file_size': file_size,
         'latest_job_date': latest_date,
         'data_coverage': coverage_data,
@@ -315,7 +342,7 @@ def generate_docs_data():
     
     print(f"✅ Documentation data generated:")
     print(f"   Total jobs: {total_jobs:,}")
-    print(f"   Total fields: {len(field_data)}")
+    print(f"   Total fields: {len(field_data)} (from {field_year})")
     print(f"   File size: {file_size}")
     print(f"   Latest job date: {latest_date}")
     print(f"   Coverage years: {len(coverage_data)}")

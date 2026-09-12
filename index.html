@@ -106,21 +106,21 @@
         <p><strong>⚠️ This is not an official USAJobs project</strong></p>
 
         <div class="stats" style="background: #d4edda; border-left: 4px solid #28a745; margin-bottom: 20px;">
-            <strong>Browse the data interactively:</strong> <a href="https://usajobs-historical.vercel.app" style="font-size: 1.1em; font-weight: bold;">usajobs-historical.vercel.app</a><br>
+            <strong>Browse the data interactively:</strong> <a href="https://usajobs-historical.abigailhaddad.com" style="font-size: 1.1em; font-weight: bold;">usajobs-historical.abigailhaddad.com</a><br>
             Interactive DataTable with filters, charts, multi-column sorting, and shareable filter URLs.
         </div>
 
         <div class="resources">
             <h2>Resources</h2>
             <ul>
-                <li><a href="https://usajobs-historical.vercel.app"><strong>Live data explorer</strong></a> - Interactive search and visualizations</li>
+                <li><a href="https://usajobs-historical.abigailhaddad.com"><strong>Live data explorer</strong></a> - Interactive search and visualizations</li>
                 <li><a href="https://github.com/abigailhaddad/usajobs_historical">GitHub repository</a></li>
                 <li><a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py">Example usage (examples.py)</a></li>
                 <li><a href="https://developer.usajobs.gov/">USAJobs API documentation</a> - Official U.S. government developer documentation for USAJOBS APIs</li>
             </ul>
         </div>
         <div class="stats">
-            <strong>Dataset:</strong> ~2.85M job postings | <strong>Coverage:</strong> 2018-2026 | <strong>Storage:</strong> Cloudflare R2 | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
+            <strong>Dataset:</strong> 3,229,683 total job postings | <strong>Coverage:</strong> 2013-2026 | <strong>Files:</strong> 1.4GB total | <strong>Storage:</strong> Cloudflare R2 | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
         </div>
 
         <h2>Table of Contents</h2>
@@ -160,7 +160,7 @@
         </table>
 
         <h2 id="all-fields">All Fields</h2>
-        <p><strong>Note:</strong> This table shows fields from historical jobs data. Current jobs API contains additional fields that are preserved in the original nested structure but not included in this rationalized view.</p>
+        <p><strong>Note:</strong> Types, examples and completeness below are measured on <code>historical_jobs_2024.parquet</code> (field sample year: 2024), the most recent complete year at the time these docs were generated. The schema does move between years &mdash; check the file you are actually reading before relying on a column &mdash; in particular, the nested array columns are <code>HiringPaths</code>, <code>JobCategories</code> and <code>PositionLocations</code> in the older year files and <code>hiringpaths</code>, <code>jobcategories</code> and <code>positionlocations</code> in the recent ones. Each year file has only one of the two casings populated; the other is all null. The Current jobs API carries additional fields, kept in their original nested structure and not included in this rationalized view.</p>
         <table>
             <thead>
                 <tr>
@@ -466,7 +466,7 @@
             <li><strong>API Documentation</strong>: <a href="https://developer.usajobs.gov/">https://developer.usajobs.gov/</a></li>
         </ul>
         
-        <p><strong>Note:</strong> There is overlap between the APIs (2024-2025 jobs appear in both), but we collect from both APIs for completeness.</p>
+        <p><strong>Note:</strong> There is overlap between the APIs -- a posting open recently appears in both -- but we collect from both anyway.</p>
         
         <p><strong>Important:</strong> The <code>current_jobs_*.parquet</code> files contain cumulative data - they include all jobs that have appeared in the Current API since we started collecting, not just jobs that are currently active. Once a job is added to these files, it remains there even after the position closes or is removed from the Current API. This provides a historical record of all jobs that were once "current."</p>
 
@@ -555,18 +555,18 @@
             <li><strong>Field Rationalization:</strong> Current API fields mapped to historical naming conventions for consistent querying</li>
             <li><strong>Data Preservation:</strong> All original fields from both APIs retained alongside rationalized overlay fields</li>
             <li><strong>No Data Loss:</strong> "Keep everything + overlay" approach ensures complete data accessibility</li>
-            <li><strong>Deduplication Available:</strong> Use <code>usajobsControlNumber</code> to identify records appearing in both APIs when needed</li>
+            <li><strong>Deduplication Available:</strong> Use <code>usajobsControlNumber</code> to identify records appearing in both APIs. Deduplicating on it is not optional: <code>hiringAgencyName</code> holds the bureau name in the historical files and often only the department name in the current ones, so unioning both and grouping by agency double-counts those jobs. Prefer the record where <code>hiringAgencyName != hiringDepartmentName</code>, or use the helpers in <code>scripts/parquet_utils.py</code></li>
         </ul>
 
         <h3>Data Structure</h3>
         <ul>
-            <li><strong>Historical API:</strong> ~40 fields including nested arrays (<code>HiringPaths</code>, <code>JobCategories</code>, <code>PositionLocations</code>)</li>
+            <li><strong>Historical API:</strong> 47 fields, including the nested arrays (<code>hiringpaths</code>, <code>jobcategories</code>, <code>positionlocations</code>)</li>
             <li><strong>Current API:</strong> ~25 overlay fields + full original nested structure (<code>MatchedObjectDescriptor</code>, etc.)</li>
             <li><strong>Result:</strong> Query any year using consistent field names (e.g., <code>hiringAgencyName</code>, <code>positionTitle</code>) while retaining access to original nested structures</li>
         </ul>
 
         <h2 id="code-examples">Code Examples from examples.py</h2>
-        <p>The <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py">examples.py</a> script demonstrates both local file access and direct GitHub downloads. It runs complete analysis on 2.97M job postings and automatically cleans up downloaded files.</p>
+        <p>The <a href="https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py">examples.py</a> script demonstrates both local file access and direct GitHub downloads. It runs complete analysis on the full dataset and automatically cleans up downloaded files.</p>
 
         <h3>Local Data Loading</h3>
         <pre>import pandas as pd
@@ -576,7 +576,7 @@ df_2024 = pd.read_parquet('data/historical_jobs_2024.parquet')
 print(f"✓ Successfully loaded {len(df_2024):,} job postings from 2024")</pre>
 
         <h3>Download from R2</h3>
-        <p>Data files are stored in Cloudflare R2. You can also browse the data interactively at <a href="https://usajobs-historical.vercel.app">usajobs-historical.vercel.app</a>.</p>
+        <p>Data files are stored in Cloudflare R2. You can also browse the data interactively at <a href="https://usajobs-historical.abigailhaddad.com">usajobs-historical.abigailhaddad.com</a>.</p>
         <pre>import pandas as pd
 
 # Download directly from R2 (or use local files if you have them)
@@ -729,7 +729,7 @@ for i, (title, count) in enumerate(common_titles.items(), 1):
         </div>
 
         <div class="stats">
-            <strong>Explore:</strong> <a href="https://usajobs-historical.vercel.app">Live interactive site</a> | <strong>Full examples:</strong> Run examples.py for complete analysis patterns | <strong>Source:</strong> Data collected from USAJobs.gov APIs, stored in Cloudflare R2
+            <strong>Explore:</strong> <a href="https://usajobs-historical.abigailhaddad.com">Live interactive site</a> | <strong>Full examples:</strong> Run examples.py for complete analysis patterns | <strong>Source:</strong> Data collected from USAJobs.gov APIs, stored in Cloudflare R2
         </div>
     </div>
 </body>

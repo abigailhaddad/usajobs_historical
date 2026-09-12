@@ -5,18 +5,19 @@ Compares every posting in the historical mirror against the dataset's manifest.
 The manifest is a couple of MB and the mirrors are ~40 MB a year, so this
 answers the question without downloading the dataset itself.
 
-    python audit_completeness.py                    # 2018-2025
+    python audit_completeness.py                    # 2013-2026
     python audit_completeness.py --years 2022 2023
     python audit_completeness.py --probe            # also fetch what is missing
 
 Exit status is 0 when every gap is a known-unreachable announcement and 1 when
 something new is missing, so it can gate a workflow.
 
-Why the known-unreachable list exists: usajobs.gov serves 503 forever for 21
-announcements and 404 for one more. An audit that does not know this reports 22
-missing, and the obvious response -- rebuild those nineteen month files -- moves
-about 5 GB to add nothing, because a month file is rewritten whole and there is
-no text to put in it. See unreachable_announcements.csv.
+Why the known-unreachable list exists: usajobs.gov serves 503 forever for 24
+announcements and 404 for one more. An audit that does not know this reports
+those 25 as missing, and the obvious response -- rebuild those nineteen month
+files -- moves about 2.5 GB down and the same again up to add nothing, because
+a month file is rewritten whole and there is no text to put in it. See
+unreachable_announcements.csv.
 """
 
 import argparse

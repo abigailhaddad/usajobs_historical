@@ -5,12 +5,16 @@ Comprehensive update script for USAJobs data pipeline
 This script:
 1. Determines the last collection date from existing data
 2. Collects historical jobs from last collection date to today
-3. Collects current jobs 
-4. Updates documentation with current data
-5. Provides summary of what was updated
+3. Collects current jobs
+4. Collects the same postings by scraping usajobs.gov (no API key needed)
+5. Diffs the scraped and API collections
+6. Updates documentation with current data
+7. Provides summary of what was updated
+
+Must be run from the update/ directory -- every path it uses is relative to it.
 
 Usage:
-    python update/update_all.py
+    cd update && python update_all.py
 """
 
 import os

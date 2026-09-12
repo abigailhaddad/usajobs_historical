@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """
-Prepare a slim 5-year parquet file for the web viewer.
+Prepare the slim parquet file for the web viewer.
 
-Reads historical and current parquet files, deduplicates (preferring current
-API records which have richer data), selects key columns, and writes a
-compact parquet for the web frontend.
+Reads historical and current parquet files, deduplicates (preferring historical
+records, which carry richer data such as locations), selects key columns, and
+writes a compact parquet for the web frontend.
+
+The output is named jobs_5yr.parquet for historical reasons; it covers 2018
+through the current year.
 
 Usage:
     python scripts/prep_web_data.py

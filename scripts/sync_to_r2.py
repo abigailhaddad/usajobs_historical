@@ -2,24 +2,15 @@
 """
 Upload parquet files to Cloudflare R2 (S3-compatible).
 
-GitHub Actions integration:
-    Add a step after "Commit and push to data-updates branch" and before
-    "Create Pull Request" in .github/workflows/daily-data-update.yml:
+Called from two workflows:
+    daily-data-update.yml  -- `--snapshot` before collection to record a
+                              baseline, then `--only-changed` after, so a run
+                              uploads just the year files it actually touched.
+    repoll-status.yml      -- plain `sync_to_r2.py`, which uploads every file.
 
-        - name: Sync data to Cloudflare R2
-          if: env.CHANGES_MADE == 'true'
-          env:
-            R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-            R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-            R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
-          run: |
-            pip install boto3
-            python scripts/sync_to_r2.py
-
-    Required GitHub repository secrets:
-        - R2_ACCESS_KEY_ID: Cloudflare R2 access key
-        - R2_SECRET_ACCESS_KEY: Cloudflare R2 secret key
-        - R2_ENDPOINT_URL: e.g. https://<account_id>.r2.cloudflarestorage.com
+Required GitHub repository secrets:
+    R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_ENDPOINT_URL
+    (e.g. https://<account_id>.r2.cloudflarestorage.com).
 """
 
 import argparse
