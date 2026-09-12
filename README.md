@@ -71,10 +71,10 @@ Data collection last run: 2026-09-12. Coverage runs 2013-2026, and the published
 | 2025 | 256,094 | 240,107 |
 | 2026 | 356,088 | 353,299 |
 
-The table sums rows in `historical_jobs_{year}.parquet` and
-`current_jobs_{year}.parquet`, so a posting that appears in both APIs is counted
-twice and the yearly figures run high. Deduplicate by `usajobsControlNumber`
-before quoting them; see the `hiringAgencyName` section below for how.
+Counts are distinct announcements, deduplicated by `usajobsControlNumber`
+across both APIs. They used to be row counts added together, which counted
+every posting that appears in both APIs twice — for 2026 that was 356,088
+against a real 180,740.
 
 Early years show many long-duration postings (e.g., 3,879 opened in 2016 but only 1,633 closed that year). 2017 starts with limited data in January-February, then ramps up significantly from March onward. Some job postings may have future opening dates.
 

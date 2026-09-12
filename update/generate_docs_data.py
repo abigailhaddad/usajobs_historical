@@ -76,66 +76,111 @@ def get_field_examples(series, field_name, max_examples=4):
         
     return examples, len(unique_vals)
 
-def analyze_data_coverage():
+def data_files(data_dir='../data'):
+    """Every year-suffixed historical and current parquet, as {year: [paths]}."""
+    out = {}
+    for path in sorted(glob.glob(os.path.join(data_dir, 'historical_jobs_*.parquet'))
+                       + glob.glob(os.path.join(data_dir, 'current_jobs_*.parquet'))):
+        part = os.path.basename(path).split('_')[-1].replace('.parquet', '')
+        try:
+            year = int(part)
+        except ValueError:
+            continue  # backup files, anything else that is not a year
+        out.setdefault(year, []).append(path)
+    return out
+
+
+def deduped_counts(data_dir='../data'):
+    """Distinct announcements per year and overall, as ({year: counts}, total).
+
+    A posting that is in both the Historical and the Current API has a row in
+    each file, so adding row counts together counts it twice. Everything
+    published off this number -- the README header, the coverage table,
+    index.html -- used to be high by that overlap. Deduplicating on
+    usajobsControlNumber is the same fix the README documents for
+    hiringAgencyName.
+
+    The overall total dedupes across years too, not just within one: a posting
+    open at a year boundary appears in two years' current files.
+
+    duckdb rather than pandas because the current_jobs files are gigabytes of
+    announcement text. This projects three columns and spills to disk if it has
+    to, where concatenating the same columns in pandas is what OOM-killed the
+    daily runner.
+    """
+    import duckdb
+    by_year = data_files(data_dir)
+    if not by_year:
+        return {}, 0
+
+    # A file without a control number would contribute rows whose cn is NULL,
+    # and count(DISTINCT) drops those -- so it would quietly undercount instead
+    # of failing. Say so instead.
+    for year, paths in by_year.items():
+        for path in paths:
+            if 'usajobsControlNumber' not in pq.read_schema(path).names:
+                raise ValueError(
+                    f"{path} has no usajobsControlNumber column, so its rows "
+                    f"cannot be deduplicated or counted")
+
+    con = duckdb.connect()
+    con.execute("SET preserve_insertion_order=false")
+    con.execute(f"SET memory_limit='{os.environ.get('DUCKDB_MEMORY_LIMIT', '2GB')}'")
+
+    def files_sql(paths):
+        listed = ", ".join(f"'{p}'" for p in paths)
+        return (f"read_parquet([{listed}], union_by_name=true)")
+
+    counts = {}
+    for year, paths in sorted(by_year.items()):
+        row = con.execute(f"""
+            SELECT count(DISTINCT cn) AS total,
+                   count(DISTINCT CASE WHEN substr(opened, 1, 4) = '{year}'
+                                       THEN cn END) AS opened,
+                   count(DISTINCT CASE WHEN substr(closed, 1, 4) = '{year}'
+                                       THEN cn END) AS closed
+            FROM (SELECT usajobsControlNumber::varchar AS cn,
+                         CAST(positionOpenDate AS VARCHAR)  AS opened,
+                         CAST(positionCloseDate AS VARCHAR) AS closed
+                  FROM {files_sql(paths)})
+        """).fetchone()
+        counts[year] = {'total': row[0], 'opened': row[1], 'closed': row[2]}
+
+    every = [p for paths in by_year.values() for p in paths]
+    total = con.execute(
+        f"SELECT count(DISTINCT usajobsControlNumber::varchar) "
+        f"FROM {files_sql(every)}").fetchone()[0]
+    con.close()
+    return counts, total
+
+
+def analyze_data_coverage(counts=None):
     """Analyze data coverage by year"""
     coverage_data = []
-    
-    # Get all parquet files
-    historical_files = glob.glob('../data/historical_jobs_*.parquet')
-    current_files = glob.glob('../data/current_jobs_*.parquet')
-    
-    all_years = set()
-    for f in historical_files + current_files:
-        part = f.split('_')[-1].replace('.parquet', '')
-        try:
-            all_years.add(int(part))
-        except ValueError:
-            continue  # skip backup files etc.
-    
-    for year in sorted(all_years):
-        hist_file = f'../data/historical_jobs_{year}.parquet'
-        curr_file = f'../data/current_jobs_{year}.parquet'
-        
-        total_jobs = 0
-        jobs_opened = 0
-        jobs_closed = 0
-        
-        for path in (hist_file, curr_file):
-            if not os.path.exists(path):
-                continue
 
-            total_jobs += pq.read_metadata(path).num_rows
+    if counts is None:
+        counts, _ = deduped_counts()
 
-            # Count jobs opened/closed by date parsing — only the two date
-            # columns get loaded, not the whole announcement text.
-            dates = read_cols(path, ['positionOpenDate', 'positionCloseDate'])
-            if dates is None:
-                continue
-            for col, bucket in (('positionOpenDate', 'opened'), ('positionCloseDate', 'closed')):
-                if col not in dates.columns:
-                    continue
-                parsed = pd.to_datetime(dates[col], errors='coerce')
-                n = int((parsed.dt.year == year).sum())
-                if bucket == 'opened':
-                    jobs_opened += n
-                else:
-                    jobs_closed += n
-        
-        # Determine coverage notes
+    # Which year is the partial one comes from the data, not a literal. This
+    # ladder used to name 2025 as "current through" and hand everything after it
+    # "Closing dates only", so on 2026-01-01 it started calling the year being
+    # collected closing-dates-only and the year that had just finished partial.
+    latest_collection = get_latest_date()
+    latest_dt = (datetime.strptime(latest_collection, '%Y-%m-%d')
+                 if latest_collection else datetime.now())
+    current_year = latest_dt.year
+
+    for year in sorted(counts):
+        total_jobs = counts[year]['total']
+        jobs_opened = counts[year]['opened']
+        jobs_closed = counts[year]['closed']
+
         if year <= 2016:
             coverage = "Very limited"
-        elif year == 2017:
-            coverage = "✅ Complete year" 
-        elif year >= 2018 and year <= 2024:
+        elif year < current_year:
             coverage = "✅ Complete year"
-        elif year == 2025:
-            # Use the latest actual data collection date instead of current date
-            latest_collection = get_latest_date()
-            if latest_collection:
-                latest_dt = datetime.strptime(latest_collection, '%Y-%m-%d')
-                coverage = f"Current through {latest_dt.strftime('%B %d, %Y')}"
-            else:
-                coverage = f"Current through {datetime.now().strftime('%B %d, %Y')}"
+        elif year == current_year:
+            coverage = f"Current through {latest_dt.strftime('%B %d, %Y')}"
         else:
             coverage = "Closing dates only"
             
@@ -244,15 +289,12 @@ def generate_docs_data():
     """Generate all documentation data"""
     print("🔍 Analyzing data files...")
     
-    # Get total dataset stats
-    all_files = glob.glob('../data/historical_jobs_*.parquet') + glob.glob('../data/current_jobs_*.parquet')
-    total_jobs = 0
-    
-    for file in all_files:
-        total_jobs += pq.read_metadata(file).num_rows
-    
+    # Distinct announcements. Summing num_rows across both APIs' files counted
+    # every posting that appears in both of them twice.
+    counts, total_jobs = deduped_counts()
+
     # Generate all data
-    coverage_data = analyze_data_coverage()
+    coverage_data = analyze_data_coverage(counts)
     field_data = analyze_all_fields()
     file_size = get_file_sizes()
     latest_date = get_latest_date()

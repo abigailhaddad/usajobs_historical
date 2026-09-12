@@ -34,10 +34,26 @@ def update_readme():
             # If date line not found, this is an error
             raise ValueError("Expected to find 'Data collection last run' line in README.md but it was not found")
     
-    # Update total jobs count in the header
-    old_pattern = r'\*\*Job dataset with [\d,\.M]+ job announcements'
-    new_text = f"**Job dataset with {data['total_jobs']:,} job announcements"
-    content = re.sub(old_pattern, new_text, content)
+    # Update the headline count and the span it covers.
+    #
+    # The pattern this replaced looked for "**Job dataset with N job
+    # announcements", which is not what the line has said for a long time -- so
+    # re.sub replaced nothing, silently, and the header sat at "~2.85M ...
+    # 2018-2026" while the data went to 3.2M starting in 2013. Hence the raise:
+    # a header this cannot find is a header that is about to go stale.
+    years = [item['year'] for item in data['data_coverage']]
+    header_pattern = (r'\*\*[\d,\.M~]+ job announcements from \d{4}-\d{4} '
+                      r'via the Historical \+ Current APIs\*\*')
+    if not re.search(header_pattern, content):
+        raise ValueError(
+            "Expected the '**N job announcements from YYYY-YYYY via the "
+            "Historical + Current APIs**' header in README.md but it was not "
+            "found -- if the wording changed, change header_pattern with it")
+    content = re.sub(
+        header_pattern,
+        f"**{data['total_jobs']:,} job announcements from {min(years)}-"
+        f"{max(years)} via the Historical + Current APIs**",
+        content)
     
     # Update file size
     old_size_pattern = r'This provides \d+MB of data'
