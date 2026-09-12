@@ -12,7 +12,9 @@ name: Repoll Historical Status
 
 on:
   schedule:
-    # 15:00 UTC — well after the daily update (07:00 UTC) has finished.
+    # 15:00 UTC. The daily update runs 07:37 and retries at 13:37 and 19:37,
+    # so these can overlap; both workflows share the usajobs-r2-data-write
+    # concurrency group, which is what actually keeps them off each other.
     - cron: '0 15 * * *'
   workflow_dispatch:
     inputs:

@@ -13,6 +13,20 @@ import json
 import re
 from datetime import datetime
 
+def sub_or_raise(pattern, replacement, content, what, where):
+    """re.sub, but a pattern that matches nothing is an error rather than a no-op.
+
+    Every substitution here has drifted at least once: the wording in the file
+    changed, the pattern stopped matching, and the page kept serving a stale
+    number with nothing to show anything was wrong.
+    """
+    if not re.search(pattern, content):
+        raise ValueError(
+            f"Expected to find {what} in {where} but it was not found -- "
+            f"if the wording changed, change the pattern with it")
+    return re.sub(pattern, replacement, content)
+
+
 def update_readme():
     """Update README.md with current data"""
     with open('../docs_data.json', 'r') as f:
@@ -55,10 +69,12 @@ def update_readme():
         f"{max(years)} via the Historical + Current APIs**",
         content)
     
-    # Update file size
-    old_size_pattern = r'This provides \d+MB of data'
-    new_size_text = f"This provides {data['file_size']} of data"
-    content = re.sub(old_size_pattern, new_size_text, content)
+    # Update file size. The README does not currently carry this string; it is
+    # only rewritten when it is there.
+    old_size_pattern = r'This provides [\d\.]+ ?[MG]B of data'
+    if re.search(old_size_pattern, content):
+        content = re.sub(old_size_pattern,
+                         f"This provides {data['file_size']} of data", content)
     
     # Update Data Coverage section header with latest date
     if data.get('latest_job_date'):
@@ -110,14 +126,19 @@ def update_index_html():
             raise ValueError("Expected to find 'Data collection last run' line in index.html but it was not found")
     
     # Update dataset stats in header
-    old_pattern = r'<strong>Dataset:</strong> [\d,]+ total job postings'
-    new_text = f'<strong>Dataset:</strong> {data["total_jobs"]:,} total job postings'
-    content = re.sub(old_pattern, new_text, content)
-    
-    # Update file size in header
-    old_size_pattern = r'<strong>Files:</strong> \d+MB total'
-    new_size_text = f'<strong>Files:</strong> {data["file_size"]} total'
-    content = re.sub(old_size_pattern, new_size_text, content)
+    years = [item['year'] for item in data['data_coverage']]
+    content = sub_or_raise(
+        r'<strong>Dataset:</strong> [\d,]+ total job postings',
+        f'<strong>Dataset:</strong> {data["total_jobs"]:,} total job postings',
+        content, "the 'Dataset: N total job postings' header", 'index.html')
+    content = sub_or_raise(
+        r'<strong>Coverage:</strong> \d{4}-\d{4}',
+        f'<strong>Coverage:</strong> {min(years)}-{max(years)}',
+        content, "the 'Coverage: YYYY-YYYY' header", 'index.html')
+    content = sub_or_raise(
+        r'<strong>Files:</strong> [\d\.]+ ?[MG]B total',
+        f'<strong>Files:</strong> {data["file_size"]} total',
+        content, "the 'Files: N total' header", 'index.html')
     
     # Update current date references  
     current_date = datetime.now().strftime('%B %d, %Y')
@@ -125,6 +146,14 @@ def update_index_html():
     new_date_text = f'Current through {current_date}'
     content = re.sub(old_date_pattern, new_date_text, content)
     
+    # Say which year's file the field table was measured on
+    if data.get('field_year'):
+        content = sub_or_raise(
+            r'<code>historical_jobs_\d{4}\.parquet</code> \(field sample year: \d{4}\)',
+            f'<code>historical_jobs_{data["field_year"]}.parquet</code> '
+            f'(field sample year: {data["field_year"]})',
+            content, "the field-table sample-year note", 'index.html')
+
     # Update data coverage table
     coverage_rows = []
     for item in data['data_coverage']:
