@@ -1,6 +1,6 @@
 # USAJobs Data Pipeline
 
-**Data collection last run: 2026-09-11**
+**Data collection last run: 2026-09-12**
 
 **This is not an official USAJobs project.**
 
@@ -52,7 +52,7 @@ Files are Parquet format and work with Python, R, or any Parquet-compatible tool
 
 ## Data Coverage
 
-Data collection last run: 2026-09-11. Coverage runs 2013-2026, and the published announcement dataset holds 3,229,043 announcements. Early years (pre-2017) are incomplete, mostly jobs with closing dates years after the opening dates.
+Data collection last run: 2026-09-12. Coverage runs 2013-2026, and the published announcement dataset holds 3,229,043 announcements. Early years (pre-2017) are incomplete, mostly jobs with closing dates years after the opening dates.
 
 | Year | Jobs Opened | Jobs Closed |
 |------|-------------|-------------|
@@ -69,7 +69,7 @@ Data collection last run: 2026-09-11. Coverage runs 2013-2026, and the published
 | 2023 | 454,652 | 434,527 |
 | 2024 | 367,776 | 352,305 |
 | 2025 | 256,094 | 240,107 |
-| 2026 | 354,433 | 351,655 |
+| 2026 | 356,088 | 353,299 |
 
 The table sums rows in `historical_jobs_{year}.parquet` and
 `current_jobs_{year}.parquet`, so a posting that appears in both APIs is counted
