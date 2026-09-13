@@ -1,9 +1,10 @@
 {
-  "generated_at": "2026-09-12T15:58:44.719058",
-  "total_jobs": 3229683,
+  "generated_at": "2026-09-13T14:07:23.749159",
+  "total_jobs": 3229874,
   "total_fields": 47,
+  "field_year": 2025,
   "file_size": "1.4GB",
-  "latest_job_date": "2026-09-12",
+  "latest_job_date": "2026-09-13",
   "data_coverage": [
     {
       "year": 2013,
@@ -98,41 +99,41 @@
     },
     {
       "year": 2026,
-      "total_jobs": 180740,
-      "jobs_opened": 180740,
-      "jobs_closed": 179369,
-      "coverage": "Current through September 12, 2026"
+      "total_jobs": 180932,
+      "jobs_opened": 180932,
+      "jobs_closed": 179560,
+      "coverage": "Current through September 13, 2026"
     }
   ],
   "all_fields": [
     {
       "field_name": "HiringPaths",
-      "field_type": "String",
-      "examples": "[{\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"The public\"}], [{\"hiringPath\": \"Internal to an agency\"}] (75962 unique combinations)",
-      "completeness_percent": 100,
-      "completeness_class": "good",
-      "unique_count": 75962
+      "field_type": "JSON Array",
+      "examples": "[{\"hiringPath\": \"Custom announcement\"}], [{\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}] (21972 unique combinations)",
+      "completeness_percent": 87,
+      "completeness_class": "warning",
+      "unique_count": 21972
     },
     {
       "field_name": "JobCategories",
-      "field_type": "String",
-      "examples": "[{\"series\": \"0801\"}, {\"series\": \"0850\"}, {\"series\": \"0830\"}, {\"series\": \"0854\"}, {\"series\": \"0855\"}], [{\"series\": \"0854\"}, {\"series\": \"1550\"}, {\"series\": \"1310\"}, {\"series\": \"0850\"}, {\"series\": \"1520\"}], [{\"series\": \"1301\"}, {\"series\": \"0101\"}, {\"series\": \"0807\"}, {\"series\": \"0401\"}], [{\"series\": \"5401\"}] (4424 unique)",
-      "completeness_percent": 100,
-      "completeness_class": "good",
-      "unique_count": 4424
+      "field_type": "JSON Array",
+      "examples": "[{\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"0401\"}], [{\"series\": \"0861\"}, {\"series\": \"0801\"}, {\"series\": \"0830\"}, {\"series\": \"0855\"}, {\"series\": \"0896\"}, {\"series\": \"0854\"}], [{\"series\": \"0819\"}, {\"series\": \"0401\"}, {\"series\": \"1301\"}], [{\"series\": \"0861\"}, {\"series\": \"0801\"}, {\"series\": \"0896\"}, {\"series\": \"0830\"}, {\"series\": \"0855\"}, {\"series\": \"0854\"}] (1820 unique)",
+      "completeness_percent": 87,
+      "completeness_class": "warning",
+      "unique_count": 1820
     },
     {
       "field_name": "PositionLocations",
-      "field_type": "String",
-      "examples": "[{\"positionLocationCity\": \"Highlands\", \"positionLocationState\": \"New Jersey\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Brooklyn\", \"positionLocationState\": \"New York\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Pentagon, Arlington\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}] (29707 unique combinations)",
-      "completeness_percent": 100,
-      "completeness_class": "good",
-      "unique_count": 29707
+      "field_type": "JSON Array",
+      "examples": "[{\"positionLocationCity\": \"State College\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Selinsgrove\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Altoona\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Du Bois\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Washington\", \"positionLocationState\": \"District of Columbia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Norristown\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Martinsville\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"New Kensington\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Charlotte Hall\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lewistown\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Towanda\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Welch\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Parkersburg\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Logan\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Wilkes Barre\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Abingdon\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Richmond\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Ambridge\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hazleton\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Rockville\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Arlington\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Greenbelt\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Seven Fields\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Winchester\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Staunton\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Covington\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bluefield\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Petersburg\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Pittsburgh\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Camp Springs\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Norfolk\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Newport News\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Meadville\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Mount Lebanon\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Wheeling\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Glen Burnie\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cumberland\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Huntington\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Wytheville\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Annapolis\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Chambersburg\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"East Stroudsburg\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Charlottesville\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Martinsburg\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Philadelphia\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Culpeper\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Westminster\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Salisbury\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Virginia Beach\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Petersburg\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lynchburg\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Washington\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Towson\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Uniontown\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Elkton\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fairfax\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Columbia\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bristol\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fairmont\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"South Boston\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Silver Spring\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lancaster\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Roanoke\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Wise\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Johnstown\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Elkins\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Chester\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fredericksburg\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Harrisburg\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"York\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Frederick\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Upper Darby\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Accomac\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Dover\", \"positionLocationState\": \"Delaware\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Farmville\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Greensburg\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Charleston\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Butler\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Indiana\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Carlisle\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Scranton\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"New Castle\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Harrisonburg\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Owings Mills\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Saint Albans\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bloomsburg\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kittanning\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Portsmouth\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Allentown\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Limerick\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Morgantown\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Chesterfield\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Rostraver\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Baltimore\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Danville\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Williamsport\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hampton\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Manassas\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Erie\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Suffolk\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Williamson\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Beckley\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lebanon\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lewes\", \"positionLocationState\": \"Delaware\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Wilmington\", \"positionLocationState\": \"Delaware\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Monroeville\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"McKeesport\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Alexandria\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cambridge\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Clarksburg\", \"positionLocationState\": \"West Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cranberry\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fairless Hills\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Easton\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Sharon\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bethlehem\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hagerstown\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Elkins Park\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"West Chester\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Pottsville\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Reading\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Union City\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Winston-Salem\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Naples\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Jasper\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Jacksboro\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Vero Beach\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Port Orange\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Greenwood\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Jackson\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Memphis\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Wilkesboro\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bowling Green\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hickory\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Sebring\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Salisbury\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Corbin\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Columbus\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Jacksonville\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Seffner\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Goldsboro\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Gastonia\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hialeah\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Danville\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Port Charlotte\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Owensboro\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kinston\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Columbus\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Concord\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Tuscaloosa\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Elizabeth City\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Venice\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Sarasota\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Wilmington\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bradenton\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Greenville\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Harlan\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Albertville\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Murfreesboro\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Prestonsburg\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Ashland\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hernando\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Mobile\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Statesville\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Clearwater\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Myers\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Rockingham\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Dothan\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Toccoa\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Marianna\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Tupelo\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Pensacola\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Warner Robins\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Florence\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cullman\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Saint Petersburg\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hazard\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Dalton\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Charlotte\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Morristown\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Knoxville\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Lauderdale\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Alexander City\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Durham\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cleveland\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"West Palm Beach\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Montgomery\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Dade City\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Vicksburg\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Melbourne\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cookeville\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Rock Hill\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Margate\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Dyersburg\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Florence\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Statesboro\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Johnson City\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Henderson\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Valdosta\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Campbellsville\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Leesburg\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Natchez\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Norcross\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Gallatin\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Boca Raton\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Beaufort\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Waycross\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Whiteville\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Orlando\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Andalusia\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Franklin\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Madison\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Newnan\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Walterboro\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Gainesville\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Savannah\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Jackson\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Deland\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Henderson\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hendersonville\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Selma\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Winder\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Decatur\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Asheville\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Madisonville\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cocoa\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Gulfport\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Smithfield\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bessemer\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Saint Augustine\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Greensboro\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hattiesburg\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kennesaw\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Elizabethtown\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Shelby\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Camden\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Gadsden\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Brookhaven\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Wilson\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Sanford\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lake Mary\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Birmingham\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Oak Ridge\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Mount Airy\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Meridian\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Macon\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Tampa\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Walton Beach\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lawrenceburg\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Raleigh\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fairhope\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kingsport\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Macon\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Athens\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Somerset\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Rome\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Richmond\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Sumter\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Athens\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Middlesboro\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kissimmee\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Columbia\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Florence\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Spartanburg\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Huntsville\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cleveland\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Clarksdale\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lumberton\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Greeneville\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Brunswick\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"McMinnville\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Paducah\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fayetteville\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cordele\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Belle Glade\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Paris\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Key West\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Miami Lakes\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Reidsville\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hopkinsville\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Chattanooga\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Maysville\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Aiken\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Greenville\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Covington\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Plantation\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Quincy\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Talladega\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Washington\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Thomasville\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Roanoke Rapids\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Maryville\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Rocky Mount\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Tullahoma\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Orangeburg\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Moss Point\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kosciusko\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Panama City\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Greenwood\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Gainesville\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Georgetown\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Tifton\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"New Bern\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Winter Haven\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Tallahassee\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Asheboro\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Miami\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Miami Beach\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Nashville\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Morrow\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Albany\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Forest\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"North Charleston\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Vidalia\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Starkville\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Laurel\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Nicholasville\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Clarksville\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Selmer\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Anderson\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Alpharetta\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Mauldin\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Jackson\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lexington\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"New Port Richey\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Villa Rica\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Philadelphia\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Auburn\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Atlanta\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Clinton\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Charleston\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Louisville\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Albemarle\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Jackson\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Griffin\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Pikeville\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Milledgeville\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bennettsville\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Dublin\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Augusta\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Corinth\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Franklin\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"LaGrange\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"McComb\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lake City\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lakeland\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Pembroke Pines\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Ocala\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Port Saint Lucie\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Decatur\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Myrtle Beach\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Columbia\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Mayfield\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Greenville\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Anniston\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Frankfort\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Grenada\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}] (11621 unique combinations)",
+      "completeness_percent": 87,
+      "completeness_class": "warning",
+      "unique_count": 11621
     },
     {
       "field_name": "agencyLevel",
       "field_type": "Integer",
-      "examples": "2, 1",
+      "examples": "1, 2",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 2
@@ -140,10 +141,10 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "National Labor Relations Board, General Services Administration\\Federal Acquisition Service, Department of Labor\\Office of the Assistant Secretary for Administration and Management, Department of the Army\\U.S. Army V Corps (542 unique)",
-      "completeness_percent": 100,
+      "examples": "Department of Agriculture\\Forest Service, Department of Agriculture\\Office of the General Counsel, National Aeronautics and Space Administration\\Armstrong Flight Research Center, Department of Transportation\\Federal Aviation Administration (462 unique)",
+      "completeness_percent": 99,
       "completeness_class": "good",
-      "unique_count": 542
+      "unique_count": 462
     },
     {
       "field_name": "announcementClosingTypeCode",
@@ -164,24 +165,24 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "MO-12393987-AR-24-165, 24-12297320-DNI/MI/NIC, IL-12408584-AR-24-151, HHS-CDC-MP-24-12369811 (363816 unique)",
+      "examples": "26-BPA-48221-12821171-MP, CBTC-12759868-25-SGP, CBSV-12833598-26-RAC, DEST-12710396-25-CEB (166988 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 363816
+      "unique_count": 166988
     },
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "ICTAP Only, Temporary Promotion, Agency Employees Only, Presidential Management Fellows (16 unique)",
+      "examples": "Detail, Permanent, Agency Employees Only, Recent graduates (13 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 16
+      "unique_count": 13
     },
     {
       "field_name": "backfilled",
       "field_type": "String",
       "examples": "True",
-      "completeness_percent": 0,
+      "completeness_percent": 7,
       "completeness_class": "poor",
       "unique_count": 1
     },
@@ -204,143 +205,143 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "AN00, HUGG, NV, AFZS (528 unique)",
+      "examples": "HSBB, SS00, HUAA, HFHA (444 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 528
+      "unique_count": 444
     },
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Internal Revenue Service, U.S. Army Central, Office of Human Resources Management, Selective Service System (502 unique)",
+      "examples": "Deputy Assistant Secretary for Administration, Air Force Inspection Agency (FO), Air Force Safety Center, Maritime Administration (432 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
-      "unique_count": 502
+      "unique_count": 432
     },
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "BW, OI, IF, KS (122 unique)",
+      "examples": "RH, LD, CM, FR (95 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 122
+      "unique_count": 95
     },
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Executive Office of the President, Department of the Interior, General Services Administration, Other Agencies and Independent Organizations (26 unique)",
-      "completeness_percent": 100,
+      "examples": "Department of the Navy, General Services Administration, Department of Veterans Affairs, Department of Commerce (26 unique)",
+      "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 26
     },
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Children's Bureau (CB)-Division of Performance Measurement and Improvement, Security Operations (SO), Operations Management (OM), Standards and Directives, Sequoia and Kings Canyon National Parks, Eastern, Southern, and Western Regions (59972 unique)",
-      "completeness_percent": 62,
-      "completeness_class": "poor",
-      "unique_count": 59972
+      "examples": "Aviation Safety (AVS), Air Traffic Safety Oversight Service, AOV-001, Port Columbus International Airport (CMH), Rock Island District Security and Law Enforcement Office, Outpatient Nursing Dept. (27150 unique)",
+      "completeness_percent": 73,
+      "completeness_class": "warning",
+      "unique_count": 27150
     },
     {
       "field_name": "hiringpaths",
-      "field_type": "String",
-      "examples": "[{\"hiringPath\": \"The public\"}], [{\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"The public\"}]",
-      "completeness_percent": 0,
+      "field_type": "JSON Array",
+      "examples": "[{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}, {\"hiringPath\": \"Family of overseas employees\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Recent graduates\"}], [{\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Recent graduates\"}, {\"hiringPath\": \"Land and base management\"}, {\"hiringPath\": \"Family of overseas employees\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Students\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}], [{\"hiringPath\": \"The public\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}], [{\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Special authorities\"}] (667 unique)",
+      "completeness_percent": 13,
       "completeness_class": "poor",
-      "unique_count": 2
+      "unique_count": 667
     },
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-20T12:36:50.119174, 2025-07-05T12:59:13.229007, 2025-09-20T11:55:10.911766, 2025-09-20T12:08:55.202062 (367192 unique)",
+      "examples": "2025-09-19T23:19:20.072591, 2025-09-19T23:24:57.463706, 2026-06-29T04:34:53.826916, 2025-09-19T23:24:00.602435 (162123 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 367192
+      "unique_count": 162123
     },
     {
       "field_name": "jobcategories",
-      "field_type": "String",
-      "examples": "[{\"series\": \"2102\"}], [{\"series\": \"0610\"}]",
-      "completeness_percent": 0,
+      "field_type": "JSON Array",
+      "examples": "[{\"series\": \"0241\"}], [{\"series\": \"0110\"}], [{\"series\": \"1160\"}], [{\"series\": \"5703\"}] (565 unique)",
+      "completeness_percent": 13,
       "completeness_class": "poor",
-      "unique_count": 2
+      "unique_count": 565
     },
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-20T12:07:01.866158, 2025-09-20T11:46:05.909399, 2025-07-05T13:47:41.900874, 2025-09-20T12:30:19.915211 (359917 unique)",
+      "examples": "2025-12-19T09:06:05.163200, 2025-09-19T23:15:07.708605, 2025-09-19T23:35:22.026320, 2025-09-19T23:11:51.278060 (116175 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 359917
+      "unique_count": 116175
     },
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "0, 31, 22, KI (127 unique)",
+      "examples": "7, 9, 02, 25 (117 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 127
+      "unique_count": 117
     },
     {
       "field_name": "maximumSalary",
       "field_type": "Number",
-      "examples": "$0, $105,612, $470,281 (range: $0-$470,281) (15681 unique)",
+      "examples": "$0, $96,116, $500,000 (range: $0-$500,000) (13649 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 15681
+      "unique_count": 13649
     },
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "09, K, 26, GI (125 unique)",
+      "examples": "HI, LJ, 07, 9 (116 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 125
+      "unique_count": 116
     },
     {
       "field_name": "minimumSalary",
       "field_type": "Number",
-      "examples": "$0, $72,553, $400,000 (range: $0-$400,000) (15418 unique)",
+      "examples": "$0, $67,297, $450,000 (range: $0-$450,000) (13463 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 15418
+      "unique_count": 13463
     },
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "NP, NZ, WS, EV (191 unique)",
+      "examples": "KO, NT, IP, ZA (163 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 191
+      "unique_count": 163
     },
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-07-23, 2025-03-23, 2024-11-09, 2024-01-17 (671 unique)",
+      "examples": "2025-02-14, 2025-12-02, 2025-12-04, 2026-01-13 (653 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 671
+      "unique_count": 653
     },
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-01-27, 2024-04-11, 2025-05-13, 2024-08-02 (596 unique)",
-      "completeness_percent": 9,
+      "examples": "2025-11-20, 2025-07-04, 2025-07-20, 2026-05-15 (496 unique)",
+      "completeness_percent": 10,
       "completeness_class": "poor",
-      "unique_count": 596
+      "unique_count": 496
     },
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2024-05-03, 2024-10-18, 2024-02-19, 2024-03-16 (365 unique)",
+      "examples": "2025-05-27, 2025-02-20, 2025-07-08, 2025-10-16 (363 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 365
+      "unique_count": 363
     },
     {
       "field_name": "positionOpeningStatus",
       "field_type": "String",
-      "examples": "Candidate selected, Job canceled, Applications under review, Job closed (5 unique)",
+      "examples": "Candidate selected, Applications under review, Job canceled, Job closed (5 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 5
@@ -348,26 +349,26 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "HAZARDOUS MATERIALS TECHNICIAN, SUPERVISORY INTERDISCIPLINARY PHYSICAL SCIENTIST/ OCEANOGRAPHER, Senior Program Manager for Academic Outreach, Forestry Technician (Fire Operations Specialist) (77992 unique)",
+      "examples": "SUPERVISORY HEALTH SYSTEM SPECIALIST, Exhibits Specialist, Rare Book Reference Librarian, SALES MANAGER (CUSTOMER SERVICE) NF-03 RFT **CLOSE DATE CHANGE (44537 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 77992
+      "unique_count": 44537
     },
     {
       "field_name": "positionlocations",
-      "field_type": "String",
-      "examples": "[{\"positionLocationCity\": \"Richmond\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}]",
-      "completeness_percent": 0,
+      "field_type": "JSON Array",
+      "examples": "[{\"positionLocationCity\": \"Savannah\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Cheektowaga\", \"positionLocationState\": \"New York\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Wellfleet\", \"positionLocationState\": \"Massachusetts\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bar Harbor\", \"positionLocationState\": \"Maine\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Calais\", \"positionLocationState\": \"Maine\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Patten\", \"positionLocationState\": \"Maine\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Dixon\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}] (3073 unique)",
+      "completeness_percent": 13,
       "completeness_class": "poor",
-      "unique_count": 1
+      "unique_count": 3073
     },
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "EM, 44, 09, Contigent (115 unique)",
+      "examples": "18, HS5, H, 02 (77 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 115
+      "unique_count": 77
     },
     {
       "field_name": "relocationExpensesReimbursed",
@@ -380,15 +381,15 @@
     {
       "field_name": "salaryType",
       "field_type": "String",
-      "examples": "Per Hour, Per Year, Without Compensation, Per Day (9 unique)",
+      "examples": "Per Year, Per Hour, Per Day, Without Compensation (10 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 9
+      "unique_count": 10
     },
     {
       "field_name": "securityClearance",
       "field_type": "String",
-      "examples": "Not Required, Secret, Other, Confidential (8 unique)",
+      "examples": "Not Required, Top Secret, Other, L Access Authorization (8 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 8
@@ -428,15 +429,15 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "7, 67, 05, 70 (157 unique)",
-      "completeness_percent": 90,
+      "examples": "Many, 50, 46, 155 (90 unique)",
+      "completeness_percent": 89,
       "completeness_class": "warning",
-      "unique_count": 157
+      "unique_count": 90
     },
     {
       "field_name": "travelRequirement",
       "field_type": "String",
-      "examples": "Not required, Occasional travel, 25% or less, 50% or less (6 unique)",
+      "examples": "Not required, 25% or less, Occasional travel, 76% or greater (6 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 6
@@ -444,23 +445,23 @@
     {
       "field_name": "usajobsControlNumber",
       "field_type": "Integer",
-      "examples": "767342200, 768473700, 769219600 (367192 unique)",
+      "examples": "555897900, 768200900, 770635000 (168358 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 367192
+      "unique_count": 168358
     },
     {
       "field_name": "usajobs_control_number",
       "field_type": "String",
-      "examples": "767342200, 768473700, 769219600 (367190 unique)",
-      "completeness_percent": 100,
+      "examples": "555897900, 768200900, 770635000 (162101 unique)",
+      "completeness_percent": 96,
       "completeness_class": "good",
-      "unique_count": 367190
+      "unique_count": 162101
     },
     {
       "field_name": "vendor",
       "field_type": "String",
-      "examples": "USASTAFFING, Monster - Hiring Management, FAA - SWIFT, HQMC MCCS (PeopleSoft) (8 unique)",
+      "examples": "USASTAFFING, Monster - Hiring Management, CSOD, FAA - SWIFT (8 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 8
@@ -468,15 +469,15 @@
     {
       "field_name": "whoMayApply",
       "field_type": "String",
-      "examples": "Status Candidates (Merit Promotion and VEOA Eligibles)",
+      "examples": "No data",
       "completeness_percent": 0,
       "completeness_class": "poor",
-      "unique_count": 1
+      "unique_count": 0
     },
     {
       "field_name": "workSchedule",
       "field_type": "String",
-      "examples": "Full-time, Intermittent, Part-time, Multiple Schedules (6 unique)",
+      "examples": "Full-time, Multiple Schedules, Intermittent, Part-time (6 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 6
