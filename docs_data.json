@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-16T15:33:16.090328",
-  "total_jobs": 3232837,
+  "generated_at": "2026-09-17T13:26:54.808590",
+  "total_jobs": 3233857,
   "total_fields": 47,
   "field_year": 2025,
   "file_size": "1.4GB",
-  "latest_job_date": "2026-09-16",
+  "latest_job_date": "2026-09-17",
   "data_coverage": [
     {
       "year": 2013,
@@ -92,17 +92,17 @@
     },
     {
       "year": 2025,
-      "total_jobs": 168530,
-      "jobs_opened": 168530,
-      "jobs_closed": 161044,
+      "total_jobs": 168531,
+      "jobs_opened": 168531,
+      "jobs_closed": 161045,
       "coverage": "\u2705 Complete year"
     },
     {
       "year": 2026,
-      "total_jobs": 183896,
-      "jobs_opened": 183896,
-      "jobs_closed": 182504,
-      "coverage": "Current through September 16, 2026"
+      "total_jobs": 184915,
+      "jobs_opened": 184915,
+      "jobs_closed": 183515,
+      "coverage": "Current through September 17, 2026"
     }
   ],
   "all_fields": [
@@ -117,7 +117,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"2032\"}], [{\"series\": \"0801\"}, {\"series\": \"0896\"}, {\"series\": \"1515\"}], [{\"series\": \"0801\"}, {\"series\": \"0830\"}, {\"series\": \"1501\"}, {\"series\": \"0861\"}, {\"series\": \"0850\"}], [{\"series\": \"0403\"}, {\"series\": \"1320\"}, {\"series\": \"0415\"}, {\"series\": \"1301\"}] (1820 unique)",
+      "examples": "[{\"series\": \"0810\"}, {\"series\": \"0861\"}, {\"series\": \"0830\"}], [{\"series\": \"0850\"}, {\"series\": \"0830\"}], [{\"series\": \"3820\"}], [{\"series\": \"0808\"}, {\"series\": \"0850\"}, {\"series\": \"0810\"}, {\"series\": \"0830\"}, {\"series\": \"0801\"}, {\"series\": \"0819\"}] (1820 unique)",
       "completeness_percent": 87,
       "completeness_class": "warning",
       "unique_count": 1820
@@ -141,7 +141,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of Veterans Affairs\\Immediate Office of the Assistant Secretary for Management, Department of Energy\\Southwestern Power Administration, Department of Agriculture\\Risk Management Agency, Department of Commerce\\Economic Development Administration (462 unique)",
+      "examples": "Judicial Branch\\U. S. Sentencing Commission, Department of the Air Force\\Air Force Civilian Career Training, Department of the Army\\ARMY TRANSPORTATION, Department of Homeland Security\\Federal Emergency Management Agency (462 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 462
@@ -165,15 +165,15 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "250012IMP-12844486-LB, ST-12847389-26-ARB, HQ-IT-835352-12669426-P, BSY-2025-0014 (166988 unique)",
+      "examples": "25-AFRH-12771665-P, CBSU-12811116-26-BLB, 25-009, NJ-12615127-AR-24-176 (166989 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 166988
+      "unique_count": 166989
     },
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Recent graduates, ICTAP Only, Multiple, Temporary (13 unique)",
+      "examples": "Agency Employees Only, Summer, Temporary, Seasonal (13 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 13
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "DLPA, DD11, ARHC, NV30 (444 unique)",
+      "examples": "EB00, CM63, AGIT, ARSB (444 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 444
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Office of the Chief Human Capital Officer, Office of Management and Budget, Air Force Legal Operations Agency, AmeriCorps (432 unique)",
+      "examples": "Office of the Assistant Secretary for Policy, Joint Activities, Defense Advanced Research Projects Agency, Defense Media Activity (432 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 432
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "NU, PU, LD, NF (95 unique)",
+      "examples": "LP, NF, NQ, EB (95 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 95
@@ -229,7 +229,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Agriculture, General Services Administration, Legislative Branch, Department of Veterans Affairs (26 unique)",
+      "examples": "Judicial Branch, Department of the Treasury, Department of the Interior, National Foundation on the Arts and the Humanities (26 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 26
@@ -237,7 +237,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "G4 FACILITIES & LOGISTICS DIRECTORATE OFFICE OF THE DIRECTOR, JFHQ, Director of Logistics, Oklahoma City, Oklahoma, COMMANDER NAVY REGION  MIDATLANTIC  NWS EARLE, COLTS NECK , NJ N96, Operations Division, Western Kentucky Area Office, Lake Barkley. (27150 unique)",
+      "examples": "Capacity Building, NBHCL KEY WEST FL, DIR OF MEDICINE, PRIMARY CARE, DFAS - AUDIT SUPPORT - COLUMBUS - JBKJB, 180 FW/ AMXS (27150 unique)",
       "completeness_percent": 73,
       "completeness_class": "warning",
       "unique_count": 27150
@@ -245,7 +245,7 @@
     {
       "field_name": "hiringpaths",
       "field_type": "JSON Array",
-      "examples": "[{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}], [{\"hiringPath\": \"Senior executives\"}], [{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"National Guard and reserves\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Native Americans\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}, {\"hiringPath\": \"Family of overseas employees\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}, {\"hiringPath\": \"Special authorities\"}], [{\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Veterans\"}] (667 unique)",
+      "examples": "[{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}, {\"hiringPath\": \"Special authorities\"}], [{\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Military spouses\"}], [{\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}], [{\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Special authorities\"}] (667 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 667
@@ -253,15 +253,15 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-19T23:48:20.047941, 2025-09-19T23:41:45.492346, 2025-09-19T23:40:43.907895, 2025-09-19T23:26:35.935184 (162123 unique)",
+      "examples": "2025-09-19T23:29:23.100144, 2025-09-19T23:53:07.157487, 2025-09-19T23:18:00.933044, 2025-09-19T23:29:23.100869 (162124 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 162123
+      "unique_count": 162124
     },
     {
       "field_name": "jobcategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0801\"}, {\"series\": \"1310\"}, {\"series\": \"1515\"}, {\"series\": \"1520\"}, {\"series\": \"1550\"}], [{\"series\": \"3566\"}], [{\"series\": \"3806\"}], [{\"series\": \"1667\"}] (565 unique)",
+      "examples": "[{\"series\": \"1060\"}], [{\"series\": \"1399\"}], [{\"series\": \"0302\"}], [{\"series\": \"3705\"}] (565 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 565
@@ -269,15 +269,15 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2026-08-17T14:09:04.800498, 2025-09-19T23:33:53.498903, 2025-09-19T23:38:09.845502, 2026-06-29T04:34:53.827455 (116175 unique)",
+      "examples": "2025-09-19T23:29:23.074016, 2025-12-19T09:05:41.739433, 2025-09-19T23:20:10.682597, 2026-06-29T04:35:42.601989 (115881 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 116175
+      "unique_count": 115881
     },
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "15, 40, DI, 06 (117 unique)",
+      "examples": "E, KL, 21, HH (117 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 117
@@ -285,15 +285,15 @@
     {
       "field_name": "maximumSalary",
       "field_type": "Number",
-      "examples": "$0, $96,116, $500,000 (range: $0-$500,000) (13649 unique)",
+      "examples": "$0, $96,116, $500,000 (range: $0-$500,000) (13650 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 13649
+      "unique_count": 13650
     },
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "EK, 02, 27, 2 (116 unique)",
+      "examples": "23, 70, IK, 03 (116 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 116
@@ -301,15 +301,15 @@
     {
       "field_name": "minimumSalary",
       "field_type": "Number",
-      "examples": "$0, $67,297, $450,000 (range: $0-$450,000) (13463 unique)",
+      "examples": "$0, $67,297, $450,000 (range: $0-$450,000) (13464 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 13463
+      "unique_count": 13464
     },
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "DR, DT, DJ, SY (163 unique)",
+      "examples": "KA, WE, EM, DC (163 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 163
@@ -317,7 +317,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2026-09-01, 2025-06-18, 2025-06-28, 2026-07-02 (653 unique)",
+      "examples": "2026-04-08, 2026-05-25, 2025-06-14, 2026-09-03 (653 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 653
@@ -325,7 +325,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2024-06-28, 2026-05-07, 2025-11-12, 2026-06-10 (496 unique)",
+      "examples": "2025-08-14, 2025-04-29, 2024-12-31, 2025-04-02 (496 unique)",
       "completeness_percent": 10,
       "completeness_class": "poor",
       "unique_count": 496
@@ -333,7 +333,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2025-12-08, 2025-02-25, 2025-11-04, 2025-08-06 (363 unique)",
+      "examples": "2025-05-01, 2025-11-05, 2025-07-14, 2025-05-12 (363 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363
@@ -349,15 +349,15 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Physician (Hematologist-Oncologist), HUMAN RESOURCES SPECIALIST (INFO SYS/MILITARY), Trial Attorney (Bivens), Dietitian  (Clinical) (44537 unique)",
+      "examples": "SUPERVISORY MISSION SUPPORT SPECIALIST, Nurse (Infection Preventionist/Quality Management Consultant), Peer Support Apprentice, MAINTENANCE MECHANIC SUPERVISOR (LANDSCAPING) NS-9 (44538 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 44537
+      "unique_count": 44538
     },
     {
       "field_name": "positionlocations",
       "field_type": "JSON Array",
-      "examples": "[{\"positionLocationCity\": \"Billings\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bozeman\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Browning\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Butte\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cut Bank\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Harrison\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Glasgow\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Glendive\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Great Falls\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hamilton\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Havre\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Helena\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kalispell\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lewistown\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Miles City\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Missoula\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Plentywood\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Red River Army Depot\", \"positionLocationState\": \"Texas\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Sequoia National Park\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Chelan\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cle Elum\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Entiat\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Leavenworth\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Naches\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Randle\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Trout Lake\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Winthrop\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Location Negotiable After Selection\", \"positionLocationState\": null, \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Baker City\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bend\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Butte Falls\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cave Junction\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Central Point\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Crescent\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Detroit\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Dufur\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Gold Beach\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Grants Pass\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Idleyld Park\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Joseph\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"La Grande\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Medford\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Parkdale\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Powers\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Prospect\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Sandy\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Sisters\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Sweet Home\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Westfir\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Zigzag\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}] (3073 unique)",
+      "examples": "[{\"positionLocationCity\": \"Camden County\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Oxon Hill\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Mammoth Lakes\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Sequoia National Park\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Whiskeytown\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Yosemite National Park\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Longmire\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Marblemount\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Duluth\", \"positionLocationState\": \"Minnesota\", \"positionLocationCountry\": \"United States\"}] (3073 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 3073
@@ -365,7 +365,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "CM, na, 02, 15 (77 unique)",
+      "examples": "14, 43, OC, 29 (77 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77
@@ -429,7 +429,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "5, 41, fEW, 84 (90 unique)",
+      "examples": "75, 84, 300, 29 (90 unique)",
       "completeness_percent": 89,
       "completeness_class": "warning",
       "unique_count": 90
@@ -445,10 +445,10 @@
     {
       "field_name": "usajobsControlNumber",
       "field_type": "Integer",
-      "examples": "555897900, 768200900, 770635000 (168358 unique)",
+      "examples": "555897900, 768200900, 770635000 (168359 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
-      "unique_count": 168358
+      "unique_count": 168359
     },
     {
       "field_name": "usajobs_control_number",
