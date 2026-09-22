@@ -4,18 +4,21 @@ Backfill fields that flatten_current_job() dropped when writing current_jobs_*.p
 
 collect_current_data.py has always stashed the full raw API response in the
 MatchedObjectDescriptor column, even though it only promoted a subset of fields
-to named columns. Two of the dropped fields matter:
+to named columns. This recovers everything flatten_current_job() now extracts
+(see its docstring) by re-parsing that raw JSON blob -- no new API calls
+needed. Two dict-path bugs (OrganizationCodes and TravelCode were both read
+from the wrong dict) and one type-confusion bug (AnnouncementClosingTypeOption
+echoes the closing-type code itself for non-cutoff postings, not a real cap)
+are fixed the same way here as in flatten_current_job().
 
-  - OrganizationCodes (UserArea.Details, "DEPTCODE/AGENCYCODE") -- flatten_current_job
-    read it from the wrong dict (top-level `job` instead of `user_area`), so
-    hiringAgencyCode was always null.
-  - AnnouncementClosingTypeOption (UserArea.Details) -- the exact application-count
-    cap for "Applicant Cut-Off" (code 03) postings. Never extracted at all.
-
-Both are recoverable from data already on disk/R2 by re-parsing the raw JSON
-blob -- no new API calls needed. This only helps current_jobs_*.parquet
-(2024-07 onward); the historicjoa API behind historical_jobs_*.parquet has no
-equivalent field for either one.
+Two different kinds of "missing" get recovered, and they're not the same:
+  - applicationCap, remoteIndicator, financialDisclosureRequired,
+    representedByUnion, positionSensitivity have NO equivalent in the
+    historicjoa API (historical_jobs_*.parquet) -- checked directly. Recovering
+    them here is the only way they'll ever exist, and only for 2024-07 onward.
+  - promotionPotential, whoMayApply, positionLocationDisplay/PositionLocations
+    already exist in historicjoa for the full 2013-2026 archive; recovering
+    them here just brings current_jobs's own copy up to parity.
 
 Usage:
     python scripts/backfill_current_jobs_fields.py data/current_jobs_2026.parquet
@@ -45,21 +48,41 @@ def _int_or_none(value):
         return None
 
 
+_EMPTY_FIELDS = {
+    "hiringDepartmentCode": None,
+    "hiringAgencyCode": None,
+    "travelRequirement": None,
+    "announcementClosingTypeCode": None,
+    "announcementClosingTypeDescription": None,
+    "applicationCap": None,
+    "remoteIndicator": None,
+    "financialDisclosureRequired": None,
+    "representedByUnion": None,
+    "positionSensitivity": None,
+    "promotionPotential": None,
+    "whoMayApply": None,
+    "positionLocationDisplay": None,
+    "positionLocationCount": None,
+    "PositionLocations": None,
+}
+
+
+def _bool_to_yn(value):
+    if value is True:
+        return "Y"
+    if value is False:
+        return "N"
+    return None
+
+
 def extract_fields(raw_mod: str) -> dict:
     """Re-derive the fields flatten_current_job() should have set, from the raw blob."""
-    empty = {
-        "hiringDepartmentCode": None,
-        "hiringAgencyCode": None,
-        "announcementClosingTypeCode": None,
-        "announcementClosingTypeDescription": None,
-        "applicationCap": None,
-    }
     if not raw_mod:
-        return empty
+        return dict(_EMPTY_FIELDS)
     try:
         mod = json.loads(raw_mod)
     except (TypeError, json.JSONDecodeError):
-        return empty
+        return dict(_EMPTY_FIELDS)
 
     details = (mod.get("UserArea") or {}).get("Details") or {}
 
@@ -73,12 +96,35 @@ def extract_fields(raw_mod: str) -> dict:
     # (e.g. "01"), not a cap -- only trust it for actual Applicant Cut-Off postings.
     cap = _int_or_none(details.get("AnnouncementClosingTypeOption")) if closing_code == "03" else None
 
+    who_may_apply = details.get("WhoMayApply") or {}
+    position_locations = mod.get("PositionLocation") or []
+    locations_json = json.dumps([
+        {
+            "positionLocationCity": loc.get("CityName"),
+            "positionLocationState": loc.get("CountrySubDivisionCode"),
+            "positionLocationCountry": loc.get("CountryCode"),
+            "latitude": loc.get("Latitude"),
+            "longitude": loc.get("Longitude"),
+        }
+        for loc in position_locations if isinstance(loc, dict)
+    ]) if position_locations else None
+
     return {
         "hiringDepartmentCode": dept_code,
         "hiringAgencyCode": agency_code,
+        "travelRequirement": details.get("TravelCode"),
         "announcementClosingTypeCode": closing_code,
         "announcementClosingTypeDescription": closing_desc,
         "applicationCap": cap,
+        "remoteIndicator": _bool_to_yn(details.get("RemoteIndicator")),
+        "financialDisclosureRequired": _bool_to_yn(details.get("FinancialDisclosure")),
+        "representedByUnion": _bool_to_yn(details.get("BargainingUnitStatus")),
+        "positionSensitivity": details.get("PositionSensitivitiy"),
+        "promotionPotential": details.get("PromotionPotential"),
+        "whoMayApply": who_may_apply.get("Name") or who_may_apply.get("Code") or None,
+        "positionLocationDisplay": mod.get("PositionLocationDisplay"),
+        "positionLocationCount": len(position_locations) if position_locations else None,
+        "PositionLocations": locations_json,
     }
 
 
@@ -98,10 +144,14 @@ def backfill(input_path: str, output_path: str):
     n_cap = df["applicationCap"].notna().sum()
     n_cutoff = (df["announcementClosingTypeCode"] == "03").sum()
     n_agency = df["hiringAgencyCode"].notna().sum()
-    print(f"  hiringAgencyCode populated: {n_agency:,} / {len(df):,}")
-    print(f"  Applicant Cut-Off postings: {n_cutoff:,}")
-    print(f"  applicationCap recovered:   {n_cap:,} ({100 * n_cap / n_cutoff:.1f}% of cut-off postings)"
-          if n_cutoff else "  applicationCap recovered:   0")
+    n_travel = df["travelRequirement"].notna().sum()
+    n_location = df["positionLocationDisplay"].notna().sum()
+    print(f"  hiringAgencyCode populated:   {n_agency:,} / {len(df):,}")
+    print(f"  travelRequirement populated:  {n_travel:,} / {len(df):,}")
+    print(f"  positionLocationDisplay:      {n_location:,} / {len(df):,}")
+    print(f"  Applicant Cut-Off postings:   {n_cutoff:,}")
+    print(f"  applicationCap recovered:     {n_cap:,} ({100 * n_cap / n_cutoff:.1f}% of cut-off postings)"
+          if n_cutoff else "  applicationCap recovered:     0")
 
     # MatchedObjectDescriptor is ~99% of these files and compresses far better
     # under zstd than the pandas-default snappy (see collect_current_data.py's
