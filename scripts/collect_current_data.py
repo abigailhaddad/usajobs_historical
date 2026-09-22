@@ -61,6 +61,16 @@ def get_api_headers() -> Dict[str, str]:
     }
 
 
+def _int_or_none(value) -> Optional[int]:
+    """Parse a value as int, returning None on empty/invalid input."""
+    if value in (None, ""):
+        return None
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return None
+
+
 def clean_text(text: Optional[str]) -> Optional[str]:
     """Clean HTML tags and entities from text"""
     if not text:
@@ -79,6 +89,31 @@ def clean_text(text: Optional[str]) -> Optional[str]:
 def flatten_current_job(job_item: dict, appointment_type_map: dict, hiring_path_map: dict) -> dict:
     """
     Keep all fields from current API job, plus add normalized fields to match historical API.
+
+    A handful of these normalized fields (applicationCap, remoteIndicator,
+    financialDisclosureRequired, representedByUnion, positionSensitivity) have
+    NO equivalent in the historicjoa API behind historical_jobs_*.parquet --
+    checked directly against a raw historicjoa record. They only exist here,
+    and only from 2024-07-08 onward (when this collector started running), and
+    only for postings it actually saw as "current" on some day's snapshot.
+    There is no way to backfill them for anything that only ever appears in
+    the historicjoa archive -- that's a permanent gap, not a bug to fix later.
+
+    The page-scrape pipeline (scraped_jobs_*.parquet / abigailhaddad/usajobs-
+    scraping on HF) already has most of these under its own names
+    (financialDisclosureRequired, representedByUnion, positionSensitivity,
+    remoteJob) but NOT applicationCap -- checked directly: the cap number is
+    rendered into a UI banner outside the labeled sections that pipeline
+    scrapes (howToApply, additionalInformation, ...), so it only shows up
+    there when a posting's author happens to also restate it in prose, which
+    is rare (16 of 733 "Applicant Cut-Off" postings in a full 2026 check).
+    This API field is the only reliable source for the cap.
+
+    The rest of the "newly added" fields (promotionPotential, whoMayApply,
+    positionLocationDisplay/PositionLocations) are NOT in that situation --
+    historicjoa already carries them for the full 2013-2026 archive. Adding
+    them here just brings this table's own copy up to parity so a still-open
+    posting has them before it resolves into the historicjoa archive.
     """
     import json
     
@@ -112,7 +147,12 @@ def flatten_current_job(job_item: dict, appointment_type_map: dict, hiring_path_
     # OrganizationName is the right match. Fall back to DepartmentName when
     # a job is posted at the dept level with no bureau attribution.
     flattened["hiringAgencyName"] = job.get("OrganizationName") or job.get("DepartmentName")
-    flattened["hiringAgencyCode"] = job.get("OrganizationCodes", "").split(".")[0] if job.get("OrganizationCodes") else None
+    # OrganizationCodes lives under UserArea.Details, not top-level `job`, and is
+    # "DEPTCODE/AGENCYCODE" (e.g. "VA/VATA"), not dot-delimited -- job.get(...) here
+    # was always None, so hiringAgencyCode was 100% null in every current_jobs row.
+    org_codes = (user_area.get("OrganizationCodes") or "").split("/")
+    flattened["hiringDepartmentCode"] = org_codes[0] if org_codes and org_codes[0] else None
+    flattened["hiringAgencyCode"] = org_codes[1] if len(org_codes) > 1 and org_codes[1] else None
     flattened["hiringDepartmentName"] = job.get("DepartmentName")
     flattened["hiringSubelementName"] = job.get("SubAgency")
     flattened["positionTitle"] = job.get("PositionTitle")
@@ -120,8 +160,13 @@ def flatten_current_job(job_item: dict, appointment_type_map: dict, hiring_path_
     _service_code = user_area.get("ServiceType")
     _service_map = {'01': 'Competitive', '02': 'Excepted', '03': 'Senior Executive'}
     flattened["serviceType"] = _service_map.get(str(_service_code), str(_service_code)) if _service_code else None
+    # SupervisoryStatus does not exist anywhere in this API's response (checked
+    # a raw job item directly) -- always None, and there's no field to fix this
+    # from. Left as-is since historical_jobs (historicjoa) does have real values.
     flattened["supervisoryStatus"] = job.get("SupervisoryStatus")
-    flattened["travelRequirement"] = job.get("TravelCode")
+    # TravelCode is also under UserArea.Details, not top-level -- same mistake
+    # as OrganizationCodes above, also always null before this fix.
+    flattened["travelRequirement"] = user_area.get("TravelCode")
     
     # Convert teleworkEligible boolean to string format to match historical data
     telework_eligible = user_area.get("TeleworkEligible")
@@ -134,6 +179,61 @@ def flatten_current_job(job_item: dict, appointment_type_map: dict, hiring_path_
     flattened["drugTestRequired"] = user_area.get("DrugTestRequired")
     flattened["relocationExpensesReimbursed"] = user_area.get("Relocation")
     flattened["totalOpenings"] = user_area.get("TotalOpenings")
+
+    # AnnouncementClosingType/Option live in UserArea.Details, not top-level `job`.
+    # "03" (Applicant Cut-Off) postings carry the actual application-count cap in
+    # the Option field, e.g. "50". For other closing types, Option just echoes
+    # the closing-type code itself (e.g. "01"), so it's meaningless there --
+    # only trust it when the closing type is actually "03". The historicjoa API
+    # used for past years has no equivalent field at all.
+    _closing_code = user_area.get("AnnouncementClosingType")
+    _closing_type_map = {'01': 'Closing Date', '02': 'Open Continuous', '03': 'Applicant Cut-Off'}
+    flattened["announcementClosingTypeCode"] = _closing_code
+    flattened["announcementClosingTypeDescription"] = _closing_type_map.get(str(_closing_code)) if _closing_code else None
+    flattened["applicationCap"] = (
+        _int_or_none(user_area.get("AnnouncementClosingTypeOption")) if _closing_code == "03" else None
+    )
+
+    # --- Fields with NO equivalent in historicjoa (historical_jobs_*.parquet) ---
+    # These only exist in the Search API, so they're only recoverable for jobs
+    # collect_current_data.py actually saw as "current" -- 2024-07-08 onward.
+    # There is no way to backfill them for anything that only ever appears in
+    # the historicjoa archive.
+    remote_indicator = user_area.get("RemoteIndicator")
+    flattened["remoteIndicator"] = "Y" if remote_indicator is True else ("N" if remote_indicator is False else None)
+    financial_disclosure = user_area.get("FinancialDisclosure")
+    flattened["financialDisclosureRequired"] = (
+        "Y" if financial_disclosure is True else ("N" if financial_disclosure is False else None)
+    )
+    bargaining_unit = user_area.get("BargainingUnitStatus")
+    flattened["representedByUnion"] = "Y" if bargaining_unit is True else ("N" if bargaining_unit is False else None)
+    flattened["positionSensitivity"] = user_area.get("PositionSensitivitiy")  # API's own spelling
+
+    # --- Fields historicjoa already has for the full 2013-2026 archive ---
+    # Adding these here isn't recovering lost history -- it's just bringing
+    # current_jobs's own copy up to parity with what historical_jobs already
+    # carries, so a job doesn't lose this data while it's still "current" and
+    # hasn't resolved into the historicjoa archive yet.
+    flattened["promotionPotential"] = user_area.get("PromotionPotential")
+    who_may_apply = user_area.get("WhoMayApply") or {}
+    flattened["whoMayApply"] = who_may_apply.get("Name") or who_may_apply.get("Code") or None
+    flattened["positionLocationDisplay"] = job.get("PositionLocationDisplay")
+    position_locations = job.get("PositionLocation") or []
+    flattened["positionLocationCount"] = len(position_locations) if position_locations else None
+    if position_locations:
+        flattened["PositionLocations"] = json.dumps([
+            {
+                "positionLocationCity": loc.get("CityName"),
+                "positionLocationState": loc.get("CountrySubDivisionCode"),
+                "positionLocationCountry": loc.get("CountryCode"),
+                "latitude": loc.get("Latitude"),
+                "longitude": loc.get("Longitude"),
+            }
+            for loc in position_locations if isinstance(loc, dict)
+        ])
+    else:
+        flattened["PositionLocations"] = None
+
     flattened["positionOpenDate"] = job.get("PositionStartDate")
     flattened["positionCloseDate"] = job.get("PositionEndDate")
     flattened["positionExpireDate"] = job.get("PositionExpireDate")
