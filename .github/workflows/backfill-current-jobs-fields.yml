@@ -1,0 +1,59 @@
+name: One-off - backfill current_jobs fields
+
+# Temporary maintenance workflow. Uploading a fixed current_jobs_*.parquet by
+# hand hits two walls: `wrangler r2 object put` refuses files over 300 MiB
+# (current_jobs_2026.parquet is ~400 MiB), and there's no local copy of the
+# real R2 API credentials sync_to_r2.py needs for a proper multipart upload.
+# This runs the same backfill + upload inside CI, where those secrets already
+# exist and boto3's multipart handles the file size fine.
+#
+# Delete this file once the fields it backfills (see
+# scripts/backfill_current_jobs_fields.py) have been recovered for every
+# year that needs it -- it's a bridge for already-collected data, not a
+# permanent part of the pipeline.
+
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Year to backfill (matches data/current_jobs_<year>.parquet)"
+        required: true
+        default: "2026"
+
+permissions:
+  contents: read
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download current file from R2 (public, no credentials needed)
+        run: |
+          mkdir -p data
+          curl -sf -o "data/current_jobs_${{ inputs.year }}.parquet" \
+            "https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/data/current_jobs_${{ inputs.year }}.parquet"
+          ls -la "data/current_jobs_${{ inputs.year }}.parquet"
+
+      - name: Backfill dropped fields
+        run: python scripts/backfill_current_jobs_fields.py "data/current_jobs_${{ inputs.year }}.parquet"
+
+      - name: Upload fixed file back to R2
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+        run: |
+          mkdir -p /tmp/r2_upload_only
+          cp "data/current_jobs_${{ inputs.year }}.parquet" /tmp/r2_upload_only/
+          python scripts/sync_to_r2.py --data-dir /tmp/r2_upload_only --web-parquet /tmp/r2_upload_only/does_not_exist.parquet
