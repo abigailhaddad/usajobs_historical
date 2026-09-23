@@ -1,12 +1,12 @@
 {
-  "created_at": "2026-09-22T07:59:51.059196",
+  "created_at": "2026-09-23T08:01:54.055007",
   "row_counts": {
     "historical_jobs_2016.parquet": 3879,
     "historical_jobs_2024.parquet": 367192,
     "historical_jobs_2019.parquet": 349256,
     "historical_jobs_2022.parquet": 441604,
     "historical_jobs_2013.parquet": 5,
-    "scraped_jobs_2026.parquet": 27596,
+    "scraped_jobs_2026.parquet": 28716,
     "historical_jobs_2025_backup.parquet": 134580,
     "current_jobs_2024.parquet": 584,
     "historical_jobs_2015.parquet": 140,
@@ -15,9 +15,9 @@
     "historical_jobs_2023.parquet": 454652,
     "scraped_jobs_2025.parquet": 387,
     "historical_jobs_2017.parquet": 237146,
-    "current_jobs_2026.parquet": 182318,
+    "current_jobs_2026.parquet": 183430,
     "historical_jobs_2020.parquet": 328440,
-    "historical_jobs_2026.parquet": 188261,
+    "historical_jobs_2026.parquet": 189410,
     "historical_jobs_2014.parquet": 24,
     "historical_jobs_2021.parquet": 369151,
     "historical_jobs_2025.parquet": 168359,
@@ -2512,7 +2512,9 @@
       "860694500",
       "860720200",
       "860734500",
+      "860813800",
       "860818400",
+      "860825700",
       "860850600",
       "860850900",
       "860895600",
@@ -2560,9 +2562,7 @@
       "861800500",
       "861820900",
       "861825000",
-      "861841400",
-      "861883200",
-      "861909900"
+      "861841400"
     ],
     "historical_jobs_2025_backup.parquet": [
       "492065100",
