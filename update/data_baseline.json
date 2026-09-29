@@ -1,13 +1,13 @@
 {
-  "created_at": "2026-09-28T08:18:11.870484",
+  "created_at": "2026-09-29T08:07:59.545528",
   "row_counts": {
     "historical_jobs_2015.parquet": 140,
-    "scraped_jobs_2026.parquet": 32338,
+    "scraped_jobs_2026.parquet": 33306,
     "current_jobs_2025.parquet": 87736,
     "historical_jobs_2018.parquet": 329356,
-    "current_jobs_2026.parquet": 187049,
+    "current_jobs_2026.parquet": 188010,
     "historical_jobs_2017.parquet": 237146,
-    "historical_jobs_2026.parquet": 193084,
+    "historical_jobs_2026.parquet": 194096,
     "historical_jobs_2025_backup.parquet": 134580,
     "current_jobs_2024.parquet": 584,
     "historical_jobs_2013.parquet": 5,
@@ -17,7 +17,7 @@
     "historical_jobs_2024.parquet": 367192,
     "historical_jobs_2023.parquet": 454652,
     "historical_jobs_2021.parquet": 369151,
-    "scraped_jobs_2025.parquet": 387,
+    "scraped_jobs_2025.parquet": 388,
     "historical_jobs_2016.parquet": 3879,
     "historical_jobs_2025.parquet": 168360,
     "historical_jobs_2022.parquet": 441604,
@@ -210,6 +210,7 @@
       "831497100",
       "839081400",
       "839089400",
+      "844393000",
       "846552900",
       "846974600",
       "846986300",
@@ -675,6 +676,7 @@
       "861319900",
       "861357400",
       "861364900",
+      "861391600",
       "861457900",
       "861500000",
       "861508200",
@@ -687,9 +689,7 @@
       "861719500",
       "861732900",
       "861753300",
-      "861753400",
-      "861759800",
-      "861792900"
+      "861753400"
     ],
     "current_jobs_2025.parquet": [
       "547366900",
@@ -1754,6 +1754,7 @@
       "843809700",
       "843946300",
       "844118200",
+      "844393000",
       "844544100",
       "844777000",
       "845357500",
@@ -2194,8 +2195,7 @@
       "853320700",
       "853323300",
       "853323900",
-      "853325000",
-      "853325100"
+      "853325000"
     ],
     "historical_jobs_2017.parquet": [
       "316399800",
@@ -6766,6 +6766,7 @@
       "764671200",
       "789407600",
       "835811200",
+      "842877000",
       "842910200",
       "845309600",
       "846588300",
