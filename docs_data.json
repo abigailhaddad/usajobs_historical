@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-29T08:07:49.314850",
-  "total_jobs": 3243025,
+  "generated_at": "2026-09-30T08:08:01.988097",
+  "total_jobs": 3244183,
   "total_fields": 47,
   "field_year": 2025,
-  "file_size": "987MB",
-  "latest_job_date": "2026-09-29",
+  "file_size": "989MB",
+  "latest_job_date": "2026-09-30",
   "data_coverage": [
     {
       "year": 2013,
@@ -99,10 +99,10 @@
     },
     {
       "year": 2026,
-      "total_jobs": 194103,
-      "jobs_opened": 194103,
-      "jobs_closed": 192593,
-      "coverage": "Current through September 29, 2026"
+      "total_jobs": 195261,
+      "jobs_opened": 195261,
+      "jobs_closed": 193734,
+      "coverage": "Current through September 30, 2026"
     }
   ],
   "all_fields": [
@@ -117,7 +117,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0193\"}, {\"series\": \"0186\"}, {\"series\": \"0101\"}, {\"series\": \"0180\"}, {\"series\": \"0102\"}, {\"series\": \"0185\"}, {\"series\": \"0190\"}], [{\"series\": \"0855\"}, {\"series\": \"0810\"}, {\"series\": \"0850\"}, {\"series\": \"0830\"}], [{\"series\": \"0801\"}, {\"series\": \"0810\"}, {\"series\": \"1350\"}], [{\"series\": \"0401\"}, {\"series\": \"0819\"}, {\"series\": \"1350\"}, {\"series\": \"0893\"}, {\"series\": \"1301\"}, {\"series\": \"1320\"}] (1820 unique)",
+      "examples": "[{\"series\": \"1010\"}], [{\"series\": \"0810\"}, {\"series\": \"0808\"}, {\"series\": \"0819\"}, {\"series\": \"0830\"}, {\"series\": \"1350\"}, {\"series\": \"0850\"}], [{\"series\": \"0830\"}, {\"series\": \"0893\"}, {\"series\": \"1320\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}], [{\"series\": \"1529\"}, {\"series\": \"0801\"}] (1820 unique)",
       "completeness_percent": 87,
       "completeness_class": "warning",
       "unique_count": 1820
@@ -141,7 +141,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Selective Service System, Department of Veterans Affairs\\Executive Director, Office of Acquisition, Logistics and Construction, Department of Commerce\\National Telecommunications and Information Administration, Department of Veterans Affairs\\Deputy Assistant Secretary for FMBTS (462 unique)",
+      "examples": "Department of the Air Force\\Air Force Elements, U.S. Special Operations Command, U.S. Holocaust Memorial Museum, Department of Defense\\Defense Legal Services Agency, Office of the Inspector General, USPS (462 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 462
@@ -165,7 +165,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "25-9BFSYC-FE817291, CBSR-12851889-26-JS, CBSW-12708369-25-HR, CAZM-12686237-25-CK (166990 unique)",
+      "examples": "MCFS256137685094, 25-12803512, ST-12857521-26-MAJ, NC7X250056556268ATT (166990 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 166990
@@ -173,7 +173,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Agency Employees Only, Seasonal, Summer, Term (13 unique)",
+      "examples": "Seasonal, Multiple, Intermittent, Temporary (13 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 13
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "AF2E, NV60, AGCR, DLSH (444 unique)",
+      "examples": "SB00, 5LCS, AR5A, BG00 (444 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 444
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Naval Education and Training Command, Bureau of Land Management, Army and Air Force Exchange Service (nonappropriated fund), Air Force Global Strike Command (432 unique)",
+      "examples": "Defense Security Cooperation Agency, Air Force Safety Center, Office of the Chief Human Capital Officer, Patent and Trademark Office (432 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 432
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "SM, TC, DO, LD (95 unique)",
+      "examples": "SK, ST, EC, XD (95 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 95
@@ -229,7 +229,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Court Services and Offender Supervision Agency for DC, Department of the Army, National Foundation on the Arts and the Humanities, Department of Energy (26 unique)",
+      "examples": "Department of Education, Executive Office of the President, Department of Homeland Security, Department of the Army (26 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 26
@@ -237,7 +237,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Evansville Regional (EVV), Headquarters United States European Command, Public Affairs Office, Veterans Health Administration- Eastern Oklahoma VA Health Care System, Human Resources Office (27151 unique)",
+      "examples": "Response and Recovery, Field Leadership Directorate, National IMAT Blue, MULTIPLE OFFICES, Office of Procurement Acquisition and Logistics, Systems Development Directorate, Air Force Technical Applications Center (AFTAC) (27151 unique)",
       "completeness_percent": 73,
       "completeness_class": "warning",
       "unique_count": 27151
@@ -245,7 +245,7 @@
     {
       "field_name": "hiringpaths",
       "field_type": "JSON Array",
-      "examples": "[{\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Military spouses\"}], [{\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Special authorities\"}, {\"hiringPath\": \"The public\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}], [{\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}, {\"hiringPath\": \"Family of overseas employees\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Military spouses\"}], [{\"hiringPath\": \"The public\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Students\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}] (667 unique)",
+      "examples": "[{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}, {\"hiringPath\": \"Family of overseas employees\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Special authorities\"}], [{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}], [{\"hiringPath\": \"The public\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"National Guard and reserves\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}], [{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}] (667 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 667
@@ -253,7 +253,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-19T23:47:00.334228, 2025-09-19T23:40:43.921839, 2025-09-19T23:10:31.444295, 2025-09-19T23:54:35.963481 (162125 unique)",
+      "examples": "2025-09-19T23:45:26.006502, 2025-09-19T23:40:43.883873, 2025-12-19T09:06:00.594898, 2025-09-19T23:42:56.648502 (162125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 162125
@@ -261,7 +261,7 @@
     {
       "field_name": "jobcategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"3703\"}], [{\"series\": \"0199\"}], [{\"series\": \"0901\"}], [{\"series\": \"0801\"}, {\"series\": \"1310\"}, {\"series\": \"1515\"}, {\"series\": \"1520\"}, {\"series\": \"1550\"}] (565 unique)",
+      "examples": "[{\"series\": \"0950\"}], [{\"series\": \"1371\"}], [{\"series\": \"8255\"}], [{\"series\": \"5378\"}] (565 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 565
@@ -269,7 +269,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-19T23:47:00.321201, 2025-09-19T23:32:43.340877, 2025-09-19T23:07:31.706825, 2025-09-19T23:15:07.748714 (115701 unique)",
+      "examples": "2025-09-19T23:25:49.545821, 2025-09-19T23:18:00.938970, 2025-09-19T23:50:42.636667, 2025-09-19T23:10:31.417064 (115701 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115701
@@ -277,7 +277,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "HS15, 96, 70, 35 (117 unique)",
+      "examples": "28, 17, 11, 07 (117 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 117
@@ -293,7 +293,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "9, J, KL, FL (116 unique)",
+      "examples": "KJ, 98, 31, LL (116 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 116
@@ -309,7 +309,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "KB, WN, AA, CU (163 unique)",
+      "examples": "NK, DE, SP, NT (163 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 163
@@ -317,7 +317,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2026-01-22, 2025-10-24, 2025-09-05, 2025-04-13 (653 unique)",
+      "examples": "2026-01-20, 2026-05-06, 2026-01-18, 2025-09-06 (653 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 653
@@ -325,7 +325,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-10-13, 2026-01-10, 2025-02-25, 2025-04-24 (496 unique)",
+      "examples": "2025-10-02, 2025-05-01, 2024-12-16, 2026-03-11 (496 unique)",
       "completeness_percent": 10,
       "completeness_class": "poor",
       "unique_count": 496
@@ -333,7 +333,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2025-08-16, 2025-09-23, 2025-02-03, 2025-08-31 (363 unique)",
+      "examples": "2025-07-31, 2025-09-30, 2025-05-25, 2025-08-21 (363 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363
@@ -349,7 +349,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Electronic Integrated System Mechanic, Medical Support Assistance, LEAD MEDICAL RECORDS TECHNICIAN-CODER, Child and Youth Program Assistant - CDC (44539 unique)",
+      "examples": "Supervisory Property Management Specialist, Advance Medical Support Assistant (Lecanto), Laborer (Machinery & Equipment), Health Systems Administrator- Associate Director (44539 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 44539
@@ -357,7 +357,7 @@
     {
       "field_name": "positionlocations",
       "field_type": "JSON Array",
-      "examples": "[{\"positionLocationCity\": \"Fort Payne\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Castle Rock\", \"positionLocationState\": \"Colorado\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Death Valley\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Whiskeytown\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Stockton\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Arcadia\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Frostproof\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Howey in the Hills\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lake Wales\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Tampa\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"College Park\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cockeysville\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Allen Park\", \"positionLocationState\": \"Michigan\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Frankfort\", \"positionLocationState\": \"Michigan\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hart\", \"positionLocationState\": \"Michigan\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bronx\", \"positionLocationState\": \"New York\", \"positionLocationCountry\": \"United States\"}] (3073 unique)",
+      "examples": "[{\"positionLocationCity\": \"Fort Hunter Liggett\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Martinez\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Orick\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kalaupapa\", \"positionLocationState\": \"Hawaii\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Spalding\", \"positionLocationState\": \"Idaho\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Astoria\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kimberly\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Limestone\", \"positionLocationState\": \"Maine\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Iwakuni Marine Corps Air Station\", \"positionLocationState\": null, \"positionLocationCountry\": \"Japan\"}] (3073 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 3073
@@ -365,7 +365,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "29, 11, EM, 21 (77 unique)",
+      "examples": "10, 13, 02, 40 (77 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77
@@ -429,7 +429,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "08, 50, 32, 100 (90 unique)",
+      "examples": "04, 15, 002, 250 (90 unique)",
       "completeness_percent": 89,
       "completeness_class": "warning",
       "unique_count": 90
