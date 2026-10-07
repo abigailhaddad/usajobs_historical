@@ -102,7 +102,7 @@
     <div class="container">
         <h1>USAJobs Historical API Data</h1>
 
-        <p><strong>Data collection last run: 2026-10-06</strong></p>
+        <p><strong>Data collection last run: 2026-10-07</strong></p>
         <p><strong>⚠️ This is not an official USAJobs project</strong></p>
 
         <div class="stats" style="background: #d4edda; border-left: 4px solid #28a745; margin-bottom: 20px;">
@@ -120,7 +120,7 @@
             </ul>
         </div>
         <div class="stats">
-            <strong>Dataset:</strong> 3,249,110 total job postings | <strong>Coverage:</strong> 2013-2026 | <strong>Files:</strong> 1001MB total | <strong>Storage:</strong> Cloudflare R2 | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
+            <strong>Dataset:</strong> 3,250,441 total job postings | <strong>Coverage:</strong> 2013-2026 | <strong>Files:</strong> 1004MB total | <strong>Storage:</strong> Cloudflare R2 | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
         </div>
 
         <h2>Table of Contents</h2>
@@ -155,7 +155,7 @@
                 <tr><td>2023</td><td>454,652</td><td>434,527</td><td>✅ Complete year</td></tr>
                 <tr><td>2024</td><td>367,192</td><td>352,305</td><td>✅ Complete year</td></tr>
                 <tr><td>2025</td><td>168,532</td><td>161,046</td><td>✅ Complete year</td></tr>
-                <tr><td>2026</td><td>200,188</td><td>198,408</td><td>Current through October 06, 2026</td></tr>
+                <tr><td>2026</td><td>201,519</td><td>199,705</td><td>Current through October 07, 2026</td></tr>
             </tbody>
         </table>
 
@@ -180,7 +180,7 @@
                 <tr>
                     <td><code class="field-name">JobCategories</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"series": "0099"}, {"series": "0599"}, {"series": "0199"}, {"series": "0899"}, {"series": "0499"}, {"series": "1399"}, {"series": "1599"}], [{"series": "1850"}], [{"series": "0861"}, {"series": "0830"}], [{"series": "1510"}, {"series": "1520"}, {"series": "1560"}, {"series": "0110"}] (1820 unique)</td>
+                    <td class="examples">[{"series": "1601"}, {"series": "1603"}], [{"series": "5352"}, {"series": "5306"}, {"series": "5350"}, {"series": "5309"}, {"series": "5378"}, {"series": "5301"}, {"series": "5313"}], [{"series": "1060"}], [{"series": "0896"}, {"series": "0830"}, {"series": "0855"}, {"series": "0861"}, {"series": "0854"}, {"series": "0801"}] (1820 unique)</td>
                     <td class="completeness warning">87%</td>
                 </tr>
                 <tr>
@@ -198,7 +198,7 @@
                 <tr>
                     <td><code class="field-name">agencyLevelSort</code></td>
                     <td>String</td>
-                    <td class="examples">Department of the Army, Department of Defense\Defense Acquisition University, Department of the Army\U.S. Army Data Analysis Center, Department of Homeland Security\Office of Intelligence and Analysis (462 unique)</td>
+                    <td class="examples">Department of Health and Human Services\Centers for Disease Control and Prevention, Department of the Army\21st Theater Sustainment Command (TSC), Smithsonian Institution , Court Services and Offender Supervision Agency for DC\Pretrial Services Agency (462 unique)</td>
                     <td class="completeness good">99%</td>
                 </tr>
                 <tr>
@@ -216,13 +216,13 @@
                 <tr>
                     <td><code class="field-name">announcementNumber</code></td>
                     <td>String</td>
-                    <td class="examples">CBTD-12682001-25-BAS, CBTA-12776570-25-NFG, CBSR-12854039-26-AF, 75567 (166990 unique)</td>
+                    <td class="examples">2025-EM-0117, CBSY-12830421-26-BH, ST-12642814-25-OCFO, 25-12802651 (166990 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">appointmentType</code></td>
                     <td>String</td>
-                    <td class="examples">Temporary, Intermittent, Internships, Temporary promotion (13 unique)</td>
+                    <td class="examples">Agency Employees Only, ICTAP Only, Intermittent, Internships (13 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -246,61 +246,61 @@
                 <tr>
                     <td><code class="field-name">hiringAgencyCode</code></td>
                     <td>String</td>
-                    <td class="examples">AF1B, DJ12, HSCB, HE11 (444 unique)</td>
+                    <td class="examples">ARE2, NV60, NV, ARHC (444 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringAgencyName</code></td>
                     <td>String</td>
-                    <td class="examples">Government National Mortgage Association (Ginnie Mae), U.S. Army Security Assistance Command, General Counsel, National Institutes of Health (432 unique)</td>
+                    <td class="examples">Organization of the Joint Chiefs of Staff, Commander, Navy Installations, U.S. Army North, Air Force Civilian Career Training (432 unique)</td>
                     <td class="completeness good">99%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringDepartmentCode</code></td>
                     <td>String</td>
-                    <td class="examples">GS, LP, LC, NF (95 unique)</td>
+                    <td class="examples">XP, RO, SE, DJ (95 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringDepartmentName</code></td>
                     <td>String</td>
-                    <td class="examples">Other Agencies and Independent Organizations, Department of Defense, Department of Agriculture, National Foundation on the Arts and the Humanities (26 unique)</td>
+                    <td class="examples">Department of Labor, Court Services and Offender Supervision Agency for DC, National Aeronautics and Space Administration, Department of Energy (26 unique)</td>
                     <td class="completeness good">99%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringSubelementName</code></td>
                     <td>String</td>
-                    <td class="examples">Base Alameda, Asset Logistics Division (ALD), Logistics Supply Support Branch (LSSB), Nominating Official for this position is LTC Sudol, Office of General Counsel of the Department of Defense (27151 unique)</td>
+                    <td class="examples">VA Boston Healthcare System, PWR Seasonal Recruitment Interior Regions 8,9,10,12 - Olympic National Park, ffice of Field Operations, National Targeting Center - Passenger Division, Jesse Brown Department of Veterans Affairs Medical Center (27151 unique)</td>
                     <td class="completeness warning">73%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringpaths</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"hiringPath": "The public"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Special authorities"}], [{"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Veterans"}, {"hiringPath": "National Guard and reserves"}, {"hiringPath": "Military spouses"}], [{"hiringPath": "Veterans"}, {"hiringPath": "National Guard and reserves"}, {"hiringPath": "Individuals with disabilities"}, {"hiringPath": "Military spouses"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Land and base management"}], [{"hiringPath": "Military spouses"}, {"hiringPath": "Internal to an agency"}] (667 unique)</td>
+                    <td class="examples">[{"hiringPath": "The public"}, {"hiringPath": "Veterans"}, {"hiringPath": "Individuals with disabilities"}, {"hiringPath": "Military spouses"}, {"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Land and base management"}, {"hiringPath": "Special authorities"}], [{"hiringPath": "Veterans"}, {"hiringPath": "Military spouses"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Federal employees - Excepted service"}, {"hiringPath": "Land and base management"}], [{"hiringPath": "Veterans"}, {"hiringPath": "Individuals with disabilities"}, {"hiringPath": "Military spouses"}, {"hiringPath": "Peace Corps & AmeriCorps Vista"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Land and base management"}, {"hiringPath": "Special authorities"}], [{"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Federal employees - Excepted service"}, {"hiringPath": "The public"}, {"hiringPath": "Veterans"}] (667 unique)</td>
                     <td class="completeness poor">13%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">inserted_at</code></td>
                     <td>String</td>
-                    <td class="examples">2025-09-19T23:20:10.675373, 2025-09-19T23:11:51.284120, 2025-09-19T23:26:35.942324, 2025-09-19T23:16:42.127220 (162125 unique)</td>
+                    <td class="examples">2026-08-17T14:30:15.165977, 2025-09-19T23:11:51.275865, 2025-09-19T23:40:43.916184, 2026-06-29T04:34:53.810013 (162125 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">jobcategories</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"series": "3359"}], [{"series": "2010"}], [{"series": "0602"}, {"series": "0668"}], [{"series": "0025"}] (565 unique)</td>
+                    <td class="examples">[{"series": "1173"}], [{"series": "2805"}], [{"series": "0963"}], [{"series": "0640"}] (565 unique)</td>
                     <td class="completeness poor">13%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">last_seen</code></td>
                     <td>String</td>
-                    <td class="examples">2025-09-19T23:23:06.159378, 2025-09-19T23:30:46.592495, 2026-06-29T04:35:28.186958, 2025-09-19T23:30:46.597161 (115507 unique)</td>
+                    <td class="examples">2025-09-19T23:18:00.932756, 2025-09-19T23:30:46.598247, 2025-09-19T23:05:43.709156, 2026-06-29T04:34:35.514635 (115507 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">maximumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">IL, 5, ES, KL (117 unique)</td>
+                    <td class="examples">LJ, 30, 53, HL (117 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -312,7 +312,7 @@
                 <tr>
                     <td><code class="field-name">minimumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">NA, EI, DI, KK (116 unique)</td>
+                    <td class="examples">LI, 8, 03, II (116 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -324,25 +324,25 @@
                 <tr>
                     <td><code class="field-name">payScale</code></td>
                     <td>String</td>
-                    <td class="examples">RF, NQ, PE, DS (163 unique)</td>
+                    <td class="examples">KE, SL, XG, DA (163 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionCloseDate</code></td>
                     <td>String</td>
-                    <td class="examples">2026-09-26, 2025-07-26, 2025-03-02, 2025-08-05 (653 unique)</td>
+                    <td class="examples">2026-05-28, 2026-09-23, 2026-08-03, 2026-08-29 (653 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionExpireDate</code></td>
                     <td>String</td>
-                    <td class="examples">2025-09-18, 2025-11-09, 2025-11-15, 2024-09-11 (496 unique)</td>
+                    <td class="examples">2025-09-17, 2025-06-17, 2025-01-22, 2026-02-25 (496 unique)</td>
                     <td class="completeness poor">10%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionOpenDate</code></td>
                     <td>String</td>
-                    <td class="examples">2025-01-24, 2025-07-13, 2025-11-07, 2025-07-29 (363 unique)</td>
+                    <td class="examples">2025-03-12, 2025-03-27, 2025-06-09, 2025-09-20 (363 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -354,19 +354,19 @@
                 <tr>
                     <td><code class="field-name">positionTitle</code></td>
                     <td>String</td>
-                    <td class="examples">Physician Assistant Primary Care (Baraboo), RN Staff - Primary Care (Littleton NH), Physician - Pain Management (Mather), IT Specialist (SYSANALYSIS/CUSTSPT) (44539 unique)</td>
+                    <td class="examples">TITLE 5 TRAINING TECHNICIAN (MI 127th FSS), Correctional Support Teams Program Specialist (National Correctional Support Teams Coordinator), IT Specialist (EA), Local Hire (Public Assistance Technical Specialist) (44539 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionlocations</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"positionLocationCity": "Culpeper", "positionLocationState": "Virginia", "positionLocationCountry": "United States"}], [{"positionLocationCity": "West Jordan", "positionLocationState": "Utah", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Highlands", "positionLocationState": "New Jersey", "positionLocationCountry": "United States"}, {"positionLocationCity": "Brooklyn", "positionLocationState": "New York", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Buffalo", "positionLocationState": "New York", "positionLocationCountry": "United States"}, {"positionLocationCity": "Freeport", "positionLocationState": "Pennsylvania", "positionLocationCountry": "United States"}, {"positionLocationCity": "Monaca", "positionLocationState": "Pennsylvania", "positionLocationCountry": "United States"}, {"positionLocationCity": "Pittsburgh", "positionLocationState": "Pennsylvania", "positionLocationCountry": "United States"}, {"positionLocationCity": "Ashland City", "positionLocationState": "Tennessee", "positionLocationCountry": "United States"}, {"positionLocationCity": "Savannah", "positionLocationState": "Tennessee", "positionLocationCountry": "United States"}, {"positionLocationCity": "Florence", "positionLocationState": "Alabama", "positionLocationCountry": "United States"}, {"positionLocationCity": "Grant", "positionLocationState": "Alabama", "positionLocationCountry": "United States"}, {"positionLocationCity": "Chicago", "positionLocationState": "Illinois", "positionLocationCountry": "United States"}, {"positionLocationCity": "Cannelton", "positionLocationState": "Indiana", "positionLocationCountry": "United States"}, {"positionLocationCity": "Mount Vernon", "positionLocationState": "Indiana", "positionLocationCountry": "United States"}, {"positionLocationCity": "Grand Rivers", "positionLocationState": "Kentucky", "positionLocationCountry": "United States"}, {"positionLocationCity": "Louisville", "positionLocationState": "Kentucky", "positionLocationCountry": "United States"}, {"positionLocationCity": "Warsaw", "positionLocationState": "Kentucky", "positionLocationCountry": "United States"}, {"positionLocationCity": "Morgantown", "positionLocationState": "West Virginia", "positionLocationCountry": "United States"}] (3073 unique)</td>
+                    <td class="examples">[{"positionLocationCity": "Wellfleet", "positionLocationState": "Massachusetts", "positionLocationCountry": "United States"}, {"positionLocationCity": "Bar Harbor", "positionLocationState": "Maine", "positionLocationCountry": "United States"}, {"positionLocationCity": "Calais", "positionLocationState": "Maine", "positionLocationCountry": "United States"}, {"positionLocationCity": "Patten", "positionLocationState": "Maine", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Los Angeles", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "Hartford", "positionLocationState": "Connecticut", "positionLocationCountry": "United States"}, {"positionLocationCity": "Kansas City", "positionLocationState": "Missouri", "positionLocationCountry": "United States"}, {"positionLocationCity": "Charlotte", "positionLocationState": "North Carolina", "positionLocationCountry": "United States"}, {"positionLocationCity": "Omaha", "positionLocationState": "Nebraska", "positionLocationCountry": "United States"}, {"positionLocationCity": "Elizabeth", "positionLocationState": "New Jersey", "positionLocationCountry": "United States"}, {"positionLocationCity": "Newark", "positionLocationState": "New Jersey", "positionLocationCountry": "United States"}, {"positionLocationCity": "Chaparral", "positionLocationState": "New Mexico", "positionLocationCountry": "United States"}, {"positionLocationCity": "Las Vegas", "positionLocationState": "Nevada", "positionLocationCountry": "United States"}, {"positionLocationCity": "Batavia", "positionLocationState": "New York", "positionLocationCountry": "United States"}, {"positionLocationCity": "Buffalo", "positionLocationState": "New York", "positionLocationCountry": "United States"}, {"positionLocationCity": "Napanoch", "positionLocationState": "New York", "positionLocationCountry": "United States"}, {"positionLocationCity": "New York", "positionLocationState": "New York", "positionLocationCountry": "United States"}, {"positionLocationCity": "New York Mills", "positionLocationState": "New York", "positionLocationCountry": "United States"}, {"positionLocationCity": "Cleveland", "positionLocationState": "Ohio", "positionLocationCountry": "United States"}, {"positionLocationCity": "Portland", "positionLocationState": "Oregon", "positionLocationCountry": "United States"}, {"positionLocationCity": "Philadelphia", "positionLocationState": "Pennsylvania", "positionLocationCountry": "United States"}, {"positionLocationCity": "Memphis", "positionLocationState": "Tennessee", "positionLocationCountry": "United States"}, {"positionLocationCity": "Conroe", "positionLocationState": "Texas", "positionLocationCountry": "United States"}, {"positionLocationCity": "El Paso", "positionLocationState": "Texas", "positionLocationCountry": "United States"}, {"positionLocationCity": "Fort Worth", "positionLocationState": "Texas", "positionLocationCountry": "United States"}, {"positionLocationCity": "Harlingen", "positionLocationState": "Texas", "positionLocationCountry": "United States"}, {"positionLocationCity": "Houston", "positionLocationState": "Texas", "positionLocationCountry": "United States"}, {"positionLocationCity": "Laredo", "positionLocationState": "Texas", "positionLocationCountry": "United States"}, {"positionLocationCity": "Pearsall", "positionLocationState": "Texas", "positionLocationCountry": "United States"}, {"positionLocationCity": "Port Isabel", "positionLocationState": "Texas", "positionLocationCountry": "United States"}, {"positionLocationCity": "San Antonio", "positionLocationState": "Texas", "positionLocationCountry": "United States"}, {"positionLocationCity": "Eloy", "positionLocationState": "Arizona", "positionLocationCountry": "United States"}, {"positionLocationCity": "Florence", "positionLocationState": "Arizona", "positionLocationCountry": "United States"}, {"positionLocationCity": "Phoenix", "positionLocationState": "Arizona", "positionLocationCountry": "United States"}, {"positionLocationCity": "Tucson", "positionLocationState": "Arizona", "positionLocationCountry": "United States"}, {"positionLocationCity": "Adelanto", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "Concord", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "Imperial", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "Otay", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "Sacramento", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "San Diego County", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "San Francisco", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "Santa Ana", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "Van Nuys", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "Aurora", "positionLocationState": "Colorado", "positionLocationCountry": "United States"}, {"positionLocationCity": "Denver", "positionLocationState": "Colorado", "positionLocationCountry": "United States"}, {"positionLocationCity": "Miami", "positionLocationState": "Florida", "positionLocationCountry": "United States"}, {"positionLocationCity": "Miami Gardens", "positionLocationState": "Florida", "positionLocationCountry": "United States"}, {"positionLocationCity": "Orlando", "positionLocationState": "Florida", "positionLocationCountry": "United States"}, {"positionLocationCity": "Atlanta", "positionLocationState": "Georgia", "positionLocationCountry": "United States"}, {"positionLocationCity": "Lumpkin", "positionLocationState": "Georgia", "positionLocationCountry": "United States"}, {"positionLocationCity": "Honolulu", "positionLocationState": "Hawaii", "positionLocationCountry": "United States"}, {"positionLocationCity": "Chicago", "positionLocationState": "Illinois", "positionLocationCountry": "United States"}, {"positionLocationCity": "Indianapolis", "positionLocationState": "Indiana", "positionLocationCountry": "United States"}, {"positionLocationCity": "Baton Rouge", "positionLocationState": "Louisiana", "positionLocationCountry": "United States"}, {"positionLocationCity": "Jena", "positionLocationState": "Louisiana", "positionLocationCountry": "United States"}, {"positionLocationCity": "New Orleans", "positionLocationState": "Louisiana", "positionLocationCountry": "United States"}, {"positionLocationCity": "Oakdale", "positionLocationState": "Louisiana", "positionLocationCountry": "United States"}, {"positionLocationCity": "Boston", "positionLocationState": "Massachusetts", "positionLocationCountry": "United States"}, {"positionLocationCity": "Chelmsford", "positionLocationState": "Massachusetts", "positionLocationCountry": "United States"}, {"positionLocationCity": "Baltimore", "positionLocationState": "Maryland", "positionLocationCountry": "United States"}, {"positionLocationCity": "Hyattsville", "positionLocationState": "Maryland", "positionLocationCountry": "United States"}, {"positionLocationCity": "Detroit", "positionLocationState": "Michigan", "positionLocationCountry": "United States"}, {"positionLocationCity": "Fort Snelling", "positionLocationState": "Minnesota", "positionLocationCountry": "United States"}, {"positionLocationCity": "New York County", "positionLocationState": "New York", "positionLocationCountry": "United States"}, {"positionLocationCity": "San Juan", "positionLocationState": "Puerto Rico", "positionLocationCountry": "United States"}, {"positionLocationCity": "Dallas County", "positionLocationState": "Texas", "positionLocationCountry": "United States"}, {"positionLocationCity": "El Paso County", "positionLocationState": "Texas", "positionLocationCountry": "United States"}, {"positionLocationCity": "West Valley City", "positionLocationState": "Utah", "positionLocationCountry": "United States"}, {"positionLocationCity": "Annandale", "positionLocationState": "Virginia", "positionLocationCountry": "United States"}, {"positionLocationCity": "Falls Church", "positionLocationState": "Virginia", "positionLocationCountry": "United States"}, {"positionLocationCity": "Richmond", "positionLocationState": "Virginia", "positionLocationCountry": "United States"}, {"positionLocationCity": "Sterling", "positionLocationState": "Virginia", "positionLocationCountry": "United States"}, {"positionLocationCity": "Seattle", "positionLocationState": "Washington", "positionLocationCountry": "United States"}, {"positionLocationCity": "Tacoma", "positionLocationState": "Washington", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Palmdale", "positionLocationState": "California", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Camp Springs", "positionLocationState": "Maryland", "positionLocationCountry": "United States"}, {"positionLocationCity": "Bloomington", "positionLocationState": "Minnesota", "positionLocationCountry": "United States"}, {"positionLocationCity": "Williston", "positionLocationState": "Vermont", "positionLocationCountry": "United States"}] (3073 unique)</td>
                     <td class="completeness poor">13%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">promotionPotential</code></td>
                     <td>String</td>
-                    <td class="examples">15, 29, 39, ES (77 unique)</td>
+                    <td class="examples">3, 43, 18, 7 (77 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -414,7 +414,7 @@
                 <tr>
                     <td><code class="field-name">totalOpenings</code></td>
                     <td>String</td>
-                    <td class="examples">14, 96, 2501, 153 (90 unique)</td>
+                    <td class="examples">33, 26, 8, 20 (90 unique)</td>
                     <td class="completeness warning">89%</td>
                 </tr>
                 <tr>
