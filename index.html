@@ -102,7 +102,7 @@
     <div class="container">
         <h1>USAJobs Historical API Data</h1>
 
-        <p><strong>Data collection last run: 2026-10-15</strong></p>
+        <p><strong>Data collection last run: 2026-10-16</strong></p>
         <p><strong>⚠️ This is not an official USAJobs project</strong></p>
 
         <div class="stats" style="background: #d4edda; border-left: 4px solid #28a745; margin-bottom: 20px;">
@@ -120,7 +120,7 @@
             </ul>
         </div>
         <div class="stats">
-            <strong>Dataset:</strong> 3,255,694 total job postings | <strong>Coverage:</strong> 2013-2026 | <strong>Files:</strong> 1016MB total | <strong>Storage:</strong> Cloudflare R2 | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
+            <strong>Dataset:</strong> 3,256,827 total job postings | <strong>Coverage:</strong> 2013-2026 | <strong>Files:</strong> 1018MB total | <strong>Storage:</strong> Cloudflare R2 | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
         </div>
 
         <h2>Table of Contents</h2>
@@ -155,7 +155,7 @@
                 <tr><td>2023</td><td>454,652</td><td>434,527</td><td>✅ Complete year</td></tr>
                 <tr><td>2024</td><td>367,192</td><td>352,305</td><td>✅ Complete year</td></tr>
                 <tr><td>2025</td><td>168,532</td><td>161,046</td><td>✅ Complete year</td></tr>
-                <tr><td>2026</td><td>206,769</td><td>204,772</td><td>Current through October 15, 2026</td></tr>
+                <tr><td>2026</td><td>207,902</td><td>205,862</td><td>Current through October 16, 2026</td></tr>
             </tbody>
         </table>
 
@@ -180,7 +180,7 @@
                 <tr>
                     <td><code class="field-name">JobCategories</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"series": "0471"}], [{"series": "0801"}, {"series": "0819"}, {"series": "0020"}, {"series": "1301"}, {"series": "0401"}], [{"series": "0669"}], [{"series": "0896"}, {"series": "0801"}, {"series": "1515"}] (1820 unique)</td>
+                    <td class="examples">[{"series": "0808"}, {"series": "0810"}, {"series": "0850"}, {"series": "0830"}], [{"series": "0181"}], [{"series": "0850"}, {"series": "0830"}, {"series": "0801"}, {"series": "0854"}, {"series": "1550"}, {"series": "0855"}], [{"series": "0610"}, {"series": "0603"}, {"series": "0660"}] (1820 unique)</td>
                     <td class="completeness warning">87%</td>
                 </tr>
                 <tr>
@@ -198,7 +198,7 @@
                 <tr>
                     <td><code class="field-name">agencyLevelSort</code></td>
                     <td>String</td>
-                    <td class="examples">Department of Veterans Affairs\Deputy Assistant Secretary for Finance, Department of the Air Force\U.S. Air Force Academy, Environmental Protection Agency, Department of Education\Office of Finance and Operations (462 unique)</td>
+                    <td class="examples">Armed Forces Retirement Home, Postal Regulatory Commission, Department of the Navy\Naval Education and Training Command, Department of the Treasury\Office of the Comptroller of the Currency (462 unique)</td>
                     <td class="completeness good">99%</td>
                 </tr>
                 <tr>
@@ -216,13 +216,13 @@
                 <tr>
                     <td><code class="field-name">announcementNumber</code></td>
                     <td>String</td>
-                    <td class="examples">CBSX-12783241-25-EG, NC7X-26-12810156-MP-S, CBSS-12765361-25-JG, JRM-25-082 (166990 unique)</td>
+                    <td class="examples">FEMA-25-SDR-870095-LH, IM-1540-IMNR-26-12832211-DE, CBST-12832337-26-PDS, CBTB-12829455-26-PH (166990 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">appointmentType</code></td>
                     <td>String</td>
-                    <td class="examples">Internships, Detail, ICTAP Only, Term (13 unique)</td>
+                    <td class="examples">Internships, Summer, Multiple, Temporary (13 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -246,61 +246,61 @@
                 <tr>
                     <td><code class="field-name">hiringAgencyCode</code></td>
                     <td>String</td>
-                    <td class="examples">TRAD, TR40, GS02, ARXP (444 unique)</td>
+                    <td class="examples">AF1Y, NN10, VAAA, EDEF (444 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringAgencyName</code></td>
                     <td>String</td>
-                    <td class="examples">21st Theater Sustainment Command (TSC), Office of Enterprise Integration, Naval Intelligence Command, U.S. Army Security Assistance Command (432 unique)</td>
+                    <td class="examples">Pipeline and Hazardous Materials Safety Administration, Bureau of Economic Analysis, Headquarters, AMC, Langley Research Center (432 unique)</td>
                     <td class="completeness good">99%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringDepartmentCode</code></td>
                     <td>String</td>
-                    <td class="examples">SK, FD, DN, TB (95 unique)</td>
+                    <td class="examples">CT, FC, MI, TN (95 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringDepartmentName</code></td>
                     <td>String</td>
-                    <td class="examples">Department of Energy, Court Services and Offender Supervision Agency for DC, Department of the Navy, Department of Transportation (26 unique)</td>
+                    <td class="examples">Judicial Branch, Department of Transportation, Executive Office of the President, Department of State (26 unique)</td>
                     <td class="completeness good">99%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringSubelementName</code></td>
                     <td>String</td>
-                    <td class="examples">Child Development Center, 422d Force Support Squadron, 637 INTL SUPPORT SQUADRON, SECDEF COMMUNICATIONS - (ORG DF), National Weather Service (NWS), Pacific Region (PR), Pacific Tsunami Warning Center (PTWC) (27151 unique)</td>
+                    <td class="examples">United States District Court - District of Nebraska, US Army Garrison Rheinland-Pfalz, Directorate of Human Resources, CNRH - Commander Navy Region Hawaii, Human Resources N94, OJAG (27151 unique)</td>
                     <td class="completeness warning">73%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringpaths</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Federal employees - Excepted service"}, {"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "The public"}, {"hiringPath": "Veterans"}, {"hiringPath": "Individuals with disabilities"}, {"hiringPath": "Military spouses"}], [{"hiringPath": "Veterans"}, {"hiringPath": "Individuals with disabilities"}, {"hiringPath": "Military spouses"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Land and base management"}], [{"hiringPath": "Individuals with disabilities"}, {"hiringPath": "Military spouses"}, {"hiringPath": "Students"}, {"hiringPath": "Peace Corps & AmeriCorps Vista"}, {"hiringPath": "Family of overseas employees"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Federal employees - Excepted service"}, {"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Recent graduates"}, {"hiringPath": "Land and base management"}], [{"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Family of overseas employees"}, {"hiringPath": "Veterans"}, {"hiringPath": "Individuals with disabilities"}, {"hiringPath": "Military spouses"}] (667 unique)</td>
+                    <td class="examples">[{"hiringPath": "Internal to an agency"}, {"hiringPath": "Military spouses"}], [{"hiringPath": "Veterans"}, {"hiringPath": "Military spouses"}, {"hiringPath": "Family of overseas employees"}, {"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Land and base management"}], [{"hiringPath": "Veterans"}, {"hiringPath": "Individuals with disabilities"}, {"hiringPath": "Military spouses"}, {"hiringPath": "Peace Corps & AmeriCorps Vista"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Federal employees - Excepted service"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Recent graduates"}, {"hiringPath": "Land and base management"}], [{"hiringPath": "The public"}, {"hiringPath": "Veterans"}, {"hiringPath": "Military spouses"}] (667 unique)</td>
                     <td class="completeness poor">13%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">inserted_at</code></td>
                     <td>String</td>
-                    <td class="examples">2025-09-19T23:35:22.017693, 2025-09-19T23:19:20.062174, 2025-09-19T23:25:49.533786, 2026-06-29T04:35:28.179432 (162125 unique)</td>
+                    <td class="examples">2025-09-24T07:07:31.364826, 2025-09-19T23:10:31.407193, 2025-09-19T23:05:43.696109, 2025-09-19T23:41:45.496756 (162125 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">jobcategories</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"series": "0391"}], [{"series": "2032"}], [{"series": "0482"}], [{"series": "1603"}] (565 unique)</td>
+                    <td class="examples">[{"series": "4403"}], [{"series": "0437"}], [{"series": "2604"}, {"series": "2610"}], [{"series": "6641"}] (565 unique)</td>
                     <td class="completeness poor">13%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">last_seen</code></td>
                     <td>String</td>
-                    <td class="examples">2025-09-19T23:20:10.680026, 2025-09-19T23:20:10.674596, 2026-08-17T14:30:15.161408, 2025-09-19T23:48:20.060259 (115306 unique)</td>
+                    <td class="examples">2026-06-29T04:34:35.521905, 2026-06-29T04:34:53.827054, 2026-06-29T04:34:53.839976, 2026-06-29T04:34:35.533428 (115306 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">maximumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">39, 8, CD, IL (117 unique)</td>
+                    <td class="examples">IL, 8, 27, GI (117 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -312,7 +312,7 @@
                 <tr>
                     <td><code class="field-name">minimumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">38, J, HL, HS3 (116 unique)</td>
+                    <td class="examples">22, 28, 1, DD (116 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -324,25 +324,25 @@
                 <tr>
                     <td><code class="field-name">payScale</code></td>
                     <td>String</td>
-                    <td class="examples">BS, PB, NT, NC (163 unique)</td>
+                    <td class="examples">IP, DS, NF, ZT (163 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionCloseDate</code></td>
                     <td>String</td>
-                    <td class="examples">2025-11-24, 2026-10-16, 2026-01-26, 2026-06-02 (653 unique)</td>
+                    <td class="examples">2025-10-17, 2026-03-19, 2025-12-11, 2026-03-10 (653 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionExpireDate</code></td>
                     <td>String</td>
-                    <td class="examples">2025-05-07, 2025-03-08, 2025-06-23, 2025-02-26 (496 unique)</td>
+                    <td class="examples">2025-10-02, 2026-01-01, 2025-08-21, 2025-11-29 (496 unique)</td>
                     <td class="completeness poor">10%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionOpenDate</code></td>
                     <td>String</td>
-                    <td class="examples">2025-08-31, 2025-09-09, 2025-03-12, 2025-09-17 (363 unique)</td>
+                    <td class="examples">2025-03-04, 2025-10-11, 2025-09-30, 2025-11-14 (363 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -354,19 +354,19 @@
                 <tr>
                     <td><code class="field-name">positionTitle</code></td>
                     <td>String</td>
-                    <td class="examples">Deputy Chief of Staff  Physician, Advance Medical Supply Technician - Sterile Processing, CTMS CTA DEV/TECH GS1, Supervisory Medical  Supply Technician (Sterile Processing) (44539 unique)</td>
+                    <td class="examples">Nurse (Mental Health Treatment Coordinator), Procurement & Facilities Specialist, Information Technology Specialist (Data Management/Systems Administration), Physician (Geriatrics-GRECC) - Associate Chief (44539 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionlocations</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"positionLocationCity": "Saint Mary", "positionLocationState": "Montana", "positionLocationCountry": "United States"}, {"positionLocationCity": "West Glacier", "positionLocationState": "Montana", "positionLocationCountry": "United States"}, {"positionLocationCity": "Cherokee", "positionLocationState": "North Carolina", "positionLocationCountry": "United States"}, {"positionLocationCity": "Medora", "positionLocationState": "North Dakota", "positionLocationCountry": "United States"}, {"positionLocationCity": "Watford City", "positionLocationState": "North Dakota", "positionLocationCountry": "United States"}, {"positionLocationCity": "Highlands", "positionLocationState": "New Jersey", "positionLocationCountry": "United States"}, {"positionLocationCity": "Crater Lake", "positionLocationState": "Oregon", "positionLocationCountry": "United States"}, {"positionLocationCity": "Gatlinburg", "positionLocationState": "Tennessee", "positionLocationCountry": "United States"}, {"positionLocationCity": "Townsend", "positionLocationState": "Tennessee", "positionLocationCountry": "United States"}, {"positionLocationCity": "Grand Canyon", "positionLocationState": "Arizona", "positionLocationCountry": "United States"}, {"positionLocationCity": "North Rim", "positionLocationState": "Arizona", "positionLocationCountry": "United States"}, {"positionLocationCity": "Yosemite National Park", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "Boston", "positionLocationState": "Massachusetts", "positionLocationCountry": "United States"}, {"positionLocationCity": "Grand Marais", "positionLocationState": "Michigan", "positionLocationCountry": "United States"}, {"positionLocationCity": "Munising", "positionLocationState": "Michigan", "positionLocationCountry": "United States"}, {"positionLocationCity": "Yellowstone National Park", "positionLocationState": "Wyoming", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Hanscom AFB", "positionLocationState": "Massachusetts", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Camp Springs", "positionLocationState": "Maryland", "positionLocationCountry": "United States"}, {"positionLocationCity": "Bloomington", "positionLocationState": "Minnesota", "positionLocationCountry": "United States"}, {"positionLocationCity": "Williston", "positionLocationState": "Vermont", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Lompoc", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "Cape Canaveral", "positionLocationState": "Florida", "positionLocationCountry": "United States"}, {"positionLocationCity": "Hill AFB", "positionLocationState": "Utah", "positionLocationCountry": "United States"}, {"positionLocationCity": "Saint Louis", "positionLocationState": "Missouri", "positionLocationCountry": "United States"}, {"positionLocationCity": "Holloman AFB", "positionLocationState": "New Mexico", "positionLocationCountry": "United States"}, {"positionLocationCity": "Las Cruces", "positionLocationState": "New Mexico", "positionLocationCountry": "United States"}] (3073 unique)</td>
+                    <td class="examples">[{"positionLocationCity": "Jackson", "positionLocationState": "Michigan", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Santa Rita", "positionLocationState": "Guam", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Bay Pines", "positionLocationState": "Florida", "positionLocationCountry": "United States"}, {"positionLocationCity": "Cape Coral", "positionLocationState": "Florida", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Parris Island", "positionLocationState": "South Carolina", "positionLocationCountry": "United States"}] (3073 unique)</td>
                     <td class="completeness poor">13%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">promotionPotential</code></td>
                     <td>String</td>
-                    <td class="examples">37, 14, CX, 98 (77 unique)</td>
+                    <td class="examples">K, 40, CM, 16 (77 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -414,7 +414,7 @@
                 <tr>
                     <td><code class="field-name">totalOpenings</code></td>
                     <td>String</td>
-                    <td class="examples">52, 0, 46, 36 (90 unique)</td>
+                    <td class="examples">4, 001, 33, MANY (90 unique)</td>
                     <td class="completeness warning">89%</td>
                 </tr>
                 <tr>
