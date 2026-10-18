@@ -94,15 +94,63 @@ The dataset went from 40 columns to 53: `positionTitle` and
 `requiredDocuments` and `howToApply`. The whole-page `text` column stays, so
 anything built against it keeps working — columns are only ever added.
 
-A month file is rewritten wholesale, so the publisher refuses to write a month
-when the local join is missing announcements the dataset already holds, rather
-than silently shrinking it. That is the expected state while the page backfill
-is still running.
+A posting lives in the month file it opened in **when it was first
+published**, and stays there. USAJOBS moves open dates after the fact (a
+reannounced posting reopens weeks later under the same control number), so a
+row's `positionOpenDate` can name a later month than the file it is in. Filter
+on `positionOpenDate`, not on the file name, when the month matters.
+`locations.parquet` on the dataset records which file holds each posting, and
+`manifest.csv` lists exactly the postings that are in some file.
+
+That rule replaced rebuilding each month from whatever the mirror currently
+dated to it, which went wrong three ways once open dates started moving. A
+rebuild dropped a moved posting from its old file while the new month had no
+copy of its text, so it landed nowhere: 164 postings by 2026-10-17, still
+listed in the manifest. Others ended up in two files: 133 across 2024-2026,
+mostly from the backfill. And from 2026-10-02 the daily publish refused every
+day. October had no file yet, so the guard checked the manifest, found 144
+"published October postings" that actually sat in September's file and
+earlier, and refused rather than drop them. Every run stayed green.
+
+A month file is rewritten wholesale, so before uploading one the publisher
+checks the file it built against the file it is replacing. It refuses if a
+published posting would vanish, if a row appears twice, or if anything
+intended is missing. A refusal, a missing input, or more than 50 postings the
+mirror has had for a week that still are not on the dataset all go to
+`logs/HF_PUBLISH_WARNING.txt`, and the daily workflow opens an `hf-publish`
+issue from it.
+
+The fill-rate check above notices a section that stops parsing. It can't
+notice one that keeps parsing but picks up page chrome. In early September
+2026 usajobs.gov moved its help links to `usajobshelp.opm.gov`, the parser
+only stripped `help.usajobs.gov`, and five sections began with the button
+label "Help". Every section stayed filled, so nothing fired. 9,828 published
+announcements carried it, 9,800 of them in September. The parser now strips
+both domains, and `scripts/repair_help_labels.py` removed the label from
+stored and published text. That repair is exactly the difference between the
+two parsers: on 49 live pages, old output plus the repair equals new output on
+every section.
+
+`scripts/section_shape.py` is the check for that kind of drift. It profiles
+the first word and last three words of each section. Each run, the publisher
+compares the postings it is adding against the ones already published for
+that month, or the previous month early on, and warns when any share moves 20
+points or more. Measured month against previous month over 2025-01..2026-09,
+it would have fired six times: 2025-03, 2025-04, 2025-07, 2025-08 (the "United
+States Constitution" line arriving, and a "Hide additional information"
+button leaving the page), 2025-10 and 2026-09. It was quiet for the eleven
+months between. Some of those alerts are content changes rather than markup,
+which is still worth knowing.
+
+```bash
+python scripts/section_shape.py --check 2026-09 --against 2026-08
+```
 
 ```bash
 python scripts/publish_to_huggingface.py --dry-run
 python scripts/publish_to_huggingface.py
-python scripts/publish_to_huggingface.py --refresh-all   # rewrite every month
+python scripts/publish_to_huggingface.py --refresh-all   # rewrite every month of the year
+python scripts/publish_to_huggingface.py --rebuild-locations  # re-scan every file (~10 min)
 ```
 
 ### Querying it
@@ -171,6 +219,12 @@ python scripts/backfill_scraped_pages.py --year 2026 --no-publish   # keep local
 2026 ran locally in 175 minutes for 160k pages: zero failures, zero 404s, 68.8
 CPU-minutes, and the local parquet ended at 15 MB because each month's text is
 pruned once published.
+
+The daily workflow runs it too, as `--fill-gaps --limit 2000`. The scrape only
+sees postings that are open when it runs, so one that opens and closes between
+runs never gets its page fetched. September 2026 had 632 of those. Gap-fill
+fetches pages for every posting in the mirror that is in no month file and has
+no text on disk, and leaves the publishing to the publish step that follows.
 
 ### The 2013-2025 backfill (done)
 

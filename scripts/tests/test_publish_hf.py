@@ -1,136 +1,221 @@
-"""Tests for publish_to_huggingface.py — the guard against shrinking a month.
+"""Tests for publish_to_huggingface.py — above all, that a rebuild never loses
+or duplicates an announcement.
 
-Month files are rewritten wholesale. Publishing one built from an incomplete
-local join deletes announcements the dataset already holds, and nothing on the
-dataset side can recover them. That is the normal state while
-backfill_scraped_pages.py is still running, which is exactly when a daily
-publish would otherwise fire.
+Month files are rewritten wholesale, so anything a rebuild leaves out is gone
+from the dataset with no way back. And USAJOBS moves open dates after a posting
+is published, which is what made the old date-based rebuild drop postings from
+one file without adding them to another (164 of them by 2026-10-17), put others
+in two files (133), and finally stall the daily publish from 2026-10-02.
 """
 import os
 import sys
+from datetime import date
 
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from publish_to_huggingface import (EXIT_REFUSED, NON_STRING_COLUMNS,
-                                    TEXT_FIELDS,
-                                    check_types, metadata_fields,
-                                    partition_safe_months,
-                                    prune_published_text, resolve_list_columns)
+                                    STALE_TOLERANCE, TEXT_FIELDS,
+                                    check_types, choose_locations,
+                                    day_partitions, metadata_fields,
+                                    month_members, months_to_rebuild,
+                                    prune_published_text, reconcile_with_prior,
+                                    resolve_list_columns, select_sql,
+                                    stale_postings, verify_build)
 
 
-class TestPartitionSafeMonths:
-    def test_a_month_gaining_rows_is_safe(self):
-        safe, refused = partition_safe_months(
-            todo=["2026-09"],
-            months={"2026-09": {"1", "2", "3"}},
-            have={"1", "2"},
-            month_of={"1": "2026-09", "2": "2026-09", "3": "2026-09"})
-        assert safe == ["2026-09"]
-        assert refused == []
+class TestMonthMembers:
+    def test_new_postings_join_their_open_month(self):
+        members = month_members("2026-10", located={"1": "2026-10"},
+                                local_by_month={"2026-10": {"1", "2"}})
+        assert members == {"1", "2"}
 
-    def test_a_month_that_would_lose_rows_is_refused(self):
-        safe, refused = partition_safe_months(
-            todo=["2026-09"],
-            months={"2026-09": {"1", "9"}},          # local join lost "2"
-            have={"1", "2"},
-            month_of={"1": "2026-09", "2": "2026-09", "9": "2026-09"})
-        assert safe == []
-        assert refused == [("2026-09", 1, 2)]
+    def test_a_posting_stays_in_its_file_when_its_open_date_moves(self):
+        # "1" was published in September; the mirror now dates it October.
+        assert "1" in month_members("2026-09", {"1": "2026-09"},
+                                    {"2026-10": {"1"}})
+        assert "1" not in month_members("2026-10", {"1": "2026-09"},
+                                        {"2026-10": {"1"}})
 
-    def test_one_bad_month_does_not_block_a_good_one(self):
-        safe, refused = partition_safe_months(
-            todo=["2026-08", "2026-09"],
-            months={"2026-08": set(), "2026-09": {"3"}},
-            have={"1", "3"},
-            month_of={"1": "2026-08", "3": "2026-09"})
-        assert safe == ["2026-09"]
-        assert [m for m, *_ in refused] == ["2026-08"]
+    def test_a_posting_in_no_file_comes_back_once_its_text_is_local(self):
+        # Lost by the old date-based rebuild, then fetched again.
+        assert month_members("2026-09", located={},
+                             local_by_month={"2026-09": {"7"}}) == {"7"}
 
-    def test_published_rows_from_another_month_are_not_this_month_s_problem(self):
-        safe, refused = partition_safe_months(
-            todo=["2026-09"],
-            months={"2026-09": {"3"}},
-            have={"1", "3"},
-            month_of={"1": "2026-01", "3": "2026-09"})
-        assert safe == ["2026-09"]
+    def test_the_october_stall(self):
+        # 2026-10 had no file. 144 "published October postings" by today's
+        # dates lived in other months' files. The month must build from its
+        # genuinely new postings alone, without the 144 and without refusing.
+        located = {str(i): "2026-09" for i in range(144)}
+        local = {"2026-10": {str(i) for i in range(20)} | {"new1", "new2"}}
+        assert months_to_rebuild(located, local) == ["2026-10"]
+        assert month_members("2026-10", located, local) == {"new1", "new2"}
 
-    def test_a_published_row_of_unknown_month_is_ignored(self):
-        # A control number the local metadata has never heard of -- a posting
-        # from another year, say -- cannot be attributed to this month, so it
-        # must not veto the rebuild.
-        safe, refused = partition_safe_months(
-            todo=["2026-09"],
-            months={"2026-09": {"3"}},
-            have={"unknown", "3"},
-            month_of={"3": "2026-09"})
-        assert safe == ["2026-09"]
-
-    def test_empty_dataset_publishes_everything(self):
-        safe, refused = partition_safe_months(
-            todo=["2026-01", "2026-02"],
-            months={"2026-01": {"1"}, "2026-02": {"2"}},
-            have=set(),
-            month_of={"1": "2026-01", "2": "2026-02"})
-        assert safe == ["2026-01", "2026-02"]
-        assert refused == []
+    def test_nothing_new_means_nothing_to_rebuild(self):
+        assert months_to_rebuild({"1": "2026-09"}, {"2026-10": {"1"}}) == []
 
 
-class TestGuardUsesTheExistingFile:
-    """Regression for the 2026-09-04 refusal.
+class TestReconcileWithPrior:
+    def test_the_file_fills_in_what_the_map_lacks(self):
+        located, stale, moved = reconcile_with_prior(
+            "2026-09", {}, prior_cns={"1"}, on_dataset={"2026-09"})
+        assert located == {"1": "2026-09"}
+        assert stale == set() and moved == set()
 
-    The guard read the manifest cross-referenced against current metadata to
-    decide what a month already holds. Which file a posting actually lives in
-    was fixed by its open date at publish time, and the daily collection
-    refreshes the last 14 days, so open dates shift and the two disagree. That
-    refused 2026-09 over 4 postings sitting safely in another month's file, and
-    blocked the daily publish.
-    """
+    def test_a_mapped_posting_missing_from_the_file_is_unmapped(self):
+        located, stale, _ = reconcile_with_prior(
+            "2026-09", {"1": "2026-09", "2": "2026-09"}, prior_cns={"1"},
+            on_dataset={"2026-09"})
+        assert stale == {"2"}
+        assert "2" not in located
 
-    def test_the_prior_file_beats_the_manifest(self):
-        # "4" is in the manifest and maps to this month by today's metadata,
-        # but is not in the month file, so it is not this month's to lose.
-        safe, refused = partition_safe_months(
-            todo=["2026-09"],
-            months={"2026-09": {"1", "2", "3"}},
-            have={"1", "2", "3", "4"},
-            month_of={c: "2026-09" for c in "1234"},
-            priors={"2026-09": {"1", "2", "3"}})
-        assert safe == ["2026-09"]
-        assert refused == []
+    def test_a_duplicate_is_dropped_only_when_its_other_file_exists(self):
+        _, _, moved = reconcile_with_prior(
+            "2026-09", {"1": "2026-08"}, prior_cns={"1"},
+            on_dataset={"2026-08", "2026-09"})
+        assert moved == {"1"}
 
-    def test_a_genuine_shrink_is_still_refused(self):
-        # "3" IS in the month file and would not survive the rebuild.
-        safe, refused = partition_safe_months(
-            todo=["2026-09"],
-            months={"2026-09": {"1", "2"}},
-            have={"1", "2", "3"},
-            month_of={c: "2026-09" for c in "123"},
-            priors={"2026-09": {"1", "2", "3"}})
-        assert safe == []
-        assert refused == [("2026-09", 1, 3)]
+        located, _, moved = reconcile_with_prior(
+            "2026-09", {"1": "2026-08"}, prior_cns={"1"},
+            on_dataset={"2026-09"})
+        assert moved == set()
+        assert located["1"] == "2026-09"
 
-    def test_no_prior_file_falls_back_to_the_manifest(self):
-        # Download failed or the month was never published: the manifest is
-        # all there is, so keep the conservative check.
-        safe, refused = partition_safe_months(
-            todo=["2026-09"],
-            months={"2026-09": {"1"}},
-            have={"1", "2"},
-            month_of={c: "2026-09" for c in "12"},
-            priors={})
-        assert safe == []
-        assert [m for m, *_ in refused] == ["2026-09"]
 
-    def test_an_empty_prior_is_not_the_same_as_a_missing_one(self):
-        # A month file that exists and is empty cannot lose anything.
-        safe, refused = partition_safe_months(
-            todo=["2026-09"],
-            months={"2026-09": {"1"}},
-            have={"1", "2"},
-            month_of={c: "2026-09" for c in "12"},
-            priors={"2026-09": set()})
-        assert safe == ["2026-09"]
+class TestChooseLocations:
+    def test_a_single_file_is_the_answer(self):
+        assert choose_locations({"1": ["2025-03"]}, {}) == {"1": "2025-03"}
+
+    def test_a_duplicate_keeps_the_copy_matching_its_open_date(self):
+        assert choose_locations({"1": ["2025-10", "2026-01"]},
+                                {"1": "2026-01"}) == {"1": "2026-01"}
+
+    def test_otherwise_the_earliest(self):
+        assert choose_locations({"1": ["2025-10", "2026-01"]},
+                                {"1": "2026-05"}) == {"1": "2025-10"}
+
+
+class TestVerifyBuild:
+    def test_an_exact_build_passes(self):
+        assert verify_build("m", {"1", "2"}, 2, {"1", "2"}, {"1"}, set()) is None
+
+    def test_dropping_a_published_row_is_refused(self):
+        assert "would drop" in verify_build(
+            "m", {"2"}, 1, {"1", "2"}, prior_cns={"1"}, moved_out=set())
+
+    def test_dropping_a_duplicate_is_allowed(self):
+        assert verify_build("m", {"2"}, 1, {"2"}, prior_cns={"1", "2"},
+                            moved_out={"1"}) is None
+
+    def test_duplicate_rows_are_refused(self):
+        assert "duplicate" in verify_build("m", {"1"}, 2, {"1"}, set(), set())
+
+    def test_rows_nobody_asked_for_are_refused(self):
+        assert "nobody" in verify_build("m", {"1", "9"}, 2, {"1"}, set(), set())
+
+
+class TestStalePostings:
+    def _mirror(self, tmp_path, rows):
+        import pandas as pd
+        path = tmp_path / "historical_jobs_2026.parquet"
+        pd.DataFrame(rows, columns=["usajobsControlNumber", "positionOpenDate"]
+                     ).to_parquet(path, index=False)
+        return str(path)
+
+    def test_only_old_unpublished_postings_count(self, tmp_path):
+        import duckdb
+        path = self._mirror(tmp_path, [
+            (1, "2026-09-01"), (2, "2026-09-02"), (3, "2026-10-16")])
+        stale = stale_postings(duckdb.connect(), path, published={"1"},
+                               today=date(2026, 10, 17))
+        assert stale == {"2026-09": 1}
+
+    def test_the_tolerance_is_small(self):
+        # The October stall left 11,351 unpublished. Anything near that has to
+        # trip it; a few withdrawn pages must not.
+        assert 0 < STALE_TOLERANCE <= 100
+
+
+class TestBuildSql:
+    """select_sql against real files, the way main() drives it."""
+
+    def _setup(self, tmp_path):
+        import duckdb
+        import pandas as pd
+        import re
+        hist = tmp_path / "historical_jobs_2026.parquet"
+        frame = pd.DataFrame({
+            "usajobsControlNumber": [1, 2, 3],
+            "positionTitle": ["A", "B", "C"],
+            # "2" reopened: published in September, the mirror now says October.
+            "positionOpenDate": ["2026-09-01", "2026-10-03", "2026-09-20"],
+            "hiringpaths": [None, None, None],
+        })
+        frame.to_parquet(hist, index=False)
+        # Every other column the metadata select names, as the mirror has it.
+        for column in re.findall(r"h\.(\w+)",
+                                 metadata_fields(duckdb.connect(), str(hist))):
+            if column not in frame:
+                frame[column] = None
+        frame.to_parquet(hist, index=False)
+        scraped = tmp_path / "scraped_jobs_2026.parquet"
+        pd.DataFrame({
+            "usajobs_control_number": ["1", "2", "3"],
+            # 1 and 2 were published and pruned; 3 is new.
+            "text": [None, None, "new page three"],
+        }).to_parquet(scraped, index=False)
+        prior = tmp_path / "prior.parquet"
+        pd.DataFrame({
+            "usajobsControlNumber": ["1", "2", "9"],
+            "positionTitle": ["A", "B", "carried"],
+            "text": ["page one", "page two", "page nine"],
+        }).to_parquet(prior, index=False)
+        con = duckdb.connect()
+        return con, str(hist), str(scraped), str(prior)
+
+    def _build(self, con, hist, scraped, prior, members, days=None):
+        con.execute("CREATE OR REPLACE TEMP TABLE members (cn VARCHAR, d VARCHAR)")
+        con.executemany("INSERT INTO members VALUES (?, ?)",
+                        [(cn, d) for cn, d in members])
+        return con.execute(select_sql(con, hist, scraped, prior, days)).df() \
+            .set_index("usajobsControlNumber")
+
+    def test_moved_posting_keeps_its_published_text(self, tmp_path):
+        con, hist, scraped, prior = self._setup(tmp_path)
+        out = self._build(con, hist, scraped, prior,
+                          [("1", "01"), ("2", "03"), ("3", "20")])
+        assert out.loc["2", "text"] == "page two"
+        assert out.loc["3", "text"] == "new page three"
+        assert out.loc["1", "text"] == "page one"
+
+    def test_a_member_the_mirror_lacks_is_carried_over(self, tmp_path):
+        # "9" moved into another mirror year: no fresh metadata, but its row
+        # must survive the rebuild.
+        con, hist, scraped, prior = self._setup(tmp_path)
+        out = self._build(con, hist, scraped, prior,
+                          [("1", "01"), ("9", "01")])
+        assert set(out.index) == {"1", "9"}
+        assert out.loc["9", "text"] == "page nine"
+        assert out.loc["9", "positionTitle"] == "carried"
+
+    def test_non_members_are_left_out(self, tmp_path):
+        con, hist, scraped, prior = self._setup(tmp_path)
+        out = self._build(con, hist, scraped, prior, [("3", "20")])
+        assert list(out.index) == ["3"]
+
+    def test_day_slices_cover_every_member(self, tmp_path):
+        import duckdb
+        con = duckdb.connect()
+        con.execute("CREATE TEMP TABLE members (cn VARCHAR, d VARCHAR)")
+        con.executemany("INSERT INTO members VALUES (?, ?)",
+                        [(str(i), f"{1 + i % 28:02d}") for i in range(100)]
+                        + [("x", "01")])
+        slices = day_partitions(con, target=30)
+        assert len(slices) > 1
+        covered = sum(con.execute(
+            f"SELECT count(*) FROM members WHERE d BETWEEN '{lo}' AND '{hi}'"
+        ).fetchone()[0] for lo, hi in slices)
+        assert covered == 101
 
 
 class TestResolveListColumns:

@@ -15,6 +15,11 @@ Output is one parquet per month plus a manifest, matching the layout the
 dataset already has. Columns are only ever added, so anything reading it keeps
 working.
 
+A posting's month file is the month it opened in *when it was first
+published*, and it stays there. USAJOBS moves open dates after the fact, so
+positionOpenDate can name a later month than the file it sits in.
+locations.parquet on the dataset records which file holds each posting.
+
 This replaces the publish path that lived in abigailhaddad/joa. Two reasons it
 moved. The dataset was missing `positionTitle` — the job title — because joa's
 field list never selected it, and nobody noticed since its controls CSV aliases
@@ -38,6 +43,10 @@ REPO_ID = os.environ.get("HF_DATASET_REPO", "abigailhaddad/usajobs-scraping")
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 BUILD_DIR = Path(__file__).resolve().parent.parent / "build" / "hf"
+# Month files downloaded from the dataset land here rather than in the shared
+# HuggingFace cache, and are deleted when the run ends. Each is ~100 MB and a
+# refresh pulls a year of them; left in the cache they filled a laptop disk.
+DOWNLOAD_DIR = BUILD_DIR / "downloads"
 
 # Structured fields, from the historical parquet.
 #
@@ -272,6 +281,16 @@ def parse_args():
                         "structured columns — so by default HuggingFace is the "
                         "store for it and the local copy keeps only what has "
                         "not been published yet.")
+    p.add_argument("--rebuild-locations", action="store_true",
+                   help="Rebuild the map of which month file holds each "
+                        "posting by reading every file's control numbers "
+                        "(~1 s a file), instead of trusting the dataset's "
+                        "locations.parquet.")
+    p.add_argument("--locations-file",
+                   help="Use this local locations.parquet -- e.g. the one a "
+                        "dry run left in build/hf -- instead of the dataset's "
+                        "or a fresh scan. The map is still corrected against "
+                        "every month file this run downloads.")
     p.add_argument("--data-dir", default=str(DATA_DIR))
     return p.parse_args()
 
@@ -310,44 +329,36 @@ def parquet_columns(path):
     return set(pq.read_schema(path).names)
 
 
-def select_sql(con, hist_path: str, scraped_path: str, month: str,
+def select_sql(con, hist_path: str, scraped_path: str,
                prior_path: str = None, days: tuple = None) -> str:
-    """Fresh metadata joined to announcement text from wherever it still lives.
+    """One month file's rows: fresh metadata joined to announcement text.
+
+    Which postings go in the file is the `members` temp table (see
+    month_members), not an open-date filter. A posting stays in the file it was
+    first published in even after USAJOBS moves its open date, so selecting by
+    today's open date is what used to drop rows from one file without adding
+    them to another.
 
     Text comes from the local scrape when it has it, and otherwise from the
     month file already on HuggingFace. That second source is what makes the
     local prune safe: once a posting is published the dataset holds its text,
-    and a later republish — a metadata refresh, or a month gaining rows — reads
-    it back rather than needing a local copy that no longer exists.
+    and a later republish reads it back rather than needing a local copy that
+    no longer exists. A local row whose text has been pruned has NULL text, so
+    it must not win over the published copy; hence the WHERE on the local side.
 
-    A local row whose text has been pruned has NULL text, so it must not win
-    over the published copy; hence the WHERE on the local side.
+    A member the year's mirror does not have -- its open date moved into
+    another year -- has no fresh metadata to join, so its published row is
+    carried over unchanged rather than dropped.
 
-    `days` narrows the whole query to a ('01', '15')-style range of open dates.
-    It has to narrow the text sides too, not just the metadata: the text is the
-    expensive half, and a day filter that only applies to the mirror leaves
-    duckdb reading every unpublished row in the local scrape regardless. That
-    is what makes a split build actually cheaper rather than merely slower.
+    `days` narrows the whole query to a ('01', '15')-style range of the
+    members' open-date days. It has to narrow the text sides too: the text is
+    the expensive half, and a filter on the metadata alone leaves duckdb
+    reading every unpublished row in the local scrape regardless.
     """
-    cols = ",\n        ".join(TEXT_FIELDS)
-    day_clause = ""
-    wanted_cte = ""
-    local_day = ""
-    prior_day = ""
-    if days:
-        lo, hi = days
-        day_clause = (f" AND substr(h.positionOpenDate, 9, 2) "
-                      f"BETWEEN '{lo}' AND '{hi}'")
-        wanted_cte = f"""wanted AS (
-        SELECT usajobsControlNumber::varchar AS cn
-        FROM read_parquet('{hist_path}')
-        WHERE substr(positionOpenDate, 1, 7) = '{month}'
-          AND substr(positionOpenDate, 9, 2) BETWEEN '{lo}' AND '{hi}'
-    ), """
-        local_day = " AND usajobs_control_number IN (SELECT cn FROM wanted)"
-        prior_day = " AND usajobsControlNumber::varchar IN (SELECT cn FROM wanted)"
-
-    parts, union = [], ""
+    day_filter = (f" WHERE d BETWEEN '{days[0]}' AND '{days[1]}'"
+                  if days else "")
+    parts = [f"wanted AS (SELECT cn FROM members{day_filter})"]
+    union = ""
     if scraped_path and os.path.exists(scraped_path):
         # Select what the file has and null the rest, exactly as the prior file
         # is handled below. save_jobs_to_parquet writes the keys the parsed
@@ -365,50 +376,55 @@ def select_sql(con, hist_path: str, scraped_path: str, month: str,
         SELECT usajobs_control_number AS cn,
         {local_cols}
         FROM read_parquet('{scraped_path}')
-        WHERE text IS NOT NULL{local_day}
+        WHERE text IS NOT NULL
+          AND usajobs_control_number IN (SELECT cn FROM wanted)
+        QUALIFY row_number() OVER (PARTITION BY usajobs_control_number) = 1
     )""")
             union = "SELECT * FROM local_text"
     if prior_path:
-        # A month published before a column existed does not have it. That is
-        # the normal case on the first pass: every month on the dataset today
-        # was written with `text` only, and the eleven sections are what this
-        # run adds. Select what is there and null the rest so the shapes line
-        # up for the UNION.
+        # A month published before a column existed does not have it. Select
+        # what is there and null the rest so the shapes line up for the UNION.
         available = parquet_columns(prior_path)
         prior_cols = ",\n        ".join(
             f"CAST({c} AS VARCHAR) AS {c}" if c in available
             else f"CAST(NULL AS VARCHAR) AS {c}"
             for c in TEXT_FIELDS)
-        exclude = ("WHERE usajobsControlNumber NOT IN (SELECT cn FROM local_text)"
+        exclude = (" AND usajobsControlNumber NOT IN (SELECT cn FROM local_text)"
                    if union else "")
-        if prior_day:
-            exclude = (exclude + prior_day) if exclude \
-                else f"WHERE 1=1{prior_day}"
         parts.append(f"""prior_text AS (
         SELECT usajobsControlNumber AS cn,
         {prior_cols}
         FROM read_parquet('{prior_path}')
-        {exclude}
+        WHERE usajobsControlNumber IN (SELECT cn FROM wanted){exclude}
     )""")
         union += (" UNION ALL " if union else "") + "SELECT * FROM prior_text"
 
-    if not parts:
+    if not union:
         # No local text and no published file: there is nothing to build this
-        # month from. Say so, rather than emitting SQL with an empty WITH and
+        # month from. Say so, rather than emitting SQL with an empty UNION and
         # letting duckdb report a syntax error several frames away.
-        raise ValueError(
-            f"no text available for {month}: the local scrape has none and "
-            f"the dataset has no file for it")
+        raise ValueError("no text available: the local scrape has none and "
+                         "the dataset has no file for this month")
 
     text_cols = ",\n    ".join(f"t.{c}" for c in TEXT_FIELDS)
-    return f"""
-        WITH {wanted_cte}{", ".join(parts)}, txt AS ({union})
+    sql = f"""
+        WITH {", ".join(parts)}, txt AS ({union})
         SELECT {metadata_fields(con, hist_path)},
     {text_cols}
         FROM read_parquet('{hist_path}') h
         JOIN txt t ON h.usajobsControlNumber::varchar = t.cn
-        WHERE substr(h.positionOpenDate, 1, 7) = '{month}'{day_clause}
     """
+    if prior_path:
+        sql = f"""
+        {sql}
+        UNION ALL BY NAME
+        SELECT * FROM read_parquet('{prior_path}')
+        WHERE usajobsControlNumber IN (SELECT cn FROM wanted)
+          AND usajobsControlNumber NOT IN (
+              SELECT usajobsControlNumber::varchar FROM read_parquet('{hist_path}'))
+    """
+    # The WITH has to scope over both halves of the UNION, so wrap the lot.
+    return f"SELECT * FROM ({sql})" if prior_path else sql
 
 
 # A month is built in slices of about this many postings. Measured on 2022-03:
@@ -419,8 +435,8 @@ def select_sql(con, hist_path: str, scraped_path: str, month: str,
 SLICE_ROWS = 12000
 
 
-def day_partitions(con, hist_path, month, target=SLICE_ROWS):
-    """Contiguous day ranges that each hold roughly `target` postings.
+def day_partitions(con, target=SLICE_ROWS):
+    """Contiguous day ranges that each hold roughly `target` members.
 
     Balanced by actual counts rather than by splitting the calendar in half:
     postings cluster hard around the start and end of a month, so even halves
@@ -429,12 +445,8 @@ def day_partitions(con, hist_path, month, target=SLICE_ROWS):
     Returns [] when the month fits in one pass, which keeps the common case on
     the original single-COPY path.
     """
-    rows = con.execute(f"""
-        SELECT substr(positionOpenDate, 9, 2) AS d, count(*) AS n
-        FROM read_parquet('{hist_path}')
-        WHERE substr(positionOpenDate, 1, 7) = '{month}'
-        GROUP BY 1 ORDER BY 1
-    """).fetchall()
+    rows = con.execute(
+        "SELECT d, count(*) FROM members GROUP BY 1 ORDER BY 1").fetchall()
     total = sum(n for _, n in rows)
     if total <= target or not rows:
         return []
@@ -452,10 +464,10 @@ def day_partitions(con, hist_path, month, target=SLICE_ROWS):
     # and 12k over the rest would merge back into a single 42k pass.
     if run:
         ranges.append((lo, rows[-1][0]))
-    # Widen the ends so the ranges provably cover the whole month, including
-    # any day the mirror has no rows for. Gaps here would silently drop rows.
-    ranges[0] = ("01", ranges[0][1])
-    ranges[-1] = (ranges[-1][0], "31")
+    # Widen the ends so the ranges provably cover every day value, including
+    # ones no member has. Gaps here would silently drop rows.
+    ranges[0] = ("00", ranges[0][1])
+    ranges[-1] = (ranges[-1][0], "99")
     # One slice is the single-pass build with extra steps. Note that a single
     # day bigger than the target cannot be divided any further than this --
     # day granularity is the floor, and such a month still needs the memory.
@@ -507,38 +519,222 @@ def check_types(path):
                          f"publish it: " + "; ".join(wrong))
 
 
+
+
+def month_file(month):
+    return f"data/{month.replace('-', '_')}.parquet"
+
+
 def download_month(repo, month, token):
-    """The month file already on HuggingFace, or None if there is not one."""
+    """The month file already on HuggingFace, or None if there is not one.
+
+    Only a 404 means "not one". Any other failure raises: a month file that
+    exists but could not be fetched is not the same as a month that was never
+    published, and treating it as one would rebuild the month without the rows
+    it already holds.
+    """
     from huggingface_hub import hf_hub_download
-    name = f"data/{month.replace('-', '_')}.parquet"
+    from huggingface_hub.errors import EntryNotFoundError
     try:
-        return hf_hub_download(repo, name, repo_type="dataset", token=token)
-    except Exception:
+        return hf_hub_download(repo, month_file(month), repo_type="dataset",
+                               token=token, cache_dir=DOWNLOAD_DIR)
+    except EntryNotFoundError:
         return None
 
 
-def month_of_every_posting(con, hist_path):
-    """Control number -> month, for the whole year, join or no join.
+def dataset_months(repo, token):
+    """Months that have a file on the dataset, as YYYY-MM."""
+    from huggingface_hub import list_repo_files
+    months = set()
+    for f in list_repo_files(repo, repo_type="dataset", token=token):
+        name = os.path.basename(f)
+        if f.startswith("data/") and name.endswith(".parquet"):
+            stem = name[:-len(".parquet")]
+            if len(stem) == 7 and stem[4] == "_":
+                months.add(stem.replace("_", "-"))
+    return months
 
-    Needed to tell whether rebuilding a month would drop rows the dataset
-    already has: the manifest lists control numbers but not which month's file
-    holds them.
+
+# Which month file each published posting lives in, kept on the dataset beside
+# the manifest. It is what lets a posting stay put when its open date moves.
+#
+# Before it existed, a month was rebuilt from whatever the mirror *currently*
+# said opened that month. USAJOBS moves open dates -- a reannounced posting
+# reopens weeks later under the same control number -- so a rebuild dropped
+# the posting from the file it was in, and the month it moved to had no copy of
+# its text (pruned locally after the first publish), so it landed nowhere.
+# Measured 2026-10-17: 164 postings listed in the manifest were in no month
+# file, and 133 sat in two. The same mismatch is what stalled the daily publish
+# from 2026-10-02: 2026-10 had no file yet, the guard fell back to the
+# manifest, and refused over 144 "published October postings" that actually
+# lived in September's file and earlier.
+LOCATIONS_FILE = "locations.parquet"
+
+
+def scan_locations(repo, months, token):
+    """{control number: [months whose file holds it]}, read off the files.
+
+    Only the control-number column is read. Every file has to be read: a scan
+    that skips one would report its postings as unpublished and they would be
+    published again, duplicated.
+
+    A few files at a time. One at a time took ~6 s a file, 15 minutes for the
+    dataset; many at once is what gets a reader 429'd.
     """
-    rows = con.execute(f"""
-        SELECT usajobsControlNumber::varchar AS cn,
-               substr(positionOpenDate, 1, 7) AS month
-        FROM read_parquet('{hist_path}')
-        WHERE positionOpenDate IS NOT NULL
-    """).fetchall()
-    return {cn: month for cn, month in rows}
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+    import pyarrow.parquet as pq
+    from huggingface_hub import HfFileSystem
+    fs = HfFileSystem(token=token)
+
+    def read(month):
+        path = f"datasets/{repo}/{month_file(month)}"
+        for attempt in range(6):
+            try:
+                with fs.open(path, "rb") as fh:
+                    return month, pq.read_table(
+                        fh, columns=["usajobsControlNumber"]).column(0).to_pylist()
+            except Exception as e:
+                # A busy reader gets a 429 partway through a full scan; back
+                # off rather than give up on the file.
+                if attempt == 5:
+                    raise RuntimeError(f"could not read {path}: {e}") from e
+                time.sleep(10 * (attempt + 1))
+
+    found = {}
+    with ThreadPoolExecutor(max_workers=SCAN_WORKERS) as pool:
+        for i, (month, cns) in enumerate(pool.map(read, sorted(months)), 1):
+            for cn in cns:
+                found.setdefault(str(cn), []).append(month)
+            if i % 20 == 0:
+                print(f"    scanned {i}/{len(months)} month files", flush=True)
+    return found
 
 
-def available_months(con, hist_path, scraped_path):
-    """Month -> control numbers we could publish, computed without reading the
-    text columns. One varchar column per row, so it stays small even at the
-    scale of a full year."""
+SCAN_WORKERS = 4
+
+
+def choose_locations(found, month_of):
+    """One month per control number, from scan_locations' lists.
+
+    A posting in two files keeps the one matching its current open date if
+    either does, else the earliest. The other copy is then dropped the next
+    time its month is rebuilt.
+    """
+    return {cn: (month_of[cn] if month_of.get(cn) in ms else min(ms))
+            for cn, ms in found.items()}
+
+
+def load_locations(repo, token):
+    """{control number: month} from the dataset, or None if it has none yet."""
+    import pyarrow.parquet as pq
+    from huggingface_hub import hf_hub_download
+    from huggingface_hub.errors import EntryNotFoundError
+    try:
+        path = hf_hub_download(repo, LOCATIONS_FILE, repo_type="dataset",
+                               token=token)
+    except EntryNotFoundError:
+        return None
+    t = pq.read_table(path)
+    return dict(zip(t.column("usajobsControlNumber").to_pylist(),
+                    t.column("month").to_pylist()))
+
+
+def write_locations(located, path):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    cns = sorted(located)
+    pq.write_table(pa.table({
+        "usajobsControlNumber": pa.array(cns, pa.string()),
+        "month": pa.array([located[c] for c in cns], pa.string()),
+    }), path, compression="zstd")
+
+
+def month_members(month, located, local_by_month):
+    """The control numbers month's file should hold after a rebuild.
+
+    Everything already located there, plus every posting with local text whose
+    current open date is in this month and which is in no file at all. A
+    posting already published in another month's file is not added here even
+    if the mirror now dates it to this month; that is the rule that keeps it
+    from being in two files.
+
+    "In no file" covers both brand-new postings and ones the old date-based
+    rebuild lost, so a lost posting comes back as soon as its page is fetched
+    again.
+    """
+    here = {cn for cn, m in located.items() if m == month}
+    new = {cn for cn in local_by_month.get(month, set()) if cn not in located}
+    return here | new
+
+
+def months_to_rebuild(located, local_by_month):
+    """Months holding at least one posting that is in no file yet."""
+    return sorted(m for m, cns in local_by_month.items()
+                  if any(cn not in located for cn in cns))
+
+
+def reconcile_with_prior(month, located, prior_cns, on_dataset):
+    """Correct the location map against the month file actually downloaded.
+
+    The file is the authority. Returns (located, stale, moved_out):
+
+      stale      control numbers the map placed in this month that the file
+                 does not hold. They are in no file, so they leave the map and
+                 become eligible to be published again.
+      moved_out  control numbers the file holds that the map places in another
+                 month's file. Those are duplicates, and the rebuild drops
+                 this copy -- but only when that other file exists, since a
+                 map pointing at a file that is not there would turn "drop a
+                 duplicate" into "drop the only copy".
+    """
+    located = dict(located)
+    here = {cn for cn, m in located.items() if m == month}
+    stale = here - prior_cns
+    for cn in stale:
+        del located[cn]
+    moved_out = set()
+    for cn in prior_cns:
+        elsewhere = located.get(cn)
+        if elsewhere is None or (elsewhere != month
+                                 and elsewhere not in on_dataset):
+            located[cn] = month
+        elif elsewhere != month:
+            moved_out.add(cn)
+    return located, stale, moved_out
+
+
+def verify_build(month, built_cns, n_rows, members, prior_cns, moved_out):
+    """Refuse a month whose built file is not exactly what was intended.
+
+    Checked against the file actually written, not against a prediction of
+    it: a month file is rewritten wholesale, and anything this misses is
+    deleted from the dataset with no way back. Returns a reason, or None.
+    """
+    if n_rows != len(built_cns):
+        return f"{n_rows - len(built_cns):,} duplicate rows"
+    lost = (prior_cns - moved_out) - built_cns
+    if lost:
+        return (f"would drop {len(lost):,} of the {len(prior_cns):,} "
+                f"announcements already in the file, e.g. "
+                f"{', '.join(sorted(lost)[:5])}")
+    missing = members - built_cns
+    if missing:
+        return (f"{len(missing):,} intended postings came out without a row, "
+                f"e.g. {', '.join(sorted(missing)[:5])}")
+    extra = built_cns - members
+    if extra:
+        return f"{len(extra):,} rows nobody asked for"
+    return None
+
+
+def local_months(con, hist_path, scraped_path):
+    """Month -> control numbers that have local announcement text, by the
+    mirror's current open date. Computed without reading the text columns.
+    One varchar column per row, so it stays small even at the scale of a full
+    year."""
     rows = con.execute(f"""
-        SELECT substr(h.positionOpenDate, 1, 7) AS month,
+        SELECT DISTINCT substr(h.positionOpenDate, 1, 7) AS month,
                h.usajobsControlNumber::varchar AS cn
         FROM read_parquet('{hist_path}') h
         JOIN read_parquet('{scraped_path}') s
@@ -551,45 +747,20 @@ def available_months(con, hist_path, scraped_path):
     return months
 
 
-def partition_safe_months(todo, months, have, month_of, priors=None):
-    """Split the months to rebuild into (safe, refused).
-
-    A month file is rewritten wholesale, so publishing one built from an
-    incomplete local join would delete announcements the dataset already has,
-    unrecoverably. The test is whether the rebuild would contain everything the
-    existing file contains.
-
-    The existing file is the authority for that, not the manifest. Which month
-    file a posting lives in was fixed by its open date at publish time, while
-    the manifest cross-referenced against *current* metadata says where it
-    would go today — and those differ, because the daily collection refreshes
-    the last 14 days and open dates shift. On 2026-09-04 that mismatch refused
-    2026-09 over 4 postings that were sitting safely in another month's file.
-
-    Only when there is no prior file to compare against — the download failed,
-    or the month has never been published — does it fall back to the manifest.
-
-    Returns refused entries as (month, would_drop, already_published).
-    """
-    priors = priors or {}
-    safe, refused = [], []
-    for month in todo:
-        prior_cns = priors.get(month)
-        if prior_cns is None:
-            published_here = {cn for cn in have if month_of.get(cn) == month}
-        else:
-            published_here = prior_cns
-        dropping = published_here - months.get(month, set())
-        if dropping:
-            refused.append((month, len(dropping), len(published_here)))
-        else:
-            safe.append(month)
-    return safe, refused
+def month_of_every_posting(con, hist_path):
+    """Control number -> month by the mirror's current open date."""
+    rows = con.execute(f"""
+        SELECT usajobsControlNumber::varchar AS cn,
+               substr(positionOpenDate, 1, 7) AS month
+        FROM read_parquet('{hist_path}')
+        WHERE positionOpenDate IS NOT NULL
+    """).fetchall()
+    return {cn: month for cn, month in rows}
 
 
 def published_control_numbers(repo: str, token) -> set:
-    """What the dataset already holds. Downloads the manifest, a couple of MB,
-    rather than the dataset."""
+    """What the dataset's manifest lists. Downloads the manifest, a couple of
+    MB, rather than the dataset."""
     from huggingface_hub import hf_hub_download
     try:
         path = hf_hub_download(repo, "manifest.csv", repo_type="dataset",
@@ -602,6 +773,116 @@ def published_control_numbers(repo: str, token) -> set:
         return {line.strip() for line in f if line.strip()}
 
 
+# The tripwire the daily workflow turns into a GitHub issue. A refused or
+# stalled publish exits cleanly enough that the run stays green -- that is how
+# the 2026-10-02 stall went unnoticed for two weeks -- so this file, not the
+# exit code, is what makes it visible.
+WARNING_FILE = Path(__file__).resolve().parent.parent / "logs" / \
+    "HF_PUBLISH_WARNING.txt"
+
+# A posting the mirror has had for this long should be on the dataset. The
+# mirror itself trails the posting by a few days, and the daily gap-fill fetch
+# is capped, so anything younger is in flight rather than missing.
+STALE_AFTER_DAYS = 7
+# Below this many, a stale backlog is the handful of pages usajobs.gov 404s
+# for postings it has withdrawn, not a stuck pipeline.
+STALE_TOLERANCE = 50
+
+
+def warn(message):
+    from datetime import datetime
+    WARNING_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(WARNING_FILE, "a") as fh:
+        fh.write(f"{datetime.now().isoformat()} | {message}\n")
+    print(f"WARNING: {message}")
+
+
+def stale_postings(con, hist_path, published, today=None):
+    """{month: count} of mirror postings opened STALE_AFTER_DAYS or more ago
+    that are not on the dataset."""
+    from datetime import date, timedelta
+    cutoff = ((today or date.today()) -
+              timedelta(days=STALE_AFTER_DAYS)).isoformat()
+    rows = con.execute(f"""
+        SELECT usajobsControlNumber::varchar, substr(positionOpenDate, 1, 7)
+        FROM read_parquet('{hist_path}')
+        WHERE positionOpenDate IS NOT NULL
+          AND substr(positionOpenDate, 1, 10) <= '{cutoff}'
+    """).fetchall()
+    out = {}
+    for cn, month in rows:
+        if cn not in published:
+            out[month] = out.get(month, 0) + 1
+    return out
+
+
+def check_freshness(con, hist_path, published):
+    stale = stale_postings(con, hist_path, published)
+    total = sum(stale.values())
+    print(f"{total:,} postings opened {STALE_AFTER_DAYS}+ days ago are not on "
+          f"the dataset"
+          + (": " + ", ".join(f"{m} ({n:,})" for m, n in sorted(stale.items()))
+             if stale else ""))
+    if total > STALE_TOLERANCE:
+        warn(f"{total:,} postings the mirror has had for {STALE_AFTER_DAYS}+ "
+             f"days are not on HuggingFace (tolerance {STALE_TOLERANCE}): "
+             + ", ".join(f"{m}: {n:,}" for m, n in sorted(stale.items()))
+             + ". Either the publish is refusing months or the gap-fill fetch "
+               "is not reaching them.")
+
+
+# Fewer already-published rows than this in the months being rebuilt -- early
+# in a month -- and the previous month's file joins the baseline.
+MIN_BASELINE_ROWS = 3000
+
+
+def check_section_shape(con, files, cns, repo, token, months):
+    """Warn if the postings this run adds open or close differently from the
+    ones published just before them -- the sign of a markup change leaking
+    page chrome into a section. See section_shape.py.
+
+    Warns rather than refuses: the text is still the page's, and holding it
+    back would stall the publish over a defect that can be repaired later.
+    """
+    from section_shape import SECTIONS, drift, profile
+    if not files or not cns:
+        return
+    con.execute("CREATE OR REPLACE TEMP TABLE fresh (cn VARCHAR)")
+    con.executemany("INSERT INTO fresh VALUES (?)", [(c,) for c in cns])
+    paths = ", ".join(f"'{f}'" for f in files)
+    cols = ", ".join(SECTIONS)
+    new = con.execute(f"""
+        SELECT {cols} FROM read_parquet([{paths}])
+        WHERE usajobsControlNumber IN (SELECT cn FROM fresh)""").df()
+    old = con.execute(f"""
+        SELECT {cols} FROM read_parquet([{paths}])
+        WHERE usajobsControlNumber NOT IN (SELECT cn FROM fresh)""").df()
+    if len(old) < MIN_BASELINE_ROWS:
+        y, m = map(int, min(months).split("-"))
+        previous = f"{y - (m == 1)}-{12 if m == 1 else m - 1:02d}"
+        try:
+            prior = download_month(repo, previous, token)
+        except Exception as e:
+            print(f"Section shape: could not read {previous} for a baseline "
+                  f"({e})")
+            prior = None
+        if prior:
+            import pandas as pd
+            old = pd.concat([old, con.execute(
+                f"SELECT {cols} FROM read_parquet('{prior}')").df()])
+    if len(old) < MIN_BASELINE_ROWS:
+        print(f"Section shape: only {len(old):,} published rows to compare "
+              f"against; not checked")
+        return
+    found = drift(profile({s: new[s].tolist() for s in SECTIONS}),
+                  profile({s: old[s].tolist() for s in SECTIONS}))
+    print(f"Section shape over {len(new):,} new postings against "
+          f"{len(old):,} published: "
+          f"{'as expected' if not found else f'{len(found)} change(s)'}")
+    for line in found:
+        warn(f"Section shape changed, probably usajobs.gov markup: {line}")
+
+
 def main() -> int:
     args = parse_args()
     data_dir = Path(args.data_dir)
@@ -609,102 +890,139 @@ def main() -> int:
     scraped = data_dir / f"scraped_jobs_{args.year}.parquet"
 
     if not hist.exists():
-        print(f"Missing {hist} — nothing to publish.")
+        warn(f"Missing {hist} — nothing published")
         return 0
     # The scraped file is optional for a deliberate one-month republish: its
     # text may have been pruned after publishing, or never fetched on this
     # machine at all, in which case the dataset's own copy supplies it.
     republishing = bool(args.month and args.refresh_all)
     if not scraped.exists() and not republishing:
-        print(f"Missing {scraped} — nothing to publish.")
+        warn(f"Missing {scraped} — nothing published")
         return 0
 
     # HF_TOKEN in CI; the cached login from `huggingface-cli login` locally.
     from huggingface_hub import get_token
     token = os.environ.get("HF_TOKEN") or get_token()
     if not token and not args.dry_run:
-        print("HF_TOKEN is not set — nothing published.")
+        warn("HF_TOKEN is not set — nothing published")
         return 0
 
     con = connection()
-    months = (available_months(con, str(hist), str(scraped))
-              if scraped.exists() else {})
-    if not months and not republishing:
-        print("No postings have both metadata and scraped text yet.")
-        return 0
-
+    month_of = month_of_every_posting(con, str(hist))
+    on_dataset = dataset_months(args.repo, token)
     have = published_control_numbers(args.repo, token)
-    print(f"Dataset holds {len(have):,} announcements")
+    print(f"Manifest lists {len(have):,} announcements; "
+          f"{len(on_dataset)} month files on the dataset")
 
-    total_available = sum(len(v) for v in months.values())
-    new = {cn for cns in months.values() for cn in cns} - have
-    print(f"Local join has {total_available:,}; {len(new):,} are new")
+    if args.locations_file:
+        import pyarrow.parquet as pq
+        t = pq.read_table(args.locations_file)
+        located = dict(zip(t.column("usajobsControlNumber").to_pylist(),
+                           t.column("month").to_pylist()))
+        print(f"Location map from {args.locations_file}")
+    else:
+        located = None if args.rebuild_locations else \
+            load_locations(args.repo, token)
+    had_locations = located is not None
+    if not had_locations:
+        print(f"Scanning all {len(on_dataset)} month files for where each "
+              f"posting lives")
+        located = choose_locations(
+            scan_locations(args.repo, on_dataset, token), month_of)
+        print(f"  {len(located):,} postings located")
+        # The dataset as scanned, before this run changes anything -- the
+        # input --locations-file wants. The locations.parquet written below
+        # already includes this run's builds.
+        BUILD_DIR.mkdir(parents=True, exist_ok=True)
+        write_locations(located, BUILD_DIR / "locations.scanned.parquet")
+    nowhere = have - set(located)
+    if nowhere:
+        # Reported, not fixed here: they drop out of the manifest below, which
+        # is what lets the gap-fill fetch see them as missing and bring them
+        # back.
+        print(f"  {len(nowhere):,} postings the manifest lists are in no "
+              f"month file")
 
-    if args.month:
-        months = {m: cns for m, cns in months.items() if m == args.month}
-        if not months and not republishing:
-            print(f"No postings opened in {args.month} have scraped text.")
-            return 0
+    by_month = (local_months(con, str(hist), str(scraped))
+                if scraped.exists() else {})
+    print(f"Local text for {sum(len(v) for v in by_month.values()):,} "
+          f"postings; {sum(1 for v in by_month.values() for c in v if c not in located):,} "
+          f"are in no month file")
 
     if args.month and args.refresh_all:
-        # A deliberate republish of one month. Not gated on local text: the
-        # point is usually to redo the metadata join for a month whose text
-        # was pruned after publishing, or was never fetched on this machine.
         todo = [args.month]
-        print(f"Republishing {args.month} from the dataset's own text")
+        print(f"Republishing {args.month}")
     elif args.refresh_all:
-        todo = sorted(months)
-        print(f"Refreshing all {len(todo)} month(s)")
+        todo = sorted({m for m in on_dataset if m[:4] == str(args.year)}
+                      | set(months_to_rebuild(located, by_month)))
+        print(f"Refreshing all {len(todo)} month(s) of {args.year}")
     else:
-        todo = sorted(m for m, cns in months.items() if cns - have)
+        todo = months_to_rebuild(located, by_month)
+        if args.month:
+            todo = [m for m in todo if m == args.month]
         print(f"{len(todo)} month(s) have new rows: {', '.join(todo) or '(none)'}")
 
-    # Pull the month files we are about to rewrite. Their text is the source
-    # for every posting whose local copy has been pruned, and their control
-    # numbers are what makes the rebuild provably non-destructive.
-    priors, availability, prior_sets = {}, {}, {}
+    BUILD_DIR.mkdir(parents=True, exist_ok=True)
+    copy_opts = "(FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 12)"
+    written, refused = {}, []
+    fresh, fresh_files = [], []
     for month in todo:
-        prior = download_month(args.repo, month, token) if token else None
-        priors[month] = prior
+        try:
+            prior = download_month(args.repo, month, token) \
+                if month in on_dataset else None
+        except Exception as e:
+            refused.append((month, f"could not download its current file ({e})"))
+            continue
         prior_cns = set()
+        moved_out = set()
         if prior:
             prior_cns = {r[0] for r in con.execute(
                 f"SELECT usajobsControlNumber::varchar "
                 f"FROM read_parquet('{prior}')").fetchall()}
-            print(f"  {month}: {len(prior_cns):,} already published, "
-                  f"{len(months.get(month, set()) - prior_cns):,} new")
-            prior_sets[month] = prior_cns
+            located, stale, moved_out = reconcile_with_prior(
+                month, located, prior_cns, on_dataset)
+            if stale:
+                print(f"  {month}: {len(stale):,} postings mapped here are not "
+                      f"in the file")
 
-            # If the local scrape already covers everything the published file
-            # holds, the prior adds no text and only costs memory. Reading it
-            # anyway meant materialising the month's announcement text twice --
-            # ~1.2 GB each -- which is what drove the publish into constant
-            # spilling and took a month from minutes to nearly an hour.
-            if prior_cns and prior_cns <= months.get(month, set()):
-                print(f"    local copy covers all of it; skipping the "
-                      f"published text")
-                priors[month] = None
-        availability[month] = months.get(month, set()) | prior_cns
+        members = month_members(month, located, by_month)
+        if not members:
+            continue
+        print(f"  {month}: {len(prior_cns):,} already published, "
+              f"{len(members - prior_cns):,} new, "
+              f"{len(moved_out):,} duplicates of other months dropped")
 
-    month_of = month_of_every_posting(con, str(hist))
-    safe, refused = partition_safe_months(todo, availability, have, month_of,
-                                          prior_sets)
+        # The members, with the open-date day the slicing works on. A member
+        # the year's mirror lacks gets day '01'; any value works as long as
+        # it is inside the ranges day_partitions hands back.
+        con.execute("CREATE OR REPLACE TEMP TABLE members (cn VARCHAR)")
+        con.executemany("INSERT INTO members VALUES (?)",
+                        [(cn,) for cn in sorted(members)])
+        con.execute(f"""
+            CREATE OR REPLACE TEMP TABLE members AS
+            SELECT m.cn, coalesce(any_value(substr(h.positionOpenDate, 9, 2)),
+                                  '01') AS d
+            FROM members m
+            LEFT JOIN read_parquet('{hist}') h
+              ON h.usajobsControlNumber::varchar = m.cn
+            GROUP BY m.cn
+        """)
 
-    for month, n, total in refused:
-        print(f"  REFUSING {month}: rebuilding it would drop {n:,} of the "
-              f"{total:,} announcements already published for that month. "
-              f"The local scrape is missing them — run "
-              f"backfill_scraped_pages.py first.")
-    todo = safe
+        # If the local scrape covers everything the published file holds, and
+        # the mirror has metadata for all of it, the prior adds nothing and
+        # only costs memory. Reading it anyway meant materialising the month's
+        # announcement text twice -- ~1.2 GB each -- which is what drove the
+        # publish into constant spilling and took a month from minutes to
+        # nearly an hour.
+        source = prior
+        keep = prior_cns - moved_out
+        if prior and keep <= by_month.get(month, set()) and \
+                keep <= set(month_of):
+            print(f"    local copy covers all of it; skipping the "
+                  f"published text")
+            source = None
 
-    if not todo:
-        print("Nothing to publish")
-        return EXIT_REFUSED if refused else 0
-
-    BUILD_DIR.mkdir(parents=True, exist_ok=True)
-    written = []
-    for month in todo:
-        name = f"data/{month.replace('-', '_')}.parquet"
+        name = month_file(month)
         dest = BUILD_DIR / name
         dest.parent.mkdir(parents=True, exist_ok=True)
         # COPY streams straight to disk. Materializing a month in Python would
@@ -717,23 +1035,21 @@ def main() -> int:
         #
         # Compression level 19 buffers far more than it saves here; 12 is
         # within a few percent on this data and materially cheaper in memory.
-        copy_opts = "(FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 12)"
-
+        #
         # Big months are built in day slices and stitched. Streaming COPY still
         # has to hold the join, and the text is 35 KB a row: 2022-03 was 41,871
-        # rows and took a 2.7 GiB duckdb limit out in one pass. Raising the
-        # limit only moves that wall, since months keep growing -- 2022 runs
-        # 35-42k against 2021's ~31k.
-        slices = day_partitions(con, str(hist), month)
+        # rows and took a 2.7 GiB duckdb limit out in one pass.
+        local = str(scraped) if scraped.exists() else None
+        slices = day_partitions(con)
         if slices:
-            print(f"  {month}: {len(slices)} slices "
+            print(f"    {len(slices)} slices "
                   + ", ".join(f"{lo}-{hi}" for lo, hi in slices))
             parts = []
             try:
                 for i, days in enumerate(slices, 1):
                     part = dest.with_suffix(f".part{i:02d}.parquet")
                     con.execute(
-                        f"COPY ({select_sql(con, str(hist), str(scraped), month, priors.get(month), days)}) "
+                        f"COPY ({select_sql(con, str(hist), local, source, days)}) "
                         f"TO '{part}' {copy_opts};")
                     parts.append(part)
                 stitch(parts, dest)
@@ -742,49 +1058,112 @@ def main() -> int:
                     part.unlink(missing_ok=True)
         else:
             con.execute(
-                f"COPY ({select_sql(con, str(hist), str(scraped), month, priors.get(month))}) "
+                f"COPY ({select_sql(con, str(hist), local, source)}) "
                 f"TO '{dest}' {copy_opts};")
         check_types(dest)
+
+        built = {r[0] for r in con.execute(
+            f"SELECT usajobsControlNumber FROM read_parquet('{dest}')").fetchall()}
         rows = con.execute(
             f"SELECT count(*) FROM read_parquet('{dest}')").fetchone()[0]
+        problem = verify_build(month, built, rows, members, prior_cns,
+                               moved_out)
+        if problem:
+            refused.append((month, problem))
+            dest.unlink()
+            continue
         print(f"  {name}: {rows:,} rows, {dest.stat().st_size/1e6:.1f} MB")
-        written.append(name)
+        written[month] = built
+        fresh.extend(built - prior_cns)
+        fresh_files.append(str(dest))
 
-    # Only control numbers in months we actually wrote, plus whatever was
-    # already published. Adding one whose month was refused would claim the
-    # dataset holds a posting that is not in any file.
-    written_cns = {cn for m in todo for cn in months.get(m, set())}
-    manifest = sorted(have | written_cns)
+    for month, why in refused:
+        warn(f"REFUSED {month}: {why}. Nothing was published for it.")
+    try:
+        check_section_shape(con, fresh_files, fresh, args.repo, token,
+                            list(written))
+    except Exception as e:
+        # A broken check must not cost a day's publish, nor pass silently.
+        warn(f"Section shape check failed to run: {e!r}")
+
+    # The map and the manifest follow the files actually written. A posting
+    # moved out of a month as a duplicate is still located in its other file.
+    for month, built in written.items():
+        for cn in [c for c, m in located.items() if m == month]:
+            if cn not in built:
+                del located[cn]
+        for cn in built:
+            located[cn] = month
+    manifest = sorted(located)
+    added = len(set(manifest) - have)
+    dropped = len(have - set(manifest))
     (BUILD_DIR / "manifest.csv").write_text(
         "usajobsControlNumber\n" + "\n".join(manifest) + "\n")
+    write_locations(located, BUILD_DIR / LOCATIONS_FILE)
+
+    # The manifest only shrinks by postings it listed that no file holds. A
+    # large drop means the location map is wrong, not that the dataset lost
+    # rows, and publishing it would make every consumer of the manifest think
+    # thousands of postings need fetching again.
+    if dropped > max(1000, len(have) // 1000):
+        warn(f"the new manifest would drop {dropped:,} of {len(have):,} "
+             f"listed postings; not publishing anything")
+        return 1
 
     if args.dry_run:
-        print(f"\nDry run — {len(written)} file(s) built in {BUILD_DIR}, "
-              f"manifest would hold {len(manifest):,}")
-        return 0
+        print(f"\nDry run — {len(written)} month file(s) built in {BUILD_DIR}, "
+              f"manifest would hold {len(manifest):,} (+{added:,}, "
+              f"-{dropped:,})")
+        check_freshness(con, str(hist), set(manifest))
+        return EXIT_REFUSED if refused else 0
 
-    # One commit for everything. File-by-file would mean a commit per month
-    # plus another for the manifest, leaving the dataset briefly inconsistent.
-    from huggingface_hub import CommitOperationAdd, HfApi
-    api = HfApi(token=token)
-    ops = [CommitOperationAdd(path_in_repo=n, path_or_fileobj=str(BUILD_DIR / n))
-           for n in written + ["manifest.csv"]]
-    api.create_commit(
-        repo_id=args.repo, repo_type="dataset", operations=ops,
-        commit_message=f"+{len(written_cns - have):,} announcements, "
-                       f"{len(manifest):,} total")
-    print(f"\nPushed {len(written)} month(s) to {args.repo}")
+    if written or dropped or not had_locations:
+        # One commit for everything. File-by-file would mean a commit per
+        # month plus the manifest, leaving the dataset briefly inconsistent.
+        from huggingface_hub import CommitOperationAdd, HfApi
+        api = HfApi(token=token)
+        ops = [CommitOperationAdd(path_in_repo=month_file(m),
+                                  path_or_fileobj=str(BUILD_DIR / month_file(m)))
+               for m in written]
+        ops += [CommitOperationAdd(path_in_repo=n,
+                                   path_or_fileobj=str(BUILD_DIR / n))
+                for n in ("manifest.csv", LOCATIONS_FILE)]
+        message = f"+{added:,} announcements, {len(manifest):,} total"
+        if dropped:
+            message += f" ({dropped:,} listed but in no file removed)"
+        api.create_commit(repo_id=args.repo, repo_type="dataset",
+                          operations=ops, commit_message=message)
+        print(f"\nPushed {len(written)} month(s) to {args.repo}: {message}")
+        # Uploaded, so the local copies are dead weight: ~100 MB a month.
+        for m in written:
+            (BUILD_DIR / month_file(m)).unlink(missing_ok=True)
 
     # Nothing to prune when the text never was local -- a republish takes it
     # from the dataset, so there is no file here to shrink.
-    if not args.keep_text and scraped.exists():
-        cleared = prune_published_text(str(scraped), written_cns)
+    #
+    # Everything with local text that is now in a month file, not just what
+    # this run wrote: a posting that already lives in another month's file
+    # keeps its local text otherwise, forever.
+    published_now = {cn for cns in by_month.values() for cn in cns
+                     if cn in located}
+    if not args.keep_text and scraped.exists() and published_now:
+        cleared = prune_published_text(str(scraped), published_now)
         after = os.path.getsize(scraped) / 1e6
         print(f"Dropped local text for {cleared:,} published postings; "
               f"{scraped.name} is now {after:,.0f} MB")
 
+    check_freshness(con, str(hist), set(manifest))
     return EXIT_REFUSED if refused else 0
 
 
+def cleanup_downloads():
+    import shutil
+    shutil.rmtree(DOWNLOAD_DIR, ignore_errors=True)
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        code = main()
+    finally:
+        cleanup_downloads()
+    sys.exit(code)
