@@ -313,7 +313,11 @@ def _clean(node) -> str:
         tag.decompose()
     for heading in node.find_all(["h1", "h2"]):
         heading.decompose()
-    for link in node.select("a[href*='help.usajobs.gov']"):
+    # usajobs.gov moved its help pages to usajobshelp.opm.gov in early
+    # September 2026. Until both were listed, every "Help" button came through
+    # as text: 9,800 of September's published majorDuties began "Help ".
+    for link in node.select("a[href*='help.usajobs.gov'], "
+                            "a[href*='usajobshelp.opm.gov']"):
         link.decompose()
     return _WS.sub(" ", node.get_text(" ")).strip()
 

@@ -453,6 +453,24 @@ jobs:
         cd update
         python test_data_integrity.py
 
+    # The scrape only sees what is open when it runs, so a posting that opens
+    # and closes between runs never gets a page fetched -- 632 of September
+    # 2026's. This fetches pages for
+    # everything in the mirror that is in no month file on the dataset, capped
+    # so a big backlog is worked off over several days rather than holding up
+    # the run. It writes into scraped_jobs_{year}.parquet, which the publish
+    # step below reads and the R2 sync uploads. Never fails the run: a backlog
+    # it leaves behind is what the publisher's staleness check reports.
+    - name: Fetch announcement pages the scrape missed
+      if: always()
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: |
+        timeout 25m python scripts/backfill_scraped_pages.py \
+          --year "$(date -u +%Y)" --data-dir data --fill-gaps \
+          --limit 2000 --max-cpu 0 \
+          || echo "::warning::Gap-fill fetch did not finish; the next run continues it"
+
     # Publish the announcement dataset to HuggingFace. Both halves are on disk
     # by now: the structured fields from the historical mirror this run just
     # refreshed, and the announcement text from the scraped collection above.
@@ -473,13 +491,13 @@ jobs:
         # only republishes the months that gained rows.
         REFRESH=""
         [ "$(date -u +%d)" = "01" ] && REFRESH="--refresh-all"
-        # A refused month (exit 3) is expected while a backfill is still
-        # filling in text, and the dataset is downstream of everything that
-        # matters here -- so that only warns. Anything else non-zero means
-        # nothing was published at all: a column type that drifted, or a
-        # traceback. Those used to be swallowed by the same `||` and showed up
-        # as an annotation nobody reads, which is how six month files sat on
-        # the dataset with the wrong types for years.
+        # A refused month (exit 3) does not fail the run -- the dataset is
+        # downstream of everything that matters here -- but it is not quiet
+        # either: the publisher writes logs/HF_PUBLISH_WARNING.txt, and the
+        # next step turns that into an issue. A warning annotation alone is
+        # how the publish refused every day from 2026-10-02 to 2026-10-17
+        # with every run green. Anything else non-zero means nothing was
+        # published at all: a column type that drifted, or a traceback.
         set +e
         python scripts/publish_to_huggingface.py $REFRESH
         status=$?
@@ -490,6 +508,52 @@ jobs:
           echo "::error::HuggingFace publish failed (exit $status) — nothing was published"
           echo "HF_PUBLISH_FAILED=1" >> "$GITHUB_ENV"
         fi
+
+    # Refusals, a missing input, postings the mirror has had for a week that
+    # still are not on the dataset, and new announcements whose sections open
+    # or close differently from the baseline all land in HF_PUBLISH_WARNING.txt.
+    # One issue per day, commented on by later attempts.
+    - name: Open an issue if the HuggingFace dataset is falling behind
+      if: always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const file = 'logs/HF_PUBLISH_WARNING.txt';
+          if (!fs.existsSync(file)) return;
+          const runUrl = context.serverUrl + '/' + context.repo.owner + '/' +
+                         context.repo.repo + '/actions/runs/' + context.runId;
+          const body = 'The HuggingFace announcement dataset needs ' +
+                       'attention: it is falling behind the mirror, a month ' +
+                       'was refused, or the text of new announcements has ' +
+                       'changed shape (usually a usajobs.gov markup ' +
+                       'change; see scripts/section_shape.py).\n\n```\n' +
+                       fs.readFileSync(file, 'utf8') + '\n```\n\n' +
+                       'Run `python scripts/publish_to_huggingface.py ' +
+                       '--dry-run` to see what it would do.\n\n' +
+                       '[View the workflow run](' + runUrl + ')';
+          fs.unlinkSync(file);
+
+          const today = new Date().toISOString().split('T')[0];
+          const title = 'HuggingFace publish needs attention - ' + today;
+          const open = await github.rest.issues.listForRepo({
+            owner: context.repo.owner, repo: context.repo.repo,
+            state: 'open', labels: 'hf-publish', per_page: 100,
+          });
+          const dupe = open.data.find(i => i.title === title);
+          if (dupe) {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: dupe.number, body: body,
+            });
+          } else {
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title: title, body: body,
+              labels: ['data-issue', 'hf-publish'],
+              assignees: ['abigailhaddad'],
+            });
+          }
 
     - name: Commit and push to data-updates branch
       # Only runs if tests pass

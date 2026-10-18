@@ -97,6 +97,14 @@ def parse_args():
                         "manifest rather than the local parquet. That makes a "
                         "run stateless, which is what lets month jobs run "
                         "concurrently in CI without sharing a file.")
+    p.add_argument("--fill-gaps", action="store_true",
+                   help="Fetch only postings that are in no month file on the "
+                        "dataset and have no text locally: ones the daily "
+                        "scrape never saw because they opened and closed "
+                        "between runs, and ones an old month rebuild lost. "
+                        "Implies --no-publish; the daily publish step pushes "
+                        "what this fetches. Meant for the daily workflow, "
+                        "with --limit.")
     p.add_argument("--month", help="Only this month (YYYY-MM). Useful for a "
                                    "pilot, or to resume a specific month.")
     p.add_argument("--no-publish", action="store_true",
@@ -247,6 +255,35 @@ def stored_control_numbers(data_dir, year):
                              .column(0).to_pylist())
             except Exception as e:
                 print(f"  unreadable shard {name} ({e}), ignoring")
+    return known
+
+
+def stored_with_text(data_dir, year):
+    """Control numbers whose announcement text is on disk: rows in the main
+    parquet that have not been pruned, and anything in a shard.
+
+    Not the same as stored_control_numbers. Publishing prunes a row's text but
+    keeps the row, so a row with no text means "published" -- unless the
+    dataset has since lost it, which is the case --fill-gaps is for.
+    """
+    import duckdb
+    known = set()
+    main = os.path.join(data_dir, f"scraped_jobs_{year}.parquet")
+    if os.path.exists(main) and "text" in pq.read_schema(main).names:
+        known |= {r[0] for r in duckdb.connect().execute(
+            f"SELECT usajobs_control_number FROM read_parquet('{main}') "
+            f"WHERE text IS NOT NULL").fetchall()}
+    # Shards are freshly fetched pages, never pruned.
+    shards = shard_dir(data_dir, year)
+    if os.path.isdir(shards):
+        for name in sorted(os.listdir(shards)):
+            if name.endswith(".parquet"):
+                try:
+                    known |= set(pq.read_table(
+                        os.path.join(shards, name),
+                        columns=["usajobs_control_number"]).column(0).to_pylist())
+                except Exception as e:
+                    print(f"  unreadable shard {name} ({e}), ignoring")
     return known
 
 
@@ -488,7 +525,14 @@ def main() -> int:
     if args.month:
         wanted = {cn: d for cn, d in wanted.items() if d[:7] == args.month}
         print(f"Restricted to {args.month}: {len(wanted):,} postings")
-    if args.known_from_hf:
+    if args.fill_gaps:
+        args.no_publish = True
+        published = published_control_numbers()
+        local = stored_with_text(args.data_dir, args.year)
+        known = published | local
+        print(f"HuggingFace manifest holds {len(published):,} announcements; "
+              f"{len(local):,} more have text on disk")
+    elif args.known_from_hf:
         known = published_control_numbers()
         print(f"HuggingFace manifest holds {len(known):,} announcements")
     else:

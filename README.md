@@ -142,6 +142,10 @@ carries the full announcement text the API does not return: one parquet per
 month, published daily. Eleven parsed sections -- `jobSummary`, `majorDuties`,
 `qualificationSummary`, `education` and the rest -- plus the whole-page `text`.
 
+A posting stays in the month file it was first published in, even if USAJOBS
+later moves its open date, so filter on `positionOpenDate` rather than on file
+names when the month matters.
+
 It exists because the daily pipeline also scrapes usajobs.gov without an API
 key, alongside the API collection. That scrape is the source of the text, and
 it doubles as a check on whether the site could replace the Current API if the
