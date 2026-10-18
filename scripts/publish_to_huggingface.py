@@ -43,6 +43,10 @@ REPO_ID = os.environ.get("HF_DATASET_REPO", "abigailhaddad/usajobs-scraping")
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 BUILD_DIR = Path(__file__).resolve().parent.parent / "build" / "hf"
+# Month files downloaded from the dataset land here rather than in the shared
+# HuggingFace cache, and are deleted when the run ends. Each is ~100 MB and a
+# refresh pulls a year of them; left in the cache they filled a laptop disk.
+DOWNLOAD_DIR = BUILD_DIR / "downloads"
 
 # Structured fields, from the historical parquet.
 #
@@ -533,7 +537,7 @@ def download_month(repo, month, token):
     from huggingface_hub.errors import EntryNotFoundError
     try:
         return hf_hub_download(repo, month_file(month), repo_type="dataset",
-                               token=token)
+                               token=token, cache_dir=DOWNLOAD_DIR)
     except EntryNotFoundError:
         return None
 
@@ -1130,6 +1134,9 @@ def main() -> int:
         api.create_commit(repo_id=args.repo, repo_type="dataset",
                           operations=ops, commit_message=message)
         print(f"\nPushed {len(written)} month(s) to {args.repo}: {message}")
+        # Uploaded, so the local copies are dead weight: ~100 MB a month.
+        for m in written:
+            (BUILD_DIR / month_file(m)).unlink(missing_ok=True)
 
     # Nothing to prune when the text never was local -- a republish takes it
     # from the dataset, so there is no file here to shrink.
@@ -1149,5 +1156,14 @@ def main() -> int:
     return EXIT_REFUSED if refused else 0
 
 
+def cleanup_downloads():
+    import shutil
+    shutil.rmtree(DOWNLOAD_DIR, ignore_errors=True)
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        code = main()
+    finally:
+        cleanup_downloads()
+    sys.exit(code)

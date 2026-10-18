@@ -107,12 +107,15 @@ def repair_local(path):
 def repair_months(months, repo, token, dry_run):
     import pyarrow.parquet as pq
     from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
-    from publish_to_huggingface import BUILD_DIR, check_types, month_file
+    import shutil
+    from publish_to_huggingface import (BUILD_DIR, DOWNLOAD_DIR, check_types,
+                                        month_file)
 
     ops, total = [], 0
     for month in months:
         name = month_file(month)
-        src = hf_hub_download(repo, name, repo_type="dataset", token=token)
+        src = hf_hub_download(repo, name, repo_type="dataset", token=token,
+                              cache_dir=DOWNLOAD_DIR)
         before = pq.read_table(src)
         after, changed = repair_table(before)
         verify(before, after)
@@ -126,10 +129,14 @@ def repair_months(months, repo, token, dry_run):
         ops.append(CommitOperationAdd(path_in_repo=name,
                                       path_or_fileobj=str(dest)))
         total += changed
+        # The original is not needed once its repaired copy is written.
+        shutil.rmtree(DOWNLOAD_DIR, ignore_errors=True)
 
+    repaired_dir = BUILD_DIR / "repair"
     if dry_run or not ops:
         print(f"{'Dry run — ' if dry_run else ''}{total:,} rows in "
               f"{len(ops)} file(s) would be repaired")
+        shutil.rmtree(repaired_dir, ignore_errors=True)
         return
     # One commit, so the dataset is never half-repaired.
     HfApi(token=token).create_commit(
@@ -137,6 +144,7 @@ def repair_months(months, repo, token, dry_run):
         commit_message=f"Strip leaked 'Help' button text from {total:,} "
                        f"announcements in {len(ops)} month(s)")
     print(f"Pushed {len(ops)} repaired month file(s)")
+    shutil.rmtree(repaired_dir, ignore_errors=True)
 
 
 def main() -> int:
