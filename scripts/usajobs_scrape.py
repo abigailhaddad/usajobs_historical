@@ -517,8 +517,13 @@ def parse_job_page(html: str) -> Dict:
     row["positionTitle"] = (_WS.sub(" ", heading.get_text(" ")).strip()
                             if heading else ld.get("title"))
 
-    # Status badge: 'Accepting applications', 'Job canceled', 'Candidate
-    # selected'. The same string the API calls positionOpeningStatus.
+    # Status badge: 'Accepting applications', 'Job canceled', 'Hiring
+    # complete'. This is the wording of USAJOBS's published code list
+    # (/api/codelist/positionopeningstatuses), NOT the Historical API's.
+    # The Historical API's positionOpeningStatus says 'Applications under
+    # review' where the page says 'Reviewing applications', and 'Candidate
+    # selected' where the page says 'Hiring complete'. The other three match.
+    # Nothing here translates between the two.
     badge = soup.select_one("[class*=badge]")
     if badge:
         row["positionOpeningStatus"] = _WS.sub(" ", badge.get_text(" ")).strip()

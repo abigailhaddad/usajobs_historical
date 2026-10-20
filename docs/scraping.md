@@ -36,6 +36,17 @@ Measured on the published dataset instead of that sample, `education` is
 genuinely missing from 10-13% of announcements (2024-06: 10.5%, 2026-08:
 13.2%); `text` and the structured fields are on effectively every row.
 
+**The scraped files are a snapshot, not a mirror.** The scrape only fetches
+postings it has not stored yet (`GET /job/{control_number}` above), and never
+goes back to refresh one. `scraped_jobs_*.parquet` therefore holds each page as
+it read when first seen, including its `positionOpeningStatus` -- which is the
+page badge's wording ("Reviewing applications", "Hiring complete"), not the
+Historical API's ("Applications under review", "Candidate selected"). It is
+not translated and it is not updated. For current metadata use
+`historical_jobs_*.parquet` and join on `usajobsControlNumber` *and*
+`positionOpenDate`; USAJOBS reuses control numbers and re-opens postings under
+new dates, so the number alone can match the wrong posting.
+
 `scripts/compare_scrape_to_api.py` diffs the two collections after each run and
 writes a report to `logs/scrape_vs_api_<date>.md`, uploaded as a workflow
 artifact. On the first full check — all 354 open 2210 postings, 2026-09-02 —
