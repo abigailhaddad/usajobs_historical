@@ -132,8 +132,10 @@ def get_job_data_page(params: Optional[Dict] = None, next_url: Optional[str] = N
             
             response.raise_for_status()
             
-            # Handle "204 No Content" text response
-            if response.text.strip() == "204 No Content":
+            # The end of the results arrives either as the text "204 No
+            # Content" or as a real HTTP 204 with an empty body (what follows a
+            # full 500-row page).
+            if response.status_code == 204 or response.text.strip() in ("", "204 No Content"):
                 return {"results": []}
                 
             return response.json()
