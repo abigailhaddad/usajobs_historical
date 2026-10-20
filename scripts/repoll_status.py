@@ -70,7 +70,11 @@ def get_page(params: Optional[Dict] = None, next_url: Optional[str] = None, retr
 
             resp.raise_for_status()
 
-            if resp.text.strip() == "204 No Content":
+            # The end of the results arrives either as the text "204 No
+            # Content" or as a real HTTP 204 with an empty body. A date with
+            # exactly 500 postings gets the second: a full first page still
+            # carries a `next` link and the follow-up is empty.
+            if resp.status_code == 204 or resp.text.strip() in ("", "204 No Content"):
                 return {"data": []}
 
             return resp.json()
@@ -134,7 +138,9 @@ def fetch_all_for_date(date_str: str) -> List[Dict]:
     # Skipped when the count already came up short — the tripwire is for
     # truncation that is otherwise *silent*, and firing both just opens two
     # issues about one event (see #531/#532 on the daily collection).
-    if not under_collected:
+    # Also skipped when the API's own total says this is all there is: a date
+    # with exactly 500 postings is a coincidence then, not a cut-off.
+    if not under_collected and expected_total != len(all_jobs):
         check_cap(len(all_jobs), f"repoll date {date_str}")
 
     return all_jobs
