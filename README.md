@@ -151,6 +151,15 @@ key, alongside the API collection. That scrape is the source of the text, and
 it doubles as a check on whether the site could replace the Current API if the
 key ever stopped working.
 
+The scrape is not kept up to date. It fetches a posting's page once, when we
+first see it, and does not go back; the text is the announcement as it read
+then. Metadata such as `positionOpeningStatus` comes from the historical data
+instead, and is refreshed on its own schedule, so a recent status change can
+lag. To have both the text and current metadata, join the two on
+`usajobsControlNumber` and `positionOpenDate`: USAJOBS reuses control numbers,
+and re-opens postings under new dates, so the number alone can match the wrong
+posting.
+
 ```sql
 SELECT count(*)
 FROM read_parquet('hf://datasets/abigailhaddad/usajobs-scraping/data/2025_*.parquet');

@@ -470,6 +470,26 @@
         
         <p><strong>Important:</strong> The <code>current_jobs_*.parquet</code> files contain cumulative data - they include all jobs that have appeared in the Current API since we started collecting, not just jobs that are currently active. Once a job is added to these files, it remains there even after the position closes or is removed from the Current API. This provides a historical record of all jobs that were once "current."</p>
 
+        <h3 id="status-values">Status values (<code>positionOpeningStatus</code>)</h3>
+        <p>The Historical API returns <code>positionOpeningStatus</code> as a string, and we store it unchanged. Its wording is <strong>not</strong> quite the same as USAJOBS's published code list (<code>/api/codelist/positionopeningstatuses</code>), which is also what the status badge on a posting's page shows:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Historical API value (what this dataset holds)</th>
+                    <th>Code list and posting page</th>
+                    <th>Code</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Accepting applications</td><td>Accepting applications</td><td>1</td></tr>
+                <tr><td>Job closed</td><td>Job closed</td><td>2</td></tr>
+                <tr><td>Applications under review</td><td>Reviewing applications</td><td>3</td></tr>
+                <tr><td>Job canceled</td><td>Job canceled</td><td>4</td></tr>
+                <tr><td>Candidate selected</td><td>Hiring complete</td><td>5</td></tr>
+            </tbody>
+        </table>
+        <p>USAJOBS does not publish a mapping between the two vocabularies. The pairing of rows 3 and 5 is our reading: on a sample of postings looked up in both places, each Historical API value lined up with exactly one code list value. A posting's status can be blank for its first days, before the Historical API carries one. Statuses of older postings are re-checked on a rotation of about nine days, so a recent change may not show up straight away. The scraped announcement files (<code>scraped_jobs_*.parquet</code>) store the page's wording as of the day each posting was first scraped and are never refreshed; for current status use the historical files.</p>
+
         <h3>Normalized Fields</h3>
         <table>
             <thead>
