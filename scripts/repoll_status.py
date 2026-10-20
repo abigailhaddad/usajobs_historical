@@ -422,6 +422,23 @@ def update_and_insert(parquet_path: str, status_map: Dict[str, str],
     return changed, inserted, transitions
 
 
+def write_date_error_marker(failed_dates: Dict[str, str], years: List[int],
+                            log_dir: str) -> Optional[str]:
+    """Write logs/REPOLL_DATE_ERRORS.txt listing the dates that failed, or
+    nothing when none did. Returns the path written."""
+    if not failed_dates:
+        return None
+    os.makedirs(log_dir, exist_ok=True)
+    path = os.path.join(log_dir, 'REPOLL_DATE_ERRORS.txt')
+    with open(path, 'w') as f:
+        f.write(f"The repoll could not fetch {len(failed_dates)} date(s) "
+                f"(years this run: {years}).\n"
+                f"Statuses on these dates stay as they were until a run succeeds.\n\n")
+        for date, error in sorted(failed_dates.items()):
+            f.write(f"{date}: {error}\n")
+    return path
+
+
 def fetch_date_worker(date_str: str) -> tuple:
     """Worker function for parallel fetching. Returns (date_str, jobs_list)."""
     try:
@@ -528,6 +545,7 @@ def main():
     row_counts_before = {year: len(ids) for year, ids in existing_ids.items()}
     dates_since_save = 0
     errors = 0
+    failed_dates: Dict[str, str] = {}  # date -> error text, for the alert
 
     # Process in batches for parallel fetching
     batch_size = args.workers
@@ -556,6 +574,7 @@ def main():
                 if error:
                     log(f"  ERROR {date_str}: {error}")
                     errors += 1
+                    failed_dates[date_str] = error
                     dates_queried += 1
                     continue
 
@@ -740,6 +759,17 @@ def main():
                     f"Partial progress WAS saved and synced. "
                     f"Remaining dates will be retried on the next scheduled run.\n")
         log(f"\n⚠️  Wrote {marker_path} (workflow will open an issue).")
+
+    # Any date that could not be fetched keeps its stale statuses until it
+    # works again. On 2026-10-13 four dates failed on an empty HTTP 204 in a
+    # run that finished green, and nothing said so. The workflow turns this
+    # marker into a GitHub issue.
+    marker = write_date_error_marker(
+        failed_dates, sorted(files.keys()),
+        os.path.join(os.path.dirname(__file__), '..', 'logs'))
+    if marker:
+        log(f"\n⚠️  {len(failed_dates)} date(s) could not be fetched; wrote {marker} "
+            f"(workflow will open an issue).")
 
     log(f"{'='*60}")
 

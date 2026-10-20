@@ -60,3 +60,19 @@ def test_short_page_with_a_larger_api_total_is_under_collection_not_a_cap_hit(mo
     monkeypatch.setattr(repoll_status, "check_cap", lambda n, what: capped.append(n))
     repoll_status.fetch_all_for_date("2026-01-01")
     assert capped == []  # under-collection path owns this case, not the cap
+
+
+def test_failed_dates_are_written_to_a_marker_the_workflow_can_alert_on(tmp_path):
+    import repoll_status
+    path = repoll_status.write_date_error_marker(
+        {"2025-06-23": "boom", "2021-02-08": "bang"}, [2021, 2025], str(tmp_path))
+    text = open(path).read()
+    assert path.endswith("REPOLL_DATE_ERRORS.txt")
+    assert "2 date(s)" in text
+    assert text.index("2021-02-08: bang") < text.index("2025-06-23: boom")
+
+
+def test_no_failed_dates_writes_no_marker(tmp_path):
+    import repoll_status
+    assert repoll_status.write_date_error_marker({}, [2025], str(tmp_path)) is None
+    assert not (tmp_path / "REPOLL_DATE_ERRORS.txt").exists()
