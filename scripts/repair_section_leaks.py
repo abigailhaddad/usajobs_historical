@@ -118,8 +118,10 @@ def repair_row(row):
         if not value:
             continue
         for tail in _run_on_tails(row, f):
-            if value.endswith(" " + tail):
-                out[f] = value[:-len(tail) - 1].rstrip() or None
+            # Equal when the section had no text of its own: the run-on is
+            # all there is, and the page has no such section.
+            if value == tail or value.endswith(" " + tail):
+                out[f] = value[:-len(tail)].rstrip() or None
                 fixes[f"run_on_{f}"] = 1
                 break
 
@@ -131,8 +133,12 @@ def repair_row(row):
                 out[f] = fixed or None
                 fixes[f"buttons_{f}"] = 1
 
+    # Rows parsed after the fix can end with these words because the agency
+    # wrote them. Every row the old parser stored carries "Expand Hide"
+    # labels (3,258,010 of 3,258,011 on the dataset), so only those lose it.
+    old_parse = any("Expand Hide" in (row.get(f) or "") for f in LABELLED)
     summary = out.get("jobSummary")
-    if summary and (summary == AGENCY_LINK
+    if old_parse and summary and (summary == AGENCY_LINK
                     or summary.endswith(" " + AGENCY_LINK)):
         out["jobSummary"] = summary[:-len(AGENCY_LINK)].rstrip() or None
         fixes["agency_link_jobSummary"] = 1
@@ -174,9 +180,9 @@ def leftovers(table):
         if f in table.column_names:
             out[f"expand_hide_{f}"] = pc.sum(pc.match_substring(
                 table.column(f), "Expand Hide")).as_py() or 0
-    if "jobSummary" in table.column_names:
-        out["agency_link_jobSummary"] = pc.sum(pc.ends_with(
-            table.column("jobSummary"), AGENCY_LINK)).as_py() or 0
+    # Not counted: a jobSummary still ending "Learn more about this agency".
+    # Some agencies end their summary with those words, before the button;
+    # the live pages checked (495604800, 495949500, 495960200) confirm it.
     for f in ("requirements", "conditionsOfEmployment", "qualificationSummary"):
         if f in table.column_names:
             out[f"questionnaire_{f}"] = pc.sum(pc.match_substring(

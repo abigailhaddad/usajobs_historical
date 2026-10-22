@@ -60,6 +60,22 @@ def test_only_additional_information_trailing():
     assert fixed["qualificationSummary"] == "Must have experience."
 
 
+def test_section_that_is_only_the_run_on_becomes_empty():
+    # An announcement whose Qualifications heading has no text of its own.
+    row = stored(education=None,
+                 qualificationSummary="Additional information " + AI)
+    fixed, _ = repair_row(row)
+    assert fixed["qualificationSummary"] is None
+
+
+def test_agency_written_ending_survives_once_the_button_is_gone():
+    # 495604800: the agency ended its summary with the same words.
+    row = stored(jobSummary="Meet deadlines. Learn more about this agency "
+                            "Learn more about this agency")
+    fixed, _ = repair_row(row)
+    assert fixed["jobSummary"] == "Meet deadlines. Learn more about this agency"
+
+
 def test_conditions_run_on_through_nested_qualifications():
     # 429653100: broken agency HTML nested the later headings in a <p>.
     row = stored(
@@ -88,6 +104,14 @@ def test_agency_link_only_comes_off_the_end_of_job_summary():
     fixed, _ = repair_row(row)
     assert fixed["jobSummary"] == "The Chief serves the medical center."
     assert fixed["majorDuties"] == row["majorDuties"]
+
+
+def test_rows_from_the_fixed_parser_keep_an_agency_written_ending():
+    row = {"jobSummary": "Meet deadlines. Learn more about this agency",
+           "howToApply": "Apply online.", "additionalInformation": None,
+           "education": None, "qualificationSummary": "Have a degree."}
+    fixed, fixes = repair_row(row)
+    assert fixes == {} and fixed is row
 
 
 def test_questionnaire_block_is_removed():

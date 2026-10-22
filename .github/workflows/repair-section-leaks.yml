@@ -1,0 +1,114 @@
+name: Repair Section Leaks
+
+# One-off, manual. Undoes, in text already stored, what PR #668 fixed in the
+# parser: qualificationSummary running on through Education and Additional
+# information, "Expand Hide ..." button labels, the "Learn more about this
+# agency" button ending jobSummary, and the "Preview job questionnaire" block.
+# See scripts/repair_section_leaks.py.
+#
+# Runs here rather than on a laptop because it reads every month file on the
+# Hugging Face dataset, ~11 GB.
+#
+# Run it once without `apply`, read the per-month counts and leftovers in the
+# log, then run it again with `apply`. Applying commits repaired month files to
+# the dataset four at a time, each on top of the revision it read, and uploads
+# the repaired scraped_jobs files to R2.
+
+on:
+  workflow_dispatch:
+    inputs:
+      months:
+        description: "Dataset months to repair (YYYY-MM, space-separated). Empty means all."
+        type: string
+        default: ""
+      apply:
+        description: "Write the repairs. Unticked, it only reports."
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Same group as the daily update, which also writes the scraped files in R2
+# and publishes to the dataset. Queue rather than cancel.
+concurrency:
+  group: usajobs-r2-data-write
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        lfs: false
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install boto3 pytest huggingface_hub
+
+    - name: Test the repair and the parser it follows
+      run: python -m pytest scripts/tests/test_repair_section_leaks.py scripts/tests/test_scrape_parse.py -q
+
+    - name: Download scraped files from R2
+      env:
+        R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+        R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+      run: |
+        python3 -c "
+        import boto3, os
+        s3 = boto3.client('s3',
+            endpoint_url=os.environ['R2_ENDPOINT_URL'],
+            aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
+            aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
+        os.makedirs('data', exist_ok=True)
+        for page in s3.get_paginator('list_objects_v2').paginate(
+                Bucket='usajobs-data', Prefix='data/scraped_jobs_'):
+            for obj in page.get('Contents', []):
+                key = obj['Key']
+                if 'backup' in key or not key.endswith('.parquet'):
+                    continue
+                print(f'Downloading {key} ({obj[\"Size\"]/1024/1024:.1f} MB)')
+                s3.download_file('usajobs-data', key, key)
+        "
+        python scripts/sync_to_r2.py --snapshot
+
+    - name: Repair the scraped files
+      env:
+        DRY_RUN: ${{ inputs.apply && '' || '--dry-run' }}
+      run: |
+        for f in data/scraped_jobs_*.parquet; do
+          python scripts/repair_section_leaks.py --local "$f" $DRY_RUN
+        done
+
+    - name: Repair the dataset
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        MONTHS: ${{ inputs.months }}
+        DRY_RUN: ${{ inputs.apply && '' || '--dry-run' }}
+      run: |
+        if [ -n "$MONTHS" ]; then
+          python scripts/repair_section_leaks.py --months $MONTHS $DRY_RUN
+        else
+          python scripts/repair_section_leaks.py --all $DRY_RUN
+        fi
+
+    - name: Upload repaired scraped files to R2
+      if: inputs.apply
+      env:
+        R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+        R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+      run: python scripts/sync_to_r2.py --only-changed
