@@ -39,6 +39,11 @@ def closed_job():
     return parse_job_page(load('job_closed_806611100.html.gz'))
 
 
+@pytest.fixture(scope="module")
+def job():
+    return parse_job_page(load('job_open_889459300.html.gz'))
+
+
 class TestOpenAnnouncement:
     def test_identity(self, open_job):
         assert open_job['usajobsControlNumber'] == 721962100
@@ -207,10 +212,6 @@ class TestPageControlsAndLinks:
     what the agency wrote stays in. Fixture: a VA announcement captured
     2026-10-22, after usajobs.gov moved its help pages to usajobshelp.opm.gov.
     """
-
-    @pytest.fixture(scope="class")
-    def job(self):
-        return parse_job_page(load('job_open_889459300.html.gz'))
 
     def test_qualifications_stop_at_the_next_heading(self, job):
         # Education and Additional information are each wrapped in a <div>,
