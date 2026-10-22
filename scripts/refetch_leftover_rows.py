@@ -157,13 +157,19 @@ def main() -> int:
     session = new_session()
 
     since = set()
+    # Old qualifications of the rows only the scraped files have, for the
+    # report.
+    since_quals = {}
     if args.inserted_since:
         for path in args.scraped:
             t = pq.read_table(path, columns=["usajobsControlNumber",
-                                              "inserted_at"])
-            since |= {str(cn) for cn, at in zip(
-                t.column(0).to_pylist(), t.column(1).to_pylist())
-                if at and at >= args.inserted_since}
+                                              "inserted_at",
+                                              "qualificationSummary"])
+            for cn, at, q in zip(*(t.column(i).to_pylist()
+                                   for i in range(3))):
+                if at and at >= args.inserted_since:
+                    since.add(str(cn))
+                    since_quals[str(cn)] = q
         print(f"{len(since):,} rows inserted at or after "
               f"{args.inserted_since} in the scraped files")
     out_dir = BUILD_DIR / "refetch"
@@ -249,6 +255,29 @@ def main() -> int:
         if len(ops) >= BATCH:
             commit()
     commit()
+
+    # Postings reach the dataset only once the historical mirror has them,
+    # so the newest are in the scraped files alone. They are fixed there, and
+    # the publish takes their text from there when it adds them.
+    only_scraped = sorted(since - set(fresh_all))
+    print(f"{len(only_scraped):,} inserted rows are not on the dataset yet; "
+          f"fetching them for the scraped files")
+    for cn in only_scraped:
+        sections, problem = fetch_sections(session, cn)
+        fresh_all[cn] = (sections, problem)
+        report_rows.append({
+            "month": "scraped files only", "control_number": cn,
+            "url": JOB_URL.format(cn),
+            "kinds": f"inserted_since_{args.inserted_since}",
+            "outcome": problem or "replaced",
+            "old_qualificationSummary": since_quals.get(cn),
+            "new_qualificationSummary": (sections or {}).get(
+                "qualificationSummary"),
+            "old_conditionsOfEmployment": None,
+            "new_conditionsOfEmployment": (sections or {}).get(
+                "conditionsOfEmployment"),
+        })
+        totals["not_fetched"] += bool(problem)
 
     fetched = {cn: s for cn, (s, _) in fresh_all.items() if s}
     for path in args.scraped:
