@@ -18,8 +18,8 @@ import sys
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from usajobs_scrape import (normalize_search_job, parse_job_page,
-                            parse_locations, parse_sections)
+from usajobs_scrape import (SECTION_FIELDS, normalize_search_job,
+                            parse_job_page, parse_locations, parse_sections)
 
 FIXTURES = os.path.join(os.path.dirname(__file__), 'fixtures')
 
@@ -165,9 +165,18 @@ class TestLongTextSections:
         assert open_job['education']
         assert open_job['additionalInformation']
 
-    def test_qualifications_beats_the_ld_json_copy(self, open_job):
-        # The whole reason to parse the page rather than read ld+json.
-        assert len(open_job['qualificationSummary']) > 1800
+    def test_qualifications_matches_the_ld_json_copy(self, open_job):
+        # The page's ld+json carries the same qualifications. This test used
+        # to assert the parse was longer (1,845 characters against 1,503) and
+        # call ld+json truncated; the extra length was Education and
+        # Additional information running on into qualificationSummary.
+        import re
+        from bs4 import BeautifulSoup
+        from usajobs_scrape import _ld_json
+        soup = BeautifulSoup(load('job_open_721962100.html.gz'), 'html.parser')
+        ld = BeautifulSoup(_ld_json(soup)['qualifications'], 'html.parser')
+        words = lambda s: re.sub(r'\W+', ' ', s).strip().lower()
+        assert words(open_job['qualificationSummary']) == words(ld.get_text(' '))
 
     def test_benefits_boilerplate_is_split_out_of_requirements(self, open_job):
         # The Benefits accordion is ~470 characters of identical text on every
@@ -184,13 +193,63 @@ class TestLongTextSections:
         assert 'education' not in closed_job
 
     def test_closed_announcements_keep_their_full_text(self, closed_job):
-        assert len(closed_job['qualificationSummary']) > 10000
+        assert len(closed_job['qualificationSummary']) > 7000
         assert len(closed_job['majorDuties']) > 4000
 
     def test_no_sections_on_an_unrelated_page(self):
         from bs4 import BeautifulSoup
         assert parse_sections(BeautifulSoup('<html><body>hi</body></html>',
                                             'html.parser')) == {}
+
+
+class TestPageControlsAndLinks:
+    """What the page draws around the announcement stays out of the text, and
+    what the agency wrote stays in. Fixture: a VA announcement captured
+    2026-10-22, after usajobs.gov moved its help pages to usajobshelp.opm.gov.
+    """
+
+    @pytest.fixture(scope="class")
+    def job(self):
+        return parse_job_page(load('job_open_889459300.html.gz'))
+
+    def test_qualifications_stop_at_the_next_heading(self, job):
+        # Education and Additional information are each wrapped in a <div>,
+        # and the walk from 'Qualifications' used to run on through both.
+        q = job['qualificationSummary']
+        assert job['education'] not in q
+        assert job['additionalInformation'][:200] not in q
+        assert q.endswith('general-schedule-qualification-standards/.')
+        assert job['education'].startswith('A transcript must be submitted')
+        assert job['additionalInformation'].startswith(
+            'This is a Temporary Promotion')
+
+    def test_buttons_are_not_text(self, job):
+        # `text` is the whole page as-is, controls and all.
+        for field in [f for f in SECTION_FIELDS if f != 'text']:
+            for label in ('Expand', 'Hide additional information',
+                          'Hide how to apply', 'Learn more about this agency',
+                          'Opens in a new window'):
+                assert label not in job.get(field, ''), (field, label)
+
+    def test_help_buttons_go_but_agency_help_links_stay(self, job):
+        # The agency's own sentence links to the help site; only the heading
+        # buttons labeled "Help" are the page's.
+        assert ('Information regarding your application status can be found '
+                'in the USAJobs Help Center.') in job['howToApply']
+        for field in SECTION_FIELDS:
+            assert not job.get(field, '').startswith('Help '), field
+        assert 'Learn more about federal benefits' not in job['benefits']
+
+    def test_no_space_before_punctuation_after_a_link(self, job):
+        # get_text(" ") put a space at every tag: "The Fair Chance Act ."
+        assert 'The Fair Chance Act.' in job['additionalInformation']
+        assert 'Fair Chance Act .' not in job['requirements']
+
+    def test_blocks_are_still_separated(self, job):
+        # Joining inline tags as written must not glue list items or
+        # paragraphs together.
+        assert 'You must be a U.S. Citizen to apply for this job Selective' in (
+            job['conditionsOfEmployment'])
 
 
 class TestLocations:

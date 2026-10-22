@@ -300,8 +300,53 @@ _REQUIREMENT_PARTS = {
 }
 
 
+_HELP_LINKS = "a[href*='help.usajobs.gov'], a[href*='usajobshelp.opm.gov']"
+
+# Tags the page lays out as their own block. Text is separated only at these.
+# get_text(" ") put a space at every tag instead, so a link followed by its
+# sentence's period came out "The Fair Chance Act ." on 2,110 of 2,122
+# October 2026 postings.
+_BLOCK_TAGS = ["address", "article", "blockquote", "br", "dd", "div", "dl",
+               "dt", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "li", "ol", "p",
+               "pre", "section", "table", "td", "th", "tr", "ul"]
+
+
+def _visible_text(node) -> str:
+    """Text as the page shows it: inline tags joined as written, blocks
+    separated by a space."""
+    if not getattr(node, "name", None):
+        return _WS.sub(" ", str(node)).strip()
+    node = copy.copy(node)
+    for tag in node.find_all(_BLOCK_TAGS):
+        tag.insert_before(" ")
+        tag.insert_after(" ")
+    return _WS.sub(" ", node.get_text()).strip()
+
+
+def _strip_controls(node) -> None:
+    """Remove, in place, what the page draws around the announcement rather
+    than what the agency wrote: buttons ("Expand Hide additional information",
+    "Learn more about this agency"), screen-reader-only labels ("Opens in a new
+    window"), and each heading's "Help" button."""
+    for tag in node(["script", "style", "noscript", "svg", "button"]):
+        tag.decompose()
+    for tag in node.select(".sr-only"):
+        tag.decompose()
+    # usajobs.gov moved its help pages to usajobshelp.opm.gov in early
+    # September 2026. Until both were listed, every "Help" button came through
+    # as text: 9,800 of September's published majorDuties began "Help ".
+    #
+    # Only the buttons go. Agencies link to the help site in their own text
+    # ("can be found in the USAJobs Help Center."), and removing every such
+    # link dropped those words from 9 of 10 October 2026 postings sampled.
+    for link in node.select(_HELP_LINKS):
+        if link.get_text(strip=True) == "Help":
+            link.decompose()
+
+
 def _clean(node) -> str:
-    """Visible text of a section, minus its own heading and the help links.
+    """Visible text of a section, minus its own heading and the page's
+    controls.
 
     Removing the heading's parent <div> instead would work for Requirements,
     where the <h2> sits in a flex row with a "Help" link, and silently empty
@@ -309,17 +354,10 @@ def _clean(node) -> str:
     the section itself.
     """
     node = copy.copy(node)
-    for tag in node(["script", "style", "noscript", "svg"]):
-        tag.decompose()
+    _strip_controls(node)
     for heading in node.find_all(["h1", "h2"]):
         heading.decompose()
-    # usajobs.gov moved its help pages to usajobshelp.opm.gov in early
-    # September 2026. Until both were listed, every "Help" button came through
-    # as text: 9,800 of September's published majorDuties began "Help ".
-    for link in node.select("a[href*='help.usajobs.gov'], "
-                            "a[href*='usajobshelp.opm.gov']"):
-        link.decompose()
-    return _WS.sub(" ", node.get_text(" ")).strip()
+    return _visible_text(node)
 
 
 # Everything parse_job_page produces from the announcement body. Health checks
@@ -384,6 +422,11 @@ def parse_sections(soup: BeautifulSoup) -> Dict[str, str]:
     # boilerplate on every announcement. Pulled out so it stops padding the
     # requirements text by ~2,400 characters per posting.
     benefits = [art.extract() for art in requirements.find_all("article")]
+    for art in benefits:
+        # The accordion's "Learn more about federal benefits" link is the
+        # site's, like the rest of it.
+        for link in art.select(_HELP_LINKS):
+            link.decompose()
     if benefits:
         text = " ".join(_clean(art) for art in benefits).strip()
         if text:
@@ -396,16 +439,22 @@ def parse_sections(soup: BeautifulSoup) -> Dict[str, str]:
     # information' each sit inside their own wrapper <div>. Walking siblings
     # from the heading handles both, since a wrapped heading's siblings are its
     # own content.
+    #
+    # The walk stops at the next heading or at a wrapper holding one. Stopping
+    # only at a bare <h3> let Qualifications, whose next siblings are those two
+    # wrappers, run on through Education and Additional information: all 2,122
+    # October 2026 postings carried both inside qualificationSummary.
+    _strip_controls(requirements)
     for h3 in requirements.find_all("h3"):
         field = _REQUIREMENT_PARTS.get(h3.get_text(" ", strip=True).lower())
         if not field:
             continue
         parts = []
         for sibling in h3.next_siblings:
-            if getattr(sibling, "name", None) == "h3":
+            if getattr(sibling, "name", None) and (
+                    sibling.name == "h3" or sibling.find("h3")):
                 break
-            parts.append(sibling.get_text(" ") if getattr(sibling, "name", None)
-                         else str(sibling))
+            parts.append(_visible_text(sibling))
         text = _WS.sub(" ", " ".join(parts)).strip()
         if text:
             out[field] = text
