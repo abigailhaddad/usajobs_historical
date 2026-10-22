@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-21T13:27:24.559563",
-  "total_jobs": 3260121,
+  "generated_at": "2026-10-22T13:26:58.173375",
+  "total_jobs": 3261168,
   "total_fields": 47,
   "field_year": 2025,
-  "file_size": "1019MB",
-  "latest_job_date": "2026-10-21",
+  "file_size": "1022MB",
+  "latest_job_date": "2026-10-22",
   "data_coverage": [
     {
       "year": 2013,
@@ -99,10 +99,10 @@
     },
     {
       "year": 2026,
-      "total_jobs": 211195,
-      "jobs_opened": 211195,
-      "jobs_closed": 209045,
-      "coverage": "Current through October 21, 2026"
+      "total_jobs": 212242,
+      "jobs_opened": 212242,
+      "jobs_closed": 210034,
+      "coverage": "Current through October 22, 2026"
     }
   ],
   "all_fields": [
@@ -117,7 +117,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0830\"}, {\"series\": \"0808\"}, {\"series\": \"0401\"}, {\"series\": \"1301\"}, {\"series\": \"1320\"}, {\"series\": \"0850\"}, {\"series\": \"0101\"}, {\"series\": \"0810\"}, {\"series\": \"1350\"}], [{\"series\": \"0810\"}, {\"series\": \"0830\"}, {\"series\": \"0850\"}, {\"series\": \"0808\"}], [{\"series\": \"0801\"}, {\"series\": \"1501\"}, {\"series\": \"1301\"}, {\"series\": \"1515\"}, {\"series\": \"1550\"}], [{\"series\": \"0184\"}] (1820 unique)",
+      "examples": "[{\"series\": \"1520\"}, {\"series\": \"1515\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"1550\"}], [{\"series\": \"5306\"}], [{\"series\": \"0806\"}, {\"series\": \"0830\"}, {\"series\": \"0810\"}, {\"series\": \"0871\"}], [{\"series\": \"0185\"}, {\"series\": \"0101\"}, {\"series\": \"0180\"}] (1820 unique)",
       "completeness_percent": 87,
       "completeness_class": "warning",
       "unique_count": 1820
@@ -141,7 +141,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Woodrow Wilson International Center for Scholars, Department of Housing and Urban Development\\Office of the Secretary of Housing and Urban Development, American Battle Monuments Commission, Department of Labor\\Veterans' Employment and Training Service (462 unique)",
+      "examples": "Department of Agriculture\\Office of the Inspector General, U.S. Postal Service, Department of Veterans Affairs\\Deputy Assistant Secretary for Information and Technology, Department of the Army\\U.S. Army Military Surface Deployment and Distribution Command (462 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 462
@@ -165,7 +165,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "CBSU-12699808-25-CJ, DAKB255831550119, CBTG-12759657-25-BRS, 25-9PVBRGP850831 (166990 unique)",
+      "examples": "TOM-2025-0013, CBTE-12808498-25-SW, CAZP-12732642-25-KI, CBSR-12705236-25-JS (166990 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 166990
@@ -173,7 +173,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Detail, Temporary, Recent graduates, Temporary promotion (13 unique)",
+      "examples": "Permanent, ICTAP Only, Temporary, Term (13 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 13
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "TS00, CI00, AF2M, XDCC (444 unique)",
+      "examples": "SM04, VADG, GS12, BO00 (444 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 444
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Centers for Medicare & Medicaid Services, Bureau of Indian Education, Food and Nutrition Service, AmeriCorps (432 unique)",
+      "examples": "U.S. Army Aviation and Missile Command, Office of the Assistant Secretary for Administration and Management, Maritime Administration, Legal Services Corporation (432 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 432
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "IB, EE, GB, AU (95 unique)",
+      "examples": "MC, LC, HE, SB (95 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 95
@@ -229,7 +229,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Labor, Judicial Branch, Department of the Interior, Department of Commerce (26 unique)",
+      "examples": "Department of the Army, Department of Justice, Department of the Interior, Department of Veterans Affairs (26 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 26
@@ -237,7 +237,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "122ND Fighter Squadron, Recruitment limited to local commuting area, Resilience, Federal Insurance Mitigation Administration, Risk Management, Sacramento District, Real Estate Division, Regional Appraisal Center (27151 unique)",
+      "examples": "IT DIR OFFICE, ENTERPRISE SERVICES, CLOUD PROJECT MGMT OFC, ZTAJ, ATO, Technical Operations - Engineering Services, AJW-2C11FTerm/Surv/Wx Construction Center CHI, George Washington Memorial Parkway Park, Naval Health Clinic Oak Harbor, Directorate of Behavioral Health (27151 unique)",
       "completeness_percent": 73,
       "completeness_class": "warning",
       "unique_count": 27151
@@ -245,7 +245,7 @@
     {
       "field_name": "hiringpaths",
       "field_type": "JSON Array",
-      "examples": "[{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Internal to an agency\"}], [{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}], [{\"hiringPath\": \"Custom announcement\"}], [{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}, {\"hiringPath\": \"Special authorities\"}, {\"hiringPath\": \"Family of overseas employees\"}] (667 unique)",
+      "examples": "[{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}], [{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Family of overseas employees\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Special authorities\"}], [{\"hiringPath\": \"The public\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}], [{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}] (667 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 667
@@ -253,7 +253,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-19T23:10:31.459359, 2026-06-29T04:35:28.175513, 2025-10-01T07:08:02.677001, 2025-09-19T23:54:35.967565 (162125 unique)",
+      "examples": "2025-09-19T23:49:30.665238, 2025-09-19T23:18:00.926633, 2025-12-19T09:06:12.616309, 2025-09-19T23:47:00.326957 (162125 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 162125
@@ -261,7 +261,7 @@
     {
       "field_name": "jobcategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0899\"}], [{\"series\": \"0101\"}, {\"series\": \"0185\"}, {\"series\": \"0610\"}], [{\"series\": \"0306\"}], [{\"series\": \"1370\"}] (565 unique)",
+      "examples": "[{\"series\": \"8862\"}], [{\"series\": \"0799\"}], [{\"series\": \"0830\"}, {\"series\": \"0854\"}, {\"series\": \"0855\"}], [{\"series\": \"1801\"}] (565 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 565
@@ -269,7 +269,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-19T23:31:44.016301, 2025-09-19T23:15:07.762046, 2025-09-19T23:07:31.694614, 2026-06-29T04:35:12.354979 (115080 unique)",
+      "examples": "2026-06-29T04:35:12.349567, 2025-09-19T23:25:49.539811, 2025-09-19T23:31:44.025356, 2025-09-19T23:45:25.977467 (115080 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 115080
@@ -277,7 +277,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "70, 32, II, HI (117 unique)",
+      "examples": "18, EI, 0, 99 (117 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 117
@@ -293,7 +293,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "7, 32, 05, 23 (116 unique)",
+      "examples": "JL, EI, EK, 4 (116 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 116
@@ -309,7 +309,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "CX, WA, ZS, DN (163 unique)",
+      "examples": "TR, SL, ZT, WG (163 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 163
@@ -317,7 +317,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-01-18, 2026-11-10, 2026-08-16, 2026-12-14 (653 unique)",
+      "examples": "2025-07-21, 2025-04-20, 2026-06-23, 2025-07-10 (653 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 653
@@ -325,7 +325,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-01-21, 2025-05-18, 2025-07-29, 2025-09-08 (496 unique)",
+      "examples": "2025-09-14, 2025-04-17, 2025-02-22, 2025-06-12 (496 unique)",
       "completeness_percent": 10,
       "completeness_class": "poor",
       "unique_count": 496
@@ -333,7 +333,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2025-10-19, 2025-12-12, 2025-07-18, 2025-03-21 (363 unique)",
+      "examples": "2025-07-26, 2025-03-25, 2025-12-09, 2025-01-11 (363 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363
@@ -349,7 +349,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Clinical Laboratory Scientist - Pathology and Laboratory Medicine, EXPLOSIVES SAFETY SPECIALIST (Title 5), Staff Psychologist (BHIP Therapist), Medical Support Assistant (Advanced)-Nursing Service/ Westside Community-Based Outpatient (44539 unique)",
+      "examples": "LEADER Physical Embedded and Control Systems Security (2228-3), Medical Records Technician (CDIS-Out and Inpatient), OPERATIONS OFFICER - TITLE 32, Registered Nurse - MDS Coordinator (SCI) (44539 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 44539
@@ -357,7 +357,7 @@
     {
       "field_name": "positionlocations",
       "field_type": "JSON Array",
-      "examples": "[{\"positionLocationCity\": \"Hunter AFB\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Leesburg\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Lowell\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Colorado Springs\", \"positionLocationState\": \"Colorado\", \"positionLocationCountry\": \"United States\"}] (3073 unique)",
+      "examples": "[{\"positionLocationCity\": \"Denver\", \"positionLocationState\": \"Colorado\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Washington\", \"positionLocationState\": \"District of Columbia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kansas City\", \"positionLocationState\": \"Missouri\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Dallas\", \"positionLocationState\": \"Texas\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Maynard\", \"positionLocationState\": \"Massachusetts\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Tobyhanna\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"North Rim\", \"positionLocationState\": \"Arizona\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Saint Mary\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"West Glacier\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Colter Bay\", \"positionLocationState\": \"Wyoming\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Moose\", \"positionLocationState\": \"Wyoming\", \"positionLocationCountry\": \"United States\"}] (3073 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 3073
@@ -365,7 +365,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "96, ES, 41, CM (77 unique)",
+      "examples": "07, 41, 15, 27 (77 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77
@@ -429,7 +429,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "46, 04, many, Few (90 unique)",
+      "examples": "54, 38, fEW, 100 (90 unique)",
       "completeness_percent": 89,
       "completeness_class": "warning",
       "unique_count": 90
