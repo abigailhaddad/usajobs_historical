@@ -22,6 +22,11 @@ Rows with the same control number in R2's scraped_jobs files get the same
 text, so a later rebuild of a month from those files does not bring the old
 text back.
 
+--inserted-since also re-fetches every row the scraped files stamp with an
+inserted_at at or after a time, wherever it sits on the dataset. The daily run
+at 13:09 UTC on 22 October 2026 parsed with #668, which ended a section at any
+<h3> with a section's name, agencies' own included.
+
     python refetch_leftover_rows.py --all --dry-run --report refetch.csv
     python refetch_leftover_rows.py --all --scraped data/scraped_jobs_*.parquet
 """
@@ -129,6 +134,9 @@ def main() -> int:
     p.add_argument("--all", action="store_true")
     p.add_argument("--scraped", nargs="*", default=[],
                    help="R2 scraped_jobs files to give the same text, in place")
+    p.add_argument("--inserted-since",
+                   help="also re-fetch rows the --scraped files inserted at "
+                        "or after this ISO time")
     p.add_argument("--report", default="refetch_leftovers.csv",
                    help="one line per leftover row: before, after, outcome")
     p.add_argument("--repo", default=os.environ.get(
@@ -147,6 +155,17 @@ def main() -> int:
     api = HfApi(token=token)
     months = all_months(args.repo, token) if args.all else args.months
     session = new_session()
+
+    since = set()
+    if args.inserted_since:
+        for path in args.scraped:
+            t = pq.read_table(path, columns=["usajobsControlNumber",
+                                              "inserted_at"])
+            since |= {str(cn) for cn, at in zip(
+                t.column(0).to_pylist(), t.column(1).to_pylist())
+                if at and at >= args.inserted_since}
+        print(f"{len(since):,} rows inserted at or after "
+              f"{args.inserted_since} in the scraped files")
     out_dir = BUILD_DIR / "refetch"
     fresh_all = {}
     report_rows = []
@@ -177,9 +196,13 @@ def main() -> int:
         before = pq.read_table(src)
         shutil.rmtree(DOWNLOAD_DIR, ignore_errors=True)
         found = find_leftovers(before)
+        cns = before.column("usajobsControlNumber").to_pylist()
+        for i, cn in enumerate(cns):
+            if str(cn) in since:
+                found.setdefault(i, []).append(
+                    f"inserted_since_{args.inserted_since}")
         if not found:
             continue
-        cns = before.column("usajobsControlNumber").to_pylist()
         quals = before.column("qualificationSummary").to_pylist()
         coes = before.column("conditionsOfEmployment").to_pylist()
         fresh = {}
