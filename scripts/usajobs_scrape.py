@@ -323,19 +323,49 @@ def _visible_text(node) -> str:
     return _WS.sub(" ", node.get_text()).strip()
 
 
-def _text_before_heading(container) -> str:
-    """Visible text of `container` up to its first <h3>."""
-    container = copy.copy(container)
-    heading = container.find("h3")
+def _text_before_heading(container, heading) -> str:
+    """Visible text of `container` up to `heading`, a tag somewhere inside
+    it."""
+    heading["data-cut-here"] = ""
+    container_copy = copy.copy(container)
+    del heading["data-cut-here"]
+    heading = container_copy.find(attrs={"data-cut-here": True})
     node = heading.parent
     for sibling in list(heading.next_siblings):
         sibling.extract()
     heading.extract()
-    while node is not container:
+    while node is not container_copy:
         for sibling in list(node.next_siblings):
             sibling.extract()
         node = node.parent
-    return _visible_text(container)
+    return _visible_text(container_copy)
+
+
+def _section_headings(requirements) -> List:
+    """The <h3>s that open Requirements' parts, as opposed to <h3>s agencies
+    put in their own text.
+
+    Agencies do: "Basic Requirements", "Education", "Experience" inside the
+    qualifications (634551300), or inside Education itself (635389100).
+    Stopping at any <h3> cut those sections short. The site's headings sit
+    in one of two places -- a direct child of the section, or the first
+    heading of a wrapper <div> that is one -- and have a known name. A known
+    name found anywhere else counts only if the page has no such heading in
+    the expected place, which is what broken agency HTML that nests them in
+    a <p> looks like (429653100).
+    """
+    def name(h):
+        return h.get_text(" ", strip=True).lower()
+
+    known = [h for h in requirements.find_all("h3")
+             if name(h) in _REQUIREMENT_PARTS]
+    placed = [h for h in known
+              if h.parent is requirements
+              or (h.parent.name == "div" and h.parent.parent is requirements
+                  and h.parent.find("h3") is h)]
+    placed_names = {name(h) for h in placed}
+    return [h for h in known
+            if any(h is p for p in placed) or name(h) not in placed_names]
 
 
 def _strip_controls(node) -> None:
@@ -467,20 +497,26 @@ def parse_sections(soup: BeautifulSoup) -> Dict[str, str]:
     # wrappers, run on through Education and Additional information: all 2,122
     # October 2026 postings carried both inside qualificationSummary.
     _strip_controls(requirements)
-    for h3 in requirements.find_all("h3"):
-        field = _REQUIREMENT_PARTS.get(h3.get_text(" ", strip=True).lower())
-        if not field:
-            continue
+    headings = _section_headings(requirements)
+
+    def heading_in(node):
+        return next((h for h in node.find_all("h3")
+                     if any(h is k for k in headings)), None)
+
+    for h3 in headings:
+        field = _REQUIREMENT_PARTS[h3.get_text(" ", strip=True).lower()]
         parts = []
         for sibling in h3.next_siblings:
-            if getattr(sibling, "name", None) == "h3":
+            if any(sibling is k for k in headings):
                 break
-            if getattr(sibling, "name", None) and sibling.find("h3"):
+            nested = (heading_in(sibling)
+                      if getattr(sibling, "name", None) else None)
+            if nested is not None:
                 # Usually a wrapper the next heading opens, with nothing
                 # before it. But agency HTML can be broken badly enough that
                 # the parser nests the next headings in a <p> that starts
                 # with this section's last sentence (429653100, 2016).
-                parts.append(_text_before_heading(sibling))
+                parts.append(_text_before_heading(sibling, nested))
                 break
             parts.append(_visible_text(sibling))
         text = _WS.sub(" ", " ".join(parts)).strip()

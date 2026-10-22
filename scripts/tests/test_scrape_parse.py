@@ -274,6 +274,31 @@ class TestPageControlsAndLinks:
         assert out['qualificationSummary'] == 'Have a degree.'
         assert out['additionalInformation'] == 'Worldwide.'
 
+    def test_agency_headings_inside_qualifications_are_content(self):
+        # 634551300: the agency's own <h3>s, "Education" among them, inside
+        # the qualifications text. Only the site's headings end a section.
+        out = self._requirements(
+            '<h3>Qualifications</h3><p>Series 0601<h3>Basic Requirements</h3>'
+            'A degree.<h3>Education</h3>Major study.</p><p>Desired: skills.</p>'
+            '<div><h3>Education</h3><p>Accredited schools only.</p></div>'
+            '<div><h3>Additional information</h3><p>More.</p></div>')
+        assert out['qualificationSummary'] == (
+            'Series 0601 Basic Requirements A degree. Education Major study. '
+            'Desired: skills.')
+        assert out['education'] == 'Accredited schools only.'
+
+    def test_agency_headings_inside_education_are_content(self):
+        # 635389100: the Education wrapper holds the agency's own "Education"
+        # and "Experience" headings after the site's.
+        out = self._requirements(
+            '<h3>Qualifications</h3><p>See below.</p>'
+            '<div><h3>Education</h3><p>Intro.</p><h3>Education</h3><p>A '
+            'degree.</p><h3>Experience</h3><p>One year.</p></div>'
+            '<div><h3>Additional information</h3><p>More.</p></div>')
+        assert out['qualificationSummary'] == 'See below.'
+        assert out['education'] == ('Intro. Education A degree. Experience '
+                                    'One year.')
+
     def test_blocks_are_still_separated(self, job):
         # Joining inline tags as written must not glue list items or
         # paragraphs together.
