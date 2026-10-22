@@ -245,6 +245,34 @@ class TestPageControlsAndLinks:
         assert 'The Fair Chance Act.' in job['additionalInformation']
         assert 'Fair Chance Act .' not in job['requirements']
 
+    def _requirements(self, body):
+        from bs4 import BeautifulSoup
+        return parse_sections(BeautifulSoup(
+            f'<div id="joa-requirements">{body}</div>', 'html.parser'))
+
+    def test_questionnaire_block_is_the_sites(self):
+        # 867720800: a button-styled link and a fixed note, right after the
+        # qualifications.
+        out = self._requirements(
+            '<h3>Qualifications</h3><p>Must show experience.</p>'
+            '<div class="pt-4"><a class="button button-primary" href="x">'
+            'Preview job questionnaire</a><p class="italic text-sm">Make sure '
+            'your resume includes detailed information.</p></div>'
+            '<div><h3>Additional information</h3><p>More.</p></div>')
+        assert out['qualificationSummary'] == 'Must show experience.'
+        assert 'questionnaire' not in out['requirements']
+
+    def test_text_before_a_nested_heading_stays_with_its_section(self):
+        # 429653100: broken agency HTML leaves the next headings inside a <p>
+        # that opens with the last sentence of Conditions of employment.
+        out = self._requirements(
+            '<h3>Conditions of employment</h3><ul><li>Citizens.</li></ul>'
+            '<p>Submit transcripts.<h3>Qualifications</h3>Have a degree.'
+            '<h3>Additional information</h3>Worldwide.</p>')
+        assert out['conditionsOfEmployment'] == 'Citizens. Submit transcripts.'
+        assert out['qualificationSummary'] == 'Have a degree.'
+        assert out['additionalInformation'] == 'Worldwide.'
+
     def test_blocks_are_still_separated(self, job):
         # Joining inline tags as written must not glue list items or
         # paragraphs together.

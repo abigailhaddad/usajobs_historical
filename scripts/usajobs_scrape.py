@@ -323,6 +323,21 @@ def _visible_text(node) -> str:
     return _WS.sub(" ", node.get_text()).strip()
 
 
+def _text_before_heading(container) -> str:
+    """Visible text of `container` up to its first <h3>."""
+    container = copy.copy(container)
+    heading = container.find("h3")
+    node = heading.parent
+    for sibling in list(heading.next_siblings):
+        sibling.extract()
+    heading.extract()
+    while node is not container:
+        for sibling in list(node.next_siblings):
+            sibling.extract()
+        node = node.parent
+    return _visible_text(container)
+
+
 def _strip_controls(node) -> None:
     """Remove, in place, what the page draws around the announcement rather
     than what the agency wrote: buttons ("Expand Hide additional information",
@@ -332,6 +347,13 @@ def _strip_controls(node) -> None:
         tag.decompose()
     for tag in node.select(".sr-only"):
         tag.decompose()
+    # Some announcements carry a "Preview job questionnaire" link styled as a
+    # button, in a block of its own with a fixed note under it ("Make sure
+    # your resume includes detailed information..."), right after the
+    # qualifications. Both are the site's.
+    for link in node.select("a.button"):
+        if link.get_text(strip=True) == "Preview job questionnaire":
+            (link.parent if link.parent is not node else link).decompose()
     # usajobs.gov moved its help pages to usajobshelp.opm.gov in early
     # September 2026. Until both were listed, every "Help" button came through
     # as text: 9,800 of September's published majorDuties began "Help ".
@@ -451,8 +473,14 @@ def parse_sections(soup: BeautifulSoup) -> Dict[str, str]:
             continue
         parts = []
         for sibling in h3.next_siblings:
-            if getattr(sibling, "name", None) and (
-                    sibling.name == "h3" or sibling.find("h3")):
+            if getattr(sibling, "name", None) == "h3":
+                break
+            if getattr(sibling, "name", None) and sibling.find("h3"):
+                # Usually a wrapper the next heading opens, with nothing
+                # before it. But agency HTML can be broken badly enough that
+                # the parser nests the next headings in a <p> that starts
+                # with this section's last sentence (429653100, 2016).
+                parts.append(_text_before_heading(sibling))
                 break
             parts.append(_visible_text(sibling))
         text = _WS.sub(" ", " ".join(parts)).strip()
