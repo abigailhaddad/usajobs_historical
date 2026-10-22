@@ -87,7 +87,7 @@ jobs:
 
     - name: Repair the scraped files
       env:
-        DRY_RUN: ${{ inputs.apply && '' || '--dry-run' }}
+        DRY_RUN: ${{ !inputs.apply && '--dry-run' || '' }}
       run: |
         for f in data/scraped_jobs_*.parquet; do
           python scripts/repair_section_leaks.py --local "$f" $DRY_RUN
@@ -97,7 +97,7 @@ jobs:
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
         MONTHS: ${{ inputs.months }}
-        DRY_RUN: ${{ inputs.apply && '' || '--dry-run' }}
+        DRY_RUN: ${{ !inputs.apply && '--dry-run' || '' }}
       run: |
         if [ -n "$MONTHS" ]; then
           python scripts/repair_section_leaks.py --months $MONTHS $DRY_RUN
