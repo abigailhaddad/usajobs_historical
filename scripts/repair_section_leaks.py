@@ -118,8 +118,10 @@ def repair_row(row):
         if not value:
             continue
         for tail in _run_on_tails(row, f):
-            if value.endswith(" " + tail):
-                out[f] = value[:-len(tail) - 1].rstrip() or None
+            # Equal when the section had no text of its own: the run-on is
+            # all there is, and the page has no such section.
+            if value == tail or value.endswith(" " + tail):
+                out[f] = value[:-len(tail)].rstrip() or None
                 fixes[f"run_on_{f}"] = 1
                 break
 
@@ -174,9 +176,9 @@ def leftovers(table):
         if f in table.column_names:
             out[f"expand_hide_{f}"] = pc.sum(pc.match_substring(
                 table.column(f), "Expand Hide")).as_py() or 0
-    if "jobSummary" in table.column_names:
-        out["agency_link_jobSummary"] = pc.sum(pc.ends_with(
-            table.column("jobSummary"), AGENCY_LINK)).as_py() or 0
+    # Not counted: a jobSummary still ending "Learn more about this agency".
+    # Some agencies end their summary with those words, before the button;
+    # the live pages checked (495604800, 495949500, 495960200) confirm it.
     for f in ("requirements", "conditionsOfEmployment", "qualificationSummary"):
         if f in table.column_names:
             out[f"questionnaire_{f}"] = pc.sum(pc.match_substring(
