@@ -106,6 +106,14 @@ def test_agency_link_only_comes_off_the_end_of_job_summary():
     assert fixed["majorDuties"] == row["majorDuties"]
 
 
+def test_rows_from_the_fixed_parser_keep_an_agency_written_ending():
+    row = {"jobSummary": "Meet deadlines. Learn more about this agency",
+           "howToApply": "Apply online.", "additionalInformation": None,
+           "education": None, "qualificationSummary": "Have a degree."}
+    fixed, fixes = repair_row(row)
+    assert fixes == {} and fixed is row
+
+
 def test_questionnaire_block_is_removed():
     row = stored(qualificationSummary="Must have experience. " + QUESTIONNAIRE
                  + " Additional information " + AI, education=None)

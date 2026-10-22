@@ -133,8 +133,12 @@ def repair_row(row):
                 out[f] = fixed or None
                 fixes[f"buttons_{f}"] = 1
 
+    # Rows parsed after the fix can end with these words because the agency
+    # wrote them. Every row the old parser stored carries "Expand Hide"
+    # labels (3,258,010 of 3,258,011 on the dataset), so only those lose it.
+    old_parse = any("Expand Hide" in (row.get(f) or "") for f in LABELLED)
     summary = out.get("jobSummary")
-    if summary and (summary == AGENCY_LINK
+    if old_parse and summary and (summary == AGENCY_LINK
                     or summary.endswith(" " + AGENCY_LINK)):
         out["jobSummary"] = summary[:-len(AGENCY_LINK)].rstrip() or None
         fixes["agency_link_jobSummary"] = 1
