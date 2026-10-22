@@ -82,6 +82,7 @@ jobs:
       run: |
         python scripts/refetch_leftover_rows.py --all \
           --scraped data/scraped_jobs_*.parquet \
+          --inserted-since 2026-10-22T13:00 \
           --report refetch_leftovers.csv $DRY_RUN
 
     - name: Keep the report

@@ -300,6 +300,9 @@ _REQUIREMENT_PARTS = {
 }
 
 
+# The parts the site wraps in a <div> of their own, heading first.
+_WRAPPED_PARTS = {"education", "additional information"}
+
 _HELP_LINKS = "a[href*='help.usajobs.gov'], a[href*='usajobshelp.opm.gov']"
 
 # Tags the page lays out as their own block. Text is separated only at these.
@@ -352,7 +355,11 @@ def _section_headings(requirements) -> List:
     heading of a wrapper <div> that is one -- and have a known name. A known
     name found anywhere else counts only if the page has no such heading in
     the expected place, which is what broken agency HTML that nests them in
-    a <p> looks like (429653100).
+    a <p> looks like (429653100). Even then it has to have the site's form:
+    'Education' and 'Additional information' always open a wrapper <div> of
+    their own. A bare <h3>Education</h3> in the agency's text, on a page
+    with no Education section, is the agency's (854673900, 646779700);
+    taking it for the section emptied qualificationSummary.
     """
     def name(h):
         return h.get_text(" ", strip=True).lower()
@@ -364,8 +371,15 @@ def _section_headings(requirements) -> List:
               or (h.parent.name == "div" and h.parent.parent is requirements
                   and h.parent.find("h3") is h)]
     placed_names = {name(h) for h in placed}
+
+    def site_form(h):
+        if name(h) not in _WRAPPED_PARTS:
+            return True
+        return h.parent.name == "div" and h.parent.find("h3") is h
+
     return [h for h in known
-            if any(h is p for p in placed) or name(h) not in placed_names]
+            if any(h is p for p in placed)
+            or (name(h) not in placed_names and site_form(h))]
 
 
 def _strip_controls(node) -> None:

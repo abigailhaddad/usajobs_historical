@@ -269,7 +269,7 @@ class TestPageControlsAndLinks:
         out = self._requirements(
             '<h3>Conditions of employment</h3><ul><li>Citizens.</li></ul>'
             '<p>Submit transcripts.<h3>Qualifications</h3>Have a degree.'
-            '<h3>Additional information</h3>Worldwide.</p>')
+            '<div><h3>Additional information</h3>Worldwide.</div></p>')
         assert out['conditionsOfEmployment'] == 'Citizens. Submit transcripts.'
         assert out['qualificationSummary'] == 'Have a degree.'
         assert out['additionalInformation'] == 'Worldwide.'
@@ -286,6 +286,19 @@ class TestPageControlsAndLinks:
             'Series 0601 Basic Requirements A degree. Education Major study. '
             'Desired: skills.')
         assert out['education'] == 'Accredited schools only.'
+
+    def test_agency_education_heading_without_a_site_section_is_content(self):
+        # 854673900: no Education section on the page, and the agency's own
+        # bare <h3>Education</h3> inside the qualifications. Taking it for the
+        # section left qualificationSummary empty.
+        out = self._requirements(
+            '<h3>Qualifications</h3><p><h3>Education</h3>Major study -- art.'
+            '<h3>Experience</h3>One year.</p>'
+            '<div><h3>Additional information</h3><p>More.</p></div>')
+        assert out['qualificationSummary'] == (
+            'Education Major study -- art. Experience One year.')
+        assert 'education' not in out
+        assert out['additionalInformation'] == 'More.'
 
     def test_agency_headings_inside_education_are_content(self):
         # 635389100: the Education wrapper holds the agency's own "Education"
