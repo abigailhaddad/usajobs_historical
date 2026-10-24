@@ -487,12 +487,12 @@ def parse_sections(soup: BeautifulSoup) -> Dict[str, str]:
     # The Benefits accordion lives inside Requirements and is near-identical
     # boilerplate on every announcement. Pulled out so it stops padding the
     # requirements text by ~2,400 characters per posting.
+    #
+    # Its links stay as text, like links anywhere else. Removing the "Learn
+    # more about federal benefits" link left "very rewarding. . Review our
+    # benefits" in about 90% of published postings; the screen-reader label
+    # inside it ("Opens in a new window") goes with the other controls.
     benefits = [art.extract() for art in requirements.find_all("article")]
-    for art in benefits:
-        # The accordion's "Learn more about federal benefits" link is the
-        # site's, like the rest of it.
-        for link in art.select(_HELP_LINKS):
-            link.decompose()
     if benefits:
         text = " ".join(_clean(art) for art in benefits).strip()
         if text:

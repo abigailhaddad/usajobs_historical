@@ -239,7 +239,14 @@ class TestPageControlsAndLinks:
                 'in the USAJobs Help Center.') in job['howToApply']
         for field in SECTION_FIELDS:
             assert not job.get(field, '').startswith('Help '), field
-        assert 'Learn more about federal benefits' not in job['benefits']
+
+    def test_benefits_links_stay_as_text(self, open_job, closed_job, job):
+        # Dropping the "Learn more about federal benefits" link left
+        # "very rewarding. . Review our benefits" on ~90% of postings.
+        for page in (open_job, closed_job, job):
+            assert ('very rewarding. Learn more about federal benefits.'
+                    in page['benefits'])
+            assert '. .' not in page['benefits']
 
     def test_no_space_before_punctuation_after_a_link(self, job):
         # get_text(" ") put a space at every tag: "The Fair Chance Act ."
