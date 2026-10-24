@@ -28,5 +28,8 @@ def test_progress_is_read_from_commit_titles():
     api = SimpleNamespace(list_repo_commits=lambda repo, repo_type: [
         SimpleNamespace(title=r.COMMIT_PREFIX + "data/2026_09.parquet"),
         SimpleNamespace(title="Repair run-on qualifications in data/2026_08"
-                              ".parquet")])
+                              ".parquet"),
+        # The first pass, before the Benefits-link fix: not done.
+        SimpleNamespace(title="Re-fetch every announcement page in "
+                              "data/2026_07.parquet")])
     assert r.done_months(api, "x") == {"data/2026_09.parquet"}
