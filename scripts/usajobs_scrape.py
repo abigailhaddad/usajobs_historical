@@ -49,6 +49,10 @@ PAGE_SIZE = 500
 MAX_RESULTS = 10000
 
 _WS = re.compile(r"\s+")
+# Characters the page never shows: soft hyphens (agencies paste them from Word,
+# "prior\u00adity"), zero-width spaces and joiners, byte-order marks. Left in,
+# a search for "priority" misses the posting; ~700 sections a month had one.
+_INVISIBLE = re.compile("[\u00ad\u200b\u200c\u200d\u2060\ufeff]")
 
 
 def new_session() -> requests.Session:
@@ -215,7 +219,7 @@ def page_text(soup: BeautifulSoup) -> str:
     dataset stores (see abigailhaddad/joa scrape.py page_text)."""
     for tag in soup(["script", "style", "noscript"]):
         tag.decompose()
-    return _WS.sub(" ", soup.get_text(" ")).strip()
+    return _WS.sub(" ", _INVISIBLE.sub("", soup.get_text(" "))).strip()
 
 
 def _dt_dd_pairs(soup: BeautifulSoup) -> Dict[str, str]:
@@ -318,12 +322,12 @@ def _visible_text(node) -> str:
     """Text as the page shows it: inline tags joined as written, blocks
     separated by a space."""
     if not getattr(node, "name", None):
-        return _WS.sub(" ", str(node)).strip()
+        return _WS.sub(" ", _INVISIBLE.sub("", str(node))).strip()
     node = copy.copy(node)
     for tag in node.find_all(_BLOCK_TAGS):
         tag.insert_before(" ")
         tag.insert_after(" ")
-    return _WS.sub(" ", node.get_text()).strip()
+    return _WS.sub(" ", _INVISIBLE.sub("", node.get_text())).strip()
 
 
 def _text_before_heading(container, heading) -> str:
@@ -487,12 +491,12 @@ def parse_sections(soup: BeautifulSoup) -> Dict[str, str]:
     # The Benefits accordion lives inside Requirements and is near-identical
     # boilerplate on every announcement. Pulled out so it stops padding the
     # requirements text by ~2,400 characters per posting.
+    #
+    # Its links stay as text, like links anywhere else. Removing the "Learn
+    # more about federal benefits" link left "very rewarding. . Review our
+    # benefits" in about 90% of published postings; the screen-reader label
+    # inside it ("Opens in a new window") goes with the other controls.
     benefits = [art.extract() for art in requirements.find_all("article")]
-    for art in benefits:
-        # The accordion's "Learn more about federal benefits" link is the
-        # site's, like the rest of it.
-        for link in art.select(_HELP_LINKS):
-            link.decompose()
     if benefits:
         text = " ".join(_clean(art) for art in benefits).strip()
         if text:

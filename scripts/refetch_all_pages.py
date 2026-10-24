@@ -46,7 +46,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from refetch_leftover_rows import SECTION_FIELDS, replace_rows, verify  # noqa: E402
 
-COMMIT_PREFIX = "Re-fetch every announcement page in "
+# "pass 2": the first pass (titled without it, 2024-07..2026-10) ran with a
+# parser that dropped the Benefits links and kept soft hyphens. Changing the
+# title starts every month over.
+COMMIT_PREFIX = "Re-fetch every announcement page (pass 2) in "
 
 # Below this share of a month's pages fetched, something is wrong with the
 # fetching, not the pages; the month waits for the next run.

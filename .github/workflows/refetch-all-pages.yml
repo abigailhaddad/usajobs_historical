@@ -8,7 +8,7 @@ name: Re-fetch All Announcement Pages
 # scripts/refetch_all_pages.py.
 #
 # Progress is the dataset's own commit history: a month is done when it has a
-# "Re-fetch every announcement page in ..." commit. Once every month has one,
+# "Re-fetch every announcement page (pass 2) in ..." commit. Once every month has one,
 # a run finds nothing to do and exits in a minute; delete this workflow then.
 #
 # 00:17 UTC with a 5-hour budget, so it is finished well before the daily
