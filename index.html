@@ -102,7 +102,7 @@
     <div class="container">
         <h1>USAJobs Historical API Data</h1>
 
-        <p><strong>Data collection last run: 2026-10-23</strong></p>
+        <p><strong>Data collection last run: 2026-10-24</strong></p>
         <p><strong>⚠️ This is not an official USAJobs project</strong></p>
 
         <div class="stats" style="background: #d4edda; border-left: 4px solid #28a745; margin-bottom: 20px;">
@@ -120,7 +120,7 @@
             </ul>
         </div>
         <div class="stats">
-            <strong>Dataset:</strong> 3,262,340 total job postings | <strong>Coverage:</strong> 2013-2026 | <strong>Files:</strong> 1.0GB total | <strong>Storage:</strong> Cloudflare R2 | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
+            <strong>Dataset:</strong> 3,263,086 total job postings | <strong>Coverage:</strong> 2013-2026 | <strong>Files:</strong> 1.0GB total | <strong>Storage:</strong> Cloudflare R2 | <strong>Source:</strong> USAJobs Historical + Current APIs with field rationalization and deduplication
         </div>
 
         <h2>Table of Contents</h2>
@@ -155,7 +155,7 @@
                 <tr><td>2023</td><td>454,652</td><td>434,527</td><td>✅ Complete year</td></tr>
                 <tr><td>2024</td><td>367,192</td><td>352,305</td><td>✅ Complete year</td></tr>
                 <tr><td>2025</td><td>168,533</td><td>161,047</td><td>✅ Complete year</td></tr>
-                <tr><td>2026</td><td>213,413</td><td>211,178</td><td>Current through October 23, 2026</td></tr>
+                <tr><td>2026</td><td>214,160</td><td>211,893</td><td>Current through October 24, 2026</td></tr>
             </tbody>
         </table>
 
@@ -180,7 +180,7 @@
                 <tr>
                     <td><code class="field-name">JobCategories</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"series": "5704"}], [{"series": "1550"}, {"series": "0855"}, {"series": "0854"}], [{"series": "0142"}], [{"series": "0190"}] (1820 unique)</td>
+                    <td class="examples">[{"series": "1340"}, {"series": "1301"}], [{"series": "0855"}, {"series": "0830"}, {"series": "0854"}], [{"series": "0801"}, {"series": "0808"}, {"series": "0810"}, {"series": "0819"}, {"series": "0830"}, {"series": "0850"}], [{"series": "0801"}, {"series": "0861"}, {"series": "0850"}, {"series": "0830"}, {"series": "1310"}] (1820 unique)</td>
                     <td class="completeness warning">87%</td>
                 </tr>
                 <tr>
@@ -198,7 +198,7 @@
                 <tr>
                     <td><code class="field-name">agencyLevelSort</code></td>
                     <td>String</td>
-                    <td class="examples">National Aeronautics and Space Administration\Headquarters, NASA, Department of the Navy\Office of Naval Research, Department of Defense\Defense Contract Management Agency, Department of Commerce\U.S. Census Bureau (462 unique)</td>
+                    <td class="examples">Department of Defense\Army and Air Force Exchange Service (nonappropriated fund), Department of the Army\U.S. Military Entrance Processing Command, Legislative Branch\House of Representatives, Surface Transportation Board (462 unique)</td>
                     <td class="completeness good">99%</td>
                 </tr>
                 <tr>
@@ -216,13 +216,13 @@
                 <tr>
                     <td><code class="field-name">announcementNumber</code></td>
                     <td>String</td>
-                    <td class="examples">SER-2025-0137, CAZP-12801611-25-RJ, O2NAFDL-25-12750363, ST-12736272-25-AC (166991 unique)</td>
+                    <td class="examples">IMP-12734591-25-MC-DETAIL, DLADist-25-12731290-MP, 25-BPA-J05234-12630739-BL, CBSR-12847241-26-MTH (166991 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">appointmentType</code></td>
                     <td>String</td>
-                    <td class="examples">Term, Permanent, Agency Employees Only, Seasonal (13 unique)</td>
+                    <td class="examples">Agency Employees Only, Recent graduates, ICTAP Only, Detail (13 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -246,61 +246,61 @@
                 <tr>
                     <td><code class="field-name">hiringAgencyCode</code></td>
                     <td>String</td>
-                    <td class="examples">AR2A, AF1Y, HUTT, ARGB (444 unique)</td>
+                    <td class="examples">TR91, ARFC, AR5A, NV24 (444 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringAgencyName</code></td>
                     <td>String</td>
-                    <td class="examples">Executive Director, Office of Acquisition, Logistics and Construction, Supreme Court of the United States, Defense Counterintelligence and Security Agency, Federal Bureau of Investigation (432 unique)</td>
+                    <td class="examples">U.S. Holocaust Memorial Museum, Office of Field Policy and Management, Animal and Plant Health Inspection Service, Maritime Administration (432 unique)</td>
                     <td class="completeness good">99%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringDepartmentCode</code></td>
                     <td>String</td>
-                    <td class="examples">BD, TR, TB, LC (95 unique)</td>
+                    <td class="examples">CM, GB, AU, IN (95 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringDepartmentName</code></td>
                     <td>String</td>
-                    <td class="examples">Department of Labor, Court Services and Offender Supervision Agency for DC, Department of Health and Human Services, National Foundation on the Arts and the Humanities (26 unique)</td>
+                    <td class="examples">Department of Defense, Department of Transportation, Department of the Air Force, Department of the Interior (26 unique)</td>
                     <td class="completeness good">99%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringSubelementName</code></td>
                     <td>String</td>
-                    <td class="examples">NGLA-JLO (J4), Community Recreation Division, Morale Welfare Recreation Fund Services, CNRH; Pacific Missile Range Facility; Navy Getaways N924B (27151 unique)</td>
+                    <td class="examples">Fort Campbell, KY, MWR - Business Recreation Division - Community Activity Center, Northern Arizona VA Healthcare System, Fort Leavenworth FMWR - Aquatics, MATES, Oklahoma (27151 unique)</td>
                     <td class="completeness warning">73%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">hiringpaths</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"hiringPath": "Federal employees - Excepted service"}, {"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Land and base management"}, {"hiringPath": "Special authorities"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Veterans"}, {"hiringPath": "Individuals with disabilities"}, {"hiringPath": "Military spouses"}, {"hiringPath": "Peace Corps & AmeriCorps Vista"}], [{"hiringPath": "Federal employees - Excepted service"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "The public"}], [{"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Land and base management"}, {"hiringPath": "Veterans"}, {"hiringPath": "Military spouses"}, {"hiringPath": "Family of overseas employees"}], [{"hiringPath": "Family of overseas employees"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Internal to an agency"}] (667 unique)</td>
+                    <td class="examples">[{"hiringPath": "Veterans"}, {"hiringPath": "National Guard and reserves"}, {"hiringPath": "Individuals with disabilities"}, {"hiringPath": "Military spouses"}, {"hiringPath": "Peace Corps & AmeriCorps Vista"}, {"hiringPath": "Family of overseas employees"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Federal employees - Excepted service"}, {"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Land and base management"}, {"hiringPath": "Special authorities"}], [{"hiringPath": "Veterans"}, {"hiringPath": "Individuals with disabilities"}, {"hiringPath": "Military spouses"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Federal employees - Excepted service"}, {"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}], [{"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "The public"}], [{"hiringPath": "Federal employees - Excepted service"}, {"hiringPath": "Internal to an agency"}, {"hiringPath": "Career transition (CTAP, ICTAP, RPL)"}, {"hiringPath": "Land and base management"}, {"hiringPath": "Federal employees - Competitive service"}, {"hiringPath": "Veterans"}, {"hiringPath": "Individuals with disabilities"}, {"hiringPath": "Military spouses"}] (667 unique)</td>
                     <td class="completeness poor">13%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">inserted_at</code></td>
                     <td>String</td>
-                    <td class="examples">2025-09-19T23:54:35.958944, 2025-09-19T23:10:31.425940, 2025-09-19T23:18:00.899525, 2025-09-19T23:47:00.334219 (162126 unique)</td>
+                    <td class="examples">2025-09-19T23:13:38.378955, 2025-09-19T23:35:22.026868, 2025-09-19T23:20:10.689571, 2025-09-19T23:35:22.026187 (162126 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">jobcategories</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"series": "2602"}], [{"series": "0803"}], [{"series": "6904"}], [{"series": "8862"}] (565 unique)</td>
+                    <td class="examples">[{"series": "5426"}], [{"series": "0401"}, {"series": "0807"}, {"series": "0808"}, {"series": "0810"}, {"series": "0819"}, {"series": "0830"}, {"series": "0850"}, {"series": "1301"}], [{"series": "0701"}], [{"series": "5729"}] (565 unique)</td>
                     <td class="completeness poor">13%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">last_seen</code></td>
                     <td>String</td>
-                    <td class="examples">2025-09-19T23:48:20.061807, 2025-09-19T23:44:10.373179, 2025-09-19T23:19:20.045573, 2025-09-19T23:07:31.697023 (115079 unique)</td>
+                    <td class="examples">2025-09-19T23:19:20.074254, 2025-09-19T23:18:00.934098, 2025-09-19T23:23:06.165147, 2025-09-19T23:10:31.424455 (115079 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">maximumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">C, 2, 28, 25 (117 unique)</td>
+                    <td class="examples">31, K, GJ, 08 (117 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -312,7 +312,7 @@
                 <tr>
                     <td><code class="field-name">minimumGrade</code></td>
                     <td>String</td>
-                    <td class="examples">2, DJ, 03, GI (116 unique)</td>
+                    <td class="examples">08, LI, DL, KI (116 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -324,25 +324,25 @@
                 <tr>
                     <td><code class="field-name">payScale</code></td>
                     <td>String</td>
-                    <td class="examples">NC, PQ, BR, VP (163 unique)</td>
+                    <td class="examples">SO, DA, KA, KM (163 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionCloseDate</code></td>
                     <td>String</td>
-                    <td class="examples">2025-02-10, 2026-01-03, 2025-12-14, 2025-12-04 (653 unique)</td>
+                    <td class="examples">2025-09-06, 2026-03-24, 2025-10-27, 2026-06-26 (653 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionExpireDate</code></td>
                     <td>String</td>
-                    <td class="examples">2026-02-25, 2025-05-09, 2025-07-13, 2025-10-16 (496 unique)</td>
+                    <td class="examples">2025-04-19, 2026-04-16, 2026-02-24, 2025-03-17 (496 unique)</td>
                     <td class="completeness poor">10%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionOpenDate</code></td>
                     <td>String</td>
-                    <td class="examples">2025-02-16, 2025-09-20, 2025-11-04, 2025-11-15 (363 unique)</td>
+                    <td class="examples">2025-10-19, 2025-08-12, 2025-09-26, 2025-08-29 (363 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -354,19 +354,19 @@
                 <tr>
                     <td><code class="field-name">positionTitle</code></td>
                     <td>String</td>
-                    <td class="examples">Field Representative (Bilingual), Physician (Cardiology-Non Invasive), EMERGENCY PLANNING & FIRE SAFETY ANALYST, Technical Advisor (Senior Technical Advisor) (44539 unique)</td>
+                    <td class="examples">Social Worker ( Behavioral Health Consultant), SUPERVISORY PROJECT MANAGEMENT SPECIALIST(PS), RECREATION AID (LIFEGUARD) - JBMDL, Occupational Therapist (Temporary Appointment NTE 2 years) (44539 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">positionlocations</code></td>
                     <td>JSON Array</td>
-                    <td class="examples">[{"positionLocationCity": "Munising", "positionLocationState": "Michigan", "positionLocationCountry": "United States"}, {"positionLocationCity": "Medora", "positionLocationState": "North Dakota", "positionLocationCountry": "United States"}, {"positionLocationCity": "Watford City", "positionLocationState": "North Dakota", "positionLocationCountry": "United States"}, {"positionLocationCity": "Williston", "positionLocationState": "North Dakota", "positionLocationCountry": "United States"}, {"positionLocationCity": "Hot Springs", "positionLocationState": "South Dakota", "positionLocationCountry": "United States"}, {"positionLocationCity": "Interior", "positionLocationState": "South Dakota", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Mountainair", "positionLocationState": "New Mexico", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Los Angeles", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "Philadelphia", "positionLocationState": "Pennsylvania", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Craig", "positionLocationState": "Colorado", "positionLocationCountry": "United States"}, {"positionLocationCity": "Montrose", "positionLocationState": "Colorado", "positionLocationCountry": "United States"}, {"positionLocationCity": "Shiprock", "positionLocationState": "New Mexico", "positionLocationCountry": "United States"}] (3073 unique)</td>
+                    <td class="examples">[{"positionLocationCity": "Hyannis", "positionLocationState": "Massachusetts", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Tracy", "positionLocationState": "California", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Sequoia National Park", "positionLocationState": "California", "positionLocationCountry": "United States"}, {"positionLocationCity": "Crater Lake", "positionLocationState": "Oregon", "positionLocationCountry": "United States"}], [{"positionLocationCity": "Hines", "positionLocationState": "Illinois", "positionLocationCountry": "United States"}] (3073 unique)</td>
                     <td class="completeness poor">13%</td>
                 </tr>
                 <tr>
                     <td><code class="field-name">promotionPotential</code></td>
                     <td>String</td>
-                    <td class="examples">FG09, 43, FG12, 41 (77 unique)</td>
+                    <td class="examples">16, 43, 24, 40 (77 unique)</td>
                     <td class="completeness good">100%</td>
                 </tr>
                 <tr>
@@ -414,7 +414,7 @@
                 <tr>
                     <td><code class="field-name">totalOpenings</code></td>
                     <td>String</td>
-                    <td class="examples">21, 129, 562, 14 (90 unique)</td>
+                    <td class="examples">9, 18, 36, 96 (90 unique)</td>
                     <td class="completeness warning">89%</td>
                 </tr>
                 <tr>
