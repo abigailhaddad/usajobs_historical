@@ -270,6 +270,15 @@ class TestPageControlsAndLinks:
         assert out['qualificationSummary'] == 'Must show experience.'
         assert 'questionnaire' not in out['requirements']
 
+    def test_invisible_characters_do_not_break_words(self):
+        # 862920800 "prior­ity", 807719500 "co­workers": invisible on
+        # the page, but a search for "priority" missed them.
+        out = self._requirements(
+            '<h3>Qualifications</h3><p>Hiring prior­ity for co&shy;workers'
+            ' and team​mates.﻿</p>')
+        assert out['qualificationSummary'] == (
+            'Hiring priority for coworkers and teammates.')
+
     def test_text_before_a_nested_heading_stays_with_its_section(self):
         # 429653100: broken agency HTML leaves the next headings inside a <p>
         # that opens with the last sentence of Conditions of employment.
