@@ -4,7 +4,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from check_scraped_text import (agency_entities, api_check,  # noqa: E402
-                                pattern_check)
+                                pattern_check, split_pruned)
 
 QUALS = "Applicants must have one year of specialized experience at GS-11."
 
@@ -104,3 +104,15 @@ def test_every_entity_must_be_in_the_api_text():
 def test_rows_the_api_does_not_have_are_skipped():
     result, spacing = api_check([row("2")], api("1"))
     assert all(n == 0 for n, _ in result.values()) and spacing == []
+
+
+def test_published_rows_with_pruned_text_are_not_checked():
+    pruned = {"usajobs_control_number": "2", "text": None}
+    kept, gone = split_pruned([row("1", text="page"), pruned, row("3")])
+    assert [r["usajobs_control_number"] for r in kept] == ["1", "3"]
+    assert gone == [pruned]
+
+
+def test_a_row_with_sections_but_no_page_text_is_still_checked():
+    kept, gone = split_pruned([row("1", text=None)])
+    assert len(kept) == 1 and gone == []

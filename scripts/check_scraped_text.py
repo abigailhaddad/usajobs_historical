@@ -149,12 +149,30 @@ def recent_rows(data_dir, since):
                                               "scraped_jobs_*.parquet"))):
         names = pq.read_schema(path).names
         cols = ["usajobs_control_number", "inserted_at"] + [
-            s for s in SECTIONS if s in names]
+            s for s in SECTIONS + ["text"] if s in names]
         t = pq.read_table(path, columns=cols)
         for r in t.to_pylist():
             if r.get("inserted_at") and r["inserted_at"] >= since:
                 rows.append(r)
     return rows
+
+
+def split_pruned(rows):
+    """(rows to check, rows whose text was pruned). Publishing to HuggingFace
+    drops the local text of every posting it pushes (publish_to_huggingface.
+    prune_published_text), leaving the page text NULL and every section
+    empty. A row the previous day's run stored and published is still inside
+    the 26-hour window, and compared with the Search API it scores 0 on every
+    field: 357 of 1,487 rows on 27 October 2026, all from the 26 October run.
+    Its text is on HuggingFace, not here, so it is counted, not checked."""
+    keep, pruned = [], []
+    for r in rows:
+        if "text" in r and r["text"] is None and not any(
+                r.get(f) for f in SECTIONS):
+            pruned.append(r)
+        else:
+            keep.append(r)
+    return keep, pruned
 
 
 def pattern_check(rows):
@@ -276,10 +294,13 @@ def main() -> int:
 
     since = args.since or (datetime.now(timezone.utc) - timedelta(hours=26)
                            ).strftime("%Y-%m-%dT%H:%M")
-    rows = recent_rows(args.data_dir, since)
-    print(f"{len(rows):,} scraped rows inserted since {since}")
+    rows, pruned = split_pruned(recent_rows(args.data_dir, since))
+    print(f"{len(rows) + len(pruned):,} scraped rows inserted since {since}; "
+          f"{len(pruned):,} already published, their text pruned, not checked")
     lines = [f"# Scraped text check, {datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC",
-             "", f"{len(rows):,} rows inserted since {since}.", ""]
+             "", f"{len(rows) + len(pruned):,} rows inserted since {since}; "
+             f"{len(pruned):,} of them already published to HuggingFace, "
+             f"their local text pruned, so not checked.", ""]
     problems = []
     if not rows:
         print("Nothing to check")
