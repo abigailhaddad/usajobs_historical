@@ -53,6 +53,40 @@ _WS = re.compile(r"\s+")
 # "prior\u00adity"), zero-width spaces and joiners, byte-order marks. Left in,
 # a search for "priority" misses the posting; ~700 sections a month had one.
 _INVISIBLE = re.compile("[\u00ad\u200b\u200c\u200d\u2060\ufeff]")
+# Private-use characters: no font draws them and they have no standard meaning.
+# They come from pasted text and stand where a space was (741013200: "specialized
+# experience\U00100003for this position"), so they become a space.
+_PRIVATE_USE = re.compile("[\ue000-\uf8ff\U000f0000-\U000ffffd\U00100000-\U0010fffd]")
+# A character reference to half of a UTF-16 surrogate pair. Some pages write an
+# emoji as two of these ("&#55357;&#56842;"); BeautifulSoup 4.13 turns each into
+# a lone surrogate, which can't be encoded as UTF-8, so writing the row fails.
+_SURROGATE_REF = re.compile(r"&#(?:[xX]([0-9a-fA-F]+)|([0-9]+));?")
+
+
+def fix_surrogate_refs(html: str) -> str:
+    """The page with each surrogate-pair reference joined into the character
+    it spells, and any unpaired half replaced with U+FFFD. Other references
+    are left for the parser."""
+    def code(m):
+        return int(m.group(1), 16) if m.group(1) else int(m.group(2))
+
+    def swap(m):
+        n = code(m)
+        if not 0xD800 <= n <= 0xDFFF:
+            return m.group(0)
+        if n <= 0xDBFF:
+            nxt = _SURROGATE_REF.match(html, m.end())
+            if nxt and 0xDC00 <= code(nxt) <= 0xDFFF:
+                pending.add(nxt.start())
+                return chr(0x10000 + ((n - 0xD800) << 10) + (code(nxt) - 0xDC00))
+        elif m.start() in pending:
+            return ""
+        return "\ufffd"
+
+    if "&#" not in html:
+        return html
+    pending = set()
+    return _SURROGATE_REF.sub(swap, html)
 
 
 def new_session() -> requests.Session:
@@ -219,7 +253,7 @@ def page_text(soup: BeautifulSoup) -> str:
     dataset stores (see abigailhaddad/joa scrape.py page_text)."""
     for tag in soup(["script", "style", "noscript"]):
         tag.decompose()
-    return _WS.sub(" ", _INVISIBLE.sub("", soup.get_text(" "))).strip()
+    return _WS.sub(" ", _PRIVATE_USE.sub(" ", _INVISIBLE.sub("", soup.get_text(" ")))).strip()
 
 
 def _dt_dd_pairs(soup: BeautifulSoup) -> Dict[str, str]:
@@ -322,12 +356,12 @@ def _visible_text(node) -> str:
     """Text as the page shows it: inline tags joined as written, blocks
     separated by a space."""
     if not getattr(node, "name", None):
-        return _WS.sub(" ", _INVISIBLE.sub("", str(node))).strip()
+        return _WS.sub(" ", _PRIVATE_USE.sub(" ", _INVISIBLE.sub("", str(node)))).strip()
     node = copy.copy(node)
     for tag in node.find_all(_BLOCK_TAGS):
         tag.insert_before(" ")
         tag.insert_after(" ")
-    return _WS.sub(" ", _INVISIBLE.sub("", node.get_text())).strip()
+    return _WS.sub(" ", _PRIVATE_USE.sub(" ", _INVISIBLE.sub("", node.get_text()))).strip()
 
 
 def _text_before_heading(container, heading) -> str:
@@ -796,7 +830,7 @@ def fetch_job_page(session: requests.Session, control_number: str,
             if len(r.text) < 20000:
                 raise ValueError(f"short page ({len(r.text)} bytes)")
             time.sleep(pause * (0.5 + random.random()))
-            return r.text, None
+            return fix_surrogate_refs(r.text), None
         except (requests.exceptions.RequestException, ValueError) as e:
             if attempt == retries - 1:
                 return None, str(e)
