@@ -504,3 +504,9 @@ class TestSurrogateReferences:
         text.encode("utf-8")
         assert text == "Apply now \U0001F60A or \ufffd later."
 
+    def test_private_use_character_becomes_a_space(self):
+        # 741013200: "&#56256;&#56323;" spells U+100003, where a space was.
+        text = self._section("specialized experience&#56256;&#56323;for this "
+                             "position &#xE000;here.")
+        assert text == "specialized experience for this position here."
+
