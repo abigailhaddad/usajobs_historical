@@ -352,16 +352,27 @@ _BLOCK_TAGS = ["address", "article", "blockquote", "br", "dd", "div", "dl",
                "pre", "section", "table", "td", "th", "tr", "ul"]
 
 
+def _tidy(text: str) -> str:
+    """Section text cleaned of what the page never shows. Some agencies'
+    text is HTML-escaped twice, so the page itself reads "Green &amp; Gold"
+    or "the team&#8217;s" (889711300, 890160800); the Search API has it
+    decoded, so one more round of unescaping matches it. Text with a bare
+    "&" ("R&D", "AT&T") is not an entity and stays as it is."""
+    if "&" in text:
+        text = html_mod.unescape(text)
+    return _WS.sub(" ", _PRIVATE_USE.sub(" ", _INVISIBLE.sub("", text))).strip()
+
+
 def _visible_text(node) -> str:
     """Text as the page shows it: inline tags joined as written, blocks
     separated by a space."""
     if not getattr(node, "name", None):
-        return _WS.sub(" ", _PRIVATE_USE.sub(" ", _INVISIBLE.sub("", str(node)))).strip()
+        return _tidy(str(node))
     node = copy.copy(node)
     for tag in node.find_all(_BLOCK_TAGS):
         tag.insert_before(" ")
         tag.insert_after(" ")
-    return _WS.sub(" ", _PRIVATE_USE.sub(" ", _INVISIBLE.sub("", node.get_text()))).strip()
+    return _tidy(node.get_text())
 
 
 def _text_before_heading(container, heading) -> str:

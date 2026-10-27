@@ -510,3 +510,10 @@ class TestSurrogateReferences:
                              "position &#xE000;here.")
         assert text == "specialized experience for this position here."
 
+    def test_text_escaped_twice_is_decoded(self):
+        # 889711300 "Green &amp;amp; Gold", 890160800 "team&amp;#8217;s": the
+        # page shows the entity; the Search API has the character.
+        text = self._section("Green &amp;amp; Gold; the team&amp;#8217;s "
+                             "R&amp;D at AT&amp;T &amp;nbsp;here.")
+        assert text == "Green & Gold; the team\u2019s R&D at AT&T here."
+
