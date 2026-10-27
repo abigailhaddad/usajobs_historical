@@ -3,7 +3,8 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from check_scraped_text import api_check, pattern_check  # noqa: E402
+from check_scraped_text import (agency_entities, api_check,  # noqa: E402
+                                pattern_check)
 
 QUALS = "Applicants must have one year of specialized experience at GS-11."
 
@@ -74,6 +75,30 @@ def test_space_before_punctuation_only_counts_when_the_api_lacks_it():
     _, spacing = api_check([spaced], api(quals=QUALS.replace("GS-11.",
                                                              "GS-11 .")))
     assert spacing == []
+
+
+def test_entity_in_the_api_text_is_the_agencys_own():
+    # 890036200, 26 October 2026: the agency's HTML has &amp;#8217;, so the
+    # page shows "&#8217;" and the scrape stores it as shown.
+    duty = "Improve personnel&#8217;s expertise."
+    rows = [row("1", majorDuties=duty), row("2", majorDuties=duty),
+            row("3", majorDuties=duty)]
+    hits = pattern_check(rows)
+    assert hits["html_entity"] == ["1", "2", "3"]
+    a = api("1")
+    a["1"]["UserArea"]["Details"]["MajorDuties"] = [duty]
+    a.update(api("2"))  # the API decoded it: the parse is suspect
+    a["2"]["UserArea"]["Details"]["MajorDuties"] = [
+        "Improve personnel’s expertise."]
+    # "3" is not in the API at all: still counted.
+    assert agency_entities(rows, hits["html_entity"], a) == ["1"]
+
+
+def test_every_entity_must_be_in_the_api_text():
+    rows = [row("1", majorDuties="A&#8217;s duty &amp; more.")]
+    a = api("1")
+    a["1"]["UserArea"]["Details"]["MajorDuties"] = ["A&#8217;s duty & more."]
+    assert agency_entities(rows, ["1"], a) == []
 
 
 def test_rows_the_api_does_not_have_are_skipped():
