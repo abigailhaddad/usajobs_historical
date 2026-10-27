@@ -18,8 +18,9 @@ import sys
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from usajobs_scrape import (SECTION_FIELDS, normalize_search_job,
-                            parse_job_page, parse_locations, parse_sections)
+from usajobs_scrape import (SECTION_FIELDS, fix_surrogate_refs,
+                            normalize_search_job, parse_job_page,
+                            parse_locations, parse_sections)
 
 FIXTURES = os.path.join(os.path.dirname(__file__), 'fixtures')
 
@@ -472,3 +473,34 @@ class TestNormalizeSearchJob:
         row = normalize_search_job({"DocumentID": "not-a-number"})
         assert row['usajobsControlNumber'] is None
         assert row['usajobs_control_number'] is None
+
+
+class TestSurrogateReferences:
+    """An emoji written as two surrogate references ("&#55357;&#56842;")
+    became two lone surrogates under BeautifulSoup 4.13, and the nightly
+    re-fetch failed writing the month (27 October 2026)."""
+
+    def _section(self, html):
+        from bs4 import BeautifulSoup
+        return parse_sections(BeautifulSoup(fix_surrogate_refs(
+            '<div id="joa-requirements"><h3>Qualifications</h3><p>' + html
+            + '</p></div>'), "html.parser"))['qualificationSummary']
+
+    def test_pair_becomes_the_character(self):
+        assert fix_surrogate_refs("a &#55357;&#56842; b") == "a \U0001F60A b"
+        assert fix_surrogate_refs("&#xD83D;&#xDE0A;") == "\U0001F60A"
+
+    def test_unpaired_half_becomes_replacement_character(self):
+        assert fix_surrogate_refs("x &#55357; y") == "x \ufffd y"
+        assert fix_surrogate_refs("x &#56842; y") == "x \ufffd y"
+        assert fix_surrogate_refs("&#56842;&#55357;") == "\ufffd\ufffd"
+
+    def test_other_references_are_left_alone(self):
+        page = "&#169; &amp; &#x2014; &#128522;"
+        assert fix_surrogate_refs(page) == page
+
+    def test_section_text_encodes(self):
+        text = self._section("Apply now &#55357;&#56842; or &#55357; later.")
+        text.encode("utf-8")
+        assert text == "Apply now \U0001F60A or \ufffd later."
+
