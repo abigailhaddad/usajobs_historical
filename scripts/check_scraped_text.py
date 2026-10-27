@@ -9,7 +9,8 @@ gap-fill step's rows are covered):
    controls and should never be in a section: the "Expand Hide ..." button
    labels, the "Preview job questionnaire" block, HTML entities left
    undecoded, mis-decoded UTF-8 ("â€™"), and one section's text running on
-   inside another. These are the defects PRs #668 and #672 fixed in 3.2
+   inside another. An entity the Search API's text for the same
+   announcement also has is the agency's own and is not counted. These are the defects PRs #668 and #672 fixed in 3.2
    million stored rows; this is what notices the next one.
 
    Deliberately not checked here: a space before punctuation, or a sentence
@@ -168,6 +169,39 @@ def pattern_check(rows):
     return hits
 
 
+def _strings(obj):
+    if isinstance(obj, str):
+        yield obj
+    elif isinstance(obj, dict):
+        for v in obj.values():
+            yield from _strings(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            yield from _strings(v)
+
+
+def agency_entities(rows, cns, api):
+    """The control numbers among `cns` whose every HTML entity is also in the
+    Search API's text for that announcement. Those are in the agency's own
+    text: its HTML escapes them a second time (&amp;#8217;), so usajobs.gov
+    shows "&#8217;" as written, as on 890036200 and 890160800 (26 October
+    2026) and 889711300 ("&amp;", 23 October). A parse that failed to decode
+    would leave an entity the API's text does not have."""
+    rx = NEVER["html_entity"]
+    by_cn = {r["usajobs_control_number"]: r for r in rows}
+    out = []
+    for cn in cns:
+        j = api.get(str(cn))
+        if not j:
+            continue
+        theirs = " ".join(_strings(j))
+        found = {m for f in SECTIONS
+                 for m in rx.findall(by_cn[cn].get(f) or "")}
+        if found and all(e in theirs for e in found):
+            out.append(cn)
+    return out
+
+
 def api_items(token, days, pages):
     """Search API results posted in the last `days`, by control number."""
     import requests
@@ -251,9 +285,18 @@ def main() -> int:
         print("Nothing to check")
         return 0
 
+    token = os.environ.get("USAJOBS_API_TOKEN")
+    api = api_items(token, args.api_days, args.api_pages) if token else {}
+
     hits = pattern_check(rows)
+    agency = agency_entities(rows, hits["html_entity"], api)
+    hits["html_entity"] = [cn for cn in hits["html_entity"]
+                           if cn not in agency]
     lines += ["## Marks of the page", "", "| rule | rows | examples |",
               "|---|---|---|"]
+    lines.append(f"| html_entity also in the API's text (agency's own, not "
+                 f"counted) | {len(agency):,} | "
+                 f"{' '.join(map(str, agency[:5]))} |")
     for rule, cns in hits.items():
         share = len(cns) / len(rows)
         lines.append(f"| {rule} | {len(cns):,} ({share:.1%}) | "
@@ -264,12 +307,10 @@ def main() -> int:
                             f"({share:.1%}), e.g. "
                             + " ".join(map(str, cns[:5])))
 
-    token = os.environ.get("USAJOBS_API_TOKEN")
     lines += ["", "## Against the Search API", ""]
     if not token:
         lines.append("Skipped: no USAJOBS_API_TOKEN.")
     else:
-        api = api_items(token, args.api_days, args.api_pages)
         both = sum(1 for r in rows if str(r["usajobs_control_number"]) in api)
         print(f"Search API: {len(api):,} announcements, {both:,} also "
               f"scraped in the window")
