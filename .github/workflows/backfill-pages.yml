@@ -13,6 +13,15 @@ name: Backfill Announcement Pages
 # The only shared thing they touch is the HuggingFace dataset, and they touch
 # different months of it.
 #
+# Pages a backfill fails to fetch are not retried here. The daily update's
+# gap-fill picks them up, for every year in the mirror, and publishes the
+# months they belong to. That is a second writer to old month files, outside
+# this workflow's concurrency group: if a dispatch here rebuilds a month while
+# the daily run is publishing it, one of the two commits wins. Nothing is lost
+# for good -- a row missing from its month drops out of the manifest, and the
+# next gap-fill fetches it again -- but avoid dispatching this while the daily
+# update runs (07:37 UTC, with retries at 13:37 and 19:37).
+#
 # Old pages are all still served — a sample across 2017, 2019, 2021, 2023 and
 # 2025 came back 40/40 alive with every section parsing.
 
