@@ -479,15 +479,40 @@ jobs:
     # the run. It writes into scraped_jobs_{year}.parquet, which the publish
     # step below reads and the R2 sync uploads. Never fails the run: a backlog
     # it leaves behind is what the publisher's staleness check reports.
+    #
+    # Every year in the mirror, not just this one. backfill-pages fetched the
+    # old years once and never retried a page that failed, so 32 postings from
+    # 2017-2025 were on no month file as of 2026-10-28. Current year first, then
+    # back, inside one 25-minute budget; the old years are a handful of pages
+    # each. Years other than this one that gained rows go in
+    # logs/gap_filled_years.txt for the publish step.
     - name: Fetch announcement pages the scrape missed
       if: always()
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
       run: |
-        timeout 25m python scripts/backfill_scraped_pages.py \
-          --year "$(date -u +%Y)" --data-dir data --fill-gaps \
-          --limit 2000 --max-cpu 0 \
-          || echo "::warning::Gap-fill fetch did not finish; the next run continues it"
+        mkdir -p logs
+        : > logs/gap_filled_years.txt
+        this_year=$(date -u +%Y)
+        deadline=$(( $(date +%s) + 25 * 60 ))
+        for hist in $(printf '%s\n' data/historical_jobs_*.parquet | sort -r); do
+          year=$(basename "$hist" .parquet); year=${year#historical_jobs_}
+          left=$(( deadline - $(date +%s) ))
+          if [ "$left" -le 60 ]; then
+            echo "::warning::Gap-fill ran out of time at $year; the next run continues it"
+            break
+          fi
+          before=$({ cksum < "data/scraped_jobs_$year.parquet"; } 2>/dev/null || echo none)
+          timeout "$left" python scripts/backfill_scraped_pages.py \
+            --year "$year" --data-dir data --fill-gaps \
+            --limit 2000 --max-cpu 0 \
+            || echo "::warning::Gap-fill fetch for $year did not finish; the next run continues it"
+          after=$({ cksum < "data/scraped_jobs_$year.parquet"; } 2>/dev/null || echo none)
+          if [ "$year" != "$this_year" ] && [ "$before" != "$after" ]; then
+            echo "$year" >> logs/gap_filled_years.txt
+          fi
+        done
+        echo "Older years that gained rows: $(tr '\n' ' ' < logs/gap_filled_years.txt)"
 
     # Publish the announcement dataset to HuggingFace. Both halves are on disk
     # by now: the structured fields from the historical mirror this run just
@@ -516,16 +541,28 @@ jobs:
         # how the publish refused every day from 2026-10-02 to 2026-10-17
         # with every run green. Anything else non-zero means nothing was
         # published at all: a column type that drifted, or a traceback.
+        #
+        # Older years the gap-fill added rows to are published after, one at a
+        # time and without --refresh-all: only their months that gained rows
+        # are rebuilt. This job shares usajobs-r2-data-write with the nightly
+        # re-fetch, so the two never rebuild a month at the same time.
         set +e
-        python scripts/publish_to_huggingface.py $REFRESH
-        status=$?
+        for year in "" $(cat logs/gap_filled_years.txt 2>/dev/null); do
+          if [ -z "$year" ]; then
+            python scripts/publish_to_huggingface.py $REFRESH
+          else
+            echo "Publishing gap-filled rows for $year"
+            python scripts/publish_to_huggingface.py --year "$year"
+          fi
+          status=$?
+          if [ "$status" = "3" ]; then
+            echo "::warning::HuggingFace publish ${year:+for $year }refused a month rather than shrink it"
+          elif [ "$status" != "0" ]; then
+            echo "::error::HuggingFace publish ${year:+for $year }failed (exit $status)"
+            echo "HF_PUBLISH_FAILED=1" >> "$GITHUB_ENV"
+          fi
+        done
         set -e
-        if [ "$status" = "3" ]; then
-          echo "::warning::HuggingFace publish refused a month rather than shrink it"
-        elif [ "$status" != "0" ]; then
-          echo "::error::HuggingFace publish failed (exit $status) — nothing was published"
-          echo "HF_PUBLISH_FAILED=1" >> "$GITHUB_ENV"
-        fi
 
     # Refusals, a missing input, postings the mirror has had for a week that
     # still are not on the dataset, and new announcements whose sections open
