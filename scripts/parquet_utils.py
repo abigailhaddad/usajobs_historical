@@ -40,12 +40,22 @@ from typing import List, Optional
 
 import pandas as pd
 
+# The historical API sends hiring paths as "HiringPaths" through 2024 and
+# increasingly as "hiringPaths" from 2025 on; 2026 has only the second. Some
+# files carry both columns (never both filled on one row), and duckdb is
+# case-insensitive, so it reads the second as "hiringpaths_1". Reading
+# HiringPaths alone left it null for every 2026 posting. The historical side
+# folds every spelling into HiringPaths; _no_hiring_paths is a null
+# placeholder so the coalesce has an argument when a file has neither.
+HIRING_PATHS_SPELLINGS = "(?i)^(hiringpaths(_[0-9]+)?|_no_hiring_paths)$"
+
 
 def build_deduped_query(
     hist_urls: List[str],
     curr_urls: List[str],
     select: str = "*",
     where: str = "",
+    coalesce_fields: Optional[List[str]] = None,
 ) -> str:
     """
     Return a DuckDB SQL string that combines historical and current parquets,
@@ -62,6 +72,29 @@ def build_deduped_query(
         Columns to SELECT in the final query (default "*").
     where:
         Optional WHERE clause (without the WHERE keyword).
+    coalesce_fields:
+        Column names to prefer non-null on, across whichever side (historical
+        or current) has a value, before picking a winning row. The dedup below
+        picks one winning row per control number, and a historical row wins
+        whenever agency-name specificity ties (the common case: 99%+ of
+        current_jobs control numbers also appear in historical_jobs) -- which
+        silently drops a field even when the *other* side's row for that same
+        control number has it. Two situations call for this:
+          - Fields with no equivalent anywhere in the historicjoa API, so only
+            current rows are ever non-null: applicationCap, remoteIndicator,
+            financialDisclosureRequired, representedByUnion,
+            positionSensitivity.
+          - Fields that exist on both sides but are null on one for some
+            postings. HiringPaths is the one to watch, but most of what
+            looked like a gap there was a column name; see
+            HIRING_PATHS_SPELLINGS.
+        Passing a name here coalesces it across every row for a control number
+        *before* picking a winner, so whichever row wins already carries a
+        value if either side had one. Every name passed must actually be a
+        column on at least one side (union_by_name adds it as null on the
+        other) -- referencing one that exists nowhere is a DuckDB "column not
+        found" error, not a silent no-op. Omit this (the default) to get the
+        exact query this function has always produced.
 
     Example
     -------
@@ -77,17 +110,53 @@ def build_deduped_query(
     curr_list = ", ".join(curr_urls)
     where_clause = f"WHERE {where}" if where else ""
 
+    if coalesce_fields:
+        exclude_list = ", ".join(coalesce_fields)
+        # FIRST_VALUE over "non-null first, then historical (_src_priority=0)
+        # before current" -- not MAX(), which would pick whichever side's
+        # string sorts alphabetically greater whenever BOTH sides are non-null
+        # (true for e.g. HiringPaths in most years). That's wrong: it should
+        # still prefer historical when both have a value, matching the row
+        # dedup's own preference below, and only fall back to current when
+        # historical's is null. MAX() only gives correct coalesce semantics
+        # for fields where at most one side is ever non-null (e.g.
+        # applicationCap) -- this ordering is correct for both cases.
+        coalesced_cols = ",\n           ".join(
+            f"first_value({f}) OVER (\n"
+            f"               PARTITION BY usajobsControlNumber\n"
+            f"               ORDER BY ({f} IS NULL) ASC, _src_priority ASC\n"
+            f"               ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\n"
+            f"           ) AS {f}"
+            for f in coalesce_fields
+        )
+        merged_cte = f"""merged AS (
+    SELECT * EXCLUDE ({exclude_list}),
+           {coalesced_cols}
+    FROM combined
+),
+"""
+        merged_from = "merged"
+    else:
+        merged_cte = ""
+        merged_from = "combined"
+
     return f"""
-WITH combined AS (
-    SELECT *, 0 AS _src_priority
-    FROM read_parquet([{hist_list}])
+WITH hist AS (
+    SELECT *, NULL::VARCHAR AS _no_hiring_paths
+    FROM read_parquet([{hist_list}], union_by_name=true)
+),
+combined AS (
+    SELECT COLUMNS(c -> NOT regexp_matches(c, '{HIRING_PATHS_SPELLINGS}')),
+           coalesce(*COLUMNS('{HIRING_PATHS_SPELLINGS}')) AS HiringPaths,
+           0 AS _src_priority
+    FROM hist
     UNION ALL BY NAME
     SELECT *, 1 AS _src_priority
     FROM read_parquet([{curr_list}], union_by_name=true)
 ),
-deduped AS (
+{merged_cte}deduped AS (
     SELECT *
-    FROM combined
+    FROM {merged_from}
     QUALIFY ROW_NUMBER() OVER (
         PARTITION BY usajobsControlNumber
         ORDER BY
