@@ -1,10 +1,11 @@
 {
-  "created_at": "2026-10-29T00:19:22.521504",
+  "created_at": "2026-10-29T14:56:27.650399",
   "row_counts": {
-    "current_jobs_2026.parquet": 210876,
+    "scraped_jobs_2019.parquet": 6,
+    "current_jobs_2026.parquet": 211481,
     "historical_jobs_2022.parquet": 441604,
     "historical_jobs_2026.parquet": 214826,
-    "scraped_jobs_2025.parquet": 389,
+    "scraped_jobs_2025.parquet": 391,
     "historical_jobs_2016.parquet": 3879,
     "historical_jobs_2020.parquet": 328440,
     "historical_jobs_2023.parquet": 454652,
@@ -12,7 +13,7 @@
     "historical_jobs_2013.parquet": 5,
     "historical_jobs_2018.parquet": 329356,
     "historical_jobs_2024.parquet": 367192,
-    "scraped_jobs_2026.parquet": 56482,
+    "scraped_jobs_2026.parquet": 57097,
     "current_jobs_2024.parquet": 584,
     "historical_jobs_2015.parquet": 140,
     "historical_jobs_2014.parquet": 24,
@@ -24,6 +25,7 @@
     "historical_jobs_2021.parquet": 369151
   },
   "duplicate_counts": {
+    "scraped_jobs_2019.parquet": 0,
     "current_jobs_2026.parquet": 0,
     "historical_jobs_2022.parquet": 0,
     "historical_jobs_2026.parquet": 0,
@@ -47,6 +49,14 @@
     "historical_jobs_2021.parquet": 0
   },
   "job_ids": {
+    "scraped_jobs_2019.parquet": [
+      "886534900",
+      "886535200",
+      "886535300",
+      "886535700",
+      "886535800",
+      "886535900"
+    ],
     "current_jobs_2026.parquet": [
       "721962100",
       "722102800",
@@ -1942,7 +1952,9 @@
       "853436000",
       "853838500",
       "863272300",
-      "879565400"
+      "863598700",
+      "879565400",
+      "886238600"
     ],
     "historical_jobs_2016.parquet": [
       "369626000",
@@ -4992,6 +5004,7 @@
       "847048400",
       "847394000",
       "847434900",
+      "848198800",
       "848958900",
       "849144500",
       "849230300",
@@ -5462,8 +5475,7 @@
       "861500000",
       "861508200",
       "861508600",
-      "861543700",
-      "861570400"
+      "861543700"
     ],
     "current_jobs_2024.parquet": [
       "547366900",
