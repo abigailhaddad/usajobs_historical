@@ -497,6 +497,8 @@ jobs:
         deadline=$(( $(date +%s) + 25 * 60 ))
         for hist in $(printf '%s\n' data/historical_jobs_*.parquet | sort -r); do
           year=$(basename "$hist" .parquet); year=${year#historical_jobs_}
+          # R2 also holds copies like historical_jobs_2025_backup.parquet.
+          case "$year" in [0-9][0-9][0-9][0-9]) ;; *) continue ;; esac
           left=$(( deadline - $(date +%s) ))
           if [ "$left" -le 60 ]; then
             echo "::warning::Gap-fill ran out of time at $year; the next run continues it"
