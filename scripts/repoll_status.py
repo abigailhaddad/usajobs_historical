@@ -101,8 +101,55 @@ def get_page(params: Optional[Dict] = None, next_url: Optional[str] = None, retr
     raise requests.HTTPError(f"exhausted {retries} attempts with no response")
 
 
+# How long to wait before re-fetching a date that came up short. The one known
+# case cleared on its own: see fetch_all_for_date.
+SHORT_RETRY_WAIT = 30
+
+
 def fetch_all_for_date(date_str: str) -> List[Dict]:
-    """Fetch all jobs from the Historical API for a single date."""
+    """Fetch all jobs from the Historical API for a single date.
+
+    A date that comes up short of the API's own totalCount is fetched once more
+    before anything is alerted. 2026-11-01 (#705): the API answered 2026-01-01
+    with totalCount 612, 500 rows and no `next` link; the same query minutes
+    later returned all 97 rows the date really has, and every stored status
+    already matched. One bad response, and it opened an issue. A second short
+    fetch still alerts, so a real pagination break is caught on the same run.
+    """
+    all_jobs, expected_total, page_num = _fetch_date_once(date_str)
+    if expected_total is not None and len(all_jobs) < expected_total:
+        log(f"  repoll date {date_str}: API reported {expected_total}, got "
+            f"{len(all_jobs)} in {page_num} page(s); fetching it again")
+        time.sleep(SHORT_RETRY_WAIT)
+        all_jobs, expected_total, page_num = _fetch_date_once(date_str)
+
+    under_collected = expected_total is not None and len(all_jobs) < expected_total
+    if under_collected:
+        msg = (f"🚨 PAGINATION UNDER-COLLECTION: repoll date {date_str} — API reported "
+               f"{expected_total} total jobs but only collected {len(all_jobs)} after "
+               f"{page_num} page(s), twice. Statuses for the rows we never saw are stale.")
+        log(msg)
+        log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
+        os.makedirs(log_dir, exist_ok=True)
+        with open(os.path.join(log_dir, 'PAGINATION_UNDER_COLLECTION.txt'), 'a') as f:
+            f.write(f"repoll date {date_str}: expected {expected_total}, "
+                    f"got {len(all_jobs)} ({page_num} pages), on two fetches\n")
+
+    # Cap tripwire: a single date returning exactly 500 (page size) or 10,000
+    # may mean pagination silently stopped instead of reaching the true end.
+    # Skipped when the count already came up short — the tripwire is for
+    # truncation that is otherwise *silent*, and firing both just opens two
+    # issues about one event (see #531/#532 on the daily collection).
+    # Also skipped when the API's own total says this is all there is: a date
+    # with exactly 500 postings is a coincidence then, not a cut-off.
+    if not under_collected and expected_total != len(all_jobs):
+        check_cap(len(all_jobs), f"repoll date {date_str}")
+
+    return all_jobs
+
+
+def _fetch_date_once(date_str: str):
+    """One pass over a date's pages: (jobs, the API's totalCount, pages read)."""
     params = {"StartPositionOpenDate": date_str, "EndPositionOpenDate": date_str}
     all_jobs = []
     next_url = None
@@ -131,29 +178,7 @@ def fetch_all_for_date(date_str: str) -> List[Dict]:
         else:
             break
 
-    under_collected = expected_total is not None and len(all_jobs) < expected_total
-    if under_collected:
-        msg = (f"🚨 PAGINATION UNDER-COLLECTION: repoll date {date_str} — API reported "
-               f"{expected_total} total jobs but only collected {len(all_jobs)} after "
-               f"{page_num} page(s). Statuses for the rows we never saw are stale.")
-        log(msg)
-        log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
-        os.makedirs(log_dir, exist_ok=True)
-        with open(os.path.join(log_dir, 'PAGINATION_UNDER_COLLECTION.txt'), 'a') as f:
-            f.write(f"repoll date {date_str}: expected {expected_total}, "
-                    f"got {len(all_jobs)} ({page_num} pages)\n")
-
-    # Cap tripwire: a single date returning exactly 500 (page size) or 10,000
-    # may mean pagination silently stopped instead of reaching the true end.
-    # Skipped when the count already came up short — the tripwire is for
-    # truncation that is otherwise *silent*, and firing both just opens two
-    # issues about one event (see #531/#532 on the daily collection).
-    # Also skipped when the API's own total says this is all there is: a date
-    # with exactly 500 postings is a coincidence then, not a cut-off.
-    if not under_collected and expected_total != len(all_jobs):
-        check_cap(len(all_jobs), f"repoll date {date_str}")
-
-    return all_jobs
+    return all_jobs, expected_total, page_num
 
 
 # How far behind the API a date may sit before the coverage check calls it a
