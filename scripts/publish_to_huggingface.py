@@ -39,6 +39,10 @@ from pathlib import Path
 
 import duckdb
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from listings import HISTORICAL, PRIOR_COL, SCRAPED, year_files  # noqa: E402
+
 REPO_ID = os.environ.get("HF_DATASET_REPO", "abigailhaddad/usajobs-scraping")
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -330,8 +334,16 @@ def parquet_columns(path):
 
 
 def select_sql(con, hist_path: str, scraped_path: str,
-               prior_path: str = None, days: tuple = None) -> str:
+               prior_path: str = None, days: tuple = None,
+               extra_hist=(), extra_scraped=()) -> str:
     """One month file's rows: fresh metadata joined to announcement text.
+
+    extra_hist / extra_scraped (2026-11-01): other years' mirror and scrape
+    files holding some of the members. A posting re-opened into another year
+    lives in that year's files now (listings.py keeps each control number in
+    exactly one), but stays in the month file it was first published in. Its
+    metadata and its re-fetched page come from those files, so the published
+    row describes the latest listing instead of being carried over frozen.
 
     Which postings go in the file is the `members` temp table (see
     month_members), not an open-date filter. A posting stays in the file it was
@@ -346,9 +358,9 @@ def select_sql(con, hist_path: str, scraped_path: str,
     no longer exists. A local row whose text has been pruned has NULL text, so
     it must not win over the published copy; hence the WHERE on the local side.
 
-    A member the year's mirror does not have -- its open date moved into
-    another year -- has no fresh metadata to join, so its published row is
-    carried over unchanged rather than dropped.
+    A member no mirror file passed in has -- its open date moved into
+    another year the caller did not pass -- has no fresh metadata to join, so
+    its published row is carried over unchanged rather than dropped.
 
     `days` narrows the whole query to a ('01', '15')-style range of the
     members' open-date days. It has to narrow the text sides too: the text is
@@ -359,28 +371,41 @@ def select_sql(con, hist_path: str, scraped_path: str,
                   if days else "")
     parts = [f"wanted AS (SELECT cn FROM members{day_filter})"]
     union = ""
-    if scraped_path and os.path.exists(scraped_path):
-        # Select what the file has and null the rest, exactly as the prior file
-        # is handled below. save_jobs_to_parquet writes the keys the parsed
-        # pages happened to carry, so a column only exists if some posting in
-        # the file had it. With 30,000 postings a month something always does;
-        # with the six that 2014-10 holds, whole columns are simply absent and
-        # naming one is a binder error.
-        local_have = parquet_columns(scraped_path)
+    # Select what each file has and null the rest, exactly as the prior file
+    # is handled below. save_jobs_to_parquet writes the keys the parsed pages
+    # happened to carry, so a column only exists if some posting in the file
+    # had it. With 30,000 postings a month something always does; with the
+    # six that 2014-10 holds, whole columns are simply absent and naming one
+    # is a binder error.
+    local_sides = []
+    for path in [scraped_path, *extra_scraped]:
+        if not path or not os.path.exists(path):
+            continue
+        local_have = parquet_columns(path)
+        if "text" not in local_have:
+            continue
         local_cols = ",\n        ".join(
             f"CAST({c} AS VARCHAR) AS {c}" if c in local_have
             else f"CAST(NULL AS VARCHAR) AS {c}"
             for c in TEXT_FIELDS)
-        if "text" in local_have:
-            parts.append(f"""local_text AS (
-        SELECT usajobs_control_number AS cn,
+        opened = ("substr(CAST(positionOpenDate AS VARCHAR), 1, 10)"
+                  if "positionOpenDate" in local_have else "CAST(NULL AS VARCHAR)")
+        local_sides.append(f"""
+        SELECT CAST(usajobs_control_number AS VARCHAR) AS cn, {opened} AS od,
         {local_cols}
-        FROM read_parquet('{scraped_path}')
+        FROM read_parquet('{path}')
         WHERE text IS NOT NULL
-          AND usajobs_control_number IN (SELECT cn FROM wanted)
-        QUALIFY row_number() OVER (PARTITION BY usajobs_control_number) = 1
+          AND CAST(usajobs_control_number AS VARCHAR) IN (SELECT cn FROM wanted)""")
+    if local_sides:
+        # A control number with a page in two files -- a re-opened posting
+        # whose old year's copy has not been collapsed yet -- takes the page
+        # fetched for the later listing.
+        text_names = ", ".join(TEXT_FIELDS)
+        parts.append(f"""local_text AS (
+        SELECT cn, {text_names} FROM ({" UNION ALL ".join(local_sides)})
+        QUALIFY row_number() OVER (PARTITION BY cn ORDER BY od DESC NULLS LAST) = 1
     )""")
-            union = "SELECT * FROM local_text"
+        union = "SELECT * FROM local_text"
     if prior_path:
         # A month published before a column existed does not have it. Select
         # what is there and null the rest so the shapes line up for the UNION.
@@ -407,21 +432,33 @@ def select_sql(con, hist_path: str, scraped_path: str,
                          "the dataset has no file for this month")
 
     text_cols = ",\n    ".join(f"t.{c}" for c in TEXT_FIELDS)
+    # One SELECT per mirror file. resolve_list_columns differs file to file
+    # (the list columns are spelled differently by year), so each gets its own
+    # metadata_fields; every column is cast to its published type, so the
+    # halves line up by name. A control number is in one mirror file only
+    # (listings.collapse_across_years), and verify_build refuses a month with
+    # a repeated row if that ever stops being true.
+    sides = [f"""
+        SELECT {metadata_fields(con, path)},
+    {text_cols}
+        FROM read_parquet('{path}') h
+        JOIN txt t ON h.usajobsControlNumber::varchar = t.cn"""
+             for path in [hist_path, *extra_hist]]
     sql = f"""
         WITH {", ".join(parts)}, txt AS ({union})
-        SELECT {metadata_fields(con, hist_path)},
-    {text_cols}
-        FROM read_parquet('{hist_path}') h
-        JOIN txt t ON h.usajobsControlNumber::varchar = t.cn
+        {" UNION ALL BY NAME ".join(sides)}
     """
     if prior_path:
+        in_mirror = " ".join(
+            f"""AND usajobsControlNumber NOT IN (
+              SELECT usajobsControlNumber::varchar FROM read_parquet('{path}'))"""
+            for path in [hist_path, *extra_hist])
         sql = f"""
         {sql}
         UNION ALL BY NAME
         SELECT * FROM read_parquet('{prior_path}')
         WHERE usajobsControlNumber IN (SELECT cn FROM wanted)
-          AND usajobsControlNumber NOT IN (
-              SELECT usajobsControlNumber::varchar FROM read_parquet('{hist_path}'))
+          {in_mirror}
     """
     # The WITH has to scope over both halves of the UNION, so wrap the lot.
     return f"SELECT * FROM ({sql})" if prior_path else sql
@@ -747,6 +784,54 @@ def local_months(con, hist_path, scraped_path):
     return months
 
 
+def control_number_homes(paths, exclude=()):
+    """Control number -> the file (of `paths`) that holds it, reading only the
+    id column. Files in `exclude` are skipped."""
+    import pyarrow.compute as pc
+    import pyarrow.parquet as pq
+    out = {}
+    for path in paths:
+        if str(path) in {str(e) for e in exclude}:
+            continue
+        names = pq.read_schema(path).names
+        col = next((c for c in ("usajobsControlNumber", "usajobs_control_number")
+                    if c in names), None)
+        if col is None:
+            continue
+        ids = pq.read_table(path, columns=[col]).column(col)
+        if ids.type != "string":
+            ids = pc.cast(pc.cast(ids, "int64"), "string") \
+                if str(ids.type).startswith(("double", "float")) \
+                else pc.cast(ids, "string")
+        for cn in ids.to_pylist():
+            if cn is not None:
+                out[cn] = str(path)
+    return out
+
+
+def relisted_pages(con, scraped_paths):
+    """Control number -> scraped file, for pages fetched again because the
+    posting was re-opened (collect_scraped_data.relisted) and not yet
+    published: the row has prior listings and its text has not been pruned.
+
+    Text alone would not do as the signal: the nightly re-fetch writes text
+    into these files for postings that are long published, and treating that
+    as news would rebuild every month it touched. A prior listing is only set
+    when the page was fetched for a later listing than the one stored.
+    """
+    out = {}
+    for path in scraped_paths:
+        have = parquet_columns(path)
+        if PRIOR_COL not in have or "text" not in have:
+            continue
+        for (cn,) in con.execute(f"""
+                SELECT DISTINCT CAST(usajobs_control_number AS VARCHAR)
+                FROM read_parquet('{path}')
+                WHERE {PRIOR_COL} IS NOT NULL AND text IS NOT NULL""").fetchall():
+            out[cn] = str(path)
+    return out
+
+
 def month_of_every_posting(con, hist_path):
     """Control number -> month by the mirror's current open date."""
     rows = con.execute(f"""
@@ -949,15 +1034,36 @@ def main() -> int:
           f"postings; {sum(1 for v in by_month.values() for c in v if c not in located):,} "
           f"are in no month file")
 
+    # Re-opened postings (2026-11-01). Each control number lives in one mirror
+    # year file and one scrape year file -- its latest listing's year -- but
+    # stays in the month file it was first published in. Where it lives now:
+    hist_home = control_number_homes(year_files(data_dir, HISTORICAL).values(),
+                                     exclude=[hist])
+    scraped_home = control_number_homes(year_files(data_dir, SCRAPED).values(),
+                                        exclude=[scraped])
+    # ...and which of them had their page fetched again for the new listing.
+    # Their month is rebuilt so the published text matches the published
+    # dates; they count as local text for that month, wherever it is.
+    relisted = {cn: path for cn, path in relisted_pages(
+        con, year_files(data_dir, SCRAPED).values()).items() if cn in located}
+    relisted_months = set()
+    for cn in relisted:
+        by_month.setdefault(located[cn], set()).add(cn)
+        relisted_months.add(located[cn])
+    if relisted:
+        print(f"{len(relisted):,} re-opened postings have a re-fetched page to "
+              f"publish, in {len(relisted_months)} month file(s)")
+
     if args.month and args.refresh_all:
         todo = [args.month]
         print(f"Republishing {args.month}")
     elif args.refresh_all:
         todo = sorted({m for m in on_dataset if m[:4] == str(args.year)}
-                      | set(months_to_rebuild(located, by_month)))
+                      | set(months_to_rebuild(located, by_month))
+                      | relisted_months)
         print(f"Refreshing all {len(todo)} month(s) of {args.year}")
     else:
-        todo = months_to_rebuild(located, by_month)
+        todo = sorted(set(months_to_rebuild(located, by_month)) | relisted_months)
         if args.month:
             todo = [m for m in todo if m == args.month]
         print(f"{len(todo)} month(s) have new rows: {', '.join(todo) or '(none)'}")
@@ -1040,6 +1146,14 @@ def main() -> int:
         # has to hold the join, and the text is 35 KB a row: 2022-03 was 41,871
         # rows and took a 2.7 GiB duckdb limit out in one pass.
         local = str(scraped) if scraped.exists() else None
+        extra_hist = sorted({hist_home[cn] for cn in members
+                             if cn not in month_of and cn in hist_home})
+        extra_scraped = sorted({scraped_home[cn] for cn in members
+                                if cn in scraped_home})
+        if extra_hist or extra_scraped:
+            print(f"    also reading {len(extra_hist)} other mirror and "
+                  f"{len(extra_scraped)} other scrape year file(s) for "
+                  f"re-opened members")
         slices = day_partitions(con)
         if slices:
             print(f"    {len(slices)} slices "
@@ -1049,7 +1163,7 @@ def main() -> int:
                 for i, days in enumerate(slices, 1):
                     part = dest.with_suffix(f".part{i:02d}.parquet")
                     con.execute(
-                        f"COPY ({select_sql(con, str(hist), local, source, days)}) "
+                        f"COPY ({select_sql(con, str(hist), local, source, days, extra_hist, extra_scraped)}) "
                         f"TO '{part}' {copy_opts};")
                     parts.append(part)
                 stitch(parts, dest)
@@ -1058,7 +1172,7 @@ def main() -> int:
                     part.unlink(missing_ok=True)
         else:
             con.execute(
-                f"COPY ({select_sql(con, str(hist), local, source)}) "
+                f"COPY ({select_sql(con, str(hist), local, source, None, extra_hist, extra_scraped)}) "
                 f"TO '{dest}' {copy_opts};")
         check_types(dest)
 
@@ -1144,13 +1258,23 @@ def main() -> int:
     # Everything with local text that is now in a month file, not just what
     # this run wrote: a posting that already lives in another month's file
     # keeps its local text otherwise, forever.
+    #
+    # A re-fetched page of a re-opened posting was located before this run, so
+    # being located proves nothing about it: it counts as published only if
+    # its month was written this run. Pruning it otherwise would delete the
+    # only copy of the new page while the dataset still holds the old one.
     published_now = {cn for cns in by_month.values() for cn in cns
-                     if cn in located}
-    if not args.keep_text and scraped.exists() and published_now:
-        cleared = prune_published_text(str(scraped), published_now)
-        after = os.path.getsize(scraped) / 1e6
-        print(f"Dropped local text for {cleared:,} published postings; "
-              f"{scraped.name} is now {after:,.0f} MB")
+                     if cn in located
+                     and (cn not in relisted or located[cn] in written)}
+    prune_paths = ([str(scraped)] if scraped.exists() else []) + sorted(
+        {relisted[cn] for cn in published_now if cn in relisted}
+        - {str(scraped)})
+    if not args.keep_text and published_now:
+        for path in prune_paths:
+            cleared = prune_published_text(path, published_now)
+            after = os.path.getsize(path) / 1e6
+            print(f"Dropped local text for {cleared:,} published postings; "
+                  f"{Path(path).name} is now {after:,.0f} MB")
 
     check_freshness(con, str(hist), set(manifest))
     return EXIT_REFUSED if refused else 0

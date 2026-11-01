@@ -45,8 +45,9 @@ from tqdm import tqdm
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from cap_alert import check_cap
-from collect_current_data import (get_year_from_date, group_jobs_by_year,
-                                  load_existing_jobs, save_jobs_to_parquet)
+from listings import (PRIOR_COL, PRIOR_FIELDS, SCRAPED, carry_listing,
+                      collapse_across_years, write_moves_csv, year_files)
+from collect_current_data import group_jobs_by_year, save_jobs_to_parquet
 from usajobs_scrape import (MAX_RESULTS, SECTION_FIELDS, diagnose_structure,
                             fetch_job_page, new_session, normalize_search_job,
                             open_inventory, parse_job_page, search_slice)
@@ -175,6 +176,51 @@ def discover(session, test: bool, only: str = "") -> tuple[List[Dict], int]:
              f"Pagination may have stopped early.")
 
     return rows, expected
+
+
+def stored_listings(data_dir: str) -> Dict[str, Dict]:
+    """Control number -> the listing its stored page was fetched for, across
+    every scraped year file. Reads only the listing columns, not the text."""
+    import pyarrow.parquet as pq
+    out = {}
+    for _, path in sorted(year_files(data_dir, SCRAPED).items()):
+        names = pq.read_schema(path).names
+        if "usajobs_control_number" not in names:
+            continue
+        cols = ["usajobs_control_number"] + [
+            c for c in PRIOR_FIELDS + (PRIOR_COL,) if c in names]
+        for row in pq.read_table(path, columns=cols).to_pylist():
+            cn = row.pop("usajobs_control_number")
+            if cn is None:
+                continue
+            cn = str(cn)
+            # A control number in two files is collapsed at the end of the
+            # run; until then the later listing is the one that counts.
+            prev = out.get(cn)
+            if prev is None or (str(row.get("positionOpenDate") or "")[:10]
+                                > str(prev.get("positionOpenDate") or "")[:10]):
+                out[cn] = row
+    return out
+
+
+def relisted(rows: List[Dict], stored: Dict[str, Dict]) -> set:
+    """Control numbers discovery now shows under a later open date than the
+    one their stored page was fetched for: re-opened postings.
+
+    The page is fetched once per control number, so before 2026-11-01 a
+    re-opened posting kept its first listing's text forever while the mirror
+    moved on to the new listing -- metadata from one listing, text from
+    another, published side by side. Their pages are fetched again.
+    """
+    out = set()
+    for r in rows:
+        cn = r.get("usajobs_control_number")
+        prev = stored.get(cn)
+        new_open = str(r.get("positionOpenDate") or "")[:10]
+        old_open = str((prev or {}).get("positionOpenDate") or "")[:10]
+        if prev is not None and new_open and old_open and new_open > old_open:
+            out.add(cn)
+    return out
 
 
 def add_details(rows: List[Dict], known: set, workers: int,
@@ -340,15 +386,16 @@ def main() -> None:
         warn("Scrape discovery returned 0 postings.")
         return
 
-    # Only postings we have never stored need their announcement page; the
-    # detail fields do not change once an announcement is posted, and the ones
-    # that do (status, close date) come from discovery on every run.
-    known = set()
-    for year in {get_year_from_date(r.get("positionOpenDate")) for r in rows}:
-        if year:
-            known |= load_existing_jobs(
-                os.path.join(args.data_dir, f"scraped_jobs_{year}.parquet"))
-    print(f"Already stored: {len(known):,} postings")
+    # Only postings we have never stored need their announcement page -- and
+    # postings re-opened under a later open date than the page we stored,
+    # since the agency can rewrite the announcement when it re-lists it. The
+    # lookup spans every year file: a posting re-opened into a new year is
+    # not "new" just because the new year's file lacks it.
+    stored = stored_listings(args.data_dir)
+    again = relisted(rows, stored)
+    known = set(stored) - again
+    print(f"Already stored: {len(known):,} postings; "
+          f"{len(again):,} re-opened since their page was fetched")
 
     undetailed = set()
     if not args.no_details:
@@ -363,12 +410,18 @@ def main() -> None:
     fresh = [r for r in rows
              if r["usajobs_control_number"] not in known
              and r["usajobs_control_number"] not in undetailed]
-    print(f"\n{len(fresh):,} new postings to store "
+    print(f"\n{len(fresh):,} new or re-opened postings to store "
           f"({len(rows) - len(fresh) - len(undetailed):,} already stored, "
           f"{len(undetailed):,} deferred to the next run)")
     if not fresh:
         print("Nothing new to write")
         return
+
+    # A re-fetched posting keeps the listing its old page belonged to, so the
+    # record of earlier listings survives the row being replaced.
+    for r in fresh:
+        if r["usajobs_control_number"] in again:
+            r[PRIOR_COL] = carry_listing(stored[r["usajobs_control_number"]], r)
 
     by_year = group_jobs_by_year(fresh)
     if not by_year:
@@ -380,7 +433,15 @@ def main() -> None:
         print(f"\n{year}: {len(by_year[year]):,} postings -> {path}")
         save_jobs_to_parquet(by_year[year], path)
 
-    print(f"\nDone: {len(fresh):,} new postings across {len(by_year)} year(s)")
+    # A re-opened posting filed under a new year leaves its old page in the
+    # old year's file; retire it. See listings.py.
+    moves = collapse_across_years(args.data_dir, prefix=SCRAPED)
+    write_moves_csv(moves, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        "..", "logs"),
+                    datetime.now().strftime("%Y%m%d_%H%M%S"), tag="_scraped")
+
+    print(f"\nDone: {len(fresh):,} new or re-fetched postings across "
+          f"{len(by_year)} year(s)")
 
 
 if __name__ == "__main__":

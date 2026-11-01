@@ -109,9 +109,17 @@ with closing dates years after the opening dates.
 | 2026 | 220,012 | 217,478 |
 
 Counts are distinct announcements, deduplicated by `usajobsControlNumber`
-across both APIs. Each row is deduplicated within its own year file, so a
-posting open across a year boundary is counted in both years and the column
-sums to a few hundred more than the header total.
+across both APIs. Each row is deduplicated within its own year file. The
+column sums to a few hundred more than the header total because USAJOBS
+re-opens postings under the same control number with new dates: a posting
+first listed in one year and re-listed in the next is filed under both years.
+
+Since 2026-11-01 the historical files keep each control number once, in its
+latest listing's year, with earlier listings in a `priorListings` column (see
+`scripts/listings.py`); 289 control numbers had been in two or three year
+files. The `current_jobs` files are a record of every posting as it was seen
+while open and are not collapsed, so their re-listed postings (309 when this
+was written) still count in both years.
 
 Figures published before September 2026 were row counts added together, which
 counted every posting appearing in both APIs twice — 2026 read 356,088 against

@@ -64,6 +64,11 @@ jobs:
         pip install -r requirements.txt
         pip install boto3 pytest
 
+    # The repoll rewrites listings and moves re-opened postings between year
+    # files (scripts/listings.py); test that before it touches the data.
+    - name: Test the listing refresh
+      run: python -m pytest scripts/tests/test_listings.py scripts/tests/test_repoll_fetch.py -q
+
     - name: Download data from R2
       env:
         R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}

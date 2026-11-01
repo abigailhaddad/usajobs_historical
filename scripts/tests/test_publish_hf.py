@@ -198,6 +198,58 @@ class TestBuildSql:
         assert out.loc["9", "text"] == "page nine"
         assert out.loc["9", "positionTitle"] == "carried"
 
+    def _other_year(self, tmp_path, hist, title, open_date, text):
+        """A second mirror year holding "9", re-opened into it, and its
+        re-fetched page in that year's scrape file."""
+        import pandas as pd
+        frame = pd.read_parquet(hist).iloc[:1].copy()
+        frame["usajobsControlNumber"] = 9
+        frame["positionTitle"] = title
+        frame["positionOpenDate"] = open_date
+        other_hist = tmp_path / "historical_jobs_2027.parquet"
+        frame.to_parquet(other_hist, index=False)
+        other_scraped = tmp_path / "scraped_jobs_2027.parquet"
+        pd.DataFrame({"usajobs_control_number": ["9"],
+                      "positionOpenDate": [open_date],
+                      "text": [text]}).to_parquet(other_scraped, index=False)
+        return str(other_hist), str(other_scraped)
+
+    def test_a_member_reopened_into_another_year_gets_its_latest_listing(self, tmp_path):
+        # 2026-11-01: "9" was carried over frozen. With its new year's files
+        # passed in, the published row takes the fresh metadata and the page
+        # fetched for the new listing.
+        con, hist, scraped, prior = self._setup(tmp_path)
+        other_hist, other_scraped = self._other_year(
+            tmp_path, hist, "fresh", "2027-01-04", "re-fetched page nine")
+        con.execute("CREATE OR REPLACE TEMP TABLE members (cn VARCHAR, d VARCHAR)")
+        con.executemany("INSERT INTO members VALUES (?, ?)", [("1", "01"), ("9", "01")])
+        out = con.execute(select_sql(con, hist, scraped, prior, None,
+                                     [other_hist], [other_scraped])).df() \
+            .set_index("usajobsControlNumber")
+        assert set(out.index) == {"1", "9"}
+        assert out.loc["9", "positionTitle"] == "fresh"
+        assert out.loc["9", "positionOpenDate"] == "2027-01-04"
+        assert out.loc["9", "text"] == "re-fetched page nine"
+        assert out.loc["1", "text"] == "page one"
+
+    def test_two_pages_for_one_posting_take_the_later_listing(self, tmp_path):
+        import pandas as pd
+        con, hist, scraped, prior = self._setup(tmp_path)
+        older = tmp_path / "scraped_jobs_2025.parquet"
+        pd.DataFrame({"usajobs_control_number": ["3"],
+                      "positionOpenDate": ["2025-01-01"],
+                      "text": ["stale page three"]}).to_parquet(older, index=False)
+        newer = tmp_path / "scraped_jobs_2027.parquet"
+        pd.DataFrame({"usajobs_control_number": ["3"],
+                      "positionOpenDate": ["2027-02-01"],
+                      "text": ["latest page three"]}).to_parquet(newer, index=False)
+        con.execute("CREATE OR REPLACE TEMP TABLE members (cn VARCHAR, d VARCHAR)")
+        con.executemany("INSERT INTO members VALUES (?, ?)", [("3", "20")])
+        out = con.execute(select_sql(con, hist, str(older), None, None,
+                                     (), [str(newer)])).df() \
+            .set_index("usajobsControlNumber")
+        assert out.loc["3", "text"] == "latest page three"
+
     def test_non_members_are_left_out(self, tmp_path):
         con, hist, scraped, prior = self._setup(tmp_path)
         out = self._build(con, hist, scraped, prior, [("3", "20")])
