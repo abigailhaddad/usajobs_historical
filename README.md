@@ -109,7 +109,13 @@ with closing dates years after the opening dates.
 | 2026 | 220,012 | 217,478 |
 
 Counts are distinct announcements, deduplicated by `usajobsControlNumber`
-across both APIs. Each row is deduplicated within its own year file. The
+across both APIs. An announcement is not a position (one can fill several
+openings, and one hiring action split by location or grade is several
+announcements), and canceled announcements are included: "Job canceled" was
+15% of all the Historical API's records on 2026-11-01, rising from 9% of
+those opened in 2017 to 22% of those opened in 2025 (2026's are still
+resolving), so year-over-year counts include a growing share of postings that
+never filled anyone. Each row is deduplicated within its own year file. The
 column sums to a few hundred more than the header total because USAJOBS
 re-opens postings under the same control number with new dates: a posting
 first listed in one year and re-listed in the next is filed under both years.
