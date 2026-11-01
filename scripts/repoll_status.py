@@ -2,6 +2,14 @@
 """
 Re-poll positionOpeningStatus for historical jobs that don't have a final status.
 
+Since 2026-11-01 it also refreshes the listing's dates (open, close, expire).
+It used to write the status alone, so an extended or re-opened posting carried
+the new listing's status beside the old listing's dates -- 835811200 said it
+closed 2026-06-30 while the API said 2026-10-30. A changed open date means a
+re-open; the earlier listing goes into priorListings (see listings.py), and a
+posting re-opened into another year is retired from the old year's file at the
+end of the run.
+
 Queries the USAJobs Historical API by date range for all jobs currently marked as
 'Accepting applications', 'Applications under review', or NULL status, then updates
 statuses and inserts any new jobs not already in the parquet files.
@@ -34,6 +42,8 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 
 from cap_alert import check_cap
+from listings import (PRIOR_COL, carry_listing, collapse_across_years,
+                      write_moves_csv)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
 
@@ -269,6 +279,19 @@ def get_coverage_gap_dates(parquet_path: str, year: int, cutoff_date: str,
     return gaps
 
 
+def _day(value) -> Optional[str]:
+    """First ten characters of a date, or None. The parquet holds dates as
+    'YYYY-MM-DDT00:00:00' strings and the API as 'YYYY-MM-DD'; compare days."""
+    if value is None:
+        return None
+    try:
+        if pd.isna(value):
+            return None
+    except (TypeError, ValueError):
+        pass
+    return str(value)[:10]
+
+
 def get_nonfinal_dates(parquet_path: str) -> List[str]:
     """Get sorted list of distinct positionOpenDate values for non-final jobs."""
     df = pd.read_parquet(parquet_path)
@@ -299,11 +322,29 @@ def get_gap_dates(parquet_path: str, year: int, cutoff_date: str, lookback_month
     return [d.strftime('%Y-%m-%d') for d in all_cal_dates if d.strftime('%Y-%m-%d') not in existing]
 
 
-def update_and_insert(parquet_path: str, status_map: Dict[str, str],
+# What the repoll refreshes on a row it already has. Status alone is how rows
+# ended up with one listing's status and another listing's dates; the dates
+# come with it. Everything else stays as first collected (the daily collector
+# replaces whole rows for the dates it re-fetches).
+REFRESHED_FIELDS = ('positionOpeningStatus', 'positionOpenDate',
+                    'positionCloseDate', 'positionExpireDate')
+
+
+def listing_fields(job: Dict) -> Dict:
+    """The parts of an API record the repoll writes back, plus what
+    carry_listing needs to describe it."""
+    return {f: job.get(f) for f in REFRESHED_FIELDS + (
+        'announcementNumber', 'positionTitle')}
+
+
+def update_and_insert(parquet_path: str, status_map: Dict[str, Dict],
                       new_jobs: List[Dict]) -> tuple:
-    """Update statuses for existing jobs and insert new jobs.
+    """Refresh the listing (status and dates) of existing jobs, insert new ones.
+
+    status_map: control number -> listing_fields() of the API's record.
     Returns (changed_count, inserted_count, status_transitions).
-    status_transitions is a list of (control_number, old_status, new_status)."""
+    status_transitions is a list of (control_number, old_status, new_status, ...);
+    a row counts as changed when its status or any of its dates did."""
     if not status_map and not new_jobs:
         return 0, 0, []
 
@@ -333,8 +374,26 @@ def update_and_insert(parquet_path: str, status_map: Dict[str, str],
     now = datetime.now().isoformat()
     for idx, key in keys.items():
         if key in status_map:
+            listing = status_map[key]
             old = df.at[idx, 'positionOpeningStatus']
-            new = status_map[key]
+            new = listing['positionOpeningStatus']
+            old_row = {f: df.at[idx, f] for f in listing if f in df.columns}
+            old_row[PRIOR_COL] = df.at[idx, PRIOR_COL] if PRIOR_COL in df.columns else None
+            dates_moved = any(
+                f in df.columns and _day(df.at[idx, f]) != _day(listing.get(f))
+                for f in REFRESHED_FIELDS[1:])
+            if dates_moved:
+                prior = carry_listing(old_row, listing)
+                if prior is not None or PRIOR_COL in df.columns:
+                    if PRIOR_COL not in df.columns:
+                        df[PRIOR_COL] = None
+                    df.at[idx, PRIOR_COL] = prior
+                for f in REFRESHED_FIELDS[1:]:
+                    if f in df.columns:
+                        df.at[idx, f] = listing.get(f)
+                df.at[idx, 'last_seen'] = now
+                if old == new:
+                    changed += 1
             if old != new:
                 df.at[idx, 'positionOpeningStatus'] = new
                 df.at[idx, 'last_seen'] = now
@@ -591,7 +650,7 @@ def main():
                     status = job.get('positionOpeningStatus')
                     if cn and status:
                         if cn in existing_ids.get(year, set()):
-                            year_status_maps[year][cn] = status
+                            year_status_maps[year][cn] = listing_fields(job)
                         else:
                             year_new_jobs[year].append(job)
                             existing_ids.setdefault(year, set()).add(cn)
@@ -629,7 +688,7 @@ def main():
                     changes_by_year[year] = changes_by_year.get(year, 0) + changed
                     parts = []
                     if changed:
-                        parts.append(f"{changed:,} statuses updated")
+                        parts.append(f"{changed:,} listings updated")
                     if inserted:
                         parts.append(f"{inserted:,} new jobs inserted")
                     if parts:
@@ -656,11 +715,21 @@ def main():
                 changes_by_year[year] = changes_by_year.get(year, 0) + changed
                 parts = []
                 if changed:
-                    parts.append(f"{changed:,} statuses updated")
+                    parts.append(f"{changed:,} listings updated")
                 if inserted:
                     parts.append(f"{inserted:,} new jobs inserted")
                 if parts:
                     log(f"{year}: {', '.join(parts)}")
+
+    # A posting the API now lists on a date in another year was inserted into
+    # that year above as if it were new; retire its copy in the old year's
+    # file, keeping that listing in priorListings. See listings.py.
+    moves = collapse_across_years(DATA_DIR, log=log)
+    if moves:
+        path = write_moves_csv(
+            moves, os.path.join(os.path.dirname(__file__), '..', 'logs'),
+            datetime.now().strftime('%Y%m%d_%H%M%S'))
+        log(f"  Moves: {path}")
 
     elapsed_total = time.time() - start_time
     from collections import Counter
@@ -669,7 +738,9 @@ def main():
     log(f"REPOLL SUMMARY")
     log(f"{'='*60}")
     log(f"Runtime: {elapsed_total/60:.1f} min | {dates_queried} dates | {api_jobs_seen:,} API jobs seen | {errors} errors")
-    log(f"Totals: {total_changed:,} statuses changed, {total_inserted:,} new jobs inserted")
+    log(f"Totals: {total_changed:,} listings changed (status or dates), "
+        f"{total_inserted:,} new jobs inserted, {len(moves):,} re-opened "
+        f"posting(s) moved to their latest year")
 
     # Per-year breakdown
     log(f"\nPer-year breakdown:")

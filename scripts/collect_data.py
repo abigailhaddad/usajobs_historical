@@ -22,6 +22,8 @@ from tqdm import tqdm
 import logging
 import sys
 from cap_alert import check_cap
+from listings import (PRIOR_COL, carry_listing, collapse_across_years,
+                      write_moves_csv)
 
 # Base URL for API requests
 
@@ -446,6 +448,23 @@ def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
         if overlapping_control_numbers and 'last_seen' not in existing_df.columns:
             existing_df['last_seen'] = existing_df.get('inserted_at', datetime.now().isoformat())
 
+        # A replaced row may be an earlier listing of a re-opened posting:
+        # same control number, earlier open date. Keep its listing in the new
+        # row's priorListings (and carry any it already had) before it is
+        # dropped below -- otherwise the replace silently erases the fact that
+        # the posting was ever listed under other dates. See listings.py.
+        if overlapping_control_numbers:
+            old_rows = {
+                cn: row for cn, row in zip(
+                    _control_numbers(existing_df),
+                    existing_df.to_dict('records'))
+                if cn in overlapping_control_numbers}
+            new_df[PRIOR_COL] = [
+                carry_listing(old_rows[cn], row) if cn in old_rows
+                else row.get(PRIOR_COL)
+                for cn, row in zip(_control_numbers(new_df),
+                                   new_df.to_dict('records'))]
+
         # Remove duplicates from existing data (keep existing version for now)
         # We'll add the new versions below
         if overlapping_control_numbers:
@@ -678,6 +697,15 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
             save_jobs_to_parquet(year_jobs, parquet_path)
         
         print(f"💾 Saved final {len(weekly_batch)} jobs to year-based parquet files")
+
+    # A posting re-opened under a new open date in another year was just
+    # filed in that year; retire its copy in the old one. See listings.py.
+    moves = collapse_across_years(data_dir)
+    if moves:
+        path = write_moves_csv(
+            moves, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'logs'),
+            datetime.now().strftime('%Y%m%d_%H%M%S'))
+        logger.info(f"Moved {len(moves)} re-opened posting(s) to their latest year; see {path}")
     
     # Report results and any failures with aggressive warnings
     logger.info(f"✅ Total unique jobs found: {len(all_jobs)}")

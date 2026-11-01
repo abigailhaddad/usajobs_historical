@@ -200,6 +200,39 @@ def check_no_duplicate_control_numbers():
     return all_good
 
 
+def _moved_out(log_dir='../logs', data_dir='../data'):
+    """{filename: control numbers legitimately moved out of it this run}.
+
+    A re-opened posting is kept only in its latest listing's year file
+    (scripts/listings.py), so the file it was first filed in shrinks. That is
+    the one way a file may shrink: listings.collapse_across_years writes every
+    removal to logs/listing_moves_*.csv, and a removal only counts here if the
+    control number is really in the file it says it moved to. Anything else
+    missing is still lost.
+    """
+    import csv
+    import glob
+    out, unverified = {}, []
+    targets = {}
+    for path in sorted(glob.glob(os.path.join(log_dir, 'listing_moves_*.csv'))):
+        with open(path, newline='') as f:
+            for row in csv.DictReader(f):
+                cn, src, dst = row['control_number'], row['from_file'], row['to_file']
+                if dst not in targets:
+                    dst_path = os.path.join(data_dir, dst)
+                    targets[dst] = (_job_ids(dst_path) or set()) \
+                        if os.path.exists(dst_path) else set()
+                if cn in targets[dst]:
+                    out.setdefault(src, set()).add(cn)
+                else:
+                    unverified.append((cn, src, dst))
+    if unverified:
+        print(f"{Colors.RED}❌ FAIL{Colors.RESET} {len(unverified)} logged move(s) "
+              f"whose control number is not in the file it moved to, e.g. "
+              f"{unverified[:3]}")
+    return out, not unverified
+
+
 def check_no_data_loss():
     """Ensure historical data hasn't been lost"""
     baseline_file = 'data_baseline.json'  # Store in update directory
@@ -216,6 +249,9 @@ def check_no_data_loss():
         baseline = json.load(f)
 
     all_good = True
+    moved, moves_ok = _moved_out()
+    if not moves_ok:
+        all_good = False
 
     # Check each parquet file hasn't shrunk.
     #
@@ -233,9 +269,14 @@ def check_no_data_loss():
                 if current_count is None:
                     current_count = pq.ParquetFile(filepath).metadata.num_rows
 
-                if current_count < baseline_count:
-                    print(f"{Colors.RED}❌ FAIL{Colors.RESET} {filename} shrunk: {baseline_count} → {current_count}")
+                allowed = len(moved.get(filename, ()))
+                if current_count < baseline_count - allowed:
+                    print(f"{Colors.RED}❌ FAIL{Colors.RESET} {filename} shrunk: {baseline_count} → {current_count}"
+                          + (f" (only {allowed} moved to a later year)" if allowed else ""))
                     all_good = False
+                elif current_count < baseline_count:
+                    print(f"{Colors.GREEN}✅ PASS{Colors.RESET} {filename} {baseline_count} → {current_count}: "
+                          f"{allowed} re-opened posting(s) moved to their latest year")
                 elif current_count > baseline_count:
                     print(f"{Colors.GREEN}✅ PASS{Colors.RESET} {filename} grew: {baseline_count} → {current_count}")
                 else:
@@ -268,6 +309,7 @@ def check_no_job_id_loss():
 
     all_good = True
     total_lost_jobs = 0
+    moved, _ = _moved_out()
 
     print(f"\n{Colors.BLUE}Checking for lost job IDs...{Colors.RESET}")
 
@@ -299,7 +341,11 @@ def check_no_job_id_loss():
                 continue
 
             baseline_set = set(baseline_ids)
-            lost_ids = baseline_set - current_ids
+            relocated = (baseline_set - current_ids) & moved.get(filename, set())
+            lost_ids = baseline_set - current_ids - relocated
+            if relocated:
+                print(f"{Colors.GREEN}✅{Colors.RESET} {filename}: {len(relocated)} tracked "
+                      f"ID(s) moved to a later year file (re-opened)")
 
             if lost_ids:
                 print(f"{Colors.RED}❌ CRITICAL FAIL{Colors.RESET} {filename} LOST {len(lost_ids)} job IDs!")
