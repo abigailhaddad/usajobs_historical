@@ -156,14 +156,10 @@ def get_job_data_page(params: Optional[Dict] = None, next_url: Optional[str] = N
                 raise e
 
 
-def fetch_all_pages(params: Dict, description: str = "") -> tuple[List[Dict], bool]:
-    """Fetch all pages of data with pagination.
-
-    Returns (all_jobs, complete). `complete` is False when a page request
-    failed part-way through or the API reported more rows than we ended up
-    with. The jobs we did collect are still good and worth saving — but the
-    set is truncated, so the caller must not treat that date as finished.
-    """
+def _fetch_pages_once(params: Dict):
+    """One pass over every page: (jobs, complete, the API's totalCount, pages
+    read). `complete` is False here only when a page request failed; the
+    short-count check is fetch_all_pages', after its retry."""
     all_jobs = []
     next_url = None
     page_num = 1
@@ -201,11 +197,40 @@ def fetch_all_pages(params: Dict, description: str = "") -> tuple[List[Dict], bo
             complete = False
             break
 
+    return all_jobs, complete, expected_total, page_num
+
+
+# How long to wait before re-fetching a range that came up short. See
+# fetch_all_pages.
+SHORT_RETRY_WAIT = 30
+
+
+def fetch_all_pages(params: Dict, description: str = "") -> tuple[List[Dict], bool]:
+    """Fetch all pages of data with pagination.
+
+    Returns (all_jobs, complete). `complete` is False when a page request
+    failed part-way through or the API reported more rows than we ended up
+    with. The jobs we did collect are still good and worth saving — but the
+    set is truncated, so the caller must not treat that date as finished.
+
+    A fetch that comes up short of the API's own totalCount is repeated once
+    before anything is alerted. 2026-11-01 (#705, on the repoll): the API
+    answered one date with totalCount 612, 500 rows and no `next` link, and
+    the same query minutes later returned all 97 rows the date really has.
+    A second short fetch still alerts.
+    """
+    all_jobs, complete, expected_total, page_num = _fetch_pages_once(dict(params))
+    if expected_total is not None and len(all_jobs) < expected_total:
+        print(f"  ↻ API reported {expected_total} but got {len(all_jobs)} in {page_num} "
+              f"page(s); fetching [{description}] again in {SHORT_RETRY_WAIT}s")
+        time.sleep(SHORT_RETRY_WAIT)
+        all_jobs, complete, expected_total, page_num = _fetch_pages_once(dict(params))
+
     # Verify we collected everything the API said was available
     if expected_total is not None and len(all_jobs) < expected_total:
         complete = False
         msg = (f"🚨 PAGINATION UNDER-COLLECTION: API reported {expected_total} total jobs "
-               f"but only collected {len(all_jobs)} after {page_num} page(s). "
+               f"but only collected {len(all_jobs)} after {page_num} page(s), twice. "
                f"Check if continuationToken-based pagination broke.")
         print(msg)
         logging.getLogger(__name__).critical(msg)
@@ -214,7 +239,8 @@ def fetch_all_pages(params: Dict, description: str = "") -> tuple[List[Dict], bo
         os.makedirs(log_dir, exist_ok=True)
         alert_path = os.path.join(log_dir, 'PAGINATION_UNDER_COLLECTION.txt')
         with open(alert_path, 'a') as f:
-            f.write(f"{description}: expected {expected_total}, got {len(all_jobs)} ({page_num} pages)\n")
+            f.write(f"{description}: expected {expected_total}, got {len(all_jobs)} "
+                    f"({page_num} pages), on two fetches\n")
 
     # Cap tripwire: landing exactly on 500 (page size) or 10,000 may mean
     # pagination stopped at a boundary rather than the true end.
