@@ -1,10 +1,10 @@
 # USAJobs Data Pipeline
 
-**Data collection last run: 2026-11-01** (updated daily from GitHub Actions)
+**Data collection last run: 2026-11-02** (updated daily from GitHub Actions)
 
 **This is not an official USAJobs project.**
 
-**3,268,936 job announcements from 2013-2026 via the Historical + Current APIs**
+**3,269,716 job announcements from 2013-2026 via the Historical + Current APIs**
 
 ## Getting the Data
 
@@ -100,13 +100,13 @@ with closing dates years after the opening dates.
 | 2017 | 237,146 | 226,249 |
 | 2018 | 329,356 | 316,938 |
 | 2019 | 349,262 | 336,614 |
-| 2020 | 328,440 | 316,052 |
+| 2020 | 328,439 | 316,051 |
 | 2021 | 369,151 | 352,375 |
 | 2022 | 441,604 | 419,295 |
-| 2023 | 454,652 | 434,527 |
-| 2024 | 367,192 | 352,305 |
-| 2025 | 168,533 | 161,047 |
-| 2026 | 220,012 | 217,478 |
+| 2023 | 454,645 | 434,521 |
+| 2024 | 367,079 | 352,261 |
+| 2025 | 168,516 | 161,031 |
+| 2026 | 220,792 | 218,328 |
 
 Counts are distinct announcements, deduplicated by `usajobsControlNumber`
 across both APIs. An announcement is not a position (one can fill several
