@@ -261,3 +261,59 @@ class TestIntegrityMoves:
         moved, ok = tdi._moved_out(logs, str(data))
         assert moved == {"historical_jobs_2024.parquet": {"547366900"}}
         assert not ok
+
+    def _run_checks(self, tmp_path, monkeypatch, files, baseline_files):
+        """Write `files` ({name: rows}), baseline `baseline_files` ({name: ids}),
+        and run both loss checks the way the daily job does: from update/, with
+        data in ../data and no move log (the re-poll runner's is gone)."""
+        tdi = self._load()
+        data, upd = tmp_path / "data", tmp_path / "update"
+        data.mkdir()
+        upd.mkdir()
+        for name, rows in files.items():
+            write(data / name, rows)
+        (upd / "data_baseline.json").write_text(json.dumps({
+            "row_counts": {n: len(ids) for n, ids in baseline_files.items()},
+            "job_ids": baseline_files}))
+        monkeypatch.chdir(upd)
+        return tdi.check_no_data_loss(), tdi.check_no_job_id_loss()
+
+    def test_a_move_another_run_made_passes_without_its_log(self, tmp_path, monkeypatch):
+        # Issue #707: re-poll moved 547366900 from 2024 into 2025 on 2026-11-01;
+        # the next daily run had neither its log nor its baseline.
+        other = {**FAA_2024, "usajobsControlNumber": 1}
+        assert self._run_checks(
+            tmp_path, monkeypatch,
+            {"historical_jobs_2024.parquet": [other],
+             "historical_jobs_2025.parquet": [FAA_2025]},
+            {"historical_jobs_2024.parquet": ["547366900", "1"],
+             "historical_jobs_2025.parquet": ["547366900"]}) == (True, True)
+
+    def test_an_id_gone_from_every_year_is_still_lost(self, tmp_path, monkeypatch, capsys):
+        other = {**FAA_2024, "usajobsControlNumber": 1}
+        assert self._run_checks(
+            tmp_path, monkeypatch,
+            {"historical_jobs_2024.parquet": [other],
+             "historical_jobs_2025.parquet": [{**FAA_2025, "usajobsControlNumber": 2}]},
+            {"historical_jobs_2024.parquet": ["547366900", "1"],
+             "historical_jobs_2025.parquet": ["2"]}) == (False, False)
+        assert "LOST 1 job IDs" in capsys.readouterr().out
+
+    def test_only_a_later_year_counts(self, tmp_path, monkeypatch):
+        # Present in 2023 but gone from 2024: a collapse never moves backwards.
+        other = {**FAA_2024, "usajobsControlNumber": 1}
+        assert self._run_checks(
+            tmp_path, monkeypatch,
+            {"historical_jobs_2023.parquet": [FAA_2024],
+             "historical_jobs_2024.parquet": [other]},
+            {"historical_jobs_2023.parquet": ["547366900"],
+             "historical_jobs_2024.parquet": ["547366900", "1"]}) == (False, False)
+
+    def test_backups_get_no_allowance(self, tmp_path, monkeypatch):
+        other = {**FAA_2024, "usajobsControlNumber": 1}
+        assert self._run_checks(
+            tmp_path, monkeypatch,
+            {"historical_jobs_2024_backup.parquet": [other],
+             "historical_jobs_2025.parquet": [FAA_2025]},
+            {"historical_jobs_2024_backup.parquet": ["547366900", "1"],
+             "historical_jobs_2025.parquet": ["547366900"]}) == (False, False)
