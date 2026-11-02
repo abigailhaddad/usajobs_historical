@@ -6,7 +6,9 @@ Ensures parquet files are valid and contain expected data.
 Usage: python test_data_integrity.py
 """
 
+import glob
 import os
+import re
 import sys
 import pandas as pd
 import pyarrow.parquet as pq
@@ -233,6 +235,39 @@ def _moved_out(log_dir='../logs', data_dir='../data'):
     return out, not unverified
 
 
+YEAR_FILE = re.compile(r'^(historical_jobs|scraped_jobs)_(\d{4})\.parquet$')
+_ids_cache = {}
+
+
+def _cached_job_ids(path):
+    if path not in _ids_cache:
+        _ids_cache[path] = _job_ids(path) or set()
+    return _ids_cache[path]
+
+
+def _in_later_year(filename, missing, data_dir='../data'):
+    """The ids in `missing` that now sit in a later year file of the same family.
+
+    The move logs above only exist on the runner that made the moves. The
+    re-poll workflow collapses re-opened postings too, and its logs and updated
+    baseline die with its runner, so the next daily run saw its 308 moves of
+    2026-11-01 as 22 lost job ids (issue #707). This checks the data instead:
+    a posting gone from historical_jobs_2024 but present in historical_jobs_2025
+    moved. An id gone from every year file is still lost. Backups and
+    current_jobs files never match YEAR_FILE, so they get no allowance.
+    """
+    m = YEAR_FILE.match(filename)
+    if not m or not missing:
+        return set()
+    prefix, year = m.group(1), int(m.group(2))
+    found = set()
+    for path in sorted(glob.glob(os.path.join(data_dir, f'{prefix}_*.parquet'))):
+        other = YEAR_FILE.match(os.path.basename(path))
+        if other and other.group(1) == prefix and int(other.group(2)) > year:
+            found |= missing & _cached_job_ids(path)
+    return found
+
+
 def check_no_data_loss():
     """Ensure historical data hasn't been lost"""
     baseline_file = 'data_baseline.json'  # Store in update directory
@@ -270,6 +305,10 @@ def check_no_data_loss():
                     current_count = pq.ParquetFile(filepath).metadata.num_rows
 
                 allowed = len(moved.get(filename, ()))
+                base_ids = set(baseline.get('job_ids', {}).get(filename) or ())
+                if current_count < baseline_count - allowed and base_ids:
+                    gone = base_ids - _cached_job_ids(filepath) - moved.get(filename, set())
+                    allowed += len(_in_later_year(filename, gone))
                 if current_count < baseline_count - allowed:
                     print(f"{Colors.RED}❌ FAIL{Colors.RESET} {filename} shrunk: {baseline_count} → {current_count}"
                           + (f" (only {allowed} moved to a later year)" if allowed else ""))
@@ -342,6 +381,7 @@ def check_no_job_id_loss():
 
             baseline_set = set(baseline_ids)
             relocated = (baseline_set - current_ids) & moved.get(filename, set())
+            relocated |= _in_later_year(filename, baseline_set - current_ids - relocated)
             lost_ids = baseline_set - current_ids - relocated
             if relocated:
                 print(f"{Colors.GREEN}✅{Colors.RESET} {filename}: {len(relocated)} tracked "
