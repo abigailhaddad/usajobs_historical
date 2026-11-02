@@ -530,6 +530,12 @@ jobs:
       if: always()
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        # connection()'s 4GB default was sized for the 8 GB Hetzner box (gone
+        # since 2026-09-12). This runner has 15 GiB, and on 2026-11-02 the
+        # publish hit the 4GB ceiling twice (OOM at 3.7 GiB in the month COPY,
+        # issue #707), the first publish to read other years' mirror files for
+        # re-opened postings. 10GB still leaves ~5 GiB for pyarrow and the rest.
+        DUCKDB_MEMORY_LIMIT: 10GB
       run: |
         # Metadata keeps changing after a posting appears (close dates,
         # opening status), so rewrite every month once a month; the daily run
