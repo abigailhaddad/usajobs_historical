@@ -82,7 +82,7 @@ The `jobs_5yr.parquet` web dataset already has this fix applied — it is safe t
 
 ## Resources
 
-- [Field documentation](https://abigailhaddad.github.io/usajobs_historical/) - Guide to data fields and statistics
+- [Live site](https://usajobs-historical.abigailhaddad.com) - Filter, chart and download the data
 - [USAJobs API documentation](https://developer.usajobs.gov/) - Official API docs
 - [`examples.py`](https://github.com/abigailhaddad/usajobs_historical/blob/main/examples.py) - Analysis examples
 
