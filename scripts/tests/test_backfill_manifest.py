@@ -27,3 +27,15 @@ def test_other_errors_raise_instead_of_returning_empty(monkeypatch):
     _patch(monkeypatch, TimeoutError("429 / timeout"))
     with pytest.raises(TimeoutError):
         bsp.published_control_numbers()
+
+
+def test_transient_hub_failure_raises(monkeypatch):
+    # LocalEntryNotFoundError subclasses EntryNotFoundError; hf_hub_download
+    # raises it when the HEAD call hits a 429/5xx/timeout with no cached copy.
+    try:
+        from huggingface_hub.errors import LocalEntryNotFoundError
+    except ImportError:
+        from huggingface_hub.utils import LocalEntryNotFoundError
+    _patch(monkeypatch, LocalEntryNotFoundError("429"))
+    with pytest.raises(LocalEntryNotFoundError):
+        bsp.published_control_numbers()
