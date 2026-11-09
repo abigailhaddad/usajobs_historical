@@ -88,6 +88,12 @@ function filterColExpr(col) {
   return base;
 }
 
+/** Escape LIKE wildcards so user text is matched literally: a typed "_" or "%"
+ *  (or backslash) is a character, not a wildcard. Pair with ESCAPE '\\'. */
+export function escapeLike(text) {
+  return String(text).replace(/[\\%_]/g, '\\$&');
+}
+
 function normalizeFilterValue(col, value) {
   if (col === 'grade') return canonicalGrade(value);
   return String(value).toLowerCase();
@@ -162,8 +168,8 @@ export function parseFilters(params) {
       if (MULTI_VALUE_FIELDS.has(paramName)) {
         const likeParts = [];
         for (const p of parts) {
-          likeParts.push(`${colExpr} LIKE ?`);
-          bindValues.push(`%${normalizeFilterValue(paramName, p)}%`);
+          likeParts.push(`${colExpr} LIKE ? ESCAPE '\\'`);
+          bindValues.push(`%${escapeLike(normalizeFilterValue(paramName, p))}%`);
         }
         clauses.push(`(${likeParts.join(' OR ')})`);
       } else {
@@ -181,13 +187,13 @@ export function parseFilters(params) {
       if (terms.length > 1) {
         const likeParts = [];
         for (const t of terms) {
-          likeParts.push(`${colExpr} LIKE ?`);
-          bindValues.push(`%${normalizeFilterValue(paramName, t)}%`);
+          likeParts.push(`${colExpr} LIKE ? ESCAPE '\\'`);
+          bindValues.push(`%${escapeLike(normalizeFilterValue(paramName, t))}%`);
         }
         clauses.push(`(${likeParts.join(' OR ')})`);
       } else {
-        clauses.push(`${colExpr} LIKE ?`);
-        bindValues.push(`%${normalizeFilterValue(paramName, value)}%`);
+        clauses.push(`${colExpr} LIKE ? ESCAPE '\\'`);
+        bindValues.push(`%${escapeLike(normalizeFilterValue(paramName, value))}%`);
       }
     }
   }

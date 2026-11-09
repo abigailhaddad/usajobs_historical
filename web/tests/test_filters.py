@@ -251,3 +251,31 @@ def test_static_json_row_order_matches_the_table():
     m = re.search(r'DISPLAY_COLUMNS = \[(.*?)\]', prep, re.S)
     assert m, 'DISPLAY_COLUMNS not found in scripts/prep_web_data.py'
     assert re.findall(r'"([^"]+)"', m.group(1)) == _js_const('COLUMNS')
+
+
+def test_like_wildcards_in_user_text_are_literal():
+    """A typed "_" or "%" is a character, not a LIKE wildcard. Self-contained:
+    runs the generated SQL on a tiny in-memory table, not the big parquet."""
+    corpus = [{'filter_positionTitle': 'help_desk'},
+              {'filter_positionTitle': '100%'},
+              {'filter_positionTitle': 'a\\b'},
+              {'filter_positionTitle': 'help desk'}]
+    proc = subprocess.run(['node', str(HERE / '_filters_runner.mjs')],
+                          input=json.dumps(corpus), capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr
+    sides = json.loads(proc.stdout)
+    con = duckdb.connect()
+    con.execute("CREATE TABLE t(positionTitle VARCHAR)")
+    titles = ['Help_Desk Technician', 'Help Desk Technician', 'HelpXDesk Specialist',
+              '100% Remote Analyst', 'Analyst 100 Series', 'Path a\\b Clerk']
+    con.executemany("INSERT INTO t VALUES (?)", [[x] for x in titles])
+
+    def match(side):
+        where = ' AND '.join(side['clauses'])
+        return sorted(r[0] for r in con.execute(
+            f'SELECT positionTitle FROM t WHERE {where}', side['binds']).fetchall())
+
+    assert match(sides[0]) == ['Help_Desk Technician']
+    assert match(sides[1]) == ['100% Remote Analyst']
+    assert match(sides[2]) == ['Path a\\b Clerk']
+    assert match(sides[3]) == ['Help Desk Technician']
