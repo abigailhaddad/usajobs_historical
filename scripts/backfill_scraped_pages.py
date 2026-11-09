@@ -191,13 +191,27 @@ def published_control_numbers():
     """
     import csv as _csv
     from huggingface_hub import get_token, hf_hub_download
+    from huggingface_hub.errors import (EntryNotFoundError,
+                                        RepositoryNotFoundError)
+    try:
+        from huggingface_hub.errors import LocalEntryNotFoundError
+    except ImportError:  # old huggingface_hub
+        from huggingface_hub.utils import LocalEntryNotFoundError
     repo = os.environ.get("HF_DATASET_REPO", "abigailhaddad/usajobs-scraping")
     token = os.environ.get("HF_TOKEN") or get_token()
     try:
         path = hf_hub_download(repo, "manifest.csv", repo_type="dataset",
                                token=token)
-    except Exception as e:
-        print(f"  could not read the manifest ({e}) — treating it as empty")
+    except (EntryNotFoundError, RepositoryNotFoundError) as e:
+        # LocalEntryNotFoundError subclasses EntryNotFoundError and is raised by
+        # hf_hub_download when its HEAD call hits a 429/5xx/timeout with no cache.
+        if isinstance(e, LocalEntryNotFoundError):
+            raise
+        # Only "there is no manifest" means nothing is published. Any other
+        # failure (429, timeout, 5xx) raises: an empty set here makes every
+        # posting in the year look unscraped, so --fill-gaps spends its
+        # --limit re-fetching pages that are already on the dataset.
+        print(f"  no manifest on {repo} ({e}) — treating it as empty")
         return set()
     with open(path) as f:
         return {r[0] for r in _csv.reader(f) if r and r[0] != "usajobsControlNumber"}
