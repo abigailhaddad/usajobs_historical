@@ -17,6 +17,7 @@ import json
 import os
 import re
 import sys
+import time
 
 import pandas as pd
 import pyarrow.parquet as pq
@@ -119,30 +120,46 @@ def _clean_date(val):
     return s[:10] if len(s) >= 10 else s
 
 
-def _fetch_series_mapping():
-    """Fetch occupational series code->name mapping from USAJobs API."""
+def _fetch_series_mapping(attempts=4, backoff=5):
+    """Fetch occupational series code->name mapping from USAJobs API.
+
+    Retries a few times, then RAISES. Returning {} here used to publish the web
+    data with bare series codes and no names, silently, whenever the codelist
+    endpoint had a bad minute. An empty list is treated as a failure too.
+    """
     url = "https://data.usajobs.gov/api/codelist/occupationalseries"
     print(f"  Fetching occupational series from {url}...")
-    try:
-        resp = requests.get(url, timeout=30)
-        resp.raise_for_status()
-        data = resp.json()
-        mapping = {}
-        if "CodeList" in data and len(data["CodeList"]) > 0:
-            for item in data["CodeList"][0].get("ValidValue", []):
-                code = item.get("Code")
-                name = item.get("Value")
-                if code and name and item.get("IsDisabled", "No") == "No":
-                    mapping[code] = name.title()
-                    # Also store without leading zeros for lookup flexibility
-                    stripped = code.lstrip("0")
-                    if stripped != code:
-                        mapping[stripped] = name.title()
-        print(f"  Fetched {len(mapping)} series mappings")
-        return mapping
-    except Exception as e:
-        print(f"  WARNING: Failed to fetch series mapping: {e}")
-        return {}
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            resp = requests.get(url, timeout=30)
+            resp.raise_for_status()
+            data = resp.json()
+            mapping = {}
+            if "CodeList" in data and len(data["CodeList"]) > 0:
+                for item in data["CodeList"][0].get("ValidValue", []):
+                    code = item.get("Code")
+                    name = item.get("Value")
+                    if code and name and item.get("IsDisabled", "No") == "No":
+                        mapping[code] = name.title()
+                        # Also store without leading zeros for lookup flexibility
+                        stripped = code.lstrip("0")
+                        if stripped != code:
+                            mapping[stripped] = name.title()
+            if not mapping:
+                raise ValueError("occupational series codelist came back empty")
+            print(f"  Fetched {len(mapping)} series mappings")
+            return mapping
+        except Exception as e:
+            last_error = e
+            print(f"  WARNING: series mapping fetch failed "
+                  f"(attempt {attempt}/{attempts}): {e}")
+            if attempt < attempts:
+                time.sleep(backoff * attempt)
+    raise RuntimeError(
+        f"Could not fetch the occupational series mapping after {attempts} attempts "
+        f"({last_error}); refusing to publish web data without series names"
+    )
 
 
 def _resolve_series(code, mapping):
