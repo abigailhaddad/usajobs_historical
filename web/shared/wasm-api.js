@@ -30,7 +30,7 @@ import * as duckdb from 'https://esm.sh/@duckdb/duckdb-wasm';
 
 import {
   COLUMNS, COLUMN_HEADERS, TEXT_SEARCH_COLUMNS, DROPDOWN_FIELDS,
-  MULTI_VALUE_FIELDS, canonicalGrade, parseFilters,
+  MULTI_VALUE_FIELDS, canonicalGrade, parseFilters, escapeLike,
 } from './filters.js';
 
 // Matches MAX_ROWS in the old api/download.py.
@@ -247,8 +247,8 @@ export async function jobs(conn, params = {}) {
   const searchValue = String(params['search[value]'] ?? '').trim();
   if (searchValue) {
     const parts = TEXT_SEARCH_COLUMNS.map((c) => {
-      binds.push(`%${searchValue.toLowerCase()}%`);
-      return `LOWER(COALESCE(CAST("${c}" AS VARCHAR), '')) LIKE ?`;
+      binds.push(`%${escapeLike(searchValue.toLowerCase())}%`);
+      return `LOWER(COALESCE(CAST("${c}" AS VARCHAR), '')) LIKE ? ESCAPE '\\'`;
     });
     clauses.push(`(${parts.join(' OR ')})`);
   }
