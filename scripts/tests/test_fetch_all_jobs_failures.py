@@ -64,3 +64,47 @@ def test_report_failed_series_writes_marker(tmp_path):
     ccd.FAILED_SERIES.clear()
     text = open(path).read()
     assert "0301" in text and "page 2" in text and "of 4 reported" in text
+
+
+def test_run_writes_series_marker_even_when_main_exits_early(monkeypatch, tmp_path):
+    """A failed year makes main() sys.exit(1) before the series report; the
+    series detail must still land in the marker file."""
+    monkeypatch.setattr(ccd, "FAILED_SERIES",
+                        [{"series": "0343", "page": 2, "fetched": 2, "total": 4}])
+
+    def boom():
+        raise SystemExit(1)
+    monkeypatch.setattr(ccd, "main", boom)
+    try:
+        ccd.run(str(tmp_path))
+    except SystemExit as e:
+        assert e.code == 1
+    else:
+        raise AssertionError("SystemExit from main() must propagate")
+    text = (tmp_path / "CURRENT_FETCH_INCOMPLETE.txt").read_text()
+    assert "series 0343" in text
+
+
+def test_run_returns_1_when_series_failed_and_0_otherwise(monkeypatch, tmp_path):
+    monkeypatch.setattr(ccd, "main", lambda: None)
+    monkeypatch.setattr(ccd, "FAILED_SERIES", [])
+    assert ccd.run(str(tmp_path)) == 0
+    assert not (tmp_path / "CURRENT_FETCH_INCOMPLETE.txt").exists()
+    monkeypatch.setattr(ccd, "FAILED_SERIES",
+                        [{"series": "0343", "page": 2, "fetched": 2, "total": 4}])
+    assert ccd.run(str(tmp_path)) == 1
+    assert (tmp_path / "CURRENT_FETCH_INCOMPLETE.txt").exists()
+
+
+def test_run_writes_marker_when_main_raises(monkeypatch, tmp_path):
+    monkeypatch.setattr(ccd, "FAILED_SERIES",
+                        [{"series": "2210", "page": None, "fetched": 0, "total": None}])
+
+    def boom():
+        raise RuntimeError("x")
+    monkeypatch.setattr(ccd, "main", boom)
+    try:
+        ccd.run(str(tmp_path))
+    except RuntimeError:
+        pass
+    assert (tmp_path / "CURRENT_FETCH_INCOMPLETE.txt").exists()

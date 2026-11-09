@@ -321,17 +321,41 @@ jobs:
 
             const body = '## Current Jobs Collection Incomplete\n\n```\n' + content + '```\n\n' +
               '**What this means:** rows that were fetched were saved, but some current postings ' +
-              'were not fetched this run.\n\n' +
+              'were not fetched this run (or the collection script exited early).\n\n' +
+              '**Likely cause:** a USAJOBS API error or timeout part-way through a series, or a ' +
+              'year file that could not be updated; the detail above names the series and page. ' +
+              'The next scheduled run re-fetches the recent window.\n\n' +
               '[View the workflow run](' + runUrl + ')';
 
-            await github.rest.issues.create({
+            // Three scheduled attempts a day: comment on today's open issue
+            // rather than opening a duplicate (same pattern as the
+            // "Check for failures" step).
+            const title = 'Current Collection Incomplete - ' + today;
+            const open = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: 'Current Collection Incomplete - ' + today,
-              body: body,
-              labels: ['bug', 'data-issue'],
-              assignees: ['abigailhaddad']
+              state: 'open',
+              labels: 'data-issue',
+              per_page: 100
             });
+            const dupe = open.data.find(i => i.title === title);
+            if (dupe) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: dupe.number,
+                body: 'Another attempt was incomplete today.\n\n' + body
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['bug', 'data-issue'],
+                assignees: ['abigailhaddad']
+              });
+            }
 
             fs.unlinkSync(markerFile);
           }

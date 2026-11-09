@@ -1028,7 +1028,17 @@ def report_failed_series(log_dir: str) -> Optional[str]:
     return path
 
 
+def run(log_dir: str) -> int:
+    """Run main() and always write the failed-series marker, even when main()
+    exits early (e.g. process_years calls sys.exit(1) for a failed year file) or
+    raises. Without the finally, a run with both a failed year and a failed
+    series lost the series detail from the issue. Returns the process exit code."""
+    try:
+        main()
+    finally:
+        marker = report_failed_series(log_dir)
+    return 1 if marker else 0
+
+
 if __name__ == "__main__":
-    main()
-    if report_failed_series(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "logs")):
-        sys.exit(1)
+    sys.exit(run(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "logs")))
