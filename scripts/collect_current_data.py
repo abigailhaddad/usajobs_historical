@@ -730,9 +730,12 @@ def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
                   f"(+{len(new_control_numbers - existing_control_numbers)} new, "
                   f"{len(overlapping_control_numbers)} updated)")
         except Exception as e:
-            print(f"⚠️ Warning: Could not read existing parquet file {parquet_path}: {e}")
-            combined_df = new_df
-            print(f"   💾 Created {parquet_path} with {len(combined_df)} jobs")
+            # Do not fall back to new_df alone: that overwrites the existing file
+            # with only the new rows. This also catches the DATA LOSS PREVENTED
+            # ValueError raised just above, which would otherwise be swallowed.
+            print(f"❌ Could not merge into existing parquet file {parquet_path}: {e}; "
+                  f"leaving it untouched")
+            raise
     else:
         combined_df = new_df
         print(f"   💾 Created {parquet_path} with {len(combined_df)} jobs")
