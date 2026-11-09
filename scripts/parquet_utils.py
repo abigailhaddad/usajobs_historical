@@ -36,6 +36,7 @@ for pandas-based workflows.
 """
 
 import json
+import os
 from typing import List, Optional
 
 import pandas as pd
@@ -265,3 +266,22 @@ def combine_and_fix(
 
     combined = combined.drop(columns=["_source", "_specificity", "_src_order"], errors="ignore")
     return combined.reset_index(drop=True)
+
+
+def write_parquet_atomic(df: pd.DataFrame, path: str, **to_parquet_kwargs) -> None:
+    """Write `df` to `path` without ever leaving a half-written file there.
+
+    Writes `<path>.tmp` in the same directory, then os.replace()s it over the
+    target (atomic on one filesystem). The temp name does not end in .parquet,
+    so the "*.parquet" globs that sync_to_r2 and the integrity checks use never
+    pick up a leftover from a killed run. On any error the temp file is removed
+    and the existing file is untouched.
+    """
+    tmp = path + ".tmp"
+    try:
+        df.to_parquet(tmp, index=False, **to_parquet_kwargs)
+        os.replace(tmp, path)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+        raise
