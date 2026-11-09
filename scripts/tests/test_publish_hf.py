@@ -539,3 +539,14 @@ class TestPublishedControlNumbers:
         self._patch(monkeypatch, TimeoutError("429 / timeout"))
         with pytest.raises(TimeoutError):
             pth.published_control_numbers("x/y", None)
+
+    def test_transient_hub_failure_raises(self, monkeypatch):
+        # LocalEntryNotFoundError subclasses EntryNotFoundError; hf_hub_download
+        # raises it when the HEAD call hits a 429/5xx/timeout with no cache.
+        try:
+            from huggingface_hub.errors import LocalEntryNotFoundError
+        except ImportError:
+            from huggingface_hub.utils import LocalEntryNotFoundError
+        self._patch(monkeypatch, LocalEntryNotFoundError("429"))
+        with pytest.raises(LocalEntryNotFoundError):
+            pth.published_control_numbers("x/y", None)

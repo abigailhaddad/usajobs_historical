@@ -850,9 +850,18 @@ def published_control_numbers(repo: str, token) -> set:
     from huggingface_hub.errors import (EntryNotFoundError,
                                         RepositoryNotFoundError)
     try:
+        from huggingface_hub.errors import LocalEntryNotFoundError
+    except ImportError:  # old huggingface_hub
+        from huggingface_hub.utils import LocalEntryNotFoundError
+    try:
         path = hf_hub_download(repo, "manifest.csv", repo_type="dataset",
                                token=token)
     except (EntryNotFoundError, RepositoryNotFoundError) as e:
+        # LocalEntryNotFoundError subclasses EntryNotFoundError and is what
+        # hf_hub_download raises when its HEAD call hits a 429/5xx/timeout
+        # with no cached copy: a failed read, not a missing manifest.
+        if isinstance(e, LocalEntryNotFoundError):
+            raise
         # Only "there is no manifest" means an empty dataset. Any other
         # failure (429, timeout, 5xx) raises: an empty `have` turns off the
         # shrinking-manifest check in main().
