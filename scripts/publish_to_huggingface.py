@@ -847,10 +847,15 @@ def published_control_numbers(repo: str, token) -> set:
     """What the dataset's manifest lists. Downloads the manifest, a couple of
     MB, rather than the dataset."""
     from huggingface_hub import hf_hub_download
+    from huggingface_hub.errors import (EntryNotFoundError,
+                                        RepositoryNotFoundError)
     try:
         path = hf_hub_download(repo, "manifest.csv", repo_type="dataset",
                                token=token)
-    except Exception as e:
+    except (EntryNotFoundError, RepositoryNotFoundError) as e:
+        # Only "there is no manifest" means an empty dataset. Any other
+        # failure (429, timeout, 5xx) raises: an empty `have` turns off the
+        # shrinking-manifest check in main().
         print(f"No manifest on {repo} ({e}) — treating the dataset as empty")
         return set()
     with open(path) as f:

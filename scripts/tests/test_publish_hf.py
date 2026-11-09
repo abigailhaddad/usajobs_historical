@@ -14,6 +14,7 @@ from datetime import date
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+import publish_to_huggingface as pth
 from publish_to_huggingface import (EXIT_REFUSED, NON_STRING_COLUMNS,
                                     STALE_TOLERANCE, TEXT_FIELDS,
                                     check_types, choose_locations,
@@ -516,3 +517,25 @@ class TestPrunePublishedText:
             {"usajobs_control_number": "1", "positionTitle": "Analyst"}])
         assert prune_published_text(path, {"1"}) == 0
         assert pd.read_parquet(path).loc[0, "positionTitle"] == "Analyst"
+
+
+class TestPublishedControlNumbers:
+    """A manifest that cannot be read is not an empty dataset: an empty set
+    turns off the check that stops the manifest shrinking."""
+
+    def _patch(self, monkeypatch, exc):
+        import huggingface_hub
+
+        def boom(*a, **k):
+            raise exc
+        monkeypatch.setattr(huggingface_hub, "hf_hub_download", boom)
+
+    def test_missing_manifest_is_a_first_run(self, monkeypatch):
+        from huggingface_hub.errors import EntryNotFoundError
+        self._patch(monkeypatch, EntryNotFoundError("404"))
+        assert pth.published_control_numbers("x/y", None) == set()
+
+    def test_other_errors_raise(self, monkeypatch):
+        self._patch(monkeypatch, TimeoutError("429 / timeout"))
+        with pytest.raises(TimeoutError):
+            pth.published_control_numbers("x/y", None)
