@@ -451,8 +451,20 @@ def fetch_occupational_series() -> List[Dict[str, str]]:
         return []
 
 
-def fetch_all_jobs(params: Dict, headers: Dict, appointment_type_map: Dict[str, str], hiring_path_map: Dict[str, str], max_results: int = 10000) -> tuple[List[Dict], List[Dict]]:
-    """Fetch all jobs with pagination up to max_results. Returns (raw_jobs, flattened_jobs)"""
+# Series whose fetch did not complete this run (a page failed after retries, or
+# the whole series raised). Filled by main(); the __main__ block exits non-zero
+# if it is non-empty, after the rows that were fetched have been saved.
+FAILED_SERIES: List[Dict] = []
+
+
+def fetch_all_jobs(params: Dict, headers: Dict, appointment_type_map: Dict[str, str], hiring_path_map: Dict[str, str], max_results: int = 10000, failures: Optional[List[Dict]] = None) -> tuple[List[Dict], List[Dict]]:
+    """Fetch all jobs with pagination up to max_results. Returns (raw_jobs, flattened_jobs)
+
+    If a page still fails after fetch_jobs_page's retries, the pages already
+    fetched are kept and returned, and a record of the failure is appended to
+    `failures` (when given) so the caller can fail the run. Without this the
+    partial series came back looking complete.
+    """
     raw_jobs = []
     flattened_jobs = []
     page = 1
@@ -467,6 +479,13 @@ def fetch_all_jobs(params: Dict, headers: Dict, appointment_type_map: Dict[str, 
         
         if not data:
             progress_bar.write("Failed to fetch data, stopping.")
+            if failures is not None:
+                failures.append({
+                    "series": params.get('JobCategoryCode') or params.get('Keyword') or 'current jobs query',
+                    "page": page,
+                    "fetched": len(raw_jobs),
+                    "total": total_count,
+                })
             break
             
         search_result = data.get("SearchResult", {})
@@ -905,6 +924,7 @@ def main():
         base_params["DatePosted"] = args.days_posted
         print(f"📅 Filtering to jobs posted in last {args.days_posted} days")
     
+    FAILED_SERIES.clear()
     all_flattened_jobs = []
     job_ids = set()  # Track unique jobs to avoid duplicates
     series_with_jobs = 0
@@ -921,7 +941,8 @@ def main():
             # checks; the flattened records are what get written. Accumulating the
             # full nested raw JSON for every open posting is what previously OOM-ed
             # the CI runner, so we intentionally drop it here.
-            _, series_flattened_jobs = fetch_all_jobs(params, headers, appointment_type_map, hiring_path_map)
+            _, series_flattened_jobs = fetch_all_jobs(params, headers, appointment_type_map, hiring_path_map,
+                                                      failures=FAILED_SERIES)
 
             # Add only unique jobs (some jobs may have multiple series)
             new_jobs = 0
@@ -945,6 +966,8 @@ def main():
                 
         except Exception as e:
             tqdm.write(f"   ❌ Error fetching jobs: {e}")
+            FAILED_SERIES.append({"series": series['code'], "page": None,
+                                  "fetched": 0, "total": None, "error": str(e)})
             continue
     
     if not all_flattened_jobs:
@@ -984,5 +1007,38 @@ def main():
     print(f"\n🎉 All years completed!")
 
 
+def report_failed_series(log_dir: str) -> Optional[str]:
+    """Print the series that did not finish, write logs/CURRENT_FETCH_INCOMPLETE.txt
+    (the daily workflow opens an issue from it) and return its path. None if
+    every series completed."""
+    if not FAILED_SERIES:
+        return None
+    lines = [f"{len(FAILED_SERIES)} occupational series did not finish fetching from the "
+             f"current API on {datetime.now().isoformat()}. What was fetched was saved; "
+             f"the rest of each series is missing from this run:"]
+    for f in FAILED_SERIES:
+        lines.append(f"- series {f['series']}: page {f['page']} failed after {f['fetched']} rows "
+                     f"(of {f['total']} reported)" + (f" ({f['error']})" if f.get('error') else ""))
+    text = "\n".join(lines) + "\n"
+    print("\n❌ " + text)
+    os.makedirs(log_dir, exist_ok=True)
+    path = os.path.join(log_dir, "CURRENT_FETCH_INCOMPLETE.txt")
+    with open(path, "w") as fh:
+        fh.write(text)
+    return path
+
+
+def run(log_dir: str) -> int:
+    """Run main() and always write the failed-series marker, even when main()
+    exits early (e.g. process_years calls sys.exit(1) for a failed year file) or
+    raises. Without the finally, a run with both a failed year and a failed
+    series lost the series detail from the issue. Returns the process exit code."""
+    try:
+        main()
+    finally:
+        marker = report_failed_series(log_dir)
+    return 1 if marker else 0
+
+
 if __name__ == "__main__":
-    main()
+    sys.exit(run(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "logs")))
