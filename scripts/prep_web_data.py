@@ -120,12 +120,38 @@ def _clean_date(val):
     return s[:10] if len(s) >= 10 else s
 
 
+# Checked-in snapshot of the same codelist (written by
+# tracking/fetch_occupation_series.py), available in a clean runner checkout.
+# Used only when the live fetch fails after all retries.
+FALLBACK_SERIES_PATH = os.path.join(os.path.dirname(__file__), "..", "tracking",
+                                    "occupation_series_from_api.json")
+
+# Where this run's series names came from; written into static.json so the
+# published data says so. "live" normally, "fallback_snapshot" after an outage.
+SERIES_MAPPING_STATUS = {"source": "unknown", "warning": None}
+
+
+def _load_fallback_series_mapping(path=None):
+    """Previously saved code->name mapping, title-cased like the live one.
+    Returns {} if the file is missing, unreadable or empty."""
+    path = path or FALLBACK_SERIES_PATH
+    try:
+        with open(path) as fh:
+            raw = json.load(fh)
+        return {str(k): str(v).title() for k, v in raw.items() if k and v}
+    except Exception as e:
+        print(f"  WARNING: could not read fallback series mapping {path}: {e}")
+        return {}
+
+
 def _fetch_series_mapping(attempts=4, backoff=5):
     """Fetch occupational series code->name mapping from USAJobs API.
 
-    Retries a few times, then RAISES. Returning {} here used to publish the web
-    data with bare series codes and no names, silently, whenever the codelist
-    endpoint had a bad minute. An empty list is treated as a failure too.
+    Retries a few times. If every attempt fails it falls back to the checked-in
+    snapshot of the previous mapping (loudly: a log warning, a GitHub Actions
+    ::warning:: and SERIES_MAPPING_STATUS, which main() writes into static.json).
+    It RAISES only when there is no usable snapshot, rather than publishing web
+    data with bare series codes and no names. An empty codelist counts as a failure.
     """
     url = "https://data.usajobs.gov/api/codelist/occupationalseries"
     print(f"  Fetching occupational series from {url}...")
@@ -149,6 +175,7 @@ def _fetch_series_mapping(attempts=4, backoff=5):
             if not mapping:
                 raise ValueError("occupational series codelist came back empty")
             print(f"  Fetched {len(mapping)} series mappings")
+            SERIES_MAPPING_STATUS.update(source="live", warning=None)
             return mapping
         except Exception as e:
             last_error = e
@@ -156,10 +183,20 @@ def _fetch_series_mapping(attempts=4, backoff=5):
                   f"(attempt {attempt}/{attempts}): {e}")
             if attempt < attempts:
                 time.sleep(backoff * attempt)
-    raise RuntimeError(
-        f"Could not fetch the occupational series mapping after {attempts} attempts "
-        f"({last_error}); refusing to publish web data without series names"
-    )
+    fallback = _load_fallback_series_mapping()
+    if not fallback:
+        raise RuntimeError(
+            f"Could not fetch the occupational series mapping after {attempts} attempts "
+            f"({last_error}) and there is no previous mapping to fall back to "
+            f"({FALLBACK_SERIES_PATH}); refusing to publish web data without series names"
+        )
+    warning = (f"USAJOBS occupational series codelist unavailable after {attempts} attempts "
+               f"({last_error}); series names come from the saved snapshot "
+               f"tracking/occupation_series_from_api.json and may be out of date")
+    print(f"  WARNING: {warning}")
+    print(f"::warning::{warning}")
+    SERIES_MAPPING_STATUS.update(source="fallback_snapshot", warning=warning)
+    return fallback
 
 
 def _resolve_series(code, mapping):
@@ -813,6 +850,8 @@ def main():
             'datasets': {'count': [r[1] for r in grade_rows]},
         },
         'filter_options': filter_options,
+        # Visible provenance of the series names (see _fetch_series_mapping).
+        'series_mapping': dict(SERIES_MAPPING_STATUS),
     }
 
     static_path = os.path.join(os.path.dirname(OUT_PATH), 'static.json')
