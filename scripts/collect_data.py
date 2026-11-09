@@ -561,29 +561,58 @@ def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
                          compression="zstd", compression_level=3)
 
 
-def group_jobs_by_year(jobs: List[Dict]) -> Dict[int, List[Dict]]:
-    """Group jobs by year based on position open date."""
+# A run fails (after the dated rows have been saved) only if the postings it
+# skipped for a missing/unparseable open date exceed
+# max(MIN_UNDATED_JOBS, UNDATED_RATE_LIMIT * postings fetched in that run).
+# This is a safety net, not an expectation: the published data shows 0 undated
+# rows in about 570,000 sampled rows. A handful is tolerated and logged; a flood
+# (relative to the size of the fetch) means the API changed shape. The count is
+# per fetch window, not cumulative: the daily run re-fetches the last 14 days,
+# so the same undated posting can be skipped again on following runs.
+MIN_UNDATED_JOBS = 5
+UNDATED_RATE_LIMIT = 0.01
+
+
+def undated_limit(fetched: int) -> float:
+    """Most skipped undated postings a run may have before it fails."""
+    return max(MIN_UNDATED_JOBS, UNDATED_RATE_LIMIT * fetched)
+
+
+def _year_from_open_date(open_date) -> Optional[int]:
+    """Year of an ISO-ish positionOpenDate, or None when missing/unparseable."""
+    if not open_date or not isinstance(open_date, str):
+        return None
+    try:
+        year = datetime.fromisoformat(open_date.replace('Z', '+00:00')).year
+    except ValueError:
+        try:
+            year = int(open_date[:4])
+        except ValueError:
+            return None
+    return year if 2000 <= year <= datetime.now().year + 1 else None
+
+
+def group_jobs_by_year(jobs: List[Dict], skipped: Optional[List[str]] = None) -> Dict[int, List[Dict]]:
+    """Group jobs by year based on position open date.
+
+    A job with a missing or unparseable open date is SKIPPED, not filed under a
+    default year (it used to land in 2024, putting rows in the wrong file with
+    no trace). Skipped control numbers are appended to `skipped` when given, so
+    the caller can count them and fail past undated_limit().
+    """
     jobs_by_year = {}
-    
+
     for job in jobs:
-        # Extract year from position open date
-        open_date = job.get('positionOpenDate', '')
-        if open_date:
-            try:
-                year = datetime.fromisoformat(open_date.replace('Z', '+00:00')).year
-            except:
-                # Fallback parsing
-                try:
-                    year = int(open_date[:4])
-                except:
-                    year = 2024  # Default year if parsing fails
-        else:
-            year = 2024  # Default year if no date
-        
-        if year not in jobs_by_year:
-            jobs_by_year[year] = []
-        jobs_by_year[year].append(job)
-    
+        year = _year_from_open_date(job.get('positionOpenDate'))
+        if year is None:
+            cn = str(job.get('usajobsControlNumber') or job.get('usajobs_control_number'))
+            print(f"⚠️ Skipping job {cn} - no valid positionOpenDate "
+                  f"({job.get('positionOpenDate')!r})")
+            if skipped is not None:
+                skipped.append(cn)
+            continue
+        jobs_by_year.setdefault(year, []).append(job)
+
     return jobs_by_year
 
 
@@ -599,6 +628,7 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
     seen_control_numbers = set()  # Track unique jobs
     weekly_batch = []  # Accumulate jobs for weekly saves
     failed_dates = []  # Track dates that failed to fetch
+    undated_jobs = []  # Control numbers skipped for a missing/unparseable open date
     partial_dates = []  # Track dates where pagination cut short (rows saved, but incomplete)
     suspicious_zero_days = []  # Track days with 0 jobs (may be legitimate but worth flagging)
     
@@ -696,7 +726,7 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
         
         if (is_week_boundary or is_last_day) and weekly_batch:
             # Group jobs by year and save to appropriate parquet files
-            jobs_by_year = group_jobs_by_year(weekly_batch)
+            jobs_by_year = group_jobs_by_year(weekly_batch, undated_jobs)
             
             for year, year_jobs in jobs_by_year.items():
                 parquet_path = f"{data_dir}/historical_jobs_{year}.parquet"
@@ -717,7 +747,7 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
     
     # Save any remaining jobs in the final batch
     if weekly_batch:
-        jobs_by_year = group_jobs_by_year(weekly_batch)
+        jobs_by_year = group_jobs_by_year(weekly_batch, undated_jobs)
         
         for year, year_jobs in jobs_by_year.items():
             parquet_path = f"{data_dir}/historical_jobs_{year}.parquet"
@@ -763,7 +793,24 @@ def fetch_jobs(start_date: str, end_date: str, position_series: Optional[str] = 
             print(f"  🤔 {zero_date}")
         print(f"💡 If these aren't weekends/holidays, consider re-running those dates")
     
-    if not failed_dates and not partial_dates and not suspicious_zero_days:
+    if undated_jobs:
+        undated_unique = list(dict.fromkeys(undated_jobs))
+        fetched_unique = len({str(j.get('usajobsControlNumber')) for j in all_jobs})
+        limit = undated_limit(fetched_unique)
+        summary = (f"{len(undated_unique)} posting(s) skipped for a missing/unparseable open date "
+                   f"in this fetch window ({start_date} to {end_date}; {fetched_unique} postings "
+                   f"fetched; limit {limit:g}). Control numbers: {', '.join(undated_unique[:200])}"
+                   + (f" (+{len(undated_unique) - 200} more)" if len(undated_unique) > 200 else ""))
+        logger.critical(summary)
+        print(f"\n⚠️  {summary}")
+        if len(undated_unique) > limit:
+            raise RuntimeError(
+                f"{len(undated_unique)} postings had no usable positionOpenDate in this fetch "
+                f"window, over the limit of {limit:g} (max of {MIN_UNDATED_JOBS} or "
+                f"{UNDATED_RATE_LIMIT:.0%} of {fetched_unique} fetched); dated rows were "
+                f"saved, these were not")
+
+    if not failed_dates and not partial_dates and not suspicious_zero_days and not undated_jobs:
         logger.info("🎉 PERFECT RUN: All dates fetched successfully with data!")
         print("🎉 All dates fetched successfully!")
     
