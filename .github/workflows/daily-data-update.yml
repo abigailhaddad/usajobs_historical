@@ -304,6 +304,38 @@ jobs:
             fs.unlinkSync(alertFile);
           }
 
+    - name: Check for incomplete current-jobs collection
+      if: always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const markerFile = 'logs/CURRENT_FETCH_INCOMPLETE.txt';
+
+          if (fs.existsSync(markerFile)) {
+            const content = fs.readFileSync(markerFile, 'utf8');
+            console.log('Warning: current-jobs collection was incomplete!');
+
+            const today = new Date().toISOString().split('T')[0];
+            const runUrl = context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId;
+
+            const body = '## Current Jobs Collection Incomplete\n\n```\n' + content + '```\n\n' +
+              '**What this means:** rows that were fetched were saved, but some current postings ' +
+              'were not fetched this run.\n\n' +
+              '[View the workflow run](' + runUrl + ')';
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Current Collection Incomplete - ' + today,
+              body: body,
+              labels: ['bug', 'data-issue'],
+              assignees: ['abigailhaddad']
+            });
+
+            fs.unlinkSync(markerFile);
+          }
+
     - name: Check for historical collection failure
       if: always()
       uses: actions/github-script@v7

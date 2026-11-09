@@ -487,6 +487,15 @@ def main():
     else:
         print("❌ Current data collection failed. Continuing with documentation update...")
         collection_errors.append("Current data collection failed")
+        # The workflow opens an issue from this file. collect_current_data.py
+        # writes it itself with the failed series; this covers any other
+        # non-zero exit so the failure is never only a line in the log.
+        os.makedirs('../logs', exist_ok=True)
+        marker = '../logs/CURRENT_FETCH_INCOMPLETE.txt'
+        if not os.path.exists(marker):
+            with open(marker, 'w') as f:
+                f.write("collect_current_data.py exited non-zero; the current-jobs "
+                        "collection did not complete. See the 'Run daily data update' step log.\n")
     
     # Step 3b: Collect the same postings by scraping usajobs.gov, then diff the
     # two. This runs in shadow — it writes data/scraped_jobs_*.parquet, which
