@@ -22,6 +22,7 @@ from tqdm import tqdm
 import logging
 import sys
 from cap_alert import check_cap
+from parquet_utils import write_parquet_atomic
 from listings import (PRIOR_COL, carry_listing, collapse_across_years,
                       write_moves_csv)
 
@@ -556,8 +557,8 @@ def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
     # smaller than snappy on real rows, and faster to write. Readers (pyarrow,
     # duckdb, pandas) handle it transparently, so the published files stay
     # drop-in compatible for downstream consumers.
-    combined_df.to_parquet(parquet_path, index=False,
-                           compression="zstd", compression_level=3)
+    write_parquet_atomic(combined_df, parquet_path,
+                         compression="zstd", compression_level=3)
 
 
 # More than this many postings with a missing or unparseable open date in one
