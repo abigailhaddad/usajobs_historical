@@ -42,6 +42,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 
 from cap_alert import check_cap
+from parquet_utils import write_parquet_atomic
 from listings import (PRIOR_COL, carry_listing, collapse_across_years,
                       write_moves_csv)
 
@@ -501,7 +502,7 @@ def update_and_insert(parquet_path: str, status_map: Dict[str, Dict],
         for col in LIST_PRONE_COLS:
             if col in df.columns:
                 df[col] = df[col].astype(object).apply(_to_json_str)
-        df.to_parquet(parquet_path, index=False)
+        write_parquet_atomic(df, parquet_path)
 
     return changed, inserted, transitions
 
