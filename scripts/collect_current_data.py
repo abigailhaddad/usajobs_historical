@@ -750,9 +750,12 @@ def save_jobs_to_parquet(jobs: List[Dict], parquet_path: str):
                   f"(+{len(new_control_numbers - existing_control_numbers)} new, "
                   f"{len(overlapping_control_numbers)} updated)")
         except Exception as e:
-            print(f"⚠️ Warning: Could not read existing parquet file {parquet_path}: {e}")
-            combined_df = new_df
-            print(f"   💾 Created {parquet_path} with {len(combined_df)} jobs")
+            # Do not fall back to new_df alone: that overwrites the existing file
+            # with only the new rows. This also catches the DATA LOSS PREVENTED
+            # ValueError raised just above, which would otherwise be swallowed.
+            print(f"❌ Could not merge into existing parquet file {parquet_path}: {e}; "
+                  f"leaving it untouched")
+            raise
     else:
         combined_df = new_df
         print(f"   💾 Created {parquet_path} with {len(combined_df)} jobs")
@@ -798,6 +801,65 @@ def group_jobs_by_year(jobs: List[Dict]) -> Dict[int, List[Dict]]:
             print(f"⚠️ Skipping job {job.get('usajobsControlNumber')} - no valid positionOpenDate")
 
     return jobs_by_year
+
+
+def process_years(jobs_by_year: Dict[int, List[Dict]], data_dir: str):
+    """Save each year's new jobs. Returns (total_new_jobs, failed_years).
+
+    A year whose file cannot be merged is left untouched, logged, and recorded;
+    the remaining years are still processed.
+    """
+    total_new_jobs = 0
+    failed_years = []
+    for year in sorted(jobs_by_year.keys()):
+        year_jobs = jobs_by_year[year]
+        parquet_path = f"{data_dir}/current_jobs_{year}.parquet"
+
+        print(f"\n📅 Processing {year} jobs...")
+        print(f"💾 Parquet file: {parquet_path}")
+
+        # Get existing control numbers to avoid duplicates
+        existing_control_numbers = load_existing_jobs(parquet_path)
+        print(f"   Found {len(existing_control_numbers)} existing current jobs")
+
+        # Filter for new jobs only
+        new_jobs = []
+        for job in year_jobs:
+            usajobs_control_number = str(job.get("usajobsControlNumber", ""))
+            if usajobs_control_number and usajobs_control_number not in existing_control_numbers:
+                new_jobs.append(job)
+
+        print(f"   📊 Found {len(new_jobs)} new jobs to add")
+
+        # Save to Parquet. One year failing must not stop the later years from
+        # being saved; the failure is reported at the end (non-zero exit).
+        if new_jobs:
+            try:
+                save_jobs_to_parquet(new_jobs, parquet_path)
+                total_new_jobs += len(new_jobs)
+            except Exception as e:
+                print(f"   ❌ FAILED to save {year} ({parquet_path}): {e}")
+                failed_years.append(year)
+                continue
+        
+        # Show stats for this year (row count from metadata, one column for the
+        # open count — never load the whole file just to print two numbers)
+        if os.path.exists(parquet_path):
+            try:
+                total_current = pq.read_metadata(parquet_path).num_rows
+                if 'positionOpeningStatus' in pq.read_schema(parquet_path).names:
+                    status = pd.read_parquet(parquet_path, columns=['positionOpeningStatus'])
+                    open_jobs = int((status['positionOpeningStatus'] == 'Open').sum())
+                else:
+                    open_jobs = 0
+
+                print(f"   ✅ {year} parquet file now contains:")
+                print(f"      - {total_current:,} total current jobs")
+                print(f"      - {open_jobs:,} open positions")
+            except Exception as e:
+                print(f"   ⚠️ Could not read stats from {parquet_path}: {e}")
+
+    return total_new_jobs, failed_years
 
 
 def main():
@@ -931,55 +993,17 @@ def main():
     for year in sorted(jobs_by_year.keys()):
         print(f"   - {year}: {len(jobs_by_year[year])} jobs")
 
-    # Process each year
-    total_new_jobs = 0
-    for year in sorted(jobs_by_year.keys()):
-        year_jobs = jobs_by_year[year]
-        parquet_path = f"{args.data_dir}/current_jobs_{year}.parquet"
+    total_new_jobs, failed_years = process_years(jobs_by_year, args.data_dir)
 
-        print(f"\n📅 Processing {year} jobs...")
-        print(f"💾 Parquet file: {parquet_path}")
-
-        # Get existing control numbers to avoid duplicates
-        existing_control_numbers = load_existing_jobs(parquet_path)
-        print(f"   Found {len(existing_control_numbers)} existing current jobs")
-
-        # Filter for new jobs only
-        new_jobs = []
-        for job in year_jobs:
-            usajobs_control_number = str(job.get("usajobsControlNumber", ""))
-            if usajobs_control_number and usajobs_control_number not in existing_control_numbers:
-                new_jobs.append(job)
-
-        print(f"   📊 Found {len(new_jobs)} new jobs to add")
-
-        # Save to Parquet
-        if new_jobs:
-            save_jobs_to_parquet(new_jobs, parquet_path)
-            total_new_jobs += len(new_jobs)
-        
-        # Show stats for this year (row count from metadata, one column for the
-        # open count — never load the whole file just to print two numbers)
-        if os.path.exists(parquet_path):
-            try:
-                total_current = pq.read_metadata(parquet_path).num_rows
-                if 'positionOpeningStatus' in pq.read_schema(parquet_path).names:
-                    status = pd.read_parquet(parquet_path, columns=['positionOpeningStatus'])
-                    open_jobs = int((status['positionOpeningStatus'] == 'Open').sum())
-                else:
-                    open_jobs = 0
-
-                print(f"   ✅ {year} parquet file now contains:")
-                print(f"      - {total_current:,} total current jobs")
-                print(f"      - {open_jobs:,} open positions")
-            except Exception as e:
-                print(f"   ⚠️ Could not read stats from {parquet_path}: {e}")
-    
     print(f"\n📊 Summary:")
     print(f"   Total series processed: {len(series_list)}")
     print(f"   Series with jobs: {series_with_jobs}")
     print(f"   Total unique jobs fetched: {len(all_flattened_jobs)}")
     print(f"   New jobs added: {total_new_jobs}")
+    if failed_years:
+        print(f"\n❌ {len(failed_years)} year file(s) could not be updated and were "
+              f"left untouched: {sorted(failed_years)}")
+        sys.exit(1)
     print(f"\n🎉 All years completed!")
 
 
