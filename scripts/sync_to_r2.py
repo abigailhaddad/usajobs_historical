@@ -8,6 +8,11 @@ Called from two workflows:
                               uploads just the year files it actually touched.
     repoll-status.yml      -- plain `sync_to_r2.py`, which uploads every file.
 
+Every sync also uploads logs/listing_moves_*.csv to r2://usajobs-data/logs/listing_moves/.
+Those record re-opened postings moved out of an older year file, which is the
+one way a year file may shrink; update/test_data_integrity.py needs them on
+whichever run checks the data next, not just the run that made the moves.
+
 Required GitHub repository secrets:
     R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_ENDPOINT_URL
     (e.g. https://<account_id>.r2.cloudflarestorage.com).
@@ -48,6 +53,8 @@ TRANSFER_CONFIG = TransferConfig(
 # boto3's default retry mode is 'legacy', which gives up after 4 attempts --
 # that is the "reached max retries: 4" in the 2026-08-08 failure.
 BOTO_CONFIG = Config(retries={"max_attempts": 10, "mode": "standard"})
+
+MOVES_PREFIX = "logs/listing_moves/"
 
 # Retries above boto3's own, because a failed CompleteMultipartUpload needs the
 # whole transfer restarted rather than the single request retried.
@@ -166,6 +173,11 @@ def main():
         help="Path to web parquet file (default: web/data/jobs_5yr.parquet)",
     )
     parser.add_argument(
+        "--log-dir",
+        default="logs",
+        help="Directory holding listing_moves_*.csv (default: logs)",
+    )
+    parser.add_argument(
         "--snapshot",
         action="store_true",
         help="Record the current state of data/*.parquet and exit. Run this "
@@ -232,6 +244,18 @@ def main():
             print(f"  Unchanged, skipping {name}")
             continue
         send(path, f"data/{name}")
+
+    # Move logs last, and only once every data file is up: a log describes
+    # files as this run wrote them, and one that reached R2 ahead of its data
+    # would send the next integrity check looking for moves that are not there.
+    moves = sorted(glob.glob(os.path.join(args.log_dir, "listing_moves_*.csv")))
+    if moves and not failed:
+        print(f"\nUploading {len(moves)} listing move log(s) from {args.log_dir}/:")
+        for path in moves:
+            send(path, MOVES_PREFIX + os.path.basename(path))
+    elif moves:
+        print(f"\nNot uploading {len(moves)} listing move log(s): data upload failed.",
+              file=sys.stderr)
 
     if skipped:
         print(f"\nSkipped {skipped} unchanged file(s), {skipped_bytes / (1024 * 1024):,.1f} MB not re-uploaded.")

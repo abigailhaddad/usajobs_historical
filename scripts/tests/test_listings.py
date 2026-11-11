@@ -11,9 +11,11 @@ import csv
 import json
 import os
 import sys
+from datetime import datetime
 
 import pandas as pd
 import pyarrow.parquet as pq
+import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -239,10 +241,10 @@ class TestIntegrityMoves:
         spec.loader.exec_module(mod)
         return mod
 
-    def _log(self, tmp_path, rows):
+    def _log(self, tmp_path, rows, name="listing_moves_20261110_213153.csv"):
         logs = tmp_path / "logs"
         logs.mkdir(exist_ok=True)
-        with open(logs / "listing_moves_x.csv", "w", newline="") as f:
+        with open(logs / name, "w", newline="") as f:
             w = csv.DictWriter(f, fieldnames=["control_number", "from_file", "to_file"])
             w.writeheader()
             w.writerows(rows)
@@ -262,10 +264,14 @@ class TestIntegrityMoves:
         assert moved == {"historical_jobs_2024.parquet": {"547366900"}}
         assert not ok
 
-    def _run_checks(self, tmp_path, monkeypatch, files, baseline_files):
+    def _run_checks(self, tmp_path, monkeypatch, files, baseline_files,
+                    row_counts=None, created_at="2026-11-10T02:49:44"):
         """Write `files` ({name: rows}), baseline `baseline_files` ({name: ids}),
         and run both loss checks the way the daily job does: from update/, with
-        data in ../data and no move log (the re-poll runner's is gone)."""
+        data in ../data and move logs, if a test wrote any, in ../logs.
+
+        `row_counts` overrides the baseline's counts, for when `baseline_files`
+        is only the sentinel sample of a bigger file, as it is in production."""
         tdi = self._load()
         data, upd = tmp_path / "data", tmp_path / "update"
         data.mkdir()
@@ -273,7 +279,8 @@ class TestIntegrityMoves:
         for name, rows in files.items():
             write(data / name, rows)
         (upd / "data_baseline.json").write_text(json.dumps({
-            "row_counts": {n: len(ids) for n, ids in baseline_files.items()},
+            "created_at": created_at,
+            "row_counts": row_counts or {n: len(ids) for n, ids in baseline_files.items()},
             "job_ids": baseline_files}))
         monkeypatch.chdir(upd)
         return tdi.check_no_data_loss(), tdi.check_no_job_id_loss()
@@ -317,3 +324,49 @@ class TestIntegrityMoves:
              "historical_jobs_2025.parquet": [FAA_2025]},
             {"historical_jobs_2024_backup.parquet": ["547366900", "1"],
              "historical_jobs_2025.parquet": ["547366900"]}) == (False, False)
+
+    # Issue #739: re-poll moved one posting out of historical_jobs_2025 at
+    # 2026-11-10 21:31:53, after the baseline was taken, and the posting was
+    # not in the baseline's 500-id sample, so finding it in a later year file
+    # could not excuse the shrink. Its move log, fetched from R2, does.
+    MOVE = {"control_number": "547366900", "from_file": "historical_jobs_2024.parquet",
+            "to_file": "historical_jobs_2025.parquet"}
+
+    def _sampled(self, tmp_path, monkeypatch, created_at="2026-11-10T02:49:44"):
+        other = {**FAA_2024, "usajobsControlNumber": 1}
+        return self._run_checks(
+            tmp_path, monkeypatch,
+            {"historical_jobs_2024.parquet": [other],
+             "historical_jobs_2025.parquet": [FAA_2025]},
+            {"historical_jobs_2024.parquet": ["1"],
+             "historical_jobs_2025.parquet": []},
+            row_counts={"historical_jobs_2024.parquet": 2,
+                        "historical_jobs_2025.parquet": 1},
+            created_at=created_at)
+
+    def test_a_move_outside_the_sample_fails_without_its_log(self, tmp_path, monkeypatch, capsys):
+        assert self._sampled(tmp_path, monkeypatch) == (False, True)
+        assert "historical_jobs_2024.parquet shrunk: 2 → 1" in capsys.readouterr().out
+
+    def test_a_move_outside_the_sample_passes_with_its_log(self, tmp_path, monkeypatch):
+        self._log(tmp_path, [self.MOVE])
+        assert self._sampled(tmp_path, monkeypatch) == (True, True)
+
+    def test_a_tagged_log_counts(self, tmp_path, monkeypatch):
+        self._log(tmp_path, [self.MOVE], name="listing_moves_20261110_213153_scraped.csv")
+        assert self._sampled(tmp_path, monkeypatch) == (True, True)
+
+    def test_a_log_from_before_the_baseline_does_not_count(self, tmp_path, monkeypatch):
+        # That move is already in the baseline's counts; letting it excuse a
+        # shrink again would let a real loss of one job through.
+        self._log(tmp_path, [self.MOVE])
+        assert self._sampled(tmp_path, monkeypatch,
+                             created_at="2026-11-11T01:02:44") == (False, True)
+
+    def test_an_undated_log_is_an_error(self, tmp_path):
+        tdi = self._load()
+        data = tmp_path / "data"
+        data.mkdir()
+        logs = self._log(tmp_path, [self.MOVE], name="listing_moves_x.csv")
+        with pytest.raises(ValueError, match="Cannot tell when"):
+            tdi._moved_out(logs, str(data), since=datetime(2026, 11, 10))
