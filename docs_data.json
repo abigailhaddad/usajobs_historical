@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-11T02:09:19.205838",
-  "total_jobs": 3277163,
+  "generated_at": "2026-11-11T15:51:42.972425",
+  "total_jobs": 3277285,
   "total_fields": 48,
   "field_year": 2025,
   "file_size": "1.0GB",
@@ -99,9 +99,9 @@
     },
     {
       "year": 2026,
-      "total_jobs": 228239,
-      "jobs_opened": 228239,
-      "jobs_closed": 225456,
+      "total_jobs": 228361,
+      "jobs_opened": 228361,
+      "jobs_closed": 225575,
       "coverage": "Current through November 11, 2026"
     }
   ],
@@ -117,7 +117,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"0850\"}, {\"series\": \"0801\"}, {\"series\": \"0830\"}], [{\"series\": \"1306\"}, {\"series\": \"0840\"}], [{\"series\": \"0260\"}], [{\"series\": \"0893\"}, {\"series\": \"1320\"}, {\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"0830\"}] (1819 unique)",
+      "examples": "[{\"series\": \"1515\"}, {\"series\": \"1550\"}, {\"series\": \"0801\"}, {\"series\": \"1501\"}, {\"series\": \"1301\"}], [{\"series\": \"0801\"}, {\"series\": \"0855\"}, {\"series\": \"0854\"}, {\"series\": \"1550\"}], [{\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"1550\"}], [{\"series\": \"0819\"}, {\"series\": \"0801\"}, {\"series\": \"0401\"}, {\"series\": \"1301\"}, {\"series\": \"0020\"}] (1819 unique)",
       "completeness_percent": 87,
       "completeness_class": "warning",
       "unique_count": 1819
@@ -141,7 +141,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of Agriculture\\Civil Rights, Department of the Navy\\Commander, Naval Information Warfare Systems Command (NAVWARSYSCOM), Department of the Army\\Army Installation Management Command, Department of the Army\\U.S. Army Security Assistance Command (462 unique)",
+      "examples": "General Services Administration\\Office of the Chief Financial Officer, Woodrow Wilson International Center for Scholars, Department of Agriculture\\Agricultural Research Service, Department of Veterans Affairs\\Board of Veterans' Appeals (462 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 462
@@ -165,7 +165,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "CBTA-12753287-25-DF, CO-2026-0047, 25-5AFSV710165, NJ-12778979-AF-25-80 (166832 unique)",
+      "examples": "CBSR-12691663-25-ET, OS-USTC-26-12841284-MP, 60-AFPC-12702118-745024-KAF, CBTA-12745861-25-KL (166832 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 166832
@@ -173,7 +173,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Summer, Multiple, Temporary, Temporary promotion (13 unique)",
+      "examples": "Intermittent, Temporary promotion, Temporary, Agency Employees Only (13 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 13
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "TRAF, DD63, LL01, TD17 (444 unique)",
+      "examples": "HE36, AB00, AG18, GC00 (444 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 444
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Office of the Chief of the National Guard Bureau, Occupational Safety and Health Administration, Agricultural Marketing Service, Office of the Secretary of the Army (432 unique)",
+      "examples": "U.S. Air Forces, Europe, Air Force Elements, U.S. Strategic Command, Office of the Inspector General, Railroad Retirement Board (432 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 432
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "5L, HD, DN, ST (95 unique)",
+      "examples": "DN, TB, ED, TW (95 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 95
@@ -229,7 +229,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Education, Department of Transportation, Department of Housing and Urban Development, Court Services and Offender Supervision Agency for DC (26 unique)",
+      "examples": "National Aeronautics and Space Administration, National Foundation on the Arts and the Humanities, Department of Energy, Other Agencies and Independent Organizations (26 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 26
@@ -237,7 +237,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "179 MDG, 433 OPERATIONS SUPPORT SQ, Departmental Reporting, Charlie Norwood VA HealthCare System, Augusta, GA (27131 unique)",
+      "examples": "HQ US ARMY SOUTH-Joint Task Force-GTMO-ENGINEERS-GUANTANAMO BAY, CUBA 43HG, DCMS,DMR,LOGCOM,LOG-3,BASE NEW ORLEANS,BASE NEW ORLEANS, United States Attorney's Office, Northern District of California - Administrative Division, Canaveral National Seashore (27131 unique)",
       "completeness_percent": 73,
       "completeness_class": "warning",
       "unique_count": 27131
@@ -245,7 +245,7 @@
     {
       "field_name": "hiringpaths",
       "field_type": "JSON Array",
-      "examples": "[{\"hiringPath\": \"The public\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}], [{\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}, {\"hiringPath\": \"Special authorities\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}], [{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Native Americans\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}, {\"hiringPath\": \"Family of overseas employees\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}], [{\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Military spouses\"}] (666 unique)",
+      "examples": "[{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Native Americans\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}, {\"hiringPath\": \"Family of overseas employees\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}, {\"hiringPath\": \"Special authorities\"}], [{\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Recent graduates\"}, {\"hiringPath\": \"Land and base management\"}, {\"hiringPath\": \"Special authorities\"}, {\"hiringPath\": \"Family of overseas employees\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}], [{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}], [{\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}, {\"hiringPath\": \"Special authorities\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}] (666 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 666
@@ -253,7 +253,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-19T23:35:22.028059, 2025-12-19T09:06:00.590619, 2025-09-19T23:20:10.687083, 2025-10-16T07:08:12.395733 (161988 unique)",
+      "examples": "2025-09-19T23:35:22.024965, 2025-09-19T23:15:07.716418, 2026-06-29T04:34:35.514207, 2025-09-19T23:33:53.489065 (161988 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 161988
@@ -261,7 +261,7 @@
     {
       "field_name": "jobcategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1499\"}], [{\"series\": \"3378\"}], [{\"series\": \"5788\"}], [{\"series\": \"1640\"}] (565 unique)",
+      "examples": "[{\"series\": \"0181\"}], [{\"series\": \"1411\"}], [{\"series\": \"0185\"}], [{\"series\": \"1499\"}] (565 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 565
@@ -269,7 +269,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-19T23:26:35.907170, 2025-09-19T23:11:51.310262, 2025-09-19T23:23:06.174197, 2025-09-19T23:18:00.909021 (113451 unique)",
+      "examples": "2025-09-19T23:27:34.366251, 2025-09-19T23:24:57.476608, 2025-09-19T23:24:00.601586, 2025-09-19T23:13:38.390784 (113451 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 113451
@@ -277,7 +277,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "35, 23, 05, HK (117 unique)",
+      "examples": "AG, KI, HL, 7 (117 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 117
@@ -293,7 +293,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "D, 03, IJ, KL (116 unique)",
+      "examples": "G, 60, AA, 03 (116 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 116
@@ -309,7 +309,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "LL, DK, SV, DJ (163 unique)",
+      "examples": "PQ, DA, PU, VP (163 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 163
@@ -317,7 +317,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2025-12-13, 2025-09-19, 2025-04-23, 2025-09-24 (652 unique)",
+      "examples": "2025-10-27, 2025-04-06, 2025-06-23, 2025-03-28 (652 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 652
@@ -325,7 +325,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-12-17, 2026-07-06, 2026-01-27, 2025-03-27 (571 unique)",
+      "examples": "2025-08-17, 2026-01-04, 2025-09-18, 2025-05-02 (571 unique)",
       "completeness_percent": 11,
       "completeness_class": "poor",
       "unique_count": 571
@@ -333,7 +333,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2025-11-06, 2025-06-11, 2025-08-06, 2025-12-06 (363 unique)",
+      "examples": "2025-07-25, 2025-02-24, 2025-08-08, 2025-10-06 (363 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363
@@ -349,7 +349,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Engineering Equipment Operator Helper, Nurse - Fall Prevention Program Coordinator, Cook - Full-time, Examination Specialist (Technology), CG-0570-13/14 (44485 unique)",
+      "examples": "Wildland Firefighter (Veteran Hand Crew Squad Leader) - Direct Hire Authority, Licensed Practical Nurse - Wound & Ostomy Team, Information Technology Specialist (System Administrator), Registered Respiratory Therapist - Home Oxygen/PFT (44485 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 44485
@@ -357,7 +357,7 @@
     {
       "field_name": "positionlocations",
       "field_type": "JSON Array",
-      "examples": "[{\"positionLocationCity\": \"Cleveland\", \"positionLocationState\": \"Ohio\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Pittsburgh\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Stehekin\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Lemoore\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Bordentown\", \"positionLocationState\": \"New Jersey\", \"positionLocationCountry\": \"United States\"}] (3071 unique)",
+      "examples": "[{\"positionLocationCity\": \"Martinez\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Orick\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kalaupapa\", \"positionLocationState\": \"Hawaii\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Spalding\", \"positionLocationState\": \"Idaho\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Astoria\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kimberly\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Jiddah\", \"positionLocationState\": null, \"positionLocationCountry\": \"Saudi Arabia\"}], [{\"positionLocationCity\": \"Cherokee\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Fairchild AFB\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}] (3071 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 3071
@@ -365,7 +365,7 @@
     {
       "field_name": "priorListings",
       "field_type": "JSON Array",
-      "examples": "[{\"positionOpenDate\": \"2025-10-10\", \"positionCloseDate\": \"2025-10-16\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"ST-12807448-25-RJM\", \"positionTitle\": \"Utilities Energy Manager Branch Head\"}], [{\"positionOpenDate\": \"2024-04-02\", \"positionCloseDate\": \"2025-04-01\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"IHS-24-GP-12372643-ESEP/MP\", \"positionTitle\": \"Medical Technician (Phlebotomy)\"}], [{\"positionOpenDate\": \"2025-10-29\", \"positionCloseDate\": \"2025-11-11\", \"positionOpeningStatus\": \"Job canceled\", \"announcementNumber\": \"CBSX-12824927-26-CR\", \"positionTitle\": \"Cook\"}], [{\"positionOpenDate\": \"2025-09-08\", \"positionCloseDate\": \"2025-09-18\", \"positionOpeningStatus\": \"Job canceled\", \"announcementNumber\": \"CAZP-12752439-25-RM\", \"positionTitle\": \"Registered Nurse (RN) Acute Care Resource Pool  P/T (FTE 0.6)\"}] (308 unique)",
+      "examples": "[{\"positionOpenDate\": \"2025-09-12\", \"positionCloseDate\": \"2025-09-26\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"IHSC-MAST-APP-O5-NS-2025\", \"positionTitle\": \"Advanced Practice Provider Medical Asset Support Team (O-5 Billet) Non-Supervisory\"}], [{\"positionOpenDate\": \"2025-06-27\", \"positionCloseDate\": \"2025-12-31\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"req2385\", \"positionTitle\": \"Green & Gold Congressional Aide\"}], [{\"positionOpenDate\": \"2025-11-03\", \"positionCloseDate\": \"2025-11-12\", \"positionOpeningStatus\": \"Job canceled\", \"announcementNumber\": \"MCGL-26-12816872-DHA\", \"positionTitle\": \"Industrial Worker\"}], [{\"positionOpenDate\": \"2024-11-26\", \"positionCloseDate\": \"2025-01-20\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"WENAFP42412626235\", \"positionTitle\": \"Resort Facilities Manager NF-04\"}] (308 unique)",
       "completeness_percent": 0,
       "completeness_class": "poor",
       "unique_count": 308
@@ -373,7 +373,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "7, No, 99, 04 (77 unique)",
+      "examples": "3, 16, 98, 15 (77 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77
@@ -437,7 +437,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "50, 11, 16, 62 (90 unique)",
+      "examples": "84, 44, 15, 33 (90 unique)",
       "completeness_percent": 89,
       "completeness_class": "warning",
       "unique_count": 90
