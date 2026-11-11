@@ -19,13 +19,57 @@ permissions:
   actions: write
 
 jobs:
+  # A Daily Data Update retry (the 13:37 and 19:37 UTC crons) that dies in its
+  # 5-minute `check` job before any work starts, on a day that already has a
+  # successful run, is not a data problem: nothing was missed. On 2026-11-11 the
+  # 19:37 retry's `check` job got no working runner, the run was marked failed,
+  # the rerun was refused ("This workflow run cannot be retried") and issue #741
+  # got a comment, while the day's data had updated fine at 16:09 UTC. This job
+  # marks only that case; any failure where `update-data` ran still alerts.
+  # Fail-open: if this job breaks, its output is empty and the jobs below run
+  # exactly as before.
+  triage:
+    if: github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'cancelled'
+    runs-on: ubuntu-latest
+    outputs:
+      already_done: ${{ steps.decide.outputs.already_done }}
+    steps:
+      - name: Was this an empty retry on a day that already succeeded?
+        id: decide
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            let done = false;
+            if (run.name === 'Daily Data Update') {
+              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRunAttempt, {
+                owner: context.repo.owner, repo: context.repo.repo,
+                run_id: run.id, attempt_number: run.run_attempt, per_page: 100,
+              });
+              const workRan = jobs.some(j => j.name === 'update-data' && j.conclusion && j.conclusion !== 'skipped');
+              if (!workRan) {
+                const day = run.created_at.slice(0, 10);
+                const ok = (await github.paginate(github.rest.actions.listWorkflowRuns, {
+                  owner: context.repo.owner, repo: context.repo.repo, workflow_id: run.workflow_id,
+                  status: 'success', created: day, per_page: 100,
+                })).filter(r => r.id !== run.id);
+                if (ok.length) {
+                  done = true;
+                  console.log(`update-data never ran in run ${run.id}, and ${ok.length} run(s) already succeeded on ${day} ` +
+                              `(e.g. ${ok[0].html_url}). No rerun, no alert.`);
+                }
+              }
+            }
+            core.setOutput('already_done', done ? 'true' : 'false');
+
   retry:
     # First failure of a run gets ONE automatic rerun. Runner deaths
     # ("shutdown signal", OOM, lost communication) are transient and a plain
     # rerun recovers them; a genuine bug just fails again on attempt 2 and
     # the notify job below opens the issue. run_attempt == 1 is the loop
     # guard: attempt 2's failure never triggers another rerun.
-    if: github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt == 1
+    needs: triage
+    if: always() && github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt == 1 && needs.triage.outputs.already_done != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Rerun the failed jobs (one retry)
@@ -92,7 +136,8 @@ jobs:
     # not rare here: 3 of the last 6 non-success daily runs ended cancelled.
     # Kept on one line on purpose: a folded `if:` still evaluates, but a broken
     # condition here fails silently (no alert, no error), so this stays boring.
-    if: (github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'cancelled') && github.event.workflow_run.run_attempt >= 2
+    needs: triage
+    if: always() && (github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'cancelled') && github.event.workflow_run.run_attempt >= 2 && needs.triage.outputs.already_done != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Open an issue for the failed run
