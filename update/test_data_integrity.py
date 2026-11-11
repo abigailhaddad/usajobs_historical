@@ -6,6 +6,7 @@ Ensures parquet files are valid and contain expected data.
 Usage: python test_data_integrity.py
 """
 
+import csv
 import glob
 import os
 import re
@@ -202,8 +203,12 @@ def check_no_duplicate_control_numbers():
     return all_good
 
 
-def _moved_out(log_dir='../logs', data_dir='../data'):
-    """{filename: control numbers legitimately moved out of it this run}.
+MOVES_FILE = re.compile(r'^listing_moves_(\d{8}_\d{6})(?:_[a-z]+)?\.csv$')
+
+
+def _moved_out(log_dir='../logs', data_dir='../data', since=None):
+    """{filename: control numbers legitimately moved out of it}, plus whether
+    every logged move checked out.
 
     A re-opened posting is kept only in its latest listing's year file
     (scripts/listings.py), so the file it was first filed in shrinks. That is
@@ -211,12 +216,24 @@ def _moved_out(log_dir='../logs', data_dir='../data'):
     removal to logs/listing_moves_*.csv, and a removal only counts here if the
     control number is really in the file it says it moved to. Anything else
     missing is still lost.
+
+    The logs come from this run and, via R2 (scripts/sync_to_r2.py uploads
+    them, the workflows download them), from any other run that synced data
+    since. `since` is when the baseline was taken: a move logged before it is
+    already in the baseline's counts, so it must not excuse a shrink again.
+    Issue #739: re-poll moved one posting out of historical_jobs_2025 on
+    2026-11-10, its log died with its runner, and the next daily run failed on
+    "168197 -> 168196".
     """
-    import csv
-    import glob
     out, unverified = {}, []
     targets = {}
     for path in sorted(glob.glob(os.path.join(log_dir, 'listing_moves_*.csv'))):
+        m = MOVES_FILE.match(os.path.basename(path))
+        if not m:
+            raise ValueError(f"Cannot tell when {path} was written: expected "
+                             f"listing_moves_YYYYmmdd_HHMMSS[_tag].csv")
+        if since is not None and datetime.strptime(m.group(1), '%Y%m%d_%H%M%S') < since:
+            continue
         with open(path, newline='') as f:
             for row in csv.DictReader(f):
                 cn, src, dst = row['control_number'], row['from_file'], row['to_file']
@@ -233,6 +250,11 @@ def _moved_out(log_dir='../logs', data_dir='../data'):
               f"whose control number is not in the file it moved to, e.g. "
               f"{unverified[:3]}")
     return out, not unverified
+
+
+def _baseline_time(baseline):
+    """When the baseline was taken (runner clock, UTC, like the move logs)."""
+    return datetime.fromisoformat(baseline['created_at'])
 
 
 YEAR_FILE = re.compile(r'^(historical_jobs|scraped_jobs)_(\d{4})\.parquet$')
@@ -284,7 +306,7 @@ def check_no_data_loss():
         baseline = json.load(f)
 
     all_good = True
-    moved, moves_ok = _moved_out()
+    moved, moves_ok = _moved_out(since=_baseline_time(baseline))
     if not moves_ok:
         all_good = False
 
@@ -348,7 +370,7 @@ def check_no_job_id_loss():
 
     all_good = True
     total_lost_jobs = 0
-    moved, _ = _moved_out()
+    moved, _ = _moved_out(since=_baseline_time(baseline))
 
     print(f"\n{Colors.BLUE}Checking for lost job IDs...{Colors.RESET}")
 

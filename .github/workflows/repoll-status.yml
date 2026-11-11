@@ -89,6 +89,15 @@ jobs:
                 key = obj['Key']
                 print(f'Downloading {key} ({obj[\"Size\"]/1024/1024:.1f} MB)')
                 s3.download_file('usajobs-data', key, key)
+        # Re-opened postings other runs moved between year files since the
+        # baseline; test_data_integrity.py needs them to excuse the shrink.
+        os.makedirs('logs', exist_ok=True)
+        for page in paginator.paginate(Bucket='usajobs-data', Prefix='logs/listing_moves/'):
+            for obj in page.get('Contents', []):
+                key = obj['Key']
+                local = os.path.join('logs', os.path.basename(key))
+                print(f'Downloading {key} -> {local}')
+                s3.download_file('usajobs-data', key, local)
         print('Done')
         "
         echo "Checking data files:"
