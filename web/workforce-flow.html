@@ -4,13 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10">
     <title>Federal workforce flow (accessions vs separations) — Poster</title>
+    <meta name="description" content="Monthly federal accessions (hires) and separations (departures) for each cabinet department, with the January 2025 hiring freeze marked.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Federal workforce flow">
+    <meta property="og:description" content="Monthly federal accessions (hires) and separations (departures) for each cabinet department, with the January 2025 hiring freeze marked.">
+    <meta property="og:url" content="https://usajobs-historical.abigailhaddad.com/workforce-flow.html">
+    <meta name="twitter:card" content="summary">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232D6A4F'/%3E%3Crect x='7' y='17' width='4' height='8' fill='%23FFF8F0'/%3E%3Crect x='14' y='9' width='4' height='16' fill='%23FFF8F0'/%3E%3Crect x='21' y='13' width='4' height='12' fill='%23FFF8F0'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="shared/shared.css">
     <style>
         body { margin: 0; background: #FAF5E8; font-family: 'Source Sans 3', system-ui, sans-serif; color: #1a1a1a; }
-        .nav { padding: 0.75rem 1.25rem; border-bottom: 1px solid #e8e0c8; display: flex; gap: 1.25rem; align-items: baseline; }
+        .nav { padding: 0.75rem 1.25rem; border-bottom: 1px solid #e8e0c8; display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; align-items: baseline; }
         .nav a { color: #1a1a1a; text-decoration: none; font-weight: 600; }
         .nav a:hover { text-decoration: underline; }
         .intro { max-width: 1100px; padding: 1.5rem 1.25rem 0.5rem; }
@@ -46,7 +53,7 @@
         .top-tile .tile { padding: 1rem 1.1rem 0.75rem; }
         .top-tile .tile h2 { font-size: 1.25rem; }
         .top-tile .canvas-wrap { height: 320px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 0.75rem; padding: 0 1.25rem 2rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 0.75rem; padding: 0 1.25rem 2rem; }
         .tile { background: #FAF5E8; border: 1px solid #e8e0c8; border-radius: 4px; padding: 0.75rem 0.85rem 0.5rem; display: flex; flex-direction: column; }
         .tile h2 { font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem; color: #1a1a1a; }
         .tile .canvas-wrap { position: relative; height: 200px; }
