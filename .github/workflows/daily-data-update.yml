@@ -846,6 +846,16 @@ jobs:
               echo "PR exists despite the API error — continuing"
               exit 0
             fi
+            # An older data-updates PR with auto-merge armed can merge the
+            # commit we just pushed before this step runs, leaving nothing to
+            # open a PR for ("No commits between main and data-updates"). That
+            # happened 2026-11-11: #738, opened 2026-11-10, merged this run's
+            # push 8 seconds after it landed. The data is on main, so that's done.
+            if git fetch -q origin main data-updates &&
+               git merge-base --is-ancestor origin/data-updates origin/main; then
+              echo "data-updates is already merged into main — no PR needed"
+              exit 0
+            fi
             echo "  PR create failed (attempt $attempt/5) — retrying in $((attempt * 15))s"
             sleep $((attempt * 15))
           done
