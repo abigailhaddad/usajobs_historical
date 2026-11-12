@@ -84,6 +84,14 @@ _ALWAYS_EXPECTED = [f for f in SECTION_FIELDS
 MIN_FILL = {"education": 0.50}
 MIN_FILL_DEFAULT = 0.90
 
+# Below this many pages a fill rate is mostly noise: a run that only picks up
+# the few postings opened since the last one often gets a handful from one
+# agency, all shaped alike. On 2026-11-12 (#747) 7 pages gave education 2/7
+# while the 60 newest live pages parsed correctly, 40/60 with education. Small
+# runs flag only a section that parsed on none of their pages, and only for
+# sections every announcement has; the next full-sized run measures the rest.
+MIN_PAGES_FOR_RATE = 30
+
 _local = threading.local()
 
 
@@ -323,13 +331,21 @@ def record_field_health(parsed: List[Dict], samples=None) -> None:
                    "pages_parsed": len(parsed), "fields": stats}, f, indent=2)
 
     below = []
+    small = len(parsed) < MIN_PAGES_FOR_RATE
     print(f"Announcement section fill over {len(parsed):,} pages parsed:")
+    if small:
+        print(f"   (under {MIN_PAGES_FOR_RATE} pages: only a section every "
+              f"announcement has, found on none of them, is flagged)")
     for field, st in stats.items():
         floor = MIN_FILL.get(field, MIN_FILL_DEFAULT)
-        flag = "" if st["rate"] >= floor else "   BELOW FLOOR"
+        if small:
+            bad = st["filled"] == 0 and field in _ALWAYS_EXPECTED
+        else:
+            bad = st["rate"] < floor
+        flag = "   BELOW FLOOR" if bad else ""
         print(f"   {st['filled']:6,}/{st['parsed']:,}  {st['rate']:6.1%}  "
               f"{field}{flag}")
-        if st["rate"] < floor:
+        if bad:
             below.append(field)
             warn(f"Announcement section '{field}' parsed out of only "
                  f"{st['rate']:.1%} of {len(parsed):,} pages fetched this run; "
