@@ -8,7 +8,40 @@
 // on; this copy only lets the UI say so before the user clicks. Keep the two in
 // sync. Anything bigger goes to the full parquet on R2.
 const DOWNLOAD_ROW_LIMIT = 100000;
-const FULL_DATASET_URL = 'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr.parquet';
+// Data host (2026-11-19): the R2 bucket's custom domain, not its
+// pub-...r2.dev development URL. Cloudflare rate-limits r2.dev and says it is
+// not for production, and network and content filters block *.r2.dev
+// addresses (one reader's Mac resolved it to 0.0.0.0). Same bucket, same
+// CORS rules; the r2.dev URL still works for scripts that use it.
+// web/tests/test_data_host.py fails if a page goes back to r2.dev.
+const FULL_DATASET_URL = 'https://data.usajobs-historical.abigailhaddad.com/web/jobs_5yr.parquet';
+
+// A data file that never arrives used to show only a 2-second "Failed to load
+// listings" toast over an empty table, which reads as "the site has no data".
+// 2026-11-19: on one reader's Mac a content filter answered 0.0.0.0 for the
+// R2 host, so every fetch failed with ERR_CONNECTION_REFUSED while the site
+// itself was fine. This banner stays up and names the host, so a reader can
+// tell a blocked data host from a broken site. Shown once per page.
+function showDataLoadError(url, err) {
+    if (document.getElementById('dataLoadError')) return;
+    let host = url;
+    try { host = new URL(url).host; } catch (e) { /* keep the raw string */ }
+    const box = document.createElement('div');
+    box.id = 'dataLoadError';
+    box.className = 'data-load-error';
+    box.setAttribute('role', 'alert');
+    const strong = document.createElement('strong');
+    strong.textContent = 'The job data could not be loaded. ';
+    const text = document.createElement('span');
+    text.textContent = 'Your browser could not download the data files from ' + host
+        + '. A network or content filter (a work network, Screen Time, an ad or'
+        + ' security blocker) may be blocking that address. Try another network'
+        + ' or browser, or reload the page.';
+    box.appendChild(strong);
+    box.appendChild(text);
+    document.body.insertBefore(box, document.body.firstChild);
+    if (err) console.error('Data load failed for ' + url + ':', err);
+}
 
 // ============================================
 // Utility Functions

@@ -168,13 +168,16 @@
         perfMark('module-start');
 
         const PARQUET_URL =
-            'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr.parquet';
+            'https://data.usajobs-historical.abigailhaddad.com/web/jobs_5yr.parquet';
 
         // Started, not awaited. Booting DuckDB-WASM means downloading the wasm
         // bundle and the parquet extension, which measured 7s warm and 17s cold
         // — so nothing on the page may block on it. Everything that needs the
         // connection awaits this promise at the point of use instead.
         const connPromise = initDb(PARQUET_URL);
+        // A failed boot (usually the parquet fetch) gets a banner that stays,
+        // not only the per-query toasts: see showDataLoadError in shared.js.
+        connPromise.catch(err => showDataLoadError(PARQUET_URL, err));
         perfMark('duckdb-boot-started');
         connPromise.then(() => perfMark('duckdb-ready'),
                          () => perfMark('duckdb-FAILED'));
@@ -188,7 +191,7 @@
         // at all — serving it from here 404s. The daily pipeline writes the R2
         // copy, so this is also the fresher of the two.
         const STATIC_URL =
-            'https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/static.json';
+            'https://data.usajobs-historical.abigailhaddad.com/web/static.json';
         const staticPromise = fetch(STATIC_URL)
             .then(r => (r.ok ? r.json() : null))
             .catch(() => null);

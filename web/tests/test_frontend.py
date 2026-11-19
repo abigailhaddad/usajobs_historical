@@ -174,3 +174,35 @@ def test_copy_link_button_exists(page: Page):
     btn = page.locator(".copy-link-btn")
     expect(btn).to_be_visible()
     expect(btn).to_have_text("Copy Link")
+
+
+# ------------------------------------------------------------------
+# Data host unreachable: a banner that stays, naming the host
+# ------------------------------------------------------------------
+# 2026-11-19: on a reader's Mac a content filter answered 0.0.0.0 for the R2
+# host, so the parquet and static.json fetches failed with
+# ERR_CONNECTION_REFUSED. The page showed an empty table and a 2-second toast,
+# which read as "the site has no data". These tests block the R2 host the way
+# that filter did and check the page says what happened, on both data pages.
+
+R2_HOST = "data.usajobs-historical.abigailhaddad.com"
+
+
+@pytest.mark.parametrize("path", ["/", "/pivot.html"])
+def test_blocked_data_host_shows_banner(page: Page, path):
+    page.route(f"**://{R2_HOST}/**", lambda route: route.abort("connectionrefused"))
+    page.goto(BASE_URL + path)
+    banner = page.locator("#dataLoadError")
+    expect(banner).to_be_visible(timeout=CHART_TIMEOUT)
+    expect(banner).to_contain_text("could not be loaded")
+    expect(banner).to_contain_text(R2_HOST)
+    # Still there after the old toast would have faded (2s + 0.3s).
+    page.wait_for_timeout(3000)
+    expect(banner).to_be_visible()
+    assert page.locator("#dataLoadError").count() == 1
+
+
+def test_no_banner_when_data_loads(page: Page):
+    page.goto(BASE_URL)
+    page.wait_for_selector("#jobsTable tbody tr td", timeout=TABLE_TIMEOUT)
+    assert page.locator("#dataLoadError").count() == 0
