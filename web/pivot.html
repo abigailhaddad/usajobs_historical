@@ -161,7 +161,7 @@
         // DOWNLOAD_ROW_LIMIT and FULL_DATASET_URL come from shared/shared.js.
 
         const PARQUET_URL =
-            'https://data.usajobs-historical.abigailhaddad.com/web/jobs_5yr.parquet';
+            'https://usajobs-data.abigailhaddad.com/web/jobs_5yr.parquet';
 
         // Started, not awaited — see index.html. Callers await at point of use.
         const connPromise = initDb(PARQUET_URL);
@@ -172,7 +172,7 @@
         // Precomputed dropdown option lists, so opening a filter does not wait
         // on the DuckDB boot or on a ~900ms unnest for occupational series.
         const STATIC_URL =
-            'https://data.usajobs-historical.abigailhaddad.com/web/static.json';
+            'https://usajobs-data.abigailhaddad.com/web/static.json';
         const staticPromise = fetch(STATIC_URL)
             .then(r => (r.ok ? r.json() : null))
             .catch(() => null);

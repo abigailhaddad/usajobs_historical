@@ -185,7 +185,7 @@ def test_copy_link_button_exists(page: Page):
 # which read as "the site has no data". These tests block the R2 host the way
 # that filter did and check the page says what happened, on both data pages.
 
-R2_HOST = "data.usajobs-historical.abigailhaddad.com"
+R2_HOST = "usajobs-data.abigailhaddad.com"
 
 
 @pytest.mark.parametrize("path", ["/", "/pivot.html"])

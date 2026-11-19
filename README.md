@@ -65,7 +65,7 @@ Naively unioning both and grouping by `hiringAgencyName` will **double-count** t
 import duckdb
 from scripts.parquet_utils import build_deduped_query
 
-R2 = "https://data.usajobs-historical.abigailhaddad.com"
+R2 = "https://usajobs-data.abigailhaddad.com"
 years = range(2023, 2027)
 sql = build_deduped_query(
     hist_urls=[f"{R2}/historical_jobs_{y}.parquet" for y in years],

@@ -14,7 +14,7 @@ const DOWNLOAD_ROW_LIMIT = 100000;
 // addresses (one reader's Mac resolved it to 0.0.0.0). Same bucket, same
 // CORS rules; the r2.dev URL still works for scripts that use it.
 // web/tests/test_data_host.py fails if a page goes back to r2.dev.
-const FULL_DATASET_URL = 'https://data.usajobs-historical.abigailhaddad.com/web/jobs_5yr.parquet';
+const FULL_DATASET_URL = 'https://usajobs-data.abigailhaddad.com/web/jobs_5yr.parquet';
 
 // A data file that never arrives used to show only a 2-second "Failed to load
 // listings" toast over an empty table, which reads as "the site has no data".

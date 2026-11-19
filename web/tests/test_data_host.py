@@ -4,14 +4,14 @@
 to 0.0.0.0 (a content filter), so the table and charts never loaded. Network
 and security filters commonly block *.r2.dev, and Cloudflare documents r2.dev
 as a rate-limited development URL. The bucket is now served at
-data.usajobs-historical.abigailhaddad.com; this test keeps every published
+usajobs-data.abigailhaddad.com; this test keeps every published
 page and shared script on it.
 """
 from pathlib import Path
 import re
 
 WEB = Path(__file__).resolve().parent.parent
-DATA_HOST = "data.usajobs-historical.abigailhaddad.com"
+DATA_HOST = "usajobs-data.abigailhaddad.com"
 
 
 def _site_files():

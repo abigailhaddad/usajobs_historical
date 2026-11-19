@@ -39,7 +39,7 @@ HERE = Path(__file__).resolve().parent
 WEB = HERE.parent
 REPO = WEB.parent
 
-R2_PARQUET = 'https://data.usajobs-historical.abigailhaddad.com/web/jobs_5yr.parquet'
+R2_PARQUET = 'https://usajobs-data.abigailhaddad.com/web/jobs_5yr.parquet'
 _LOCAL = WEB / 'data' / 'jobs_5yr.parquet'
 PARQUET = os.environ.get('PARQUET') or (str(_LOCAL) if _LOCAL.exists() else R2_PARQUET)
 IS_REMOTE = PARQUET.startswith('http')

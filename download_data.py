@@ -14,7 +14,7 @@ import os
 import urllib.request
 import zipfile
 
-R2_BASE = "https://data.usajobs-historical.abigailhaddad.com"
+R2_BASE = "https://usajobs-data.abigailhaddad.com"
 
 HISTORICAL_FILES = [f"data/historical_jobs_{y}.parquet" for y in range(2013, 2027)]
 CURRENT_FILES = [f"data/current_jobs_{y}.parquet" for y in range(2024, 2027)]

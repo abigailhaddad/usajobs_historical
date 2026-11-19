@@ -28,7 +28,7 @@ from collections import defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-MIRROR = "https://data.usajobs-historical.abigailhaddad.com/data"
+MIRROR = "https://usajobs-data.abigailhaddad.com/data"
 HERE = os.path.dirname(os.path.abspath(__file__))
 UNREACHABLE = os.path.join(HERE, "unreachable_announcements.csv")
 

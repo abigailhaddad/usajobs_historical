@@ -168,7 +168,7 @@
         perfMark('module-start');
 
         const PARQUET_URL =
-            'https://data.usajobs-historical.abigailhaddad.com/web/jobs_5yr.parquet';
+            'https://usajobs-data.abigailhaddad.com/web/jobs_5yr.parquet';
 
         // Started, not awaited. Booting DuckDB-WASM means downloading the wasm
         // bundle and the parquet extension, which measured 7s warm and 17s cold
@@ -191,7 +191,7 @@
         // at all — serving it from here 404s. The daily pipeline writes the R2
         // copy, so this is also the fresher of the two.
         const STATIC_URL =
-            'https://data.usajobs-historical.abigailhaddad.com/web/static.json';
+            'https://usajobs-data.abigailhaddad.com/web/static.json';
         const staticPromise = fetch(STATIC_URL)
             .then(r => (r.ok ? r.json() : null))
             .catch(() => null);
