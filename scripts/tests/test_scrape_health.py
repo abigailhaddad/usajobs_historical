@@ -67,6 +67,28 @@ class TestRecordFieldHealth:
         csd.record_field_health([row(education=None) for _ in range(100)])
         assert "education" in warnings(isolate)
 
+    def test_a_small_run_does_not_flag_a_low_rate(self, isolate):
+        # #747: 7 pages, education on 2 of them, while live pages parsed fine.
+        rows = [row(education="x" if i < 2 else None) for i in range(7)]
+        csd.record_field_health(rows)
+        assert warnings(isolate) == ""
+
+    def test_a_small_run_still_flags_a_section_found_on_no_page(self, isolate):
+        csd.record_field_health([row(majorDuties=None) for _ in range(7)])
+        assert "majorDuties" in warnings(isolate)
+
+    def test_a_small_run_does_not_flag_education_absent_everywhere(self, isolate):
+        # Education is legitimately missing on some announcements; three
+        # pages without it say nothing about the markup.
+        csd.record_field_health([row(education=None) for _ in range(3)])
+        assert warnings(isolate) == ""
+
+    def test_the_rate_check_applies_from_the_threshold_up(self, isolate):
+        n = csd.MIN_PAGES_FOR_RATE
+        csd.record_field_health([row(education="x" if i < 2 else None)
+                                 for i in range(n)])
+        assert "education" in warnings(isolate)
+
     def test_pruned_rows_cannot_affect_the_measurement(self, isolate):
         # The bug: published rows have their text nulled on disk. Those rows
         # are not in the parsed list, so they cannot drag the rate down.
