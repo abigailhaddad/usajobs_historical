@@ -774,3 +774,13 @@ table.dataTable tbody tr:hover {
         min-width: 1200px;
     }
 }
+
+/* Persistent banner when the R2 data files can't be fetched (shared.js
+   showDataLoadError, 2026-11-19). */
+.data-load-error {
+    background: var(--color-error);
+    color: var(--color-bg);
+    padding: 12px 16px;
+    font-size: 15px;
+    line-height: 1.4;
+}

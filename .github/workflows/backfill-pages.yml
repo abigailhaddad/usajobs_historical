@@ -129,7 +129,7 @@ jobs:
         run: |
           mkdir -p data
           curl -sSf -o "data/historical_jobs_${{ matrix.year }}.parquet" \
-            "https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/data/historical_jobs_${{ matrix.year }}.parquet"
+            "https://usajobs-data.abigailhaddad.com/data/historical_jobs_${{ matrix.year }}.parquet"
           ls -lh "data/historical_jobs_${{ matrix.year }}.parquet"
 
       - name: Check usajobs.gov serves this runner

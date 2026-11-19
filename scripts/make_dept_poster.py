@@ -21,7 +21,7 @@ import os
 import duckdb
 from PIL import Image, ImageDraw, ImageFont
 
-PARQUET_URL = "https://pub-317c58882ec04f329b63842c1eb65b0c.r2.dev/web/jobs_5yr.parquet"
+PARQUET_URL = "https://usajobs-data.abigailhaddad.com/web/jobs_5yr.parquet"
 
 # Visual palette — matches the live site
 BG = (250, 245, 232)
