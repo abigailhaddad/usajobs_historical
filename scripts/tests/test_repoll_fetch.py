@@ -165,3 +165,29 @@ def test_daily_collection_alerts_and_marks_incomplete_when_short_twice(monkeypat
         assert "2026-01-01: expected 612, got 500" in open(alerts).read()
     finally:
         _restore(alerts, before)
+
+
+def test_a_503_is_retried_with_growing_waits_then_succeeds(monkeypatch):
+    import repoll_status
+    pages = [FakeResponse(503, "apology page"), FakeResponse(503, "apology page"),
+             FakeResponse(200, '{"data": [{"usajobsControlNumber": 7}]}')]
+    monkeypatch.setattr(repoll_status.requests, "get", lambda *a, **k: pages.pop(0))
+    waits = []
+    monkeypatch.setattr(repoll_status.time, "sleep", lambda s: waits.append(s))
+    jobs = repoll_status.fetch_all_for_date("2026-05-23")
+    assert [j["usajobsControlNumber"] for j in jobs] == [7]
+    assert waits == [15, 30]
+
+
+def test_a_persistent_503_raises_after_five_attempts(monkeypatch):
+    import pytest, requests
+    import repoll_status
+    calls = []
+    def always_503(*a, **k):
+        calls.append(1)
+        return FakeResponse(503, "apology page")
+    monkeypatch.setattr(repoll_status.requests, "get", always_503)
+    monkeypatch.setattr(repoll_status.time, "sleep", lambda s: None)
+    with pytest.raises(requests.HTTPError, match="503 Service Unavailable after 5 attempts"):
+        repoll_status.get_page({"StartPositionOpenDate": "2026-05-23"})
+    assert len(calls) == 5
