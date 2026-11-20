@@ -58,6 +58,15 @@ def log(msg):
     print(msg, flush=True)
 
 
+# Seconds added per attempt when waiting out a 503 (15, 30, 45, 60 across five
+# attempts). The API's gateway gives up at ~30s and answers with a 503 apology
+# page, and it did the same to a whole batch of 15 concurrent requests at once
+# (#765: 2026-05-23..06-06 all failed together; fetched one at a time, 14 of
+# those 15 dates worked minutes later). Waiting 5-20s between tries was too
+# short for it to recover.
+RETRY_503_STEP = 15
+
+
 def get_page(params: Optional[Dict] = None, next_url: Optional[str] = None, retries: int = 5) -> Dict:
     base_url = "https://data.usajobs.gov"
     for attempt in range(retries):
@@ -69,7 +78,7 @@ def get_page(params: Optional[Dict] = None, next_url: Optional[str] = None, retr
 
             if resp.status_code == 503:
                 if attempt < retries - 1:
-                    time.sleep((attempt + 1) * 5)
+                    time.sleep((attempt + 1) * RETRY_503_STEP)
                     continue
                 # The last 503 used to `continue` too, falling out of the loop
                 # and returning None. The caller's data.get(...) then died with
@@ -537,7 +546,7 @@ def main():
     parser = argparse.ArgumentParser(description="Re-poll status for non-final historical jobs")
     parser.add_argument("--years", nargs="*", type=int, help="Specific years to re-poll (default: all)")
     parser.add_argument("--dry-run", action="store_true", help="Just count dates, don't query API")
-    parser.add_argument("--workers", type=int, default=15, help="Parallel API workers (default: 15)")
+    parser.add_argument("--workers", type=int, default=4, help="Parallel API workers (default: 4; 15 got a whole batch 503'd in #765)")
     parser.add_argument("--skip-recent-days", type=int, default=14,
                         help="Skip dates within this many days of today (default: 14, covered by daily collection)")
     parser.add_argument("--skip-coverage-check", action="store_true",
