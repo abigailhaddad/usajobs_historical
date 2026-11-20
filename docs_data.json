@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-11-19T17:01:45.449825",
-  "total_jobs": 3283487,
+  "generated_at": "2026-11-20T01:44:34.693596",
+  "total_jobs": 3284014,
   "total_fields": 48,
   "field_year": 2025,
   "file_size": "1.1GB",
-  "latest_job_date": "2026-11-19",
+  "latest_job_date": "2026-11-20",
   "data_coverage": [
     {
       "year": 2013,
@@ -99,10 +99,10 @@
     },
     {
       "year": 2026,
-      "total_jobs": 234563,
-      "jobs_opened": 234563,
-      "jobs_closed": 231516,
-      "coverage": "Current through November 19, 2026"
+      "total_jobs": 235090,
+      "jobs_opened": 235090,
+      "jobs_closed": 232040,
+      "coverage": "Current through November 20, 2026"
     }
   ],
   "all_fields": [
@@ -117,7 +117,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"1515\"}], [{\"series\": \"1550\"}, {\"series\": \"0332\"}, {\"series\": \"0340\"}], [{\"series\": \"1801\"}], [{\"series\": \"0190\"}, {\"series\": \"0193\"}] (1819 unique)",
+      "examples": "[{\"series\": \"1330\"}], [{\"series\": \"0850\"}, {\"series\": \"0893\"}, {\"series\": \"0801\"}, {\"series\": \"0861\"}, {\"series\": \"0855\"}, {\"series\": \"0830\"}, {\"series\": \"1501\"}, {\"series\": \"1320\"}], [{\"series\": \"0830\"}, {\"series\": \"0896\"}, {\"series\": \"0861\"}, {\"series\": \"0801\"}, {\"series\": \"0855\"}, {\"series\": \"0854\"}], [{\"series\": \"0332\"}] (1819 unique)",
       "completeness_percent": 87,
       "completeness_class": "warning",
       "unique_count": 1819
@@ -141,7 +141,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of the Army\\Field Operating Offices of the Office of the Secretary of the Army, Department of the Air Force\\Space Systems Command, Department of Energy\\Western Area Power Administration, Department of Homeland Security\\Federal Law Enforcement Training Centers (462 unique)",
+      "examples": "Department of Agriculture, Department of Justice\\Drug Enforcement Administration, Department of the Interior\\Bureau of Ocean Energy Management, Department of the Interior\\National Park Service (462 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 462
@@ -165,7 +165,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "CBSY-12782184-25-AM, 25-VAOIG-12734977-ICTAP, OCA-CBSW-12815688-26-MF, 5A-AFPC-12857242-058668-SJS (166832 unique)",
+      "examples": "CBSU-12668364-25-KMS, ST-12785776-25-RJH, CBTC-12789770-25-JJ, CBSY-12746410-25-JH (166832 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 166832
@@ -173,7 +173,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Temporary, Permanent, Intermittent, Detail (13 unique)",
+      "examples": "Internships, Agency Employees Only, Term, Detail (13 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 13
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "PO01, DD15, TD09, AF34 (444 unique)",
+      "examples": "VAAA, IN06, ARX2, DD05 (444 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 444
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Defense Counterintelligence and Security Agency, Maritime Administration, U.S. Military Academy, National Archives and Records Administration (432 unique)",
+      "examples": "Office of the National Cyber Director, Food Safety and Inspection Service, Air Force Services Agency, Immigration and Customs Enforcement (432 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 432
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "LD, BO, ZG, SK (95 unique)",
+      "examples": "BG, DL, TW, SB (95 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 95
@@ -229,7 +229,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "General Services Administration, Department of State, Department of the Army, Department of Health and Human Services (26 unique)",
+      "examples": "Department of Housing and Urban Development, Department of Transportation, National Aeronautics and Space Administration, Department of the Navy (26 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 26
@@ -237,7 +237,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "Legal Support Activity Europe, Harry S Truman National Historic Site, J9(HAC)/HYBRID CLOUD SOLUTIONS (HC3254), USPFO Warehouse, Johnston, IA (27131 unique)",
+      "examples": "USCG Base Kodiak, Procurement & Contracting, New England District, Real Estate Division, Internal Medicine Department, Chinle Service Unit, Air Traffic Organization, Western-Pacific Region, Oakland District, Oakland ATCT (OAK) (27131 unique)",
       "completeness_percent": 73,
       "completeness_class": "warning",
       "unique_count": 27131
@@ -245,7 +245,7 @@
     {
       "field_name": "hiringpaths",
       "field_type": "JSON Array",
-      "examples": "[{\"hiringPath\": \"The public\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}], [{\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}], [{\"hiringPath\": \"The public\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Special authorities\"}], [{\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Family of overseas employees\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Land and base management\"}] (666 unique)",
+      "examples": "[{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Family of overseas employees\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Special authorities\"}], [{\"hiringPath\": \"The public\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"National Guard and reserves\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}], [{\"hiringPath\": \"The public\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"National Guard and reserves\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}], [{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Senior executives\"}, {\"hiringPath\": \"Peace Corps & AmeriCorps Vista\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Special authorities\"}] (666 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 666
@@ -253,7 +253,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2026-06-29T04:35:12.352154, 2025-09-19T23:24:00.583128, 2025-09-19T23:11:51.302461, 2025-09-19T23:10:31.458869 (161988 unique)",
+      "examples": "2025-09-19T23:18:00.904790, 2025-09-19T23:40:43.923063, 2025-09-19T23:13:38.387353, 2025-10-10T07:07:42.022312 (161988 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 161988
@@ -261,7 +261,7 @@
     {
       "field_name": "jobcategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"8255\"}], [{\"series\": \"5301\"}], [{\"series\": \"1010\"}], [{\"series\": \"0856\"}] (565 unique)",
+      "examples": "[{\"series\": \"0810\"}], [{\"series\": \"2150\"}], [{\"series\": \"0455\"}], [{\"series\": \"0602\"}, {\"series\": \"0668\"}] (565 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 565
@@ -269,7 +269,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-19T23:25:49.547130, 2025-09-19T23:48:20.037394, 2025-09-19T23:13:38.147846, 2025-09-19T23:10:31.408925 (113198 unique)",
+      "examples": "2025-09-19T23:47:00.313734, 2025-09-19T23:15:07.734794, 2025-09-19T23:18:00.896121, 2025-09-19T23:23:06.155713 (113198 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 113198
@@ -277,7 +277,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "JJ, 0, 53, LL (117 unique)",
+      "examples": "24, HH, 26, IL (117 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 117
@@ -293,7 +293,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "II, HI, 11, IH (116 unique)",
+      "examples": "07, EI, K, EJ (116 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 116
@@ -309,7 +309,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "EM, PU, ZP, NT (163 unique)",
+      "examples": "IP, NR, BB, VH (163 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 163
@@ -317,7 +317,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2026-08-28, 2026-01-27, 2025-04-07, 2025-04-30 (652 unique)",
+      "examples": "2025-10-29, 2025-11-28, 2025-01-19, 2026-10-28 (652 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 652
@@ -325,7 +325,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2026-03-10, 2025-01-26, 2025-07-23, 2025-12-19 (571 unique)",
+      "examples": "2026-01-30, 2025-02-17, 2026-04-22, 2025-11-25 (571 unique)",
       "completeness_percent": 11,
       "completeness_class": "poor",
       "unique_count": 571
@@ -333,7 +333,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2025-03-11, 2025-12-16, 2025-11-27, 2025-11-20 (363 unique)",
+      "examples": "2025-07-22, 2025-12-11, 2025-09-13, 2025-01-14 (363 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363
@@ -349,7 +349,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Child & Youth Program Leader CY2 Regular Full-Time, Physician Chief Geriatrics and Extended Care Service, Lead Documents Inspection Technician, Nursing Assistant-Inpatient (44485 unique)",
+      "examples": "TOUR COORDINATOR, NF-02/RFT, MCCS TOURS PLUS, CAMP FOSTER, Materials Examiner and Identifier (Sorting & Classifying) NA-06, Inpatient Mental Health Nursing Assistant, ASSISTANT SUPERVISORY AQUATICS SPECIALIST NF3 (44485 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 44485
@@ -357,7 +357,7 @@
     {
       "field_name": "positionlocations",
       "field_type": "JSON Array",
-      "examples": "[{\"positionLocationCity\": \"Niantic\", \"positionLocationState\": \"Connecticut\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Washington\", \"positionLocationState\": \"District of Columbia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Grand Prairie\", \"positionLocationState\": \"Texas\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Fairbanks\", \"positionLocationState\": \"Alaska\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Juneau\", \"positionLocationState\": \"Alaska\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Soldotna\", \"positionLocationState\": \"Alaska\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Fort Ben Harrison\", \"positionLocationState\": \"Indiana\", \"positionLocationCountry\": \"United States\"}] (3071 unique)",
+      "examples": "[{\"positionLocationCity\": \"Location Negotiable After Selection\", \"positionLocationState\": null, \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"McCall\", \"positionLocationState\": \"Idaho\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Carver\", \"positionLocationState\": \"Minnesota\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Pearl Harbor\", \"positionLocationState\": \"Hawaii\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Mission Viejo\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Boston\", \"positionLocationState\": \"Massachusetts\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Westlake\", \"positionLocationState\": \"Texas\", \"positionLocationCountry\": \"United States\"}] (3071 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 3071
@@ -365,7 +365,7 @@
     {
       "field_name": "priorListings",
       "field_type": "JSON Array",
-      "examples": "[{\"positionOpenDate\": \"2025-10-06\", \"positionCloseDate\": \"2025-10-21\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"CBTG-12811172-26-ZH\", \"positionTitle\": \"Mental Health Staff Psychologist\"}], [{\"positionOpenDate\": \"2025-09-09\", \"positionCloseDate\": \"2025-09-23\", \"positionOpeningStatus\": \"Job closed\", \"announcementNumber\": \"74140\", \"positionTitle\": \"SALES ASSOCIATE SENIOR NF2* - PART TIME (EXTENDED)\"}], [{\"positionOpenDate\": \"2025-09-17\", \"positionCloseDate\": \"2025-09-26\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"DESTIMP-12779759-25-VL\", \"positionTitle\": \"Cybersecurity Specialist\"}], [{\"positionOpenDate\": \"2025-10-10\", \"positionCloseDate\": \"2025-10-16\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"ST-12807448-25-RJM\", \"positionTitle\": \"Utilities Energy Manager Branch Head\"}] (308 unique)",
+      "examples": "[{\"positionOpenDate\": \"2024-09-06\", \"positionCloseDate\": \"2025-03-24\", \"positionOpeningStatus\": \"Job closed\", \"announcementNumber\": \"WV-12530112-AR-24-088\", \"positionTitle\": \"TITLE 32 ELECTRONICS MECHANIC SUPERVISOR WS-2604-13\"}], [{\"positionOpenDate\": \"2025-10-21\", \"positionCloseDate\": \"2025-11-03\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"MRL2025-30230\", \"positionTitle\": \"Chief Headquarters Operations Administration and Resources\"}], [{\"positionOpenDate\": \"2024-09-25\", \"positionCloseDate\": \"2025-07-22\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"IHS-24-GP-12560285-DHA\", \"positionTitle\": \"Supervisory General Engineer (Deputy Facility Manager)\"}], [{\"positionOpenDate\": \"2025-10-24\", \"positionCloseDate\": \"2025-10-27\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"HSJG-26-12821225 DHA\", \"positionTitle\": \"Health System Specialist\"}] (308 unique)",
       "completeness_percent": 0,
       "completeness_class": "poor",
       "unique_count": 308
@@ -373,7 +373,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "4, 28, 8, 31 (77 unique)",
+      "examples": "8, 3, 09, 30 (77 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77
@@ -437,7 +437,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "45, 49, 001, 01 (90 unique)",
+      "examples": "99999, 3, 35, 48 (90 unique)",
       "completeness_percent": 89,
       "completeness_class": "warning",
       "unique_count": 90
