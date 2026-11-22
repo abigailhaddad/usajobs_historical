@@ -4,14 +4,22 @@ name: Repoll Historical Status
 # workflow already refreshes the recent window). Runs on its own so a slow or
 # large repoll can never block today's data from publishing.
 #
-# Rotation: one year-group per run, cycling by day-of-year. 2013-2015 and
-# 2016-2018 each share a slot; each year from 2019 through the current year
-# gets its own — a full sweep every ~10 days today, extending by one day
-# each new year. (Until 2026-11-21 this was a single 2013-2018 slot — see
-# #769/#773: at the 4-worker/slower-503-backoff settings from #767, that
-# combined slot's ~975 dates didn't fit the 90-minute budget even with zero
-# errors, so it's now split in two.) A wall-clock budget stops the run
-# cleanly and opens an issue if it can't finish its group in time.
+# Rotation: one year-group per run, cycling by day-of-year. 2013-2015 (26
+# non-final dates combined, as of 2026-11-22) is the only multi-year slot;
+# every year from 2016 through the current year gets its own — a full
+# sweep every ~12 days today, extending by one day each new year.
+#
+# Until 2026-11-21 this was a single 2013-2018 slot (see #769/#773): at the
+# 4-worker/slower-503-backoff settings from #767, that slot's ~975 dates
+# didn't fit the 90-minute budget even with zero errors. The first fix split
+# it into 2013-2015 + 2016-2018, but a live run of just 2016-2018 still hit
+# the 100-minute budget at 672/950 (0 errors) — nearly all the volume was
+# in 2016-2018 (231/360/359 dates respectively, each already single-year
+# sized), not spread evenly across the six years. 2016, 2017 and 2018 each
+# now get their own slot like every other year since.
+#
+# A wall-clock budget stops the run cleanly and opens an issue if it can't
+# finish its group in time.
 
 on:
   schedule:
@@ -138,12 +146,14 @@ jobs:
           YEARS="$REPOLL_YEARS"
           echo "Manual override — repolling years: $YEARS"
         else
-          # One year-group per run, rotating by day-of-year. 2013-2015 and
-          # 2016-2018 each share a slot (split from one combined 2013-2018
-          # slot — see #769/#773); every year from 2019 through the CURRENT
-          # year gets its own slot, so the rotation extends automatically
-          # each January.
-          YEARS=$(python3 -c "import datetime; cy=datetime.date.today().year; groups=[list(range(2013,2016)),list(range(2016,2019))]+[[y] for y in range(2019,cy+1)]; doy=datetime.date.today().timetuple().tm_yday; print(' '.join(map(str, groups[doy % len(groups)])))")
+          # One year-group per run, rotating by day-of-year. 2013-2015 is the
+          # only multi-year slot (genuinely sparse — 26 non-final dates
+          # combined); every year from 2016 through the CURRENT year gets
+          # its own slot, so the rotation extends automatically each
+          # January. (2016-2018 used to share a slot too; split out after a
+          # live run showed that trio alone still didn't fit the budget —
+          # see #769/#773.)
+          YEARS=$(python3 -c "import datetime; cy=datetime.date.today().year; groups=[list(range(2013,2016))]+[[y] for y in range(2016,cy+1)]; doy=datetime.date.today().timetuple().tm_yday; print(' '.join(map(str, groups[doy % len(groups)])))")
           echo "Rotation selected years: $YEARS"
         fi
 
