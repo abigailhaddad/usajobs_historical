@@ -4,11 +4,14 @@ name: Repoll Historical Status
 # workflow already refreshes the recent window). Runs on its own so a slow or
 # large repoll can never block today's data from publishing.
 #
-# Rotation: one year-group per run, cycling by day-of-year. 2013-2018 (sparse)
-# share one slot; each year from 2019 through the current year gets its own —
-# a full sweep every ~9 days today, extending by one day each new year. A
-# wall-clock budget stops the run cleanly and opens an issue if it can't finish
-# its group in time.
+# Rotation: one year-group per run, cycling by day-of-year. 2013-2015 and
+# 2016-2018 each share a slot; each year from 2019 through the current year
+# gets its own — a full sweep every ~10 days today, extending by one day
+# each new year. (Until 2026-11-21 this was a single 2013-2018 slot — see
+# #769/#773: at the 4-worker/slower-503-backoff settings from #767, that
+# combined slot's ~975 dates didn't fit the 90-minute budget even with zero
+# errors, so it's now split in two.) A wall-clock budget stops the run
+# cleanly and opens an issue if it can't finish its group in time.
 
 on:
   schedule:
@@ -25,7 +28,7 @@ on:
       max_minutes:
         description: "Wall-clock budget for the repoll step (minutes)."
         type: string
-        default: "90"
+        default: "100"
 
 permissions:
   contents: read
@@ -129,16 +132,18 @@ jobs:
       env:
         GITHUB_ACTIONS: true
         REPOLL_YEARS: ${{ inputs.years }}
-        MAX_MINUTES: ${{ inputs.max_minutes || '90' }}
+        MAX_MINUTES: ${{ inputs.max_minutes || '100' }}
       run: |
         if [ -n "$REPOLL_YEARS" ]; then
           YEARS="$REPOLL_YEARS"
           echo "Manual override — repolling years: $YEARS"
         else
-          # One year-group per run, rotating by day-of-year. 2013-2018 (sparse)
-          # share slot 0; every year from 2019 through the CURRENT year gets its
-          # own slot, so the rotation extends automatically each January.
-          YEARS=$(python3 -c "import datetime; cy=datetime.date.today().year; groups=[list(range(2013,2019))]+[[y] for y in range(2019,cy+1)]; doy=datetime.date.today().timetuple().tm_yday; print(' '.join(map(str, groups[doy % len(groups)])))")
+          # One year-group per run, rotating by day-of-year. 2013-2015 and
+          # 2016-2018 each share a slot (split from one combined 2013-2018
+          # slot — see #769/#773); every year from 2019 through the CURRENT
+          # year gets its own slot, so the rotation extends automatically
+          # each January.
+          YEARS=$(python3 -c "import datetime; cy=datetime.date.today().year; groups=[list(range(2013,2016)),list(range(2016,2019))]+[[y] for y in range(2019,cy+1)]; doy=datetime.date.today().timetuple().tm_yday; print(' '.join(map(str, groups[doy % len(groups)])))")
           echo "Rotation selected years: $YEARS"
         fi
 
