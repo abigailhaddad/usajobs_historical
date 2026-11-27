@@ -533,6 +533,56 @@ def write_date_error_marker(failed_dates: Dict[str, str], years: List[int],
     return path
 
 
+# How long to wait before giving the failed dates a second try at the end of a
+# run. The 503s come in bursts: on 2026-11-27 (#787) twelve dates failed inside
+# six minutes, the run went on for another half hour, and fetched by hand later
+# all of them worked. Each date's own five attempts span only ~2.5 minutes.
+RETRY_PASS_WAIT = 120
+# Stop the second pass after this many failures in a row: the API is still down,
+# and the next run will pick the dates up.
+RETRY_PASS_MAX_CONSECUTIVE_FAILURES = 2
+
+
+def retry_failed_dates(failed_dates: Dict[str, str], wait_seconds: float = RETRY_PASS_WAIT,
+                       time_left=lambda: float("inf"), fetch=None,
+                       sleep=time.sleep) -> List[tuple]:
+    """Fetch each failed date once more, one at a time, after a pause.
+
+    Returns [(date, jobs)] for the dates that worked and removes them from
+    failed_dates. A date that fails again keeps its newest error. Stops early
+    when time_left() (seconds) runs out or after
+    RETRY_PASS_MAX_CONSECUTIVE_FAILURES failures in a row; the dates not tried
+    stay in failed_dates with their first error.
+    """
+    fetch = fetch or fetch_date_worker
+    recovered = []
+    if not failed_dates or time_left() <= wait_seconds:
+        return recovered
+    log(f"\n--- Second try for {len(failed_dates)} failed date(s), "
+        f"after {wait_seconds:.0f}s ---")
+    sleep(wait_seconds)
+    in_a_row = 0
+    for date_str in sorted(failed_dates, reverse=True):
+        if time_left() <= 0:
+            log("  Time budget reached; the rest wait for the next run.")
+            break
+        if in_a_row >= RETRY_PASS_MAX_CONSECUTIVE_FAILURES:
+            log(f"  {in_a_row} failures in a row; the API is still down, "
+                f"the rest wait for the next run.")
+            break
+        _, jobs, error = fetch(date_str)
+        if error:
+            failed_dates[date_str] = error
+            in_a_row += 1
+            log(f"  ERROR again {date_str}: {error}")
+        else:
+            del failed_dates[date_str]
+            in_a_row = 0
+            recovered.append((date_str, jobs))
+            log(f"  Recovered {date_str}: {len(jobs)} jobs")
+    return recovered
+
+
 def fetch_date_worker(date_str: str) -> tuple:
     """Worker function for parallel fetching. Returns (date_str, jobs_list)."""
     try:
@@ -641,6 +691,28 @@ def main():
     errors = 0
     failed_dates: Dict[str, str] = {}  # date -> error text, for the alert
 
+    def absorb(date_str: str, jobs: List[Dict]) -> None:
+        """File one date's API rows as status updates or new jobs, by year."""
+        nonlocal api_jobs_seen
+        year = date_to_year[date_str]
+        api_jobs_seen += len(jobs)
+        year_status_maps.setdefault(year, {})
+        year_new_jobs.setdefault(year, [])
+        for job in jobs:
+            cn = str(job.get('usajobsControlNumber', ''))
+            status = job.get('positionOpeningStatus')
+            if cn and status:
+                if cn in existing_ids.get(year, set()):
+                    year_status_maps[year][cn] = listing_fields(job)
+                else:
+                    year_new_jobs[year].append(job)
+                    existing_ids.setdefault(year, set()).add(cn)
+                    title = job.get('positionTitle', 'Unknown')
+                    agency = job.get('hiringAgencyName', 'Unknown')
+                    open_date = job.get('positionOpenDate', 'Unknown')
+                    log(f"  🆕 New job: {cn} — {title} ({agency}) opened {open_date} [{status}]")
+                    all_new_jobs_details.append((year, open_date, cn, title, agency, status))
+
     # Process in batches for parallel fetching
     batch_size = args.workers
     i = 0
@@ -672,29 +744,7 @@ def main():
                     dates_queried += 1
                     continue
 
-                year = date_to_year[date_str]
-                api_jobs_seen += len(jobs)
-
-                if year not in year_status_maps:
-                    year_status_maps[year] = {}
-                if year not in year_new_jobs:
-                    year_new_jobs[year] = []
-
-                for job in jobs:
-                    cn = str(job.get('usajobsControlNumber', ''))
-                    status = job.get('positionOpeningStatus')
-                    if cn and status:
-                        if cn in existing_ids.get(year, set()):
-                            year_status_maps[year][cn] = listing_fields(job)
-                        else:
-                            year_new_jobs[year].append(job)
-                            existing_ids.setdefault(year, set()).add(cn)
-                            title = job.get('positionTitle', 'Unknown')
-                            agency = job.get('hiringAgencyName', 'Unknown')
-                            open_date = job.get('positionOpenDate', 'Unknown')
-                            log(f"  🆕 New job: {cn} — {title} ({agency}) opened {open_date} [{status}]")
-                            all_new_jobs_details.append((year, open_date, cn, title, agency, status))
-
+                absorb(date_str, jobs)
                 dates_queried += 1
                 dates_since_save += 1
 
@@ -734,6 +784,16 @@ def main():
             dates_since_save = 0
 
         i += batch_size
+
+    # Give the dates that errored one more try before the final save.
+    if failed_dates and not stopped_early:
+        def time_left():
+            if not args.max_minutes:
+                return float("inf")
+            return args.max_minutes * 60 - (time.time() - start_time)
+        for date_str, jobs in retry_failed_dates(failed_dates, time_left=time_left):
+            absorb(date_str, jobs)
+        errors = len(failed_dates)   # count only the dates still failing
 
     # Final save for any remaining updates
     if year_status_maps or year_new_jobs:
