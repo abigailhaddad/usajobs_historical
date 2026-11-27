@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-27T02:41:19.034260",
-  "total_jobs": 3288218,
+  "generated_at": "2026-11-27T17:53:11.500451",
+  "total_jobs": 3288513,
   "total_fields": 48,
   "field_year": 2025,
   "file_size": "1.1GB",
@@ -99,9 +99,9 @@
     },
     {
       "year": 2026,
-      "total_jobs": 239294,
-      "jobs_opened": 239294,
-      "jobs_closed": 236052,
+      "total_jobs": 239589,
+      "jobs_opened": 239589,
+      "jobs_closed": 236336,
       "coverage": "Current through November 27, 2026"
     }
   ],
@@ -117,7 +117,7 @@
     {
       "field_name": "JobCategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"4255\"}], [{\"series\": \"1320\"}, {\"series\": \"0819\"}, {\"series\": \"1313\"}, {\"series\": \"0401\"}, {\"series\": \"1301\"}, {\"series\": \"1350\"}], [{\"series\": \"0807\"}, {\"series\": \"0810\"}, {\"series\": \"0830\"}, {\"series\": \"0808\"}, {\"series\": \"0819\"}, {\"series\": \"0801\"}], [{\"series\": \"1340\"}, {\"series\": \"1315\"}, {\"series\": \"1301\"}] (1819 unique)",
+      "examples": "[{\"series\": \"0830\"}, {\"series\": \"0855\"}, {\"series\": \"0854\"}, {\"series\": \"0861\"}, {\"series\": \"0896\"}, {\"series\": \"0801\"}], [{\"series\": \"1301\"}, {\"series\": \"0801\"}, {\"series\": \"1550\"}, {\"series\": \"1501\"}], [{\"series\": \"0150\"}, {\"series\": \"0810\"}, {\"series\": \"0819\"}, {\"series\": \"0408\"}, {\"series\": \"0401\"}, {\"series\": \"1301\"}], [{\"series\": \"1515\"}, {\"series\": \"0801\"}, {\"series\": \"0896\"}] (1819 unique)",
       "completeness_percent": 87,
       "completeness_class": "warning",
       "unique_count": 1819
@@ -141,7 +141,7 @@
     {
       "field_name": "agencyLevelSort",
       "field_type": "String",
-      "examples": "Department of Veterans Affairs\\Office of Enterprise Integration, Department of Agriculture\\Economic Research Service, National Aeronautics and Space Administration\\Ames Research Center, Department of the Air Force\\Air Force Review Boards Agency (462 unique)",
+      "examples": "Department of the Air Force\\Air Force Review Boards Agency, Court Services and Offender Supervision Agency for DC\\Pretrial Services Agency, Department of Justice\\Justice, Bureau of Prisons/Federal Prison System, Department of Defense\\Defense Information Systems Agency (462 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 462
@@ -165,7 +165,7 @@
     {
       "field_name": "announcementNumber",
       "field_type": "String",
-      "examples": "CBSR-12787716-25-LW, 25-12756829, SMP-12699892-LEB, 4U-AFPC-12847068-030518-STG (166832 unique)",
+      "examples": "DESTIMP-12707325-25-RH, CBSX-12743553-25-JAR, CBZY-12752426-25-KLC, DE-12753179-25-LO (166832 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 166832
@@ -173,7 +173,7 @@
     {
       "field_name": "appointmentType",
       "field_type": "String",
-      "examples": "Seasonal, Term, Temporary promotion, Permanent (13 unique)",
+      "examples": "Recent graduates, Term, Agency Employees Only, Detail (13 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 13
@@ -205,7 +205,7 @@
     {
       "field_name": "hiringAgencyCode",
       "field_type": "String",
-      "examples": "NV33, TB00, QQ00, FW00 (444 unique)",
+      "examples": "VABG, CM63, EP00, ARHC (444 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 444
@@ -213,7 +213,7 @@
     {
       "field_name": "hiringAgencyName",
       "field_type": "String",
-      "examples": "Defense Health Agency, Air Force Operational Test and Evaluation Center, Naval Systems Management Activity, Bureau of Engraving and Printing (432 unique)",
+      "examples": "U.S. Army Central, U.S. Army Corps of Engineers, Office of the U.S. Trade Representative, Bureau of Economic Analysis (432 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 432
@@ -221,7 +221,7 @@
     {
       "field_name": "hiringDepartmentCode",
       "field_type": "String",
-      "examples": "EE, MC, TD, XP (95 unique)",
+      "examples": "BD, EE, GC, SZ (95 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 95
@@ -229,7 +229,7 @@
     {
       "field_name": "hiringDepartmentName",
       "field_type": "String",
-      "examples": "Department of Commerce, Department of Transportation, Court Services and Offender Supervision Agency for DC, Department of Energy (26 unique)",
+      "examples": "Department of Transportation, Court Services and Offender Supervision Agency for DC, Department of Labor, Department of Defense (26 unique)",
       "completeness_percent": 99,
       "completeness_class": "good",
       "unique_count": 26
@@ -237,7 +237,7 @@
     {
       "field_name": "hiringSubelementName",
       "field_type": "String",
-      "examples": "709 TECH MAINT SQ, Financial Operations (J-8) Direct Care Financial Management Accounting, DE Department of Information Management, ATEHNS, GA; MOULTRIE, GA; CENTER HILL, FL; AND CAROLINA, PR (27131 unique)",
+      "examples": "Gator Lakes Golf Course - Oasis Cafe, Los Angeles National Cemetery, ATO, Western Service Area, Seattle District, Seattle ARTCC, TWSE1-ZSE, US ARMY INSTALLATION MANAGEMENT CMD USAG (REDSTONE ARSENAL) PUBLIC AFFAIRS OFFICE (27131 unique)",
       "completeness_percent": 73,
       "completeness_class": "warning",
       "unique_count": 27131
@@ -245,7 +245,7 @@
     {
       "field_name": "hiringpaths",
       "field_type": "JSON Array",
-      "examples": "[{\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"The public\"}, {\"hiringPath\": \"Veterans\"}], [{\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Veterans\"}], [{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Special authorities\"}], [{\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"The public\"}] (666 unique)",
+      "examples": "[{\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Special authorities\"}], [{\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"Career transition (CTAP, ICTAP, RPL)\"}, {\"hiringPath\": \"Special authorities\"}, {\"hiringPath\": \"Veterans\"}, {\"hiringPath\": \"Individuals with disabilities\"}, {\"hiringPath\": \"Military spouses\"}], [{\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}, {\"hiringPath\": \"Federal employees - Competitive service\"}, {\"hiringPath\": \"The public\"}, {\"hiringPath\": \"Veterans\"}], [{\"hiringPath\": \"National Guard and reserves\"}, {\"hiringPath\": \"Federal employees - Excepted service\"}, {\"hiringPath\": \"Internal to an agency\"}] (666 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 666
@@ -253,7 +253,7 @@
     {
       "field_name": "inserted_at",
       "field_type": "String",
-      "examples": "2025-09-19T23:50:42.602775, 2025-09-19T23:13:38.378182, 2025-09-19T23:10:31.415279, 2025-09-19T23:30:46.595497 (161988 unique)",
+      "examples": "2025-09-19T23:22:17.708661, 2025-09-19T23:35:22.008763, 2025-09-19T23:16:42.141888, 2025-09-19T23:25:49.564392 (161988 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 161988
@@ -261,7 +261,7 @@
     {
       "field_name": "jobcategories",
       "field_type": "JSON Array",
-      "examples": "[{\"series\": \"1801\"}], [{\"series\": \"1016\"}], [{\"series\": \"0007\"}], [{\"series\": \"1702\"}] (565 unique)",
+      "examples": "[{\"series\": \"0633\"}], [{\"series\": \"0360\"}], [{\"series\": \"0503\"}], [{\"series\": \"0807\"}, {\"series\": \"0808\"}, {\"series\": \"0810\"}, {\"series\": \"0819\"}, {\"series\": \"0830\"}, {\"series\": \"0850\"}] (565 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 565
@@ -269,7 +269,7 @@
     {
       "field_name": "last_seen",
       "field_type": "String",
-      "examples": "2025-09-19T23:41:45.492087, 2025-09-19T23:29:23.091468, 2025-09-19T23:07:31.733239, 2025-09-19T23:19:20.043163 (113198 unique)",
+      "examples": "2025-09-19T23:07:31.733612, 2025-09-19T23:38:09.842996, 2025-09-19T23:18:00.928101, 2025-09-19T23:18:00.938459 (113198 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 113198
@@ -277,7 +277,7 @@
     {
       "field_name": "maximumGrade",
       "field_type": "String",
-      "examples": "13, 11, AQ, AG (117 unique)",
+      "examples": "II, 8, 1, G (117 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 117
@@ -293,7 +293,7 @@
     {
       "field_name": "minimumGrade",
       "field_type": "String",
-      "examples": "HJ, KK, 32, 10 (116 unique)",
+      "examples": "0, 37, DJ, F (116 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 116
@@ -309,7 +309,7 @@
     {
       "field_name": "payScale",
       "field_type": "String",
-      "examples": "CE, EE, BB, NG (163 unique)",
+      "examples": "IE, DP, NZ, PE (163 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 163
@@ -317,7 +317,7 @@
     {
       "field_name": "positionCloseDate",
       "field_type": "String",
-      "examples": "2026-09-21, 2025-09-01, 2026-08-01, 2025-03-15 (652 unique)",
+      "examples": "2025-01-16, 2026-12-11, 2025-06-29, 2025-11-14 (652 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 652
@@ -325,7 +325,7 @@
     {
       "field_name": "positionExpireDate",
       "field_type": "String",
-      "examples": "2025-10-22, 2025-10-10, 2025-01-22, 2025-10-04 (571 unique)",
+      "examples": "2024-01-30, 2026-02-05, 2025-12-15, 2026-09-02 (571 unique)",
       "completeness_percent": 11,
       "completeness_class": "poor",
       "unique_count": 571
@@ -333,7 +333,7 @@
     {
       "field_name": "positionOpenDate",
       "field_type": "String",
-      "examples": "2025-09-20, 2025-05-15, 2025-09-27, 2025-03-01 (363 unique)",
+      "examples": "2025-05-16, 2025-09-13, 2025-09-28, 2025-11-21 (363 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 363
@@ -349,7 +349,7 @@
     {
       "field_name": "positionTitle",
       "field_type": "String",
-      "examples": "Program Specialist (Direct Hire), Management Program Specialist, Registered Nurse-Outpatient Staff, Registered Nurse (Assistant Nurse Manager Med/ Surg) (44485 unique)",
+      "examples": "Marriage and Family Therapist - Local Recovery Coordinator, Physician Assistant - EHRM, GARDENER A04*, Community Relations Specialist (44485 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 44485
@@ -357,7 +357,7 @@
     {
       "field_name": "positionlocations",
       "field_type": "JSON Array",
-      "examples": "[{\"positionLocationCity\": \"Hines\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"College Park\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Ottumwa\", \"positionLocationState\": \"Iowa\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cold Spring\", \"positionLocationState\": \"Minnesota\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Dakota City\", \"positionLocationState\": \"Nebraska\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fargo\", \"positionLocationState\": \"North Dakota\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Pearl Harbor\", \"positionLocationState\": \"Hawaii\", \"positionLocationCountry\": \"United States\"}] (3071 unique)",
+      "examples": "[{\"positionLocationCity\": \"Fort Harrison\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Missoula\", \"positionLocationState\": \"Montana\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Location Negotiable After Selection\", \"positionLocationState\": null, \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Baker City\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Joseph\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"La Grande\", \"positionLocationState\": \"Oregon\", \"positionLocationCountry\": \"United States\"}], [{\"positionLocationCity\": \"Elmendorf AFB\", \"positionLocationState\": \"Alaska\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Wainwright\", \"positionLocationState\": \"Alaska\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Redstone Arsenal\", \"positionLocationState\": \"Alabama\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Little Rock AFB\", \"positionLocationState\": \"Arkansas\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Davis Monthan AFB\", \"positionLocationState\": \"Arizona\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Luke AFB\", \"positionLocationState\": \"Arizona\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Camp Pendleton\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"March AFB\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Marine Corps Air Station Miramar\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"McClellan\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Naval Air Station San Diego\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"San Diego County\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Travis AFB\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Twentynine Palms\", \"positionLocationState\": \"California\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Buckley AFB\", \"positionLocationState\": \"Colorado\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Carson\", \"positionLocationState\": \"Colorado\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Peterson AFB\", \"positionLocationState\": \"Colorado\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Eglin AFB\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Jacksonville\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"MacDill AFB\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Mayport\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Patrick AFB\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Pensacola\", \"positionLocationState\": \"Florida\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Benning\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Gordon\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Stewart\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kings Bay\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Robins AFB\", \"positionLocationState\": \"Georgia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Andersen Air Base\", \"positionLocationState\": \"Guam\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Santa Rita\", \"positionLocationState\": \"Guam\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Hickam AFB\", \"positionLocationState\": \"Hawaii\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kaneohe\", \"positionLocationState\": \"Hawaii\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Pearl Harbor\", \"positionLocationState\": \"Hawaii\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Schofield Barracks\", \"positionLocationState\": \"Hawaii\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Great Lakes\", \"positionLocationState\": \"Illinois\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Scott AFB\", \"positionLocationState\": \"Illinois\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Riley\", \"positionLocationState\": \"Kansas\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Campbell\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Knox\", \"positionLocationState\": \"Kentucky\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Andrews AFB\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Meade\", \"positionLocationState\": \"Maryland\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Bangor\", \"positionLocationState\": \"Maine\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Buchanan\", \"positionLocationState\": \"Puerto Rico\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Belvoir\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Eustis\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Lee\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Myer\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Langley AFB\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Little Creek Amphibious Base\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Norfolk\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Quantico\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Virginia Beach\", \"positionLocationState\": \"Virginia\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Joint Base Lewis-McChord\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"McChord AFB\", \"positionLocationState\": \"Washington\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Chievres\", \"positionLocationState\": null, \"positionLocationCountry\": \"Belgium\"}, {\"positionLocationCity\": \"Ansbach\", \"positionLocationState\": null, \"positionLocationCountry\": \"Germany\"}, {\"positionLocationCity\": \"Baumholder\", \"positionLocationState\": null, \"positionLocationCountry\": \"Germany\"}, {\"positionLocationCity\": \"Grafenwohr\", \"positionLocationState\": null, \"positionLocationCountry\": \"Germany\"}, {\"positionLocationCity\": \"Hohenfels\", \"positionLocationState\": null, \"positionLocationCountry\": \"Germany\"}, {\"positionLocationCity\": \"Kaiserslautern\", \"positionLocationState\": null, \"positionLocationCountry\": \"Germany\"}, {\"positionLocationCity\": \"Ramstein\", \"positionLocationState\": null, \"positionLocationCountry\": \"Germany\"}, {\"positionLocationCity\": \"Spangdahlem\", \"positionLocationState\": null, \"positionLocationCountry\": \"Germany\"}, {\"positionLocationCity\": \"Stuttgart\", \"positionLocationState\": null, \"positionLocationCountry\": \"Germany\"}, {\"positionLocationCity\": \"Vilseck\", \"positionLocationState\": null, \"positionLocationCountry\": \"Germany\"}, {\"positionLocationCity\": \"Wiesbaden\", \"positionLocationState\": null, \"positionLocationCountry\": \"Germany\"}, {\"positionLocationCity\": \"Aviano\", \"positionLocationState\": null, \"positionLocationCountry\": \"Italy\"}, {\"positionLocationCity\": \"Vicenza\", \"positionLocationState\": null, \"positionLocationCountry\": \"Italy\"}, {\"positionLocationCity\": \"Atsugi Naval Air Facility\", \"positionLocationState\": null, \"positionLocationCountry\": \"Japan\"}, {\"positionLocationCity\": \"Camp Courtney Okinawa\", \"positionLocationState\": null, \"positionLocationCountry\": \"Japan\"}, {\"positionLocationCity\": \"Camp Foster\", \"positionLocationState\": null, \"positionLocationCountry\": \"Japan\"}, {\"positionLocationCity\": \"Iwakuni Marine Corps Air Station\", \"positionLocationState\": null, \"positionLocationCountry\": \"Japan\"}, {\"positionLocationCity\": \"Kadena Air Base Okinawa\", \"positionLocationState\": null, \"positionLocationCountry\": \"Japan\"}, {\"positionLocationCity\": \"Misawa AFB\", \"positionLocationState\": null, \"positionLocationCountry\": \"Japan\"}, {\"positionLocationCity\": \"Sagamihara\", \"positionLocationState\": null, \"positionLocationCountry\": \"Japan\"}, {\"positionLocationCity\": \"Sasebo\", \"positionLocationState\": null, \"positionLocationCountry\": \"Japan\"}, {\"positionLocationCity\": \"Yokosuka\", \"positionLocationState\": null, \"positionLocationCountry\": \"Japan\"}, {\"positionLocationCity\": \"Yokota Air Base\", \"positionLocationState\": null, \"positionLocationCountry\": \"Japan\"}, {\"positionLocationCity\": \"Camp Humphreys\", \"positionLocationState\": null, \"positionLocationCountry\": \"South Korea\"}, {\"positionLocationCity\": \"Osan\", \"positionLocationState\": null, \"positionLocationCountry\": \"South Korea\"}, {\"positionLocationCity\": \"TAEGU\", \"positionLocationState\": null, \"positionLocationCountry\": \"South Korea\"}, {\"positionLocationCity\": \"Yongsan\", \"positionLocationState\": null, \"positionLocationCountry\": \"South Korea\"}, {\"positionLocationCity\": \"Rota\", \"positionLocationState\": null, \"positionLocationCountry\": \"Spain\"}, {\"positionLocationCity\": \"Alconbury\", \"positionLocationState\": null, \"positionLocationCountry\": \"United Kingdom\"}, {\"positionLocationCity\": \"Lakenheath\", \"positionLocationState\": null, \"positionLocationCountry\": \"United Kingdom\"}, {\"positionLocationCity\": \"Fort Leonard Wood\", \"positionLocationState\": \"Missouri\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Keesler AFB\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Meridian\", \"positionLocationState\": \"Mississippi\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Camp Lejeune\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Cherry Point\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Bragg\", \"positionLocationState\": \"North Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Offutt AFB\", \"positionLocationState\": \"Nebraska\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"McGuire AFB\", \"positionLocationState\": \"New Jersey\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kirtland AFB\", \"positionLocationState\": \"New Mexico\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Nellis AFB\", \"positionLocationState\": \"Nevada\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Wright-Patterson AFB\", \"positionLocationState\": \"Ohio\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Sill\", \"positionLocationState\": \"Oklahoma\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Tinker AFB\", \"positionLocationState\": \"Oklahoma\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Moon\", \"positionLocationState\": \"Pennsylvania\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Jackson\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Parris Island\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Shaw AFB\", \"positionLocationState\": \"South Carolina\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Arnold AFB\", \"positionLocationState\": \"Tennessee\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Bliss\", \"positionLocationState\": \"Texas\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Hood\", \"positionLocationState\": \"Texas\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Fort Sam Houston\", \"positionLocationState\": \"Texas\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Lackland AFB\", \"positionLocationState\": \"Texas\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Randolph AFB\", \"positionLocationState\": \"Texas\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Camp Kinser\", \"positionLocationState\": null, \"positionLocationCountry\": \"Japan\"}], [{\"positionLocationCity\": \"Ogden\", \"positionLocationState\": \"Utah\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Kansas City\", \"positionLocationState\": \"Missouri\", \"positionLocationCountry\": \"United States\"}, {\"positionLocationCity\": \"Austin\", \"positionLocationState\": \"Texas\", \"positionLocationCountry\": \"United States\"}] (3071 unique)",
       "completeness_percent": 13,
       "completeness_class": "poor",
       "unique_count": 3071
@@ -365,7 +365,7 @@
     {
       "field_name": "priorListings",
       "field_type": "JSON Array",
-      "examples": "[{\"positionOpenDate\": \"2024-08-20\", \"positionCloseDate\": \"2025-08-19\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"IHS-24-GP-12523128-DE\", \"positionTitle\": \"Clinical Psychologist\"}], [{\"positionOpenDate\": \"2025-10-02\", \"positionCloseDate\": \"2025-10-20\", \"positionOpeningStatus\": \"Job canceled\", \"announcementNumber\": \"CBSZ-12810587-26-NAS\", \"positionTitle\": \"Staff Psychologist\"}], [{\"positionOpenDate\": \"2025-09-16\", \"positionCloseDate\": \"2025-11-14\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"CBSX-12799370-25-QMD\", \"positionTitle\": \"Social Worker (Program Coordinator) - Spinal Cord Injury\"}], [{\"positionOpenDate\": \"2025-10-02\", \"positionCloseDate\": \"2025-10-09\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"CBSU-12809747-26-KDP\", \"positionTitle\": \"Security Specialist - Uniform Compliance Officer\"}] (308 unique)",
+      "examples": "[{\"positionOpenDate\": \"2025-09-16\", \"positionCloseDate\": \"2025-09-26\", \"positionOpeningStatus\": \"Job canceled\", \"announcementNumber\": \"IHSC-BHCM-O5-NS-2025\", \"positionTitle\": \"Behavioral Health Case Manager (O-5 Billet) Non-Supervisory\"}], [{\"positionOpenDate\": \"2024-12-06\", \"positionCloseDate\": \"2024-12-19\", \"positionOpeningStatus\": \"Applications under review\", \"announcementNumber\": \"IHS-25-CR-12633690-ESEP/MP\", \"positionTitle\": \"Contact Representative\"}], [{\"positionOpenDate\": \"2024-10-24\", \"positionCloseDate\": \"2024-12-24\", \"positionOpeningStatus\": \"Job closed\", \"announcementNumber\": \"CBSX-12824919-26-DA\", \"positionTitle\": \"Physician Assistant - Primary Care - Raton\"}], [{\"positionOpenDate\": \"2025-09-12\", \"positionCloseDate\": \"2025-09-26\", \"positionOpeningStatus\": \"Candidate selected\", \"announcementNumber\": \"DHA-25-12799338-CBXH-JR\", \"positionTitle\": \"Wildland Firefighter - Direct Hire Authority\"}] (308 unique)",
       "completeness_percent": 0,
       "completeness_class": "poor",
       "unique_count": 308
@@ -373,7 +373,7 @@
     {
       "field_name": "promotionPotential",
       "field_type": "String",
-      "examples": "FG12, 06, 07, F (77 unique)",
+      "examples": "26, D, PB1, 18 (77 unique)",
       "completeness_percent": 100,
       "completeness_class": "good",
       "unique_count": 77
@@ -437,7 +437,7 @@
     {
       "field_name": "totalOpenings",
       "field_type": "String",
-      "examples": "35, 24, 20, 44 (90 unique)",
+      "examples": "42, 300, 001, 11 (90 unique)",
       "completeness_percent": 89,
       "completeness_class": "warning",
       "unique_count": 90
